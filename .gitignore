@@ -1,6 +1,7 @@
-#DB files
+#Projetc
 *.db
 migrations/
+static/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
