@@ -11,7 +11,7 @@ roles_users = db.Table('roles_users',
                             db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
                             db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
-class User(UserMixin, db.Model()):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, nullable=False, unique=True)
     name = db.Column(db.String(512), index=True, nullable=False)
@@ -54,7 +54,7 @@ class User(UserMixin, db.Model()):
 
 class Role(RoleMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    leve = db.Column(db.Integer, unique=False, nullable=False)
+    level = db.Column(db.Integer, unique=False, nullable=False)
     name = db.Column(db.String(128), nullable=False, unique=True)
     description = db.Column(db.String(255), nullable=True)
 
