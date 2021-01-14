@@ -1,6 +1,25 @@
 {% extends 'base.html' %}
+{% block styles %}
+{{ super()}}
+<link href="{{url_for('static', filename='css/login.css')}}" rel="stylesheet">
+{% endblock %}
 {% block app_content %}
 {% if article %}
-{{ article }}
+<div class="col-sm-8 wiki-main">
+    <div class="article-header">
+        <h1 class="article-title">
+            {{article.title}}
+        </h1>
+        <p class="lead article-description">
+            {{article.description}}
+        </p>
+        <p class="article-meta">
+            {{article.timstamp}}
+        </p>
+    </div>
+    <div class="article-text">
+        {{article.get_description_html()}}
+    </div>
+</div>
 {% endif %}
 {% endblock %}

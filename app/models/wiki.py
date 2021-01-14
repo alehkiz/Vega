@@ -1,8 +1,14 @@
+from flask import Markup
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
 from markdown import markdown
 # from pypandoc import convert_text
 from app.core.db import db
+
+
+article_tag = db.Table('article_tag',
+                        db.Column('post_id', db.Integer, db.ForeignKey('article.id')),
+                        db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')))
 
 class Article(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -12,11 +18,16 @@ class Article(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'))
+    tags = db.relationship('Tag', 
+            secondary=article_tag, 
+            backref=db.backref('articles', 
+                lazy='dynamic'), 
+            lazy='dynamic')
     def __repr__(self):
         return f'<Article {self.title}>'
 
     def get_description_html(self):
-        return markdown(self.text)
+        return Markup(markdown(self.text))
 
 class Topic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -31,4 +42,4 @@ class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(48), index=True, nullable=False)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    # articles = db.relationship('Article', )
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
