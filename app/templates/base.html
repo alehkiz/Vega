@@ -15,7 +15,7 @@
 
         <title>
             {% block title %}
-             {% if title %}{{ title }} - Social{% else %}Welcome to Social{% endif %}
+             {% if title %}{{ title }} - {{config['PROJECT_NAME']}}{% else %}Welcome to {{config['PROJECT_NAME']}}{% endif %}
             {% endblock %}
         </title>
         {% endblock %}
@@ -30,7 +30,7 @@
             <div class="collapse navbar-collapse" id="navBarsDefault">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item"><a href="{{ url_for('main.index') }}" class="nav-link">Home</a></li>
-                    <li class="nav-item"><a href="{{ url_for('main.index') }}" class="nav-link">Explore</a></li>
+                    <li class="nav-item"><a href="{{ url_for('main.index') }}" class="nav-link">Manuais</a></li>
                 </ul>
                 {% if g.search_form %}
                 <form class="form-inline my-2 my-lg-0" method="get" action="{{ url_for('main.search') }}">
@@ -39,7 +39,7 @@
                 {% endif %}
                 <ul class="navbar-nav mr-right">
                     {% if current_user.is_anonymous %}
-                    <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link">{{ _('Login') }}</a></li>
+                    <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link">Login</a></li>
                     {% else %}
                     <li class="nav-item">
                         {#<a href="{{ url_for('main.index') }}" class="nav-link">{{ _('Messages') }}

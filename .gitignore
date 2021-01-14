@@ -2,6 +2,7 @@
 *.db
 migrations/
 static/
+regras/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
