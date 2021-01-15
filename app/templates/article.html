@@ -5,21 +5,39 @@
 {% endblock %}
 {% block app_content %}
 {% if article %}
-<div class="col-sm-8 wiki-main">
-    <div class="article-header">
-        <h1 class="article-title">
-            {{article.title}}
-        </h1>
-        <p class="lead article-description">
-            {{article.description}}
-        </p>
-        <p class="article-meta">
-            {{article.timstamp}}
-        </p>
+<main class="conteiner">
+    <div class='row'>
+        <div class="col-md-8">
+            <article class="article-post">
+            <div class="article-header">
+                <h1 class="article-title">
+                    {{article.title}}
+                </h1>
+                <p class="lead article-description">
+                    {{article.description}}
+                </p>
+                <p class="article-meta">
+                    {{article.get_time_elapsed()}} por <a href='#'>{{article.author.name}}</a>
+                </p>
+            </div>
+            <div class="article-text">
+                {{article.get_description_html()}}
+            </div>
+            <div class="article-tag">
+                {% for tag in article.tags.all() %}
+                    <a href="{{url_for('wiki.tag', tag_name=tag.name)}}"
+                {% endfor %}
+            </div>
+            </article>
+        </div>
+
+        <div class="col-md-4">
+            <div class="p-4 mb-3 bg-light rounded">
+              <h4 class="font-italic">About</h4>
+              <p class="mb-0">Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>
+            </div>
+          </div>
     </div>
-    <div class="article-text">
-        {{article.get_description_html()}}
-    </div>
-</div>
+</main>
 {% endif %}
 {% endblock %}
