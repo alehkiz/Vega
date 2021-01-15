@@ -4,6 +4,7 @@ from datetime import datetime
 from markdown import markdown
 # from pypandoc import convert_text
 from app.core.db import db
+from app.utils.kernel import format_elapsed_time
 
 
 article_tag = db.Table('article_tag',
@@ -28,6 +29,8 @@ class Article(db.Model):
 
     def get_description_html(self):
         return Markup(markdown(self.text))
+    def get_time_elapsed(self):
+        return format_elapsed_time(self.timestamp)
 
 class Topic(db.Model):
     id = db.Column(db.Integer, primary_key=True)

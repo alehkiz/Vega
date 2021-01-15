@@ -21,5 +21,4 @@ def before_request():
 @bp.route('/index')
 def index():
     article = Article.query.first()
-    html = Markup(article.get_description_html())
-    return render_template('article.html', article=html)
+    return render_template('article.html', article=article)
