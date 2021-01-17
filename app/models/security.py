@@ -33,6 +33,7 @@ class User(UserMixin, db.Model):
     confirmed_at = db.Column(db.DateTime, nullable=True)
     login_count = db.Column(db.Integer, nullable=True, default=0)
     articles = db.relationship('Article', backref='author', lazy='dynamic')
+    articles_viewed = db.relationship('ArticleView', cascade='all, delete-orphan', backref='user', single_parent=True, lazy='dynamic')
     roles = db.relationship('Role', 
                 secondary=roles_users, 
                 backref=db.backref('users', lazy='dynamic'), 

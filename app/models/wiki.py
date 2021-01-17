@@ -1,4 +1,4 @@
-from flask import Markup, escape
+from flask import Markup, escape, current_app as app, abort
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
 from markdown import markdown
@@ -6,10 +6,22 @@ from app.core.db import db
 from app.utils.kernel import format_elapsed_time, get_list_max_len
 from app.utils.html import process_html
 from bs4 import BeautifulSoup
+from app.models.security import User
 
 article_tag = db.Table('article_tag',
                         db.Column('post_id', db.Integer, db.ForeignKey('article.id')),
                         db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')))
+
+class ArticleView(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id =db.Column(db.Integer, db.ForeignKey('user.id'))
+    article_id = db.Column(db.Integer, db.ForeignKey('article.id'), nullable=False)
+    first_view = db.Column(db.DateTime, index=True, default= datetime.utcnow)
+    last_view = db.Column(db.DateTime, index=True, default= datetime.utcnow)
+    count_view = db.Column(db.Integer, default=1)
+
+    def __repr__(self):
+        return f'<Article View id {self.article_id} by {self.user_id}'
 
 class Article(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -25,6 +37,7 @@ class Article(db.Model):
                 lazy='dynamic'), 
             lazy='dynamic')
 
+    views = db.relationship('ArticleView', cascade='all, delete-orphan', backref='article', single_parent=True, lazy='dynamic')
     @hybrid_property
     def text(self):
         return self._text
@@ -50,6 +63,24 @@ class Article(db.Model):
 
     def get_time_elapsed(self):
         return format_elapsed_time(self.timestamp)
+    def view(self, user_id):
+        user = User.query.filter_by(id=user_id).first_or_404()
+        article_view = ArticleView.query.filter_by(user_id=user.id, article_id=self.id).first()
+        if article_view is None:
+            article_view = ArticleView()
+            article_view.article_id = self.id
+            article_view.user_id = user.id
+            self.views.append(article_view)
+        else:
+            article_view.count_view += 1
+            article_view.last_view = datetime.utcnow()
+        try:
+            db.session.commit()
+        except Exception as e:
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            return abort(500)
+
 
 class Topic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
