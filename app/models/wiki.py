@@ -1,5 +1,5 @@
 from flask import Markup, escape, current_app as app, abort
-from sqlalchemy import func
+from sqlalchemy import func, text
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
 from markdown import markdown
@@ -106,15 +106,22 @@ class Article(db.Model):
         else:
             try:
                 rs = sum_query.filter(ArticleView.article_id == self.id).filter(ArticleView.user_id == user_id).all()
-                if not rs:
-                    return 0
             except Exception as e:
                 db.session.rollback()
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 return abort(500)
             return sum([x.views for x in rs if x.views != None])
-
+    @staticmethod
+    def most_viewed():
+        try:
+            rs = db.session.query(Article, func.sum(ArticleView.count_view).label('views')).join(Article.views).group_by(Article).order_by(text('views DESC')).all()
+        except Exception as e:
+                db.session.rollback()
+                app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(e)
+                return abort(500)
+        return [x[0] for x in rs if x != None]
 class Topic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32), index=True, nullable=False)
