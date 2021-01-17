@@ -1,11 +1,14 @@
 from flask import Markup, escape, current_app as app, abort
+from sqlalchemy import func
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
 from markdown import markdown
+from bs4 import BeautifulSoup
+
+
 from app.core.db import db
 from app.utils.kernel import format_elapsed_time, get_list_max_len
 from app.utils.html import process_html
-from bs4 import BeautifulSoup
 from app.models.security import User
 
 article_tag = db.Table('article_tag',
@@ -63,13 +66,15 @@ class Article(db.Model):
 
     def get_time_elapsed(self):
         return format_elapsed_time(self.timestamp)
-    def view(self, user_id):
-        user = User.query.filter_by(id=user_id).first_or_404()
-        article_view = ArticleView.query.filter_by(user_id=user.id, article_id=self.id).first()
+    def add_view(self, user_id=None):
+        if not user_id is None:
+            user = User.query.filter_by(id=user_id).first_or_404()
+            user_id = user.id
+        article_view = ArticleView.query.filter_by(user_id=user_id, article_id=self.id).first()
         if article_view is None:
             article_view = ArticleView()
             article_view.article_id = self.id
-            article_view.user_id = user.id
+            article_view.user_id = user_id
             self.views.append(article_view)
         else:
             article_view.count_view += 1
@@ -77,10 +82,38 @@ class Article(db.Model):
         try:
             db.session.commit()
         except Exception as e:
+            db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             return abort(500)
-
+    def sum_views(self, user_id : int=None):
+        try:
+            sum_query = db.session.query(func.sum(ArticleView.count_view).label('views')).join(Article.views)
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            return abort(500)
+        if user_id is None:
+            try:
+                rs = sum_query.filter(ArticleView.article_id == self.id).all()
+            except Exception as e:
+                db.session.rollback()
+                app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(e)
+                return abort(500)
+            return sum([x.views for x in rs if x.views != None])
+        else:
+            try:
+                rs = sum_query.filter(ArticleView.article_id == self.id).filter(ArticleView.user_id == user_id).all()
+                if not rs:
+                    return 0
+            except Exception as e:
+                db.session.rollback()
+                app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(e)
+                return abort(500)
+            return sum([x.views for x in rs if x.views != None])
 
 class Topic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
