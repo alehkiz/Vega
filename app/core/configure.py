@@ -13,7 +13,7 @@ from os import mkdir
 from app.blueprints import register_blueprints
 from app.core.db import db, user_datastore
 from app.models.security import User, Role
-from app.models.wiki import Article, Topic, Tag
+from app.models.wiki import Article, Topic, Tag, ArticleView
 
 security = Security()
 migrate = Migrate()
@@ -30,9 +30,7 @@ def init(app):
     login.init_app(app)
     login.session_protection = 'strong'
     
-    @login.user_loader
-    def load_user(id):
-        return User.query.get(int(id))
+    
     
     @app.shell_context_processor
     @with_appcontext
@@ -40,16 +38,27 @@ def init(app):
         app.config['SERVER_NAME'] = 'localhost'
         ctx = app.test_request_context()
         ctx.push()
-        return dict(db=db, app=app, User=User, Role=Role, Article=Article, Tag=Tag, Topic=Topic)
+        return dict(db=db, app=app, User=User, Role=Role, Article=Article, Tag=Tag, Topic=Topic, ArticleView=ArticleView)
     register_blueprints(app)
 
     # logger
     if not exists('logs'):
         mkdir('logs')
-    file_handler = RotatingFileHandler('logs/erros.log', maxBytes=50250, backupCount=100)
+    file_handler = RotatingFileHandler('logs/erros.log', maxBytes=1024000, backupCount=100)
     file_handler.setFormatter(logging.Formatter("[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"))
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
     app.logger.setLevel(logging.INFO)
     app.logger.info('Vega start')
+
+    @login.user_loader
+    def load_user(id):
+        try:
+            user =  User.query.get(int(id))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            return None
+        return user
     return app
