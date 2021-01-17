@@ -2,7 +2,8 @@
 <main class="conteiner">
     <div class='row'>
         <div class="col-md-8">
-            {% if articles %} {% for article in articles %}
+            {% if articles %} 
+            {% for article in articles %}
             <article class="article-post">
                 <div class="article-header">
                     <h4>
@@ -10,13 +11,16 @@
                     </h4>
                     <p class="article-meta">
                         {{article.get_time_elapsed()}} por <a href="{{ url_for('user.username', name=article.author.username) }}" class="text-decoration-none">{{article.author.name}}</a>
+                    em <a href="{{ url_for('wiki.topic', topic_name=article.topic.formated_name)}}" class="text-decoration-none">{{article.topic.name}}</a>
                     </p>
                 </div>
                 <div class="article-text">
                     {{article.get_body_html(resume=True)}}
                 </div>
             </article>
-            <hr> {% endfor %} {% endif %}
+            <hr> 
+            {% endfor %} 
+            {% endif %}
         </div>
 
         <div class="col-md-4">

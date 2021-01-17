@@ -3,7 +3,9 @@ from dateutil.tz import tzutc
 from babel.dates import format_timedelta
 from functools import wraps
 from datetime import datetime
+from unicodedata import normalize, category
 
+ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_123456789'
 def validate_password(password):
     '''
     Valida uma senha com a regra:
@@ -51,5 +53,13 @@ def get_list_max_len(l, max_value):
     return _temp_l
 
 
+def strip_accents(string:str):
+    return ''.join(c for c in normalize('NFD', string)
+                    if category(c)  != 'Mn')
 
+def only_letters(string:str):
+    text = strip_accents(string)
+    text = text.replace(' ', '_')
+    text = ''.join([x for x in text if x in ALPHABET])
+    return text.lower()
 

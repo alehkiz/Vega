@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 
 from app.core.db import db
-from app.utils.kernel import format_elapsed_time, get_list_max_len
+from app.utils.kernel import format_elapsed_time, get_list_max_len, only_letters
 from app.utils.html import process_html
 from app.models.security import User
 
@@ -124,9 +124,19 @@ class Article(db.Model):
         return [x[0] for x in rs if x != None]
 class Topic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(32), index=True, nullable=False)
+    _name = db.Column(db.String(32), index=True, nullable=False, unique=True)
+    formated_name = db.Column(db.String(32), index=True, nullable=True, unique=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
+
+    @hybrid_property
+    def name(self):
+        return self._name
+    
+    @name.setter
+    def name(self, text):
+        self._name = text
+        self.formated_name = only_letters(text)
 
     def __repr__(self):
         return f'<Topic {self.name}>'

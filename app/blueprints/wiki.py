@@ -8,8 +8,7 @@ bp = Blueprint('wiki', __name__, url_prefix='/wiki/')
 @bp.route('/')
 @bp.route('/index')
 def index():
-    articles = Article.query.all()
-    articles
+    articles = Article.query.order_by(Article.timestamp.desc()).all()
     return render_template('wiki.html', articles=articles, cls_article=Article)
 
 @bp.route('/article/<article_id>')
@@ -31,7 +30,13 @@ def article(article_id=None):
 
     return render_template('article.html', article=article)
 
-@bp.route('/tag/<tag_name>')
+@bp.route('/topic/<string:topic_name>')
+def topic(topic_name):
+    topic = Topic.query.filter_by(formated_name=topic_name).first_or_404()
+    articles = topic.articles.all()
+    return render_template('wiki.html', articles=articles, cls_article=Article, title= f'{topic.name}')
+
+@bp.route('/tag/<string:tag_name>')
 def tag(tag_name=None):
     if tag_name is None:
         return abort(404)
