@@ -5,12 +5,14 @@ from app.models.wiki import Article, Tag, Topic
 
 bp = Blueprint('wiki', __name__, url_prefix='/wiki/')
 
+@bp.route('/')
 @bp.route('/index')
 def index():
-    return 'false'
+    articles = Article.query.all()
+    return render_template('wiki.html', articles=articles)
 
-@bp.route('/<article_id>')
-def wiki(article_id=None):
+@bp.route('/article/<article_id>')
+def article(article_id=None):
     if article_id is None:
         #TODO em caso do artumento article_id é vazio, retornar todos os artigos
         return abort(404)
