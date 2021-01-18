@@ -54,7 +54,7 @@ class Article(db.Model):
         '''
         Remove tags html in text
         '''
-        self._text = BeautifulSoup(text).get_text()
+        self._text = BeautifulSoup(text, features="lxml").get_text()
 
     def __repr__(self):
         return f'<Article {self.title}>'
