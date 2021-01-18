@@ -1,15 +1,14 @@
 <!doctype html>
 <html lang="en">
-
 <head>
     {% block head %}
     <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> {% block styles %}
+    <meta charset="utf-8" />
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">--> {% block styles %} 
     <!-- Bootstrap CSS -->
     <link href="{{url_for('static', filename='css/main.css')}}" rel="stylesheet">
     <link href="{{url_for('static', filename='css/bootstrap/bootstrap.min.css')}}" rel="stylesheet">
-    <link href="{{url_for('static', filename='css/fontawesome/all.css')}}" rel="stylesheet"> {% endblock %}
+    <link href="{{url_for('static', filename='css/fontawesome/font-awesome.min.css')}}" rel="stylesheet"> {% endblock %}
 
     <title>
         {% block title %} {% if title %}{{ title }} - {{config['PROJECT_NAME']}}{% else %}Welcome to {{config['PROJECT_NAME']}}{% endif %} {% endblock %}
@@ -69,7 +68,8 @@
     </div>
     </nav>
     <!-- END OF NAV -->
-    {% endblock %} {% block content %}
+    {% endblock %} 
+    {% block content %}
     <div class="container">
         {% with messages = get_flashed_messages() %} 
         {% if messages %} 
@@ -82,8 +82,14 @@
         {% block app_content %}
         {% endblock %}
     </div>
-    {% endblock %} {% block scripts %}
+    {% endblock %} 
+    {% block scripts %}
     <!-- Optional JavaScript -->
+    
+    
+    <!-- <script src="{{url_for('static', filename='js/fontawesome/all.js')}}"></script> -->
+    <script src="{{url_for('static', filename='js/jquery/jquery.min.js')}}"></script>
+
     <script src="{{url_for('static', filename='js/bootstrap/bootstrap.min.js')}}"></script>
     <!-- <script src="{{url_for('static', filename='js/main.js')}}"></script> -->
     {% endblock %}

@@ -2,7 +2,7 @@ from flask import Markup, escape, current_app as app, abort
 from sqlalchemy import func, text
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
-from markdown import markdown
+from markdown2 import markdown
 from bs4 import BeautifulSoup
 
 
@@ -32,8 +32,12 @@ class Article(db.Model):
     description = db.Column(db.String(128), index=False, nullable=False)
     _text = db.Column(db.Text, index=False, nullable=False)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    updated_timestamp = db.Column(db.DateTime, index=True)
+    updated_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'))
+    # updater = db.relationship('User', foreign_keys = [updated_user_id], backref='articles_updated')
+    # author = db.relationship('User', foreign_keys = [user_id], backref='articles', lazy='dynamic')
     tags = db.relationship('Tag', 
             secondary=article_tag, 
             backref=db.backref('articles', 
@@ -59,13 +63,16 @@ class Article(db.Model):
         if resume:
             l_text = list(filter(lambda x : x not in ['', ' ', '\t'], self.text.split('\n')))
             text = get_list_max_len(l_text, 256)
-            print(text)
             return Markup(process_html(markdown('\n'.join(text)))).striptags()
             # return Markup(process_html(markdown(text))).striptags()
-        return Markup(process_html(markdown(self.text)))
+        html_classes = {'table': 'table table-bordered',
+                        'img': 'img img-fluid'}
+        return Markup(process_html(markdown(self.text, extras={"tables": None, "html-classes":html_classes})))
 
     def get_time_elapsed(self):
         return format_elapsed_time(self.timestamp)
+    def get_update_elapsed(self):
+        return format_elapsed_time(self.updated_timestamp)
     def add_view(self, user_id=None):
         if not user_id is None:
             user = User.query.filter_by(id=user_id).first_or_404()
