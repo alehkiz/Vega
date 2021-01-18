@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% block styles %}
+{{ super()}}
+<link href="{{url_for('static', filename='css/editormd/editormd.css')}}" rel="stylesheet" />
+{% endblock %}
+{% block app_content %}
+{% if form %}
+<div class="col-md-8">
+    <form action="" method="POST">
+        {{ form.csrf_token }}
+        <h1 class="h3 mb-3 fw-normal">Editar</h1>
+        {{ form.title.label(class='visually-hidden')}}
+        {{ form.title(size=32, class='form-control', placeholder='Titulo')}}
+        {% for error in form.title.errors %}
+        <span style='color: red;'>[{{error}}]</span>
+        {% endfor %}
+        {{ form.description.label(class='visually-hidden')}}
+        {{ form.description(size=128, class='form-control', placeholder='Descrição')}}
+        {% for error in form.description.errors %}
+        <span style='color: red;'>[{{error}}]</span>
+        {% endfor %}
+        <div id='test-editormd'>
+            <!-- {{ form.text.label(class='visually-hidden')}} -->
+            {{ form.text(rows=30, placeholder='Texto', style='display:none')}}
+            {% for error in form.text.errors %}
+            <span style='color: red;'>[{{error}}]</span>
+            {% endfor %}
+        </div>
+        <br />
+        {{ form.submit }}
+    </form>
+    {#
+    <!-- <article class="article-post">
+        <div class="article-header">
+            <h1 class="article-title">
+                {{article.title}}
+            </h1>
+            <p class="lead article-description">
+                {{article.description}}
+            </p>
+            <p class="article-meta">
+                {{article.get_time_elapsed()}} por <a href='#'>{{article.author.name}}</a>
+            </p>
+        </div>
+        <div class="article-text">
+            {{article.get_body_html()}}
+        </div>
+        {% if article.tags.count() > 0 %}
+        <div class="article-tag card border-dark">
+            <div class="card-header">Tags</div>
+            <div class="card-body text-dark">
+                <p class="card-text">
+                    {% for tag in article.tags.all() %}
+                    <a href="{{url_for('wiki.tag', tag_name=tag.name)}}">{{tag.name}}</a> 
+                    {% endfor %}
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </article> -->#}
+</div>
+
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{url_for('static', filename='js/editormd/editormd.min.js')}}"></script>
+
+
+<script type="text/javascript">
+    var testEditor;
+
+    $(function() {
+        editorMD = editormd("test-editormd", {
+            width   : '100%',
+            height  : 640,
+            syncScrolling : "single",
+            path    : "{{'/'.join(url_for('static', filename='js/editormd/lib/flowchart.min.js').split('/')[:-1])}}/",
+            toolbarIcons : function() {
+                // Or return editormd.toolbarModes[name]; // full, simple, mini
+                // Using "||" set icons align right.
+                return ["undo", "redo", "|", 
+                        "bold", "italic", "quote", "ucwords", "uppercase", "lowercase", "|", 
+                        "h1", "h2", "h3", "h4", "h5", "h6", "|",
+                        "list-ul", "list-ol", "hr", "|",
+                        "link", "reference-link", "image", "preformatted-text", "table", "html-entities", "pagebreak", "|",
+                        "preview", "watch", "|", "fullscreen"]
+            },
+
+            lang : {
+                name : "pt-br",
+                description : "Editor",
+                tocTitle    : "Editar",
+                toolbar : {
+                    undo             : "Desfazer(Ctrl+Z)",
+                    redo             : "Refazer(Ctrl+Y)",
+                    bold             : "Negrito",
+                    italic           : "Italico",
+                    quote            : "Citação",
+                    ucwords          : "Primeira letra maiúsula",
+                    uppercase        : "Converte seleção para maiúscula",
+                    lowercase        : "Converte seleção para minúscula",
+                    h1               : "Cabeçalho 1",
+                    h2               : "Cabeçalho 2",
+                    h3               : "Cabeçalho 3",
+                    h4               : "Cabeçalho 4",
+                    h5               : "Cabeçalho 5",
+                    h6               : "Cabeçalho 6",
+                    "list-ul"        : "Lista não ordenada",
+                    "list-ol"        : "Lista ordenada",
+                    hr               : "Linha horizontal",
+                    link             : "Link",
+                    "reference-link" : "Link de referência",
+                    image            : "Imagem",
+                    code             : "Código em linha",
+                    "preformatted-text" : "Texto pré-formatado (Tab indent)",
+                    "code-block"     : "Bloco de código (Multi-languages)",
+                    table            : "Tabelas",
+                    datetime         : "Dia / hora",
+                    emoji            : "Emoji",
+                    "html-entities"  : "Códigos especiais",
+                    pagebreak        : "Quebra de página",
+                    watch            : "Desativar prévia",
+                    unwatch          : "Ativar prévia",
+                    preview          : "Visualizar resultao (Pressione Shift + ESC para sair)",
+                    fullscreen       : "Tela cheia (Pressione ESC para sair)",
+                    clear            : "Limpar",
+                    search           : "Procurar",
+                    help             : "Ajuda",
+                    info             : "Sobre "
+                },
+                buttons : {
+                    enter  : "Enter",
+                    cancel : "Cancel",
+                    close  : "Close"
+                },
+                dialog : {
+                    link : {
+                        title    : "Link",
+                        url      : "Endereço (URL)",
+                        urlTitle : "Título",
+                        urlEmpty : "Erro: Preencha o endereço do link."
+                    },
+                    referenceLink : {
+                        title    : "Link de referência",
+                        name     : "Nome",
+                        url      : "Endereço",
+                        urlId    : "ID",
+                        urlTitle : "Titulo",
+                        nameEmpty: "Erro: Nome de referência nãão pode ser vazio.",
+                        idEmpty  : "Erro: Preenche o ID.",
+                        urlEmpty : "Erro: Preencha o endereço de referência."
+                    },
+                    image : {
+                        title    : "Imagem",
+                        url      : "Endereço",
+                        link     : "Link",
+                        alt      : "Titulo",
+                        uploadButton     : "Upload",
+                        imageURLEmpty    : "Error: Endereço da imagem não pode ser vazio.",
+                        uploadFileEmpty  : "Error: Upload de imagens não pode ser vazio",
+                        formatNotAllowed : "Error: Apenas imagens são aceitas"
+                    },
+                    preformattedText : {
+                        title             : "Texto pré-formatado", 
+                        emptyAlert        : "Error: Preencha o texto"
+                    },
+                    codeBlock : {
+                        title             : "Bloco de códito",
+                        selectLabel       : "Linguagens: ",
+                        selectDefaultText : "Selecione uma linguagem",
+                        otherLanguage     : "Outras linguagens",
+                        unselectedLanguageAlert : "Error: Selecione uma linguagem",
+                        codeEmptyAlert    : "Error: Preencha o bloco de código."
+                    },
+                    htmlEntities : {
+                        title : "Códigos"
+                    },
+                    help : {
+                        title : "Ajuda"
+                    },
+                    table :{
+                        title      : "Tabela",
+						cellsLabel : "Células",
+						alignLabel : "Alinhamento",
+						rows       : "Linhas",
+						cols       : "Colunas",
+						aligns     : ["Justificado", "Esquerda", "Direita", "Centralizado"]
+                    }
+                }
+            }
+
+        });
+
+        /*
+        // or
+        testEditor = editormd({
+            id      : "test-editormd",
+            width   : "90%",
+            height  : 640,
+            path    : "../lib/"
+        });
+        */
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+<!-- <script src="{{url_for('static', filename='js/languages/en.js')}}"></script> -->
+<!-- <script type="text/javascript"> -->
+			
+
+
+
+<!-- </script> -->
+
+{% endblock %}

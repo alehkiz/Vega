@@ -1,4 +1,6 @@
-{% extends 'base.html' %} {% block app_content %} {% if article %}
+{% extends 'base.html' %} 
+{% block app_content %} 
+{% if article %}
 <div class="col-md-8">
     <article class="article-post">
         <div class="article-header">
@@ -9,7 +11,8 @@
                 {{article.description}}
             </p>
             <p class="article-meta">
-                {{article.get_time_elapsed()}} por <a href='#'>{{article.author.name}}</a>
+                Criado {{article.get_time_elapsed()}} por <a href='#'>{{article.author.name}}</a> 
+                Atualizado {{article.get_update_elapsed()}} por <a href='#'>{{article.updater.name}}</a> 
             </p>
         </div>
         <div class="article-text">
@@ -19,8 +22,10 @@
         <div class="article-tag card border-dark">
             <div class="card-header">Tags</div>
             <div class="card-body text-dark">
-                <p class="card-text">{% for tag in article.tags.all() %}
-                    <a href="{{url_for('wiki.tag', tag_name=tag.name)}}">{{tag.name}}</a> {% endfor %}
+                <p class="card-text">
+                    {% for tag in article.tags.all() %}
+                    <a href="{{url_for('wiki.tag', tag_name=tag.name)}}">{{tag.name}}</a> 
+                    {% endfor %}
                 </p>
             </div>
         </div>
@@ -29,4 +34,5 @@
 </div>
 
 
-{% endif %} {% endblock %}
+{% endif %} 
+{% endblock %}

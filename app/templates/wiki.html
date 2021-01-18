@@ -1,4 +1,5 @@
-{% extends 'base.html' %} {% block app_content %}
+{% extends 'base.html' %} 
+{% block app_content %}
 <main class="conteiner">
     <div class='row'>
         <div class="col-md-8">
@@ -12,6 +13,7 @@
                     <p class="article-meta">
                         {{article.get_time_elapsed()}} por <a href="{{ url_for('user.username', name=article.author.username) }}" class="text-decoration-none">{{article.author.name}}</a>
                     em <a href="{{ url_for('wiki.topic', topic_name=article.topic.formated_name)}}" class="text-decoration-none">{{article.topic.name}}</a>
+                    <a href="{{url_for('admin.edit', article_id=article.id)}}" class="text-decoration-none text-danger"><i class="icon-edit"></i></a>
                     </p>
                 </div>
                 <div class="article-text">

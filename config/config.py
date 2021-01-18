@@ -23,9 +23,9 @@ class BaseConfig(object):
     SECURITY_MSG_UNAUTHORIZED = ('Você não tem permissão para acessar essa página', 'danger')
     SECURITY_MSG_LOGIN = ('É necessário se logar para acessar essa página', 'info')
 
-    _SQLALCHEMY_DATABASE_NAME = PROJECT_NAME
-    _SQLALCHEMY_DATABASE_HOST = 'localhost'
-    _SQLALCHEMY_DATABASE_USERNAME = 'root'
+    _SQLALCHEMY_DATABASE_NAME = PROJECT_NAME.lower()
+    _SQLALCHEMY_DATABASE_HOST = environ.get('DB_USER') or 'localhost'
+    _SQLALCHEMY_DATABASE_USERNAME = environ.get('DB_USER') or None
     _SQLALCHEMY_DATABASE_PASSWORD = environ.get('DB_PASS') or None
 
 
@@ -46,6 +46,7 @@ class TestConfig(BaseConfig):
 class ProductionConfig(BaseConfig):
 
     SQLALCHEMY_DATABASE_URI = f'postgresql://{BaseConfig._SQLALCHEMY_DATABASE_USERNAME}:{BaseConfig._SQLALCHEMY_DATABASE_PASSWORD}@{BaseConfig._SQLALCHEMY_DATABASE_HOST}/{BaseConfig._SQLALCHEMY_DATABASE_NAME}'
+    
 
-
-config = {'development': DevelopmentConfig}
+config = {'development': DevelopmentConfig,
+          'production': ProductionConfig}

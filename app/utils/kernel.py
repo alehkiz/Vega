@@ -30,8 +30,7 @@ def format_elapsed_time(timestamp):
     '''
     if isinstance(timestamp, datetime):
         timestamp = timestamp.replace(microsecond=0)
-        timestamp = timestamp.astimezone(tz=None)
-        return format_timedelta(timestamp - datetime.now(tzutc()), add_direction=True)
+        return format_timedelta(timestamp - datetime.utcnow(), add_direction=True)
 
 def get_list_max_len(l, max_value):
     '''
