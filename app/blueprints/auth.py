@@ -36,7 +36,6 @@ def login():
             logout_user()
             return redirect(url_for('auth.login'))
         next_page = request.args.get('next')
-        print(next_page)
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('main.index')
         return redirect(next_page)
