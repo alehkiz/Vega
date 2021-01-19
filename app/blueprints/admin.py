@@ -15,8 +15,18 @@ def index():
 @bp.route('/users/')
 def users():
     page = request.args.get('page', 1, type=int)
-    users = User.query.paginate(page, app.config['ITEMS_PER_PAGE'], False)
-    return render_template('users.html', users=users.items)
+    paginate = User.query.paginate(page, app.config['ITEMS_PER_PAGE'], False)
+    first_page = list(paginate.iter_pages())[0]
+    last_page = list(paginate.iter_pages())[-1] if list(paginate.iter_pages())[-1] != first_page else None
+    return render_template('admin.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint='admin.users', cls_table=User)
+
+@bp.route('/articles/')
+def articles():
+    page = request.args.get('page', 1, type=int)
+    paginate = Article.query.paginate(page, app.config['ITEMS_PER_PAGE'], False)
+    first_page = list(paginate.iter_pages())[0]
+    last_page = list(paginate.iter_pages())[-1] if list(paginate.iter_pages())[-1] != first_page else None
+    return render_template('admin.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint='admin.articles', cls_table=Article)
 
 @bp.route('/edit_article/<int:article_id>', methods=['GET', 'POST'])
 @login_required

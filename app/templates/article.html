@@ -11,12 +11,12 @@
                 {{article.description}}
             </p>
             <p class="article-meta">
-                Criado {{article.get_time_elapsed()}} por <a href='#'>{{article.author.name}}</a> 
-                Atualizado {{article.get_update_elapsed()}} por <a href='#'>{{article.updater.name}}</a> 
+                Criado {{article.get_created_time_elapsed}} por <a href='#'>{{article.author.name}}</a> 
+                Atualizado {{article.get_update_time_elapsed}} por <a href='#'>{{article.updater.name}}</a> 
             </p>
         </div>
         <div class="article-text">
-            {{article.get_body_html()}}
+            {{article.get_body_html(}}
         </div>
         {% if article.tags.count() > 0 %}
         <div class="article-tag card border-dark">

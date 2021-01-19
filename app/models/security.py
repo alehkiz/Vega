@@ -86,7 +86,13 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return verify_password(password, self.password)
 
+    @property
+    def format_created_date(self):
+        return self.created_at.strftime("%d/%m/%Y")
 
+    @property
+    def format_active(self):
+        return 'Sim' if self.active else 'Não'
 
 
     def __repr__(self):
