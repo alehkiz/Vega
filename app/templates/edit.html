@@ -8,7 +8,7 @@
 <div class="col-md-8">
     <form action="" method="POST">
         {{ form.csrf_token }}
-        <h1 class="h3 mb-3 fw-normal">Editar</h1>
+        <!-- <h1 class="h3 mb-3 fw-normal">Editar</h1> -->
         {{ form.title.label(class='visually-hidden')}}
         {{ form.title(size=32, class='form-control', placeholder='Titulo')}}
         {% for error in form.title.errors %}

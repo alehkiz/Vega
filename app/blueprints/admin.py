@@ -2,7 +2,7 @@ from flask import current_app as app, Blueprint, render_template, url_for, redir
 from flask_security import current_user, login_required
 from datetime import datetime
 
-from app.models.wiki import Article
+from app.models.wiki import Article, User
 from app.forms.wiki import ArticleForm
 from app.core.db import db
 
@@ -11,7 +11,14 @@ bp = Blueprint('admin', __name__, url_prefix='/admin/')
 @bp.route('/')
 def index():
     return render_template('base.html')
-@bp.route('/edit/<int:article_id>', methods=['GET', 'POST'])
+
+@bp.route('/users/')
+def users():
+    page = request.args.get('page', 1, type=int)
+    users = User.query.paginate(page, app.config['ITEMS_PER_PAGE'], False)
+    return render_template('users.html', users=users.items)
+
+@bp.route('/edit_article/<int:article_id>', methods=['GET', 'POST'])
 @login_required
 def edit(article_id):
     article = Article.query.filter_by(id=article_id).first_or_404()
@@ -32,4 +39,4 @@ def edit(article_id):
     form.title.data = article.title
     form.description.data = article.description
     form.text.data = article.text
-    return render_template('edit.html', form=form)
+    return render_template('edit.html', form=form, title='Editar')

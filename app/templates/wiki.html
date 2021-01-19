@@ -1,27 +1,39 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
 {% block app_content %}
 <main class="conteiner">
     <div class='row'>
         <div class="col-md-8">
-            {% if articles %} 
+            {% if articles %}
             {% for article in articles %}
             <article class="article-post">
                 <div class="article-header">
                     <h4>
                         <a href="{{url_for('wiki.article', article_id=article.id)}}" class="text-decoration-none">{{article.title}}</a>
+                        {% if current_user.is_admin %}
+                        
+                            <a href="{{url_for('admin.edit', article_id=article.id)}}"
+                                class="text-decoration-none btn btn-success btn-sm"><i class="icon-edit"></i></a>
+                            <a href="{{url_for('admin.edit', article_id=article.id)}}"
+                                class="text-decoration-none btn btn-danger btn-sm"><i class="icon-remove"></i></a>
+                        
+                        {% endif %}
                     </h4>
+
                     <p class="article-meta">
-                        {{article.get_time_elapsed()}} por <a href="{{ url_for('user.username', name=article.author.username) }}" class="text-decoration-none">{{article.author.name}}</a>
-                    em <a href="{{ url_for('wiki.topic', topic_name=article.topic.formated_name)}}" class="text-decoration-none">{{article.topic.name}}</a>
-                    <a href="{{url_for('admin.edit', article_id=article.id)}}" class="text-decoration-none text-danger"><i class="icon-edit"></i></a>
+                        {{article.get_time_elapsed()}} por <a
+                            href="{{ url_for('user.username', name=article.author.username) }}"
+                            class="text-decoration-none">{{article.author.name}}</a>
+                        em <a href="{{ url_for('wiki.topic', topic_name=article.topic.formated_name)}}"
+                            class="text-decoration-none">{{article.topic.name}}</a>
+
                     </p>
                 </div>
                 <div class="article-text">
                     {{article.get_body_html(resume=True)}}
                 </div>
             </article>
-            <hr> 
-            {% endfor %} 
+            <hr>
+            {% endfor %}
             {% endif %}
         </div>
 
@@ -29,7 +41,8 @@
             <div class="p-4 mb-3 bg-light rounded">
                 <h4 class="font-italic">Mais visualizados</h4>
                 {% for article in cls_article.most_viewed()[0:5] %}
-                    <p class="mb-0"><a href="{{url_for('wiki.article', article_id=article.id)}}" class="text-decoration-none">{{article.title}}</a></p>
+                <p class="mb-0"><a href="{{url_for('wiki.article', article_id=article.id)}}"
+                        class="text-decoration-none">{{article.title}}</a></p>
                 {% endfor %}
             </div>
         </div>

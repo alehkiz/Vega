@@ -4,7 +4,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 
 from app.core.db import db
-from app.utils.kernel import validate_password
+from app.utils.kernel import validate_password, format_elapsed_time
 
 from datetime import datetime
 
@@ -79,7 +79,10 @@ class User(UserMixin, db.Model):
             self._password = hash_password(password)
         else:
             raise ValueError('Não foi possível validar a senha')
-
+    
+    @property
+    def last_seen_elapsed(self):
+        return format_elapsed_time(self.last_seen)
     def check_password(self, password):
         return verify_password(password, self.password)
 

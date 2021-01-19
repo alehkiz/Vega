@@ -31,6 +31,7 @@ class BaseConfig(object):
 
     _ERRORS = {'DB_COMMIT_ERROR': 'Não foi possível atualizar o banco de dados'}
 
+    ITEMS_PER_PAGE = 5
 
 class DevelopmentConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{BaseConfig.DEV_DB}'
