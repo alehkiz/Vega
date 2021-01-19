@@ -45,11 +45,16 @@
                     <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
                 </li>
                 {% else %}
-                <li class="nav-item">
-                        {% if current_user.is_admin %}
-                    <a href="{{url_for('admin.index')}}" class="nav-link">Admin</a> 
-                    {% endif %}
-                </li>
+                {% if current_user.is_admin %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Admin</a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                      <li><a class="dropdown-item" href="{{url_for('admin.index')}}">adm</a></li>
+                      <li><a class="dropdown-item" href="{{url_for('admin.users')}}">Usuários</a></li>
+                      <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
+                    
+                </li>{% endif %}
                 <li class="nav-item">
                     <a href="{{ url_for('user.username', name=current_user.username) }}" class="nav-link">{{ _('Profile') }}</a>
                 </li>
