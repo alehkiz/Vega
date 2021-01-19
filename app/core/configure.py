@@ -22,6 +22,7 @@ login.login_view = 'auth.login'
 login.login_message = 'Please login to access this page'
 csrf = CSRFProtect()
 
+
 def init(app):
     security.init_app(app, datastore=user_datastore, register_blueprint=False)
     db.init_app(app)
@@ -29,9 +30,7 @@ def init(app):
     csrf.init_app(app)
     login.init_app(app)
     login.session_protection = 'strong'
-    
-    
-    
+
     @app.shell_context_processor
     @with_appcontext
     def make_shell_context():
@@ -44,17 +43,18 @@ def init(app):
     # logger
     if not exists('logs'):
         mkdir('logs')
-    file_handler = RotatingFileHandler('logs/erros.log', maxBytes=1024000, backupCount=100)
-    file_handler.setFormatter(logging.Formatter("[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"))
+    file_handler = RotatingFileHandler(
+        'logs/erros.log', maxBytes=1024000, backupCount=100)
+    file_handler.setFormatter(logging.Formatter(
+        "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"))
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
-    app.logger.setLevel(logging.INFO)
-    app.logger.info('Vega start')
+    
 
     @login.user_loader
     def load_user(id):
         try:
-            user =  User.query.get(int(id))
+            user = User.query.get(int(id))
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))

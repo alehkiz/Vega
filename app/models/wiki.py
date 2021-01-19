@@ -68,10 +68,19 @@ class Article(db.Model):
         html_classes = {'table': 'table table-bordered',
                         'img': 'img img-fluid'}
         return Markup(process_html(markdown(self.text, extras={"tables": None, "html-classes":html_classes})))
+    
+    @property
+    def get_text_resume(self):
+        return self.get_body_html(resume=True)
 
-    def get_time_elapsed(self):
+    @property
+    def format_created_date(self):
+        return self.timestamp.strftime("%d/%m/%Y")
+    @property
+    def get_created_time_elapsed(self):
         return format_elapsed_time(self.timestamp)
-    def get_update_elapsed(self):
+    @property
+    def get_update_time_elapsed(self):
         return format_elapsed_time(self.updated_timestamp)
     def add_view(self, user_id=None):
         if not user_id is None:
