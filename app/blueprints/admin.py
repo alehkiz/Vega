@@ -22,11 +22,13 @@ def users():
 
 @bp.route('/articles/')
 def articles():
+    print(request.blueprint)
+    print(request.url_rule.endpoint)
     page = request.args.get('page', 1, type=int)
     paginate = Article.query.paginate(page, app.config['ITEMS_PER_PAGE'], False)
     first_page = list(paginate.iter_pages())[0]
     last_page = list(paginate.iter_pages())[-1] if list(paginate.iter_pages())[-1] != first_page else None
-    return render_template('admin.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint='admin.articles', cls_table=Article)
+    return render_template('admin.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint, cls_table=Article, obj_endpoint='')
 
 @bp.route('/edit_article/<int:article_id>', methods=['GET', 'POST'])
 @login_required

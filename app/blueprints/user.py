@@ -9,5 +9,5 @@ def index():
     return render_template('base.html')
 
 @bp.route('/<name>')
-def username(name):
+def view(name):
     return render_template('base.html')
