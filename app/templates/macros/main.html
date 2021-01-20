@@ -73,66 +73,65 @@
                 </button>
         </div>
     </div> -->
- 
+
     <div class="col-md-6">
-        <a href="{{ url_for(cls_table.__tablename__+'.add')}}" class="btn btn-primary pull-right h2">Adcionar   </a>
+        <a href="{{ url_for(cls_table.__tablename__+'.add')}}" class="btn btn-primary pull-right h2">Adcionar </a>
     </div>
-</div>  
-    <div class="table-responsive col-md-12">
-        <table class="table table-striped table-hover" cellspacing="0" cellpadding="0">
-            <thead>
-                <tr>
-                    {% for value in config['TABULATE'].get(cls_table.__tablename__).values() %}
-                    <th>{{value['name'].capitalize()}}</th>
+</div>
+<div class="table-responsive col-md-12">
+    <table class="table table-striped table-hover" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                {% for value in config['TABULATE'].get(cls_table.__tablename__).values() %}
+                <th>{{value['name'].capitalize()}}</th>
 
 
-                    {% endfor %}
-                    <th class="actions">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                
-                    {% if pagination %}
-                    {% for item in pagination.items %}
-                    <tr>
-                        {% for tabulate_item in config['TABULATE'].get(cls_table.__tablename__).items() %}
-                            {% if not tabulate_item[1].get('attr') is none %}
-                            <td>{{item | attr(tabulate_item[1].get('attr')) | string | truncate(40, True)}}</td>
-                            {% else %}
-                            <td>{{item | attr(tabulate_item[0]) | string | truncate(40, True)}}</td>
-                            {% endif %}
-                        {% endfor %}
+                {% endfor %}
+                <th class="actions">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
 
-                    <!-- <td>{{item.id}}</td>
-                    <td>{{item.username}}</td>
-                    <td>{{item.name}}</td>
-                    <td>{{item.email}}</td>
-                    <td>{{item.active}}</td>
-                    <td>{{item.last_seen_elapsed}}</td> -->
+            {% if pagination %}
+            {% for item in pagination.items %}
+            <tr>
+                {% for tabulate_item in config['TABULATE'].get(cls_table.__tablename__).items() %}
+                {% if not tabulate_item[1].get('attr') is none %}
+                <td>{{item | attr(tabulate_item[1].get('attr')) | string | truncate(40, True)}}</td>
+                {% else %}
+                <td>{{item | attr(tabulate_item[0]) | string | truncate(40, True)}}</td>
+                {% endif %}
+                {% endfor %}
+                <td class="actions">
+                    <a class="btn btn-success btn-sm"
+                        href="{{ url_for(cls_table.__tablename__+'.view', id=item.id)}}"><i
+                            class="icon-zoom-in"></i></a>
+                    <a class="btn btn-warning btn-sm"
+                        href="{{ url_for(cls_table.__tablename__+'.edit', id=item.id)}}"><i class="icon-edit"></i></a>
+                    <a class="btn btn-danger btn-sm" href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}"
+                        data-toggle="modal" data-target="#delete-modal"><i class="icon-remove"></i></a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% endif %}
 
-                    <td class="actions">
-                        <a class="btn btn-success btn-sm" href="{{ url_for(cls_table.__tablename__+'.view', id=item.id)}}"><i
-                                class="icon-zoom-in"></i></a>
-                        <a class="btn btn-warning btn-sm" href="{{ url_for(cls_table.__tablename__+'.edit', id=item.id)}}"><i class="icon-edit"></i></a>
-                        <a class="btn btn-danger btn-sm" href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}" data-toggle="modal" data-target="#delete-modal"><i
-                                class="icon-remove"></i></a>
-                    </td>
-                </tr>
-                    {% endfor %}
-                    {% endif %}
-                
-            </tbody>
-        </table>
-        </div>
-        
+        </tbody>
+    </table>
+</div>
 
-        {% endif %}
 
-        {% endif %}
+{% endif %}
+
+{% endif %}
 
 
 
 
 
 
-        {% endmacro %}
+{% endmacro %}
+
+
+{% macro render_view(obj) %}
+
+{% endmacro %}

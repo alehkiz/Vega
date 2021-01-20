@@ -22,7 +22,9 @@ def add():
 @bp.route('/view/<int:id>/')
 def view(id):
     # TODO: create route
-    return render_template('base.html')
+    user = User.query.filter_by(id=id).first_or_404()
+
+    return render_template('view.html', item=user, user=True)
 
 @bp.route('/edit/<int:id>/', methods=['GET', 'POST'])
 @login_required
