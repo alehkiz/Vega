@@ -8,12 +8,12 @@
             <article class="article-post">
                 <div class="article-header">
                     <h4>
-                        <a href="{{url_for('wiki.article', article_id=article.id)}}" class="text-decoration-none">{{article.title}}</a>
-                        {% if current_user.is_admin %}
+                        <a href="{{url_for('article.view', id=article.id)}}" class="text-decoration-none">{{article.title}}</a>
+                        {% if current_user.can_edit %}
                         
-                            <a href="{{url_for('admin.edit', article_id=article.id)}}"
+                            <a href="{{url_for('article.edit', id=article.id)}}"
                                 class="text-decoration-none btn btn-success btn-sm"><i class="icon-edit"></i></a>
-                            <a href="{{url_for('admin.edit', article_id=article.id)}}"
+                            <a href="{{url_for('article.edit', id=article.id)}}"
                                 class="text-decoration-none btn btn-danger btn-sm"><i class="icon-remove"></i></a>
                         
                         {% endif %}
@@ -21,7 +21,7 @@
 
                     <p class="article-meta">
                         {{article.get_created_time_elapsed}} por <a
-                            href="{{ url_for('user.username', name=article.author.username) }}"
+                            href="{{ url_for('user.view', id=article.author.id) }}"
                             class="text-decoration-none">{{article.author.name}}</a>
                         em <a href="{{ url_for('wiki.topic', topic_name=article.topic.formated_name)}}"
                             class="text-decoration-none">{{article.topic.name}}</a>
@@ -41,7 +41,7 @@
             <div class="p-4 mb-3 bg-light rounded">
                 <h4 class="font-italic">Mais visualizados</h4>
                 {% for article in cls_article.most_viewed()[0:5] %}
-                <p class="mb-0"><a href="{{url_for('wiki.article', article_id=article.id)}}"
+                <p class="mb-0"><a href="{{url_for('article.view', id=article.id)}}"
                         class="text-decoration-none">{{article.title}}</a></p>
                 {% endfor %}
             </div>

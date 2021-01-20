@@ -73,9 +73,27 @@ class BaseConfig(object):
                 "name": "criado em",
                 "attr": 'format_created_date'
             },
-
         }
     }
+    ROUTES_NAMES = {
+        'user': {
+            'add': 'user.view',
+            'edit': 'user.edit',
+            'remove': 'user.remove'
+        },
+        'article':{
+            'add': 'article.view',
+            'edit': '.edit',
+            'remove': '.remove'
+        }   
+        # ,
+        # 'article':{
+        #     'add': '.add',
+        #     'edit': '.edit',
+        #     'remove': '.remove'
+        # }
+    }
+
 
 
 class DevelopmentConfig(BaseConfig):
