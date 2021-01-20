@@ -1,8 +1,8 @@
 {% import "macros/main.html" as macros %}
 {% extends 'base.html' %}
 {% block app_content %}
-
+<div id="list" class="row">
 {{ macros.render_table(cls_table, pagination) }}
 {{ macros.render_pagination(pagination, first_page, last_page, endpoint)}}
-
+</div>
 {% endblock %}

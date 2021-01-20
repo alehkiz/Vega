@@ -31,6 +31,7 @@ class User(UserMixin, db.Model):
     current_login_ip = db.Column(db.String(255), nullable=True)
     confirmed_ip = db.Column(db.String(255), nullable=True)
     confirmed_at = db.Column(db.DateTime, nullable=True)
+    updated_at = db.Column(db.DateTime, nullable=True)
     login_count = db.Column(db.Integer, nullable=True, default=0)
     articles = db.relationship('Article', backref='author', lazy='dynamic', foreign_keys='[Article.user_id]')
     articles_updated = db.relationship('Article', backref='updater', lazy='dynamic', foreign_keys='[Article.updated_user_id]')
@@ -51,17 +52,22 @@ class User(UserMixin, db.Model):
             return True
         return False
     @property
-    def is_manager_content(self):
-        if any([role.is_manager_content for role in self.roles.all()]):
+    def is_editor(self):
+        if any([role.is_editor for role in self.roles.all()]):
             return True
         return False
     
     @property
-    def is_collab_content(self):
-        if any([role.is_collab_content for role in self.roles.all()]):
+    def is_aux_editor(self):
+        if any([role.is_aux_editor for role in self.roles.all()]):
             return True
         return False
 
+    @property
+    def can_edit(self):
+        if any([role.can_edit for role in self.roles.all()]):
+            return True
+        return False
     @property
     def is_viewer(self):
         if any([role.is_viewer for role in self.roles.all()]):
@@ -109,7 +115,7 @@ class Role(RoleMixin, db.Model):
         if self.level == 0:
             return True
         return False
-
+    
     @property
     def is_manager_user(self):
         if self.level == 1:
@@ -117,20 +123,26 @@ class Role(RoleMixin, db.Model):
         return False
 
     @property
-    def is_manager_content(self):
+    def is_editor(self):
         if self.level == 2:
             return True
         return False
 
     @property
-    def is_collab_content(self):
+    def is_aux_editor(self):
         if self.level == 3:
+            return True
+        return False
+    
+    @property
+    def is_viewer(self):
+        if self.level == 4:
             return True
         return False
 
     @property
-    def is_viewer(self):
-        if self.level == 4:
+    def can_edit(self):
+        if self.level in [0, 2, 3]:
             return True
         return False
 
