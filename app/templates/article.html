@@ -12,7 +12,11 @@
             </p>
             <p class="article-meta">
                 Criado {{article.get_created_time_elapsed}} por <a href='#'>{{article.author.name}}</a> 
-                Atualizado {{article.get_update_time_elapsed}} por <a href='#'>{{article.updater.name}}</a> 
+                <!-- TODO: Finalizar -->
+                {% if article.was_updated() %}
+                <br>
+                {{'Atualizado '+ article.get_update_time_elapsed if article.get_update_time_elapsed else ''}} por <a href='#'>{{article.updater.name}}</a> 
+                {% endif %}
             </p>
         </div>
         <div class="article-text">

@@ -1,4 +1,4 @@
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request
 from flask_security import login_required, current_user
 from app.core.db import db
 from app.models.wiki import Article, Tag, Topic
@@ -8,6 +8,7 @@ bp = Blueprint('wiki', __name__, url_prefix='/wiki/')
 @bp.route('/')
 @bp.route('/index')
 def index():
+    print(request.access_route[0])
     articles = Article.query.order_by(Article.timestamp.desc()).all()
     return render_template('wiki.html', articles=articles, cls_article=Article)
 

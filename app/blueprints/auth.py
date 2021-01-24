@@ -20,8 +20,11 @@ def login():
     if login.validate_on_submit():
         user = User.query.filter_by(username=login.username.data).first()
         if user is None or not user.check_password(login.password.data):
-            flash('Senha ou usuário inválido')
+            flash('Senha ou usuário inválido', category='danger')
             return render_template('login.html', form=login, title='Login')#redirect(url_for('auth.login'))
+        if not user.is_active:
+            flash('Usuário inativo', category='danger'),
+            return redirect(url_for('auth.login'))
         login_user(user, remember=login.remember_me.data)
         user.last_login_ip = request.remote_addr
         user.last_login_at = datetime.utcnow()
