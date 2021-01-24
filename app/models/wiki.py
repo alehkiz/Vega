@@ -34,8 +34,8 @@ class Article(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     updated_timestamp = db.Column(db.DateTime, index=True)
     updated_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     # updater = db.relationship('User', foreign_keys = [updated_user_id], backref='articles_updated')
     # author = db.relationship('User', foreign_keys = [user_id], backref='articles', lazy='dynamic')
     tags = db.relationship('Tag', 
@@ -59,19 +59,20 @@ class Article(db.Model):
     def __repr__(self):
         return f'<Article {self.title}>'
 
-    def get_body_html(self, resume=False):
-        if resume:
-            l_text = list(filter(lambda x : x not in ['', ' ', '\t'], self.text.split('\n')))
-            text = get_list_max_len(l_text, 256)
-            return Markup(process_html(markdown('\n'.join(text)))).striptags()
-            # return Markup(process_html(markdown(text))).striptags()
+    def get_body_html(self, resume=False, size=256):
         html_classes = {'table': 'table table-bordered',
                         'img': 'img img-fluid'}
+        if resume:
+            l_text = list(filter(lambda x : x not in ['', ' ', '\t'], self.text.split('\n')))
+            # text = get_list_max_len(l_text, 256)
+            return Markup(process_html(markdown('\n'.join(l_text), extras={"tables": None, "html-classes":html_classes}))).striptags()[0:size] + '...'
+            # return Markup(process_html(markdown(text))).striptags()
+        
         return Markup(process_html(markdown(self.text, extras={"tables": None, "html-classes":html_classes})))
     
     @property
     def get_text_resume(self):
-        return self.get_body_html(resume=True)
+        return self.get_body_html(resume=True, size=15)
 
     @property
     def format_created_date(self):
@@ -128,6 +129,11 @@ class Article(db.Model):
                 app.logger.error(e)
                 return abort(500)
             return sum([x.views for x in rs if x.views != None])
+    def was_updated(self):
+        if self.updated_timestamp is None and self.updated_user_id is None:
+            return False
+        return True
+    
     @staticmethod
     def most_viewed():
         try:

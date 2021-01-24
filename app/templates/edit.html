@@ -16,6 +16,10 @@
         {{ form.csrf_token }}
         {{ macros.render_field(form.title, size=32, class='form-control', placeholder='Titulo') }}
         {{ macros.render_field(form.description, size=128, class='form-control', placeholder='Descrição')}}
+        <div class="col-md-6">
+            {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
+        </div>
+        <br>
         <div id='editormd'>
         {{ macros.render_field(form.text, rows=30, placeholder='Texto', style='display:none')}}
         </div>
@@ -26,6 +30,8 @@
         {{ macros.render_field(form.name, size=128, class='form-control', placeholder='Nome')}}
         {{ macros.render_field(form.email, size=128, class='form-control', placeholder='Email')}}
         {{ macros.render_field(form.about_me, size=512, class='form-control', placeholder='Sobre mim')}}
+        {{ macros.render_field(form.active)}}
+        <br>
         {{ form.submit }}
         {% endif %}
         {#<!-- <h1 class="h3 mb-3 fw-normal">Editar</h1>

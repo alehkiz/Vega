@@ -1,18 +1,27 @@
-{% macro render_field(field, size, class, placeholder) %}
+{% macro render_field(field, size, class, placeholder, nosize) %}
 {% if nolabel %}
 {{ field.label(class='visually-hidden') }}
-{% endif %}
-{% if style %}
-{{ field(class=class, size=size, placeholder=placeholder, style=style, **kwargs)|safe }}
 {% else %}
-{{ field(class=class, size=size, placeholder=placeholder, **kwargs)|safe }}
+{{ field.label(class='form-label') }}
+{% endif %}
+
+{% if style %}
+{{ field(class=(class if class else '') + (" is-invalid" if field.errors else ""), size=size, placeholder=placeholder,
+style=style, **kwargs)|safe }}
+{% else %}
+{% if nosize %}
+{{ field(class=(class if class else '') + (" is-invalid" if field.errors else ""))|safe }}
+{% else %}
+{{ field(class=(class if class else '') + (" is-invalid" if field.errors else ""), size=size, placeholder=placeholder,
+**kwargs)|safe }}
+{% endif %}
 {% endif %}
 {% if field.errors %}
-<ul class=errors>
-    {% for error in field.errors %}
-    <li>{{ error }}</li>
-    {% endfor %}
-</ul>
+<!-- <ul class='invalid-feedback'> -->
+{% for error in field.errors %}
+<!-- <li>{{ error }}</li> -->
+<div class='invalid-feedback'>{{ error }} </div>
+{% endfor %}
+<!-- </ul> -->
 {% endif %}
-</dd>
 {% endmacro %}

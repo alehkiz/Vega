@@ -4,6 +4,8 @@ from babel.dates import format_timedelta
 from functools import wraps
 from datetime import datetime
 from unicodedata import normalize, category
+from werkzeug.urls import url_parse
+from flask import request
 
 ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_123456789'
 def validate_password(password):
@@ -62,3 +64,7 @@ def only_letters(string:str):
     text = ''.join([x for x in text if x in ALPHABET])
     return text.lower()
 
+def url_in_host(url):
+    if url_parse(url).netloc == url_parse(request.base_url).netloc:
+        return True
+    return False

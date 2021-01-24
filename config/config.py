@@ -34,6 +34,8 @@ class BaseConfig(object):
 
     _ERRORS = {'DB_COMMIT_ERROR': 'Não foi possível atualizar o banco de dados'}
 
+    DEFAULT_PASS = 'Abc123'
+
     ITEMS_PER_PAGE = 5
 
     # Variável responsável pelo DE-PARA entre as colunas das tabelas
@@ -59,12 +61,13 @@ class BaseConfig(object):
                 "attr": None
             },
             "name": {
-                "name": "nome",
+                "name": "name",
                 "attr": None
             },
             "email": {
                 "name": "email",
-                "attr": None},
+                "attr": None
+            },
             "active": {
                 "name": "ativo",
                 "attr": 'format_active'

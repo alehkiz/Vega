@@ -1,7 +1,6 @@
 {% macro render_pagination(pagination, first_page, last_page, endpoint) %}
 <nav aria-label="pagination">
     <ul class="pagination justify-content-end">
-
         {%- if first_page != pagination.page %}
         <li class='page-item'>
             <a class="page-link" href="{{url_for(endpoint, page=first_page)}}" aria-label='First'>
@@ -15,9 +14,7 @@
             </a>
         </li>
         {%- endif %}
-
         {%- for page in pagination.iter_pages() %}
-
         {% if page %}
         {% if page != pagination.page %}
         <li class="page-item">
@@ -25,15 +22,14 @@
         </li>
         {% else %}
         <li class="page-item active">
-            <a class="page-link" href="#" aria-label='Last'>
-                <strong aria-current="page">{{page}}</strong>
+            <a class="page-link active" href="#" aria-current="page">
+                {{page}}
             </a>
         </li>
         {% endif %}
         {% else %}
         ...
         {% endif %}
-
         {%- endfor %}
         {%- if last_page != pagination.page and not last_page is none %}
         <li class='page-item'>
@@ -75,7 +71,7 @@
     </div> -->
 
     <div class="col-md-6">
-        <a href="{{ url_for(cls_table.__tablename__+'.add')}}" class="btn btn-primary pull-right h2">Adcionar </a>
+        <a href="{{ url_for(cls_table.__tablename__+'.add')}}" class="btn btn-primary pull-right h2">Adicionar </a>
     </div>
 </div>
 <div class="table-responsive col-md-12">
@@ -118,19 +114,9 @@
         </tbody>
     </table>
 </div>
-
-
 {% endif %}
-
 {% endif %}
-
-
-
-
-
-
 {% endmacro %}
-
 
 {% macro render_view(obj) %}
 

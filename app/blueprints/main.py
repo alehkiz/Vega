@@ -20,5 +20,6 @@ def before_request():
 @bp.route('/')
 @bp.route('/index')
 def index():
+    print(current_user.is_anonymous)
     article = Article.query.first()
     return render_template('article.html', article=article)
