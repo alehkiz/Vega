@@ -16,7 +16,7 @@ bp = Blueprint('article', __name__, url_prefix='/article/')
 @bp.route('/view/<int:id>')
 def view(id=None):
     if id is None:
-        #TODO em caso do artumento id é vazio, retornar todos os artigos
+        #TODO em caso do argumento id é vazio, retornar todos os artigos
         return abort(404)
     if not str(id).isnumeric():
         return abort(404)
@@ -41,13 +41,14 @@ def add():
         article = Article.query.filter(Article.title.ilike(form.title.data)).first()
         if not article is None:
             form.title.errors.append('Título inválido ou já existente')
-            
+        print(form.topic.data)
         if not form.errors:
             article = Article()
             article.title = form.title.data
             article.description = form.description.data
             article.text = form.text.data
             article.user_id = current_user.id
+            article.topic_id = form.topic.data.id
             try:
                 db.session.add(article)
                 db.session.commit()
@@ -71,8 +72,8 @@ def edit(id):
             article.title = form.title.data
             article.description = form.description.data
             article.text = form.text.data
-            article.updated_timestamp = datetime.utcnow()
-            article.updated_user_id = current_user.id
+            article.update_at = datetime.utcnow()
+            article.update_user_id = current_user.id
             db.session.commit()
             return redirect(url_for('article.view', id=article.id))
         except Exception as e:

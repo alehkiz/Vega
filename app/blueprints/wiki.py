@@ -9,12 +9,12 @@ bp = Blueprint('wiki', __name__, url_prefix='/wiki/')
 @bp.route('/index')
 def index():
     print(request.access_route[0])
-    articles = Article.query.order_by(Article.timestamp.desc()).all()
+    articles = Article.query.order_by(Article.create_at.desc()).all()
     return render_template('wiki.html', articles=articles, cls_article=Article)
 
 @bp.route('/topic/<string:topic_name>')
 def topic(topic_name):
-    topic = Topic.query.filter_by(formated_name=topic_name).first_or_404()
+    topic = Topic.query.filter_by(format_name=topic_name).first_or_404()
     articles = topic.articles.all()
     return render_template('wiki.html', articles=articles, cls_article=Article, title= f'{topic.name}')
 
