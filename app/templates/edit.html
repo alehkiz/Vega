@@ -4,7 +4,8 @@
 {% block styles %}
 {{ super()}}
 {% if article %}
-<link href="{{url_for('static', filename='css/editormd/editormd.css')}}" rel="stylesheet" />
+<!-- <link href="{{url_for('static', filename='css/editormd/editormd.css')}}" rel="stylesheet" /> -->
+<link href="{{url_for('static', filename='css/simplemde/simplemde.min.css')}}" rel="stylesheet" />
 {% endif %}
 {% endblock %}
 
@@ -64,7 +65,7 @@
                 {{article.description}}
             </p>
             <p class="article-meta">
-                {{article.get_created_time_elapsed}} por <a href='#'>{{article.author.name}}</a>
+                {{article.get_create_time_elapsed}} por <a href='#'>{{article.author.name}}</a>
             </p>
         </div>
         <div class="article-text">
@@ -93,133 +94,145 @@
 {% block scripts %}
 {{ super() }}
 {% if article == true %}
-<script src="{{url_for('static', filename='js/editormd/editormd.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}"></script>
 
 
 <script type="text/javascript">
-    var testEditor;
+var simplemde = new SimpleMDE({ 
+    element: document.getElementById("text"),
+    renderingConfig: {
+		singleLineBreaks: true,
+		codeSyntaxHighlighting: true,
+    },
+    shortcuts: {
+		drawTable: "Cmd-Alt-T"
+	},
+	showIcons: ["code", "table"]
+});
 
-    $(function() {
-        editorMD = editormd("editormd", {
-            width   : '100%',
-            height  : 640,
-            syncScrolling : "single",
-            path    : "{{'/'.join(url_for('static', filename='js/editormd/lib/flowchart.min.js').split('/')[:-1])}}/",
-            toolbarIcons : function() {
-                // Or return editormd.toolbarModes[name]; // full, simple, mini
-                // Using "||" set icons align right.
-                return ["undo", "redo", "|", 
-                        "bold", "italic", "quote", "ucwords", "uppercase", "lowercase", "|", 
-                        "h1", "h2", "h3", "h4", "h5", "h6", "|",
-                        "list-ul", "list-ol", "hr", "|",
-                        "link", "reference-link", "image", "preformatted-text", "table", "html-entities", "pagebreak", "|",
-                        "preview", "watch", "|", "fullscreen"]
-            },
+    // var testEditor;
 
-            lang : {
-                name : "pt-br",
-                description : "Editor",
-                tocTitle    : "Editar",
-                toolbar : {
-                    undo             : "Desfazer(Ctrl+Z)",
-                    redo             : "Refazer(Ctrl+Y)",
-                    bold             : "Negrito",
-                    italic           : "Italico",
-                    quote            : "Citação",
-                    ucwords          : "Primeira letra maiúsula",
-                    uppercase        : "Converte seleção para maiúscula",
-                    lowercase        : "Converte seleção para minúscula",
-                    h1               : "Cabeçalho 1",
-                    h2               : "Cabeçalho 2",
-                    h3               : "Cabeçalho 3",
-                    h4               : "Cabeçalho 4",
-                    h5               : "Cabeçalho 5",
-                    h6               : "Cabeçalho 6",
-                    "list-ul"        : "Lista não ordenada",
-                    "list-ol"        : "Lista ordenada",
-                    hr               : "Linha horizontal",
-                    link             : "Link",
-                    "reference-link" : "Link de referência",
-                    image            : "Imagem",
-                    code             : "Código em linha",
-                    "preformatted-text" : "Texto pré-formatado (Tab indent)",
-                    "code-block"     : "Bloco de código (Multi-languages)",
-                    table            : "Tabelas",
-                    datetime         : "Dia / hora",
-                    emoji            : "Emoji",
-                    "html-entities"  : "Códigos especiais",
-                    pagebreak        : "Quebra de página",
-                    watch            : "Desativar prévia",
-                    unwatch          : "Ativar prévia",
-                    preview          : "Visualizar resultao (Pressione Shift + ESC para sair)",
-                    fullscreen       : "Tela cheia (Pressione ESC para sair)",
-                    clear            : "Limpar",
-                    search           : "Procurar",
-                    help             : "Ajuda",
-                    info             : "Sobre "
-                },
-                buttons : {
-                    enter  : "Enter",
-                    cancel : "Cancel",
-                    close  : "Close"
-                },
-                dialog : {
-                    link : {
-                        title    : "Link",
-                        url      : "Endereço (URL)",
-                        urlTitle : "Título",
-                        urlEmpty : "Erro: Preencha o endereço do link."
-                    },
-                    referenceLink : {
-                        title    : "Link de referência",
-                        name     : "Nome",
-                        url      : "Endereço",
-                        urlId    : "ID",
-                        urlTitle : "Titulo",
-                        nameEmpty: "Erro: Nome de referência nãão pode ser vazio.",
-                        idEmpty  : "Erro: Preenche o ID.",
-                        urlEmpty : "Erro: Preencha o endereço de referência."
-                    },
-                    image : {
-                        title    : "Imagem",
-                        url      : "Endereço",
-                        link     : "Link",
-                        alt      : "Titulo",
-                        uploadButton     : "Upload",
-                        imageURLEmpty    : "Error: Endereço da imagem não pode ser vazio.",
-                        uploadFileEmpty  : "Error: Upload de imagens não pode ser vazio",
-                        formatNotAllowed : "Error: Apenas imagens são aceitas"
-                    },
-                    preformattedText : {
-                        title             : "Texto pré-formatado", 
-                        emptyAlert        : "Error: Preencha o texto"
-                    },
-                    codeBlock : {
-                        title             : "Bloco de códito",
-                        selectLabel       : "Linguagens: ",
-                        selectDefaultText : "Selecione uma linguagem",
-                        otherLanguage     : "Outras linguagens",
-                        unselectedLanguageAlert : "Error: Selecione uma linguagem",
-                        codeEmptyAlert    : "Error: Preencha o bloco de código."
-                    },
-                    htmlEntities : {
-                        title : "Códigos"
-                    },
-                    help : {
-                        title : "Ajuda"
-                    },
-                    table :{
-                        title      : "Tabela",
-						cellsLabel : "Células",
-						alignLabel : "Alinhamento",
-						rows       : "Linhas",
-						cols       : "Colunas",
-						aligns     : ["Justificado", "Esquerda", "Direita", "Centralizado"]
-                    }
-                }
-            }
+    // $(function() {
+    //     editorMD = editormd("editormd", {
+    //         width   : '100%',
+    //         height  : 640,
+    //         syncScrolling : "single",
+    //         path    : "{{'/'.join(url_for('static', filename='js/editormd/lib/flowchart.min.js').split('/')[:-1])}}/",
+    //         toolbarIcons : function() {
+    //             // Or return editormd.toolbarModes[name]; // full, simple, mini
+    //             // Using "||" set icons align right.
+    //             return ["undo", "redo", "|", 
+    //                     "bold", "italic", "quote", "ucwords", "uppercase", "lowercase", "|", 
+    //                     "h1", "h2", "h3", "h4", "h5", "h6", "|",
+    //                     "list-ul", "list-ol", "hr", "|",
+    //                     "link", "reference-link", "image", "preformatted-text", "table", "html-entities", "pagebreak", "|",
+    //                     "preview", "watch", "|", "fullscreen"]
+    //         },
 
-        });
+    //         lang : {
+    //             name : "pt-br",
+    //             description : "Editor",
+    //             tocTitle    : "Editar",
+    //             toolbar : {
+    //                 undo             : "Desfazer(Ctrl+Z)",
+    //                 redo             : "Refazer(Ctrl+Y)",
+    //                 bold             : "Negrito",
+    //                 italic           : "Italico",
+    //                 quote            : "Citação",
+    //                 ucwords          : "Primeira letra maiúsula",
+    //                 uppercase        : "Converte seleção para maiúscula",
+    //                 lowercase        : "Converte seleção para minúscula",
+    //                 h1               : "Cabeçalho 1",
+    //                 h2               : "Cabeçalho 2",
+    //                 h3               : "Cabeçalho 3",
+    //                 h4               : "Cabeçalho 4",
+    //                 h5               : "Cabeçalho 5",
+    //                 h6               : "Cabeçalho 6",
+    //                 "list-ul"        : "Lista não ordenada",
+    //                 "list-ol"        : "Lista ordenada",
+    //                 hr               : "Linha horizontal",
+    //                 link             : "Link",
+    //                 "reference-link" : "Link de referência",
+    //                 image            : "Imagem",
+    //                 code             : "Código em linha",
+    //                 "preformatted-text" : "Texto pré-formatado (Tab indent)",
+    //                 "code-block"     : "Bloco de código (Multi-languages)",
+    //                 table            : "Tabelas",
+    //                 datetime         : "Dia / hora",
+    //                 emoji            : "Emoji",
+    //                 "html-entities"  : "Códigos especiais",
+    //                 pagebreak        : "Quebra de página",
+    //                 watch            : "Desativar prévia",
+    //                 unwatch          : "Ativar prévia",
+    //                 preview          : "Visualizar resultao (Pressione Shift + ESC para sair)",
+    //                 fullscreen       : "Tela cheia (Pressione ESC para sair)",
+    //                 clear            : "Limpar",
+    //                 search           : "Procurar",
+    //                 help             : "Ajuda",
+    //                 info             : "Sobre "
+    //             },
+    //             buttons : {
+    //                 enter  : "Enter",
+    //                 cancel : "Cancel",
+    //                 close  : "Close"
+    //             },
+    //             dialog : {
+    //                 link : {
+    //                     title    : "Link",
+    //                     url      : "Endereço (URL)",
+    //                     urlTitle : "Título",
+    //                     urlEmpty : "Erro: Preencha o endereço do link."
+    //                 },
+    //                 referenceLink : {
+    //                     title    : "Link de referência",
+    //                     name     : "Nome",
+    //                     url      : "Endereço",
+    //                     urlId    : "ID",
+    //                     urlTitle : "Titulo",
+    //                     nameEmpty: "Erro: Nome de referência nãão pode ser vazio.",
+    //                     idEmpty  : "Erro: Preenche o ID.",
+    //                     urlEmpty : "Erro: Preencha o endereço de referência."
+    //                 },
+    //                 image : {
+    //                     title    : "Imagem",
+    //                     url      : "Endereço",
+    //                     link     : "Link",
+    //                     alt      : "Titulo",
+    //                     uploadButton     : "Upload",
+    //                     imageURLEmpty    : "Error: Endereço da imagem não pode ser vazio.",
+    //                     uploadFileEmpty  : "Error: Upload de imagens não pode ser vazio",
+    //                     formatNotAllowed : "Error: Apenas imagens são aceitas"
+    //                 },
+    //                 preformattedText : {
+    //                     title             : "Texto pré-formatado", 
+    //                     emptyAlert        : "Error: Preencha o texto"
+    //                 },
+    //                 codeBlock : {
+    //                     title             : "Bloco de códito",
+    //                     selectLabel       : "Linguagens: ",
+    //                     selectDefaultText : "Selecione uma linguagem",
+    //                     otherLanguage     : "Outras linguagens",
+    //                     unselectedLanguageAlert : "Error: Selecione uma linguagem",
+    //                     codeEmptyAlert    : "Error: Preencha o bloco de código."
+    //                 },
+    //                 htmlEntities : {
+    //                     title : "Códigos"
+    //                 },
+    //                 help : {
+    //                     title : "Ajuda"
+    //                 },
+    //                 table :{
+    //                     title      : "Tabela",
+	// 					cellsLabel : "Células",
+	// 					alignLabel : "Alinhamento",
+	// 					rows       : "Linhas",
+	// 					cols       : "Colunas",
+	// 					aligns     : ["Justificado", "Esquerda", "Direita", "Centralizado"]
+    //                 }
+    //             }
+    //         }
+
+    //     });
 
         /*
         // or
@@ -230,7 +243,7 @@
             path    : "../lib/"
         });
         */
-    });
+    // });
 </script>
 
 

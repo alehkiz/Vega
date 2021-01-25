@@ -1,6 +1,8 @@
 from os.path import abspath, dirname, join
 from os import environ
 
+import logging
+
 import app
 
 
@@ -29,8 +31,8 @@ class BaseConfig(object):
 
     _SQLALCHEMY_DATABASE_NAME = PROJECT_NAME.lower()
     _SQLALCHEMY_DATABASE_HOST = environ.get('DB_USER') or 'localhost'
-    _SQLALCHEMY_DATABASE_USERNAME = environ.get('DB_USER') or None
-    _SQLALCHEMY_DATABASE_PASSWORD = environ.get('DB_PASS') or None
+    _SQLALCHEMY_DATABASE_USERNAME = environ.get('DB_USER') or 'alexandre'
+    _SQLALCHEMY_DATABASE_PASSWORD = environ.get('DB_PASS') or 'contato'
 
     _ERRORS = {'DB_COMMIT_ERROR': 'Não foi possível atualizar o banco de dados'}
 
@@ -50,7 +52,7 @@ class BaseConfig(object):
             'text': {'name': 'texto',
                      'attr': 'get_text_resume'},
             'updadet_time_stamp': {'name': 'Criado em',
-                                   'attr': 'format_created_date'}
+                                   'attr': 'format_create_date'}
         },
         'user': {
             "id": {"name": "id",
@@ -74,7 +76,7 @@ class BaseConfig(object):
             },
             "created_at": {
                 "name": "criado em",
-                "attr": 'format_created_date'
+                "attr": 'format_create_date'
             },
         }
     }
@@ -96,6 +98,9 @@ class BaseConfig(object):
         #     'remove': '.remove'
         # }
     }
+
+
+    ELASTICSEARCH_URL = 'http://localhost:9200'
 
 
 
