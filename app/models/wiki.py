@@ -100,11 +100,11 @@ class Article(db.Model):
 
     @property
     def format_create_date(self):
-        return self.timestamp.strftime("%d/%m/%Y")
+        return self.create_at.strftime("%d/%m/%Y")
 
     @property
     def get_create_time_elapsed(self):
-        return format_elapsed_time(self.timestamp)
+        return format_elapsed_time(self.create_at)
 
     @property
     def get_update_time_elapsed(self):
@@ -186,7 +186,7 @@ class Topic(db.Model):
     _name = db.Column(db.String(32), index=True, nullable=False, unique=True)
     format_name = db.Column(db.String(32), index=True,
                             nullable=True, unique=True)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
 
     @hybrid_property
@@ -205,7 +205,7 @@ class Topic(db.Model):
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(48), index=True, nullable=False)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
