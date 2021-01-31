@@ -1,3 +1,4 @@
+# from sqlalchemy import func
 from flask import Markup, escape, current_app as app, abort
 from sqlalchemy import func, text, Index, cast
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -5,12 +6,17 @@ from datetime import datetime
 from markdown2 import markdown
 from bs4 import BeautifulSoup
 from sqlalchemy.dialects import postgresql
+from sqlalchemy_utils.types import TSVectorType
+
+from sqlalchemy_searchable import make_searchable
 
 from app.core.db import db
 from app.utils.kernel import format_elapsed_time, get_list_max_len, only_letters
 from app.utils.html import process_html
 from app.models.security import User
 
+
+make_searchable(db.metadata, options={'regconfig': 'pg_catalog.portuguese'})
 
 def create_tsvector(*args):
     exp = args[0]
@@ -50,14 +56,14 @@ class Article(db.Model):
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     # updater = db.relationship('User', foreign_keys = [update_user_id], backref='articles_updated')
     # author = db.relationship('User', foreign_keys = [user_id], backref='articles', lazy='dynamic')
-
+    search_vector = db.Column(TSVectorType('_text', 'title', regconfig='pg_catalog.portuguese'))
     __ts_vector__ = create_tsvector(
         cast(func.coalesce(_text, ''), postgresql.TEXT))
 
     __table_args__ = (Index(
-            'idx_text_fts',
-            __ts_vector__,
-            postgresql_using='gin'),)
+        'idx_text_fts',
+        __ts_vector__,
+        postgresql_using='gin'),)
 
     tags = db.relationship('Tag',
                            secondary=article_tag,
@@ -263,3 +269,54 @@ class Question(db.Model):
     @property
     def answer_text(self):
         return self.get_answer_html(resume=9999)
+
+
+# (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article._text, func.to_tsquery('smit:* | ji:*')).label('rank'))
+#     .filter(Article._text.op('@@')(func.to_tsquery('smit:* | ji:*')))
+#     .order_by('rank desc')
+#  ).all()
+
+
+# subquery = db.session.query(
+#     Article,
+#     func.ts_rank().over(order_by=Article.create_at.desc(),
+#                      partition_by=Article.id
+#                      ).label('rnk')
+# ).subquery()
+
+# query = db.session.query(subquery).filter(
+#     subquery.c.rnk >= 1
+# )
+
+
+# (db.session.query(User, func.ts_rank('{0.1,0.1,0.1,0.1}', User.textsearchable_index_col, func.to_tsquery('smit:* | ji:*')).label('rank'))
+#     .filter(User.authentication_method != 2)
+#     .filter(User.textsearchable_index_col.op('@@')(func.to_tsquery('smit:* | ji:*')))
+#     .order_by('rank desc')
+# ).all()
+
+# (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article.search_vector, func.to_tsquery('comportamento')).label('rank'))
+#     .filter(Article.search_vector.op('@@')(func.to_tsquery('comportamento')))
+#     .order_by('rank desc')
+#  ).all()
+
+# (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article.__ts_vector__, func.to_tsquery('mutacao')).label('rank'))
+#     .filter(Article.__ts_vector__.op('@@')(func.to_tsquery('mutacao')))
+#     .order_by('rank')
+#  ).all()
+# 
+# 
+
+(db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article.search_vector, func.to_tsquery('tres')).label('rank'))
+    .filter(Article.search_vector.op('@@')(func.to_tsquery('tres')))
+    .order_by('rank')
+ ).all()
+
+
+(db.session.query(Article, (
+    func.strict_word_similarity(
+        Article.search_vector.op('@@')(
+            func.to_tsquery('principal')), 'principal'
+            ).label('sml')
+        )
+    ).order_by(desc('sml'))).all()

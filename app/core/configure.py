@@ -27,6 +27,7 @@ csrf = CSRFProtect()
 def init(app):
     security.init_app(app, datastore=user_datastore, register_blueprint=False)
     db.init_app(app)
+    db.configure_mappers()
     migrate.init_app(app, db, render_as_batch=True)
     csrf.init_app(app)
     login.init_app(app)
