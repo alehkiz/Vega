@@ -313,10 +313,6 @@ class Question(db.Model):
  ).all()
 
 
-(db.session.query(Article, (
-    func.strict_word_similarity(
-        Article.search_vector.op('@@')(
-            func.to_tsquery('principal')), 'principal'
-            ).label('sml')
-        )
-    ).order_by(desc('sml'))).all()
+(db.session.query(Article, (func.strict_word_similarity(Article.search_vector.op('@@')(func.to_tsquery('principal'), 'principal')).label('sml'))).order_by(desc('sml'))).all()
+
+(db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal variantes sobre tempo exemplo')).label('sml'))).order_by(desc('sml')).all()
