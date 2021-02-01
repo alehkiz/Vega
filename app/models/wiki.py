@@ -1,6 +1,6 @@
 # from sqlalchemy import func
 from flask import Markup, escape, current_app as app, abort
-from sqlalchemy import func, text, Index, cast
+from sqlalchemy import func, text, Index, cast, desc
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
 from markdown2 import markdown
@@ -87,6 +87,24 @@ class Article(db.Model):
 
     def __repr__(self):
         return f'<Article {self.title}>'
+
+
+    def search(text):
+        # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
+        result = (db.session.query(Article, (
+            func.ts_rank_cd(
+                Article.search_vector, 
+                func.plainto_tsquery(
+                    'pg_catalog.portuguese',
+                    text))).label(
+                        'similarity')).filter((
+            func.ts_rank_cd(
+                Article.search_vector, 
+                func.plainto_tsquery(
+                    'pg_catalog.portuguese',
+                    text))) > 0).order_by(
+                    desc('similarity'))).all()
+        return result
 
     def get_body_html(self, resume=False, size=256):
         html_classes = {'table': 'table table-bordered',
@@ -307,12 +325,12 @@ class Question(db.Model):
 # 
 # 
 
-(db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article.search_vector, func.to_tsquery('tres')).label('rank'))
-    .filter(Article.search_vector.op('@@')(func.to_tsquery('tres')))
-    .order_by('rank')
- ).all()
+# (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article.search_vector, func.to_tsquery('tres')).label('rank'))
+#     .filter(Article.search_vector.op('@@')(func.to_tsquery('tres')))
+#     .order_by('rank')
+#  ).all()
 
 
-(db.session.query(Article, (func.strict_word_similarity(Article.search_vector.op('@@')(func.to_tsquery('principal'), 'principal')).label('sml'))).order_by(desc('sml'))).all()
+# (db.session.query(Article, (func.strict_word_similarity(Article.search_vector.op('@@')(func.to_tsquery('principal'), 'principal')).label('sml'))).order_by(desc('sml'))).all()
 
-(db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal variantes sobre tempo exemplo')).label('sml'))).order_by(desc('sml')).all()
+# (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal variantes sobre tempo exemplo')).label('sml'))).order_by(desc('sml')).all()
