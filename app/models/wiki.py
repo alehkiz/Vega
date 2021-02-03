@@ -288,7 +288,7 @@ class Question(db.Model):
     def answer_text(self):
         return self.get_answer_html(resume=9999)
 
-
+# TESTE
 # (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article._text, func.to_tsquery('smit:* | ji:*')).label('rank'))
 #     .filter(Article._text.op('@@')(func.to_tsquery('smit:* | ji:*')))
 #     .order_by('rank desc')
