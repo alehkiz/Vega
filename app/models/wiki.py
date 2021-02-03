@@ -14,7 +14,7 @@ from app.core.db import db
 from app.utils.kernel import format_elapsed_time, get_list_max_len, only_letters
 from app.utils.html import process_html
 from app.models.security import User
-from sqlalchemy_utils import TSVectorType
+
 
 make_searchable(db.metadata, options={'regconfig': 'pg_catalog.portuguese'})
 
@@ -41,11 +41,10 @@ class ArticleView(db.Model):
     count_view = db.Column(db.Integer, default=1)
 
     def __repr__(self):
-        return f'<Article View id {self.article_id} by {self.user_id}'
+        return f'<Article View id {self.article_id} by {self.user_id}>'
 
 
 class Article(db.Model):
-    __searchable__ = ['text', 'title', 'description']
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(32), index=True, nullable=False, unique=True)
     description = db.Column(db.String(128), index=False, nullable=False)
@@ -57,44 +56,14 @@ class Article(db.Model):
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     # updater = db.relationship('User', foreign_keys = [update_user_id], backref='articles_updated')
     # author = db.relationship('User', foreign_keys = [user_id], backref='articles', lazy='dynamic')
-    search_vector = db.column(TSVectorType('_text', 'description'))
+    search_vector = db.Column(TSVectorType('_text', 'title', regconfig='pg_catalog.portuguese'))
     # __ts_vector__ = create_tsvector(
-    #     cast(func.coalesce(text, ''), postgresql.TEXT))
+    #     cast(func.coalesce(_text, ''), postgresql.TEXT))
 
     # __table_args__ = (Index(
-    #         'idx_text_fts',
-    #         __ts_vector__,
-    #         postgresql_using='gin'),
-    #         Index(
-    #         'idx_description_fts',
-    #         func.to_tsvector('portuguese','description'),
-    #         postgresql_using="gin")
-    #         )
-# (db.session.query(User, func.ts_rank('{0.1,0.1,0.1,0.1}', 
-#     User.textsearchable_index_col, 
-#     func.to_tsquery('smit:* | ji:*')).label('rank'))
-#     .filter(User.authentication_method != 2)
-#     .filter(User.textsearchable_index_col.op('@@')(func.to_tsquery('smit:* | ji:*')))
-#     .order_by('rank desc')
-# ).all()
-
-# (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}',Article.description,func.to
-#     ...: _tsquery('lore')).label('rank')).filter(Article.description.op('@@')(func.plainto_tsque
-#     ...: ry('lore')))).all()
-
-# SELECT _text, ts_rank_cd('inquerito ', query) AS rank
-# FROM article, to_tsquery('inquerito') query
-# WHERE query @@ 'inquerito '
-# ORDER BY rank DESC  
-# LIMIT 10;
-
-# (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article.description, func.to_tsquery('smit:* | ji:*')).label('rank'))
-#     .filter(Article.description.op('@@')(func.to_tsquery('smit:* | ji:*')))
-#     .order_by('rank desc')
-# ).all()
-
-
-
+    #     'idx_text_fts',
+    #     __ts_vector__,
+    #     postgresql_using='gin'),)
 
     tags = db.relationship('Tag',
                            secondary=article_tag,
@@ -272,7 +241,7 @@ class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.String(256), index=True,
                          nullable=False, unique=True)
-    _answer = db.Column(db.Text, index=True, nullable=True, unique=False)
+    answer = db.Column(db.Text, index=True, nullable=True, unique=False)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     create_user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -281,43 +250,103 @@ class Question(db.Model):
     answer_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_at = db.Column(db.DateTime)
 
+    search_vector = db.Column(TSVectorType('question', 'answer', regconfig='pg_catalog.portuguese'))
+
+
+
     def __repr__(self):
         return f'<Question {self.question if len(self.title) <= 15 else self.question[:15] + "..."}>'
 
-    @hybrid_property
-    def answer(self):
-        return self._answer
+    @property
+    def views(self):
+        return db.session.query(func.sum(self.))
+    # @hybrid_property
+    # def answer(self):
+    #     return self._answer
 
-    @answer.setter
-    def answer(self, answer):
-        '''
-        Remove tags html in text
-        '''
-        self._answer = BeautifulSoup(answer, features="lxml").get_text()
+    # @answer.setter
+    # def answer(self, answer):
+    #     '''
+    #     Remove tags html in text
+    #     '''
+    #     self._answer = BeautifulSoup(answer, features="lxml").get_text()
 
     @property
     def answered(self):
-        if self._answer != None:
+        if self.answer != None:
             return True
         return False
 
-    def get_answer_html(self, resume=False, size=256):
-        html_classes = {'table': 'table table-bordered',
-                        'img': 'img img-fluid'}
-        if self.answer is None:
-            return ''
-        if resume:
-            l_text = list(filter(lambda x: x not in [
-                          '', ' ', '\t'], self.answer.split('\n')))
-            # text = get_list_max_len(l_text, 256)
-            return Markup(process_html(markdown('\n'.join(l_text), extras={"tables": None, "html-classes": html_classes}))).striptags()[0:size] + '...'
-            # return Markup(process_html(markdown(text))).striptags()
+    # def get_answer_html(self, resume=False, size=256):
+    #     html_classes = {'table': 'table table-bordered',
+    #                     'img': 'img img-fluid'}
+    #     if self.answer is None:
+    #         return ''
+    #     if resume:
+    #         l_text = list(filter(lambda x: x not in [
+    #                       '', ' ', '\t'], self.answer.split('\n')))
+    #         # text = get_list_max_len(l_text, 256)
+    #         return Markup(process_html(markdown('\n'.join(l_text), extras={"tables": None, "html-classes": html_classes}))).striptags()[0:size] + '...'
+    #         # return Markup(process_html(markdown(text))).striptags()
 
-        return Markup(process_html(markdown(self.answer, extras={"tables": None, "html-classes": html_classes})))
+    #     return Markup(process_html(markdown(self.answer, extras={"tables": None, "html-classes": html_classes})))
 
-    @property
-    def answer_text(self):
-        return self.get_answer_html(resume=9999)
+    # @property
+    # def answer_text(self):
+    #     return self.get_answer_html(resume=9999)
+
+
+class QuestionView(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer,  db.ForeignKey('user.id'))
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    first_view = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    last_view = db.Column(db.DateTime, index=True, nullable=False)
+    count_view = db.Column(db.Integer, default=1)
+
+    def __repr__(self):
+        return f'<Question View id: {self.question_id} by {self.user_id}>'
+
+    
+    def views_by_question(self, question_id : int):
+        return db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.question_id == question_id).scalar()
+
+    def views_by_user(self, user_id : int):
+        return db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.user_id == user_id).scalar()
+
+
+class QuestionLike(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    create_at = db.Column(db.DateTime, nullable=False)
+
+    def __repr__(self):
+        return f'<Question Like id: {self.question_id} by {self.user_id}>'
+
+    def likes_by_user(self, question_id : int):
+        return self.query.filter(self.question_id == question_id).count()
+
+    def likes_by_user(self, user_id : int):
+        return self.query.filter(self.question_id == user_id).count()
+
+class QuestionSave(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    create_at = db.Column(db.DateTime, nullable=False)
+
+    def __repr__(self):
+        return f'<Question Like id: {self.question_id} by {self.user_id}>'
+
+    def saves_by_user(self, question_id : int):
+        return self.query.filter(self.question_id == question_id).count()
+
+    def saves_by_user(self, user_id : int):
+        return self.query.filter(self.question_id == user_id).count()
 
 # TESTE
 # (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article._text, func.to_tsquery('smit:* | ji:*')).label('rank'))
