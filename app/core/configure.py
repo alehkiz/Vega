@@ -5,7 +5,7 @@ from flask.cli import with_appcontext
 from flask_login import LoginManager
 from logging.handlers import RotatingFileHandler
 import logging
-from elasticsearch import Elasticsearch
+# from elasticsearch import Elasticsearch
 
 from os.path import exists
 from os import mkdir
@@ -14,7 +14,7 @@ from os import mkdir
 from app.blueprints import register_blueprints
 from app.core.db import db, user_datastore
 from app.models.security import User, Role
-# from app.models.wiki import Article, Topic, Tag, ArticleView, Question
+from app.models.wiki import Article, Topic, Tag, ArticleView, Question
 
 security = Security()
 migrate = Migrate()
@@ -35,7 +35,7 @@ def init(app):
 
     ### SEARCH
 
-    app.elasticsearch = Elasticsearch(app.config['ELASTICSEARCH_URL']) if app.config['ELASTICSEARCH_URL'] else None
+    # app.elasticsearch = Elasticsearch(app.config['ELASTICSEARCH_URL']) if app.config['ELASTICSEARCH_URL'] else None
 
 
     @app.shell_context_processor
@@ -44,8 +44,7 @@ def init(app):
         app.config['SERVER_NAME'] = 'localhost'
         ctx = app.test_request_context()
         ctx.push()
-        return {}
-        # return dict(db=db, app=app, User=User, Role=Role, Article=Article, Tag=Tag, Topic=Topic, ArticleView=ArticleView, Question=Question)
+        return dict(db=db, app=app, User=User, Role=Role, Article=Article, Tag=Tag, Topic=Topic, ArticleView=ArticleView, Question=Question)
     register_blueprints(app)
 
     # logger
