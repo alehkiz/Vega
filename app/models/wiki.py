@@ -14,7 +14,7 @@ from app.core.db import db
 from app.utils.kernel import format_elapsed_time, get_list_max_len, only_letters
 from app.utils.html import process_html
 from app.models.security import User
-
+from sqlalchemy_utils import TSVectorType
 
 make_searchable(db.metadata, options={'regconfig': 'pg_catalog.portuguese'})
 
@@ -45,6 +45,7 @@ class ArticleView(db.Model):
 
 
 class Article(db.Model):
+    __searchable__ = ['text', 'title', 'description']
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(32), index=True, nullable=False, unique=True)
     description = db.Column(db.String(128), index=False, nullable=False)
@@ -56,14 +57,44 @@ class Article(db.Model):
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     # updater = db.relationship('User', foreign_keys = [update_user_id], backref='articles_updated')
     # author = db.relationship('User', foreign_keys = [user_id], backref='articles', lazy='dynamic')
-    search_vector = db.Column(TSVectorType('_text', 'title', regconfig='pg_catalog.portuguese'))
-    __ts_vector__ = create_tsvector(
-        cast(func.coalesce(_text, ''), postgresql.TEXT))
+    search_vector = db.column(TSVectorType('_text', 'description'))
+    # __ts_vector__ = create_tsvector(
+    #     cast(func.coalesce(text, ''), postgresql.TEXT))
 
-    __table_args__ = (Index(
-        'idx_text_fts',
-        __ts_vector__,
-        postgresql_using='gin'),)
+    # __table_args__ = (Index(
+    #         'idx_text_fts',
+    #         __ts_vector__,
+    #         postgresql_using='gin'),
+    #         Index(
+    #         'idx_description_fts',
+    #         func.to_tsvector('portuguese','description'),
+    #         postgresql_using="gin")
+    #         )
+# (db.session.query(User, func.ts_rank('{0.1,0.1,0.1,0.1}', 
+#     User.textsearchable_index_col, 
+#     func.to_tsquery('smit:* | ji:*')).label('rank'))
+#     .filter(User.authentication_method != 2)
+#     .filter(User.textsearchable_index_col.op('@@')(func.to_tsquery('smit:* | ji:*')))
+#     .order_by('rank desc')
+# ).all()
+
+# (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}',Article.description,func.to
+#     ...: _tsquery('lore')).label('rank')).filter(Article.description.op('@@')(func.plainto_tsque
+#     ...: ry('lore')))).all()
+
+# SELECT _text, ts_rank_cd('inquerito ', query) AS rank
+# FROM article, to_tsquery('inquerito') query
+# WHERE query @@ 'inquerito '
+# ORDER BY rank DESC  
+# LIMIT 10;
+
+# (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article.description, func.to_tsquery('smit:* | ji:*')).label('rank'))
+#     .filter(Article.description.op('@@')(func.to_tsquery('smit:* | ji:*')))
+#     .order_by('rank desc')
+# ).all()
+
+
+
 
     tags = db.relationship('Tag',
                            secondary=article_tag,
