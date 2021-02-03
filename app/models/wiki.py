@@ -259,7 +259,9 @@ class Question(db.Model):
 
     @property
     def views(self):
-        return db.session.query(func.sum(self.))
+        #TODO:continuar
+        # return db.session.query(func.sum(self.))
+
     # @hybrid_property
     # def answer(self):
     #     return self._answer
