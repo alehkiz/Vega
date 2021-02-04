@@ -252,26 +252,47 @@ class Question(db.Model):
 
     search_vector = db.Column(TSVectorType('question', 'answer', regconfig='pg_catalog.portuguese'))
 
-
+    view = db.relationship('QuestionView', backref='question', lazy='dynamic')
+    like = db.relationship('QuestionLike', backref='question', lazy='dynamic')
 
     def __repr__(self):
-        return f'<Question {self.question if len(self.title) <= 15 else self.question[:15] + "..."}>'
+        return f'<Question {self.question if len(self.question) <= 15 else self.question[:15] + "..."}>'
+
+
+    def add_view(self, user_id):
+        user = User.query.filter(User.id == user_id).first()
+        if user is None:
+            raise Exception('Usuário informado não existe')
+        qv = QuestionView.query.filter(QuestionView.question_id==self.id, QuestionView.user_id==user.id).first()
+        if qv == None:
+            qv = QuestionView()
+            qv.user_id = user_id
+            qv.question_id = self.id
+            qv.last_view = datetime.utcnow()
+            qv.count_view = 1
+            db.session.add(qv)
+        else:
+            qv.count_view += 1
+            qv.last_view = datetime.utcnow()
+        try:
+            db.session.commit()
+        except Exception as e:
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            db.session.rollback()
+        return qv
+        
 
     @property
     def views(self):
-        #TODO:continuar
-        # return db.session.query(func.sum(self.))
+        return db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.question_id==self.id).scalar()
 
-    # @hybrid_property
-    # def answer(self):
-    #     return self._answer
 
-    # @answer.setter
-    # def answer(self, answer):
-    #     '''
-    #     Remove tags html in text
-    #     '''
-    #     self._answer = BeautifulSoup(answer, features="lxml").get_text()
+
+    @property
+    def likes(self):
+        return db.session.query(func.sum(QuestionLike.question_id)).filter(QuestionLike.question_id==self.id).scalar()
+
 
     @property
     def answered(self):
@@ -306,6 +327,9 @@ class QuestionView(db.Model):
     first_view = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     last_view = db.Column(db.DateTime, index=True, nullable=False)
     count_view = db.Column(db.Integer, default=1)
+
+    
+
 
     def __repr__(self):
         return f'<Question View id: {self.question_id} by {self.user_id}>'
