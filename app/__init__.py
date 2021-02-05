@@ -4,7 +4,7 @@ from logging import INFO
 from app.core.configure import init
 
 
-def create_app(mode='production'):
+def create_app(mode='development'):
 
     app = Flask(__name__)
     app.config.from_object(config[mode])

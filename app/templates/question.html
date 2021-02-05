@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block app_content %}
+<main class="conteiner">
+    <div class='row'>
+        <div class="col-md-8">
+            {% if questions %}
+            {% for question in questions %}
+            <article class="article-post">
+                <div class="article-header">
+                    <h4>
+                        <a href="{{url_for('question.view', id=question.id)}}" class="text-decoration-none">{{question.title}}</a>
+                        <a href="{{url_for('question.view', id=question.id)}}" class="text-decoration-none">{{question.title}}</a>
+                        {% if current_user.can_edit %}
+                        
+                            <a href="{{url_for('question.edit', id=question.id)}}"
+                                class="text-decoration-none btn btn-success btn-sm"><i class="icon-edit"></i></a>
+                            <a href="{{url_for('question.remove', id=question.id)}}"
+                                class="text-decoration-none btn btn-danger btn-sm"><i class="icon-remove"></i></a>
+                        
+                        {% endif %}
+                    </h4>
+
+                    <p class="article-meta">
+                        {{question.get_create_time_elapsed}} por <a
+                            href="{{ url_for('user.view', id=question.author.id) }}"
+                            class="text-decoration-none">{{question.author.name}}</a>
+                        em <a href="{{ url_for('wiki.topic', topic_name=question.topic.format_name)}}"
+                            class="text-decoration-none">{{question.topic.name}}</a>
+
+                    </p>
+                </div>
+                <div class="article-text">
+                    {{question.get_body_html(resume=True)}}
+                </div>
+            </article>
+            <hr>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="p-4 mb-3 bg-light rounded">
+                <h4 class="font-italic">Mais visualizados</h4>
+                {% for question in cls_article.most_viewed()[0:5] %}
+                <p class="mb-0"><a href="{{url_for('question.view', id=question.id)}}"
+                        class="text-decoration-none">{{question.title}}</a></p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</main>
+
+{% endblock %}

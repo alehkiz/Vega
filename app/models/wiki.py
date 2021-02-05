@@ -1,5 +1,5 @@
 # from sqlalchemy import func
-from flask import Markup, escape, current_app as app, abort
+from flask import Markup, escape, current_app as app, abort, flash
 from sqlalchemy import func, text, Index, cast, desc
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
@@ -252,12 +252,29 @@ class Question(db.Model):
 
     search_vector = db.Column(TSVectorType('question', 'answer', regconfig='pg_catalog.portuguese'))
 
-    view = db.relationship('QuestionView', backref='question', lazy='dynamic')
-    like = db.relationship('QuestionLike', backref='question', lazy='dynamic')
+    view = db.relationship('QuestionView', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
+    like = db.relationship('QuestionLike', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
 
     def __repr__(self):
         return f'<Question {self.question if len(self.question) <= 15 else self.question[:15] + "..."}>'
 
+    @staticmethod
+    def search(text):
+        # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
+        result = (db.session.query(Question, (
+            func.ts_rank_cd(
+                Question.search_vector, 
+                func.plainto_tsquery(
+                    'pg_catalog.portuguese',
+                    text))).label(
+                        'similarity')).filter((
+            func.ts_rank_cd(
+                Question.search_vector, 
+                func.plainto_tsquery(
+                    'pg_catalog.portuguese',
+                    text))) > 0).order_by(
+                    desc('similarity'))).all()
+        return result
 
     def add_view(self, user_id):
         user = User.query.filter(User.id == user_id).first()
@@ -280,6 +297,7 @@ class Question(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
+            flash('Não foi possível atualizar a visualização')
         return qv
         
 

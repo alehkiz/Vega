@@ -106,6 +106,7 @@ class BaseConfig(object):
 
 class DevelopmentConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{BaseConfig.DEV_DB}'
+    SQLALCHEMY_DATABASE_URI = f'postgresql://{BaseConfig._SQLALCHEMY_DATABASE_USERNAME}:{BaseConfig._SQLALCHEMY_DATABASE_PASSWORD}@{BaseConfig._SQLALCHEMY_DATABASE_HOST}/{BaseConfig._SQLALCHEMY_DATABASE_NAME}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ENV = 'dev'
     SECURITY_LOGIN_WITHOUT_CONFIRMATION = True

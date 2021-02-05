@@ -37,6 +37,31 @@
         {{ macros.render_field(form.active)}}
         <br>
         {{ form.submit }}
+
+
+
+        {% elif question is defined %}
+        {{ form.csrf_token }}
+        {{ macros.render_field(form.question, size=32, class='form-control', placeholder='Titulo') }}
+        {{ macros.render_field(form.answer, size=128, class='form-control', placeholder='Descrição')}}
+        
+        {{ form.submit }}
+        {% elif user %}
+        {{ form.csrf_token}}
+        {{ macros.render_field(form.username, size=32, class='form-control', placeholder='Username')}}
+        {{ macros.render_field(form.name, size=128, class='form-control', placeholder='Nome')}}
+        {{ macros.render_field(form.email, size=128, class='form-control', placeholder='Email')}}
+        {{ macros.render_field(form.about_me, size=512, class='form-control', placeholder='Sobre mim')}}
+        <br>
+        <div class="col-md-6">
+            {{ macros.render_field(form.role, class='form-select', nosize=true)}}
+        </div>
+        <br>
+        {{ macros.render_field(form.active)}}
+        <br>
+        {{ form.submit }}
+
+
         {% endif %}
         <br />
 
