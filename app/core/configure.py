@@ -14,7 +14,7 @@ from os import mkdir
 from app.blueprints import register_blueprints
 from app.core.db import db, user_datastore
 from app.models.security import User, Role
-from app.models.wiki import Article, Topic, Tag, ArticleView, Question
+from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView
 
 security = Security()
 migrate = Migrate()
@@ -44,7 +44,13 @@ def init(app):
         app.config['SERVER_NAME'] = 'localhost'
         ctx = app.test_request_context()
         ctx.push()
-        return dict(db=db, app=app, User=User, Role=Role, Article=Article, Tag=Tag, Topic=Topic, ArticleView=ArticleView, Question=Question)
+        return dict(db=db, app=app, User=User, Role=Role, Article=Article, Tag=Tag, Topic=Topic, 
+            ArticleView=ArticleView, 
+            Question=Question,
+            QuestionLike=QuestionLike, 
+            QuestionSave=QuestionSave, 
+            QuestionView=QuestionView
+            )
     register_blueprints(app)
 
     # logger
