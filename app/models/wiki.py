@@ -193,10 +193,10 @@ class Article(db.Model):
         return True
 
     @staticmethod
-    def most_viewed():
+    def most_viewed(limit=5):
         try:
             rs = db.session.query(Article, func.sum(ArticleView.count_view).label('views')).join(
-                Article.views).group_by(Article).order_by(text('views DESC')).all()
+                Article.views).group_by(Article).order_by(text('views DESC')).limit(limit).all()
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
@@ -256,24 +256,25 @@ class Question(db.Model):
     like = db.relationship('QuestionLike', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
 
     def __repr__(self):
-        return f'<Question {self.question if len(self.question) <= 15 else self.question[:15] + "..."}>'
+
+        return f'<Question {self.question[:15] if not self.question  is None else None}>'
 
     @staticmethod
-    def search(text):
+    def search(expression, per_page, page = 1):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         result = (db.session.query(Question, (
             func.ts_rank_cd(
                 Question.search_vector, 
                 func.plainto_tsquery(
                     'pg_catalog.portuguese',
-                    text))).label(
+                    expression))).label(
                         'similarity')).filter((
             func.ts_rank_cd(
                 Question.search_vector, 
                 func.plainto_tsquery(
                     'pg_catalog.portuguese',
-                    text))) > 0).order_by(
-                    desc('similarity'))).all()
+                    expression))) > 0).order_by(
+                    desc('similarity'))).paginate(page=page, per_page=per_page)
         return result
 
     def add_view(self, user_id):
@@ -305,8 +306,6 @@ class Question(db.Model):
     def views(self):
         return db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.question_id==self.id).scalar()
 
-
-
     @property
     def likes(self):
         return db.session.query(func.sum(QuestionLike.question_id)).filter(QuestionLike.question_id==self.id).scalar()
@@ -317,6 +316,18 @@ class Question(db.Model):
         if self.answer != None:
             return True
         return False
+
+    @staticmethod
+    def most_viewed(limit=5):
+        try:
+            rs = db.session.query(Question, func.sum(QuestionView.count_view).label('views')).join(
+                Question.view).group_by(Question).order_by(text('views DESC')).limit(limit).all()
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            return abort(500)
+        return [x[0] for x in rs if x != None]
 
     # def get_answer_html(self, resume=False, size=256):
     #     html_classes = {'table': 'table table-bordered',

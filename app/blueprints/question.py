@@ -1,24 +1,59 @@
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
 from app.core.db import db
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView
 
 
-from app.forms.question import QuestionForm
+from app.forms.question import QuestionForm, QuestionSearchForm
 
 bp = Blueprint('question', __name__, url_prefix='/question/')
 
 @bp.route('/')
 @bp.route('/index')
 def index():
-    print(request.access_route[0])
-    question = Question.query.order_by(Question.create_at.desc()).all()
-    return render_template('wiki.html', questions=questions, cls_question=Question)
+    search_form = QuestionSearchForm()
+    questions = Question.query.order_by(Question.create_at.desc()).all()
+    return render_template('question.html', questions=questions, cls_question=Question, form=search_form)
+
+
+@bp.route('/search/')
+def search():
+    
+    print(g.question_search_form.validate())
+    # if not g.question_search_form.validate():
+    #     return redirect(url_for('question.index'))
+    print(url_for('.search', page=1, q=g.question_search_form.q.data))
+    page = request.args.get('page', 1, type=int)
+    result = Question.search(g.question_search_form.q.data, page, app.config.get('ITEM_PER_PAGE'))
+    if result.total == 0:
+        first_page = url_for('.search', page=1, q=g.question_search_form.q.data)
+        last_page = url_for('.search', page=1, q=g.question_search_form.q.data)
+    else: 
+        iter_pages = list(result.iter_pages())
+        first_page =  url_for('.search',page=iter_pages[0], q= g.question_search_form.q.data)
+        last_page = url_for('.search',page=iter_pages[-1] if iter_pages[-1] != first_page else None, q= g.question_search_form.q.data)
+
+    return render_template('question.html', mode='search',cls_question=Question, 
+                    pagination=result, first_page=first_page, last_page=last_page,
+                    url_arguments={'q':g.question_search_form.q.data})
+
+
+    q = escape(q)
+    result = Question.search(q)
+    return render_template('question.html', mode='search', result=result)
 
 @bp.route('/view')
-def view():
+def view(id=None):
     return 'value'
+
+@bp.route('edit')
+def edit():
+    return 'none'
+
+@bp.route('remove')
+def remove():
+    return 'none'
 
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
