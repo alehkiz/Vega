@@ -1,9 +1,11 @@
-{% macro render_pagination(pagination, first_page, last_page, endpoint) %}
+{% macro render_pagination(pagination, first_page, last_page, endpoint, url_arguments) %}
+
+
 <nav aria-label="pagination">
     <ul class="pagination justify-content-end">
         {%- if first_page != pagination.page %}
         <li class='page-item'>
-            <a class="page-link" href="{{url_for(endpoint, page=first_page)}}" aria-label='First'>
+            <a class="page-link" href="{{first_page}} " aria-label='First'>
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
@@ -17,14 +19,31 @@
         {%- for page in pagination.iter_pages() %}
         {% if page %}
         {% if page != pagination.page %}
-        <li class="page-item">
-            <a class="page-link" href="{{url_for(endpoint, page=page)}}">{{page}}</a>
-        </li>
+            {% if not url_arguments %}
+                <li class="page-item">
+                    <a class="page-link" href="{{url_for(endpoint, page=page)}}">{{page}}</a>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for(endpoint, page=page, **url_arguments) }}">
+                        {{page}}
+                    </a>
+                </li>
+            {% endif %}
         {% else %}
+        
         <li class="page-item active">
+            {% if not url_arguments %}
             <a class="page-link active" href="#" aria-current="page">
                 {{page}}
             </a>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for(endpoint, page=page, **url_arguments) }}">
+                    {{page}}
+                </a>
+            </li>
+        {% endif %}
         </li>
         {% endif %}
         {% else %}
@@ -33,7 +52,7 @@
         {%- endfor %}
         {%- if last_page != pagination.page and not last_page is none %}
         <li class='page-item'>
-            <a class="page-link" href="{{url_for(endpoint, page=last_page)}}" aria-label='Last'>
+            <a class="page-link" href="{{last_page}}" aria-label='Last'>
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>

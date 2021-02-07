@@ -1,9 +1,10 @@
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, g
 from flask_security import login_required, current_user
 from datetime import datetime
 
 from app.core.db import db
 from app.models.wiki import Article
+from app.forms.question import QuestionSearchForm
 
 bp = Blueprint('main', __name__, url_prefix='/')
 
@@ -16,6 +17,7 @@ def before_request():
         except Exception as e:
             app.logger.error('Não foi possível')
             app.logger.error(e)
+        g.question_search_form = QuestionSearchForm()
 
 @bp.route('/')
 @bp.route('/index')
