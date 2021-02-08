@@ -78,6 +78,21 @@ class BaseConfig(object):
                 "name": "criado em",
                 "attr": 'format_create_date'
             },
+        },
+        'question' : {
+            'id' : {
+                'name' : 'id',
+                'attr': None
+            },
+            'question' : {
+                'name' : 'Dúvida',
+                'atrr' : None
+            },
+            'answer' : {
+                'name' : 'Resposta',
+                'attr' : None
+            }
+
         }
     }
     ROUTES_NAMES = {
@@ -100,7 +115,7 @@ class BaseConfig(object):
     }
 
 
-    ELASTICSEARCH_URL = 'http://localhost:9200'
+    # ELASTICSEARCH_URL = 'http://localhost:9200'
 
 
 

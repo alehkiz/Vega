@@ -6,14 +6,15 @@
     <div class='row'>
         <div class="col-md-8">
             <form method="GET" action="{{ url_for('question.search')}}">
-            <!-- {{ g.question_search_form.csrf_token }} -->
-            {{ render_field(g.question_search_form.q, size=32, class='form-control', placeholder='Titulo') }}
+                {{ render_field(g.question_search_form.q, size=256, class='form-control', placeholder='Buscar', nolabel=true) }}
             </form>
             {% if mode == 'search' %}
-                {% for item in pagination.items %}
+            {% for item in pagination.items %}
+            <div class="article-post">
                 {{ item[0].question }}
-                {% endfor %}
-                {{ render_pagination(pagination, first_page, last_page, 'question.search', url_arguments=url_arguments)}}
+            </div>
+            {% endfor %}
+            {{ render_pagination(pagination, first_page, last_page, 'question.search', url_arguments=url_arguments)}}
             {% endif %}
 
 
@@ -23,15 +24,17 @@
             <article class="article-post">
                 <div class="article-header">
                     <h4>
-                        <a href="{{url_for('question.view', id=question.id)}}" class="text-decoration-none">{{question.title}}</a>
-                        <a href="{{url_for('question.view', id=question.id)}}" class="text-decoration-none">{{question.title}}</a>
+                        <a href="{{url_for('question.view', id=question.id)}}"
+                            class="text-decoration-none">{{question.title}}</a>
+                        <a href="{{url_for('question.view', id=question.id)}}"
+                            class="text-decoration-none">{{question.title}}</a>
                         {% if current_user.can_edit %}
-                        
-                            <a href="{{url_for('question.edit', id=question.id)}}"
-                                class="text-decoration-none btn btn-success btn-sm"><i class="icon-edit"></i></a>
-                            <a href="{{url_for('question.remove', id=question.id)}}"
-                                class="text-decoration-none btn btn-danger btn-sm"><i class="icon-remove"></i></a>
-                        
+
+                        <a href="{{url_for('question.edit', id=question.id)}}"
+                            class="text-decoration-none btn btn-success btn-sm"><i class="icon-edit"></i></a>
+                        <a href="{{url_for('question.remove', id=question.id)}}"
+                            class="text-decoration-none btn btn-danger btn-sm"><i class="icon-remove"></i></a>
+
                         {% endif %}
                     </h4>
 
