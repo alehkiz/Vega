@@ -212,6 +212,7 @@ class Topic(db.Model):
                             nullable=True, unique=True)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
+    questions = db.relationship('Question', backref='topic', lazy='dynamic', foreign_keys='[Question.topic_id]')
 
     @hybrid_property
     def name(self):
@@ -231,7 +232,7 @@ class Tag(db.Model):
     name = db.Column(db.String(48), index=True, nullable=False)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
+    questions = db.relationship('Question', backref='tag', lazy='dynamic', foreign_keys='[Question.tag_id]')
 
 class Question(db.Model):
     '''
@@ -249,6 +250,8 @@ class Question(db.Model):
     update_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_at = db.Column(db.DateTime)
+    tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
+    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
 
     search_vector = db.Column(TSVectorType('question', 'answer', regconfig='pg_catalog.portuguese'))
 
@@ -329,25 +332,6 @@ class Question(db.Model):
             return abort(500)
         return [x[0] for x in rs if x != None]
 
-    # def get_answer_html(self, resume=False, size=256):
-    #     html_classes = {'table': 'table table-bordered',
-    #                     'img': 'img img-fluid'}
-    #     if self.answer is None:
-    #         return ''
-    #     if resume:
-    #         l_text = list(filter(lambda x: x not in [
-    #                       '', ' ', '\t'], self.answer.split('\n')))
-    #         # text = get_list_max_len(l_text, 256)
-    #         return Markup(process_html(markdown('\n'.join(l_text), extras={"tables": None, "html-classes": html_classes}))).striptags()[0:size] + '...'
-    #         # return Markup(process_html(markdown(text))).striptags()
-
-    #     return Markup(process_html(markdown(self.answer, extras={"tables": None, "html-classes": html_classes})))
-
-    # @property
-    # def answer_text(self):
-    #     return self.get_answer_html(resume=9999)
-
-
 class QuestionView(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -402,6 +386,19 @@ class QuestionSave(db.Model):
 
     def saves_by_user(self, user_id : int):
         return self.query.filter(self.question_id == user_id).count()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # TESTE
 # (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article._text, func.to_tsquery('smit:* | ji:*')).label('rank'))

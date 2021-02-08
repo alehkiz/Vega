@@ -32,6 +32,9 @@
                 <li class="nav-item">
                     <a href="{{ url_for('wiki.index') }}" class="nav-link">Wiki</a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('question.index')}}" class='nav-link'>Dúvidas</a>
+                </li>
             </ul>
             {% if g.search_form %}
             <form class="form-inline my-2 my-lg-0" method="get" action="{{ url_for('main.search') }}">
@@ -52,6 +55,7 @@
                       <li><a class="dropdown-item" href="{{url_for('admin.index')}}">adm</a></li>
                       <li><a class="dropdown-item" href="{{url_for('admin.users')}}">Usuários</a></li>
                       <li><a class="dropdown-item" href="{{url_for('admin.articles')}}">Artigos</a></li>
+                      <li><a class="dropdown-item" href="{{url_for('admin.questions')}}">Dúvidas</a></li>
                     </ul>
                     
                 </li>{% endif %}

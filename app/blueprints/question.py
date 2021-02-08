@@ -21,27 +21,21 @@ def index():
 def search():
     
     print(g.question_search_form.validate())
-    # if not g.question_search_form.validate():
-    #     return redirect(url_for('question.index'))
     print(url_for('.search', page=1, q=g.question_search_form.q.data))
     page = request.args.get('page', 1, type=int)
-    result = Question.search(g.question_search_form.q.data, page, app.config.get('ITEM_PER_PAGE'))
-    if result.total == 0:
-        first_page = url_for('.search', page=1, q=g.question_search_form.q.data)
-        last_page = url_for('.search', page=1, q=g.question_search_form.q.data)
-    else: 
-        iter_pages = list(result.iter_pages())
-        first_page =  url_for('.search',page=iter_pages[0], q= g.question_search_form.q.data)
-        last_page = url_for('.search',page=iter_pages[-1] if iter_pages[-1] != first_page else None, q= g.question_search_form.q.data)
-
+    paginate = Question.search(g.question_search_form.q.data, per_page = app.config.get('ITEMS_PER_PAGE'), page = page)#
+    iter_pages = list(paginate.iter_pages())
+    first_page =  iter_pages[0] if len(iter_pages) >= 1 else None#url_for('.search',page=iter_pages[0], q= g.question_search_form.q.data)
+    last_page = paginate.pages#url_for('.search',page=iter_pages[-1] if iter_pages[-1] != first_page else None, q= g.question_search_form.q.data)
+    
     return render_template('question.html', mode='search',cls_question=Question, 
-                    pagination=result, first_page=first_page, last_page=last_page,
+                    pagination=paginate, first_page=first_page, last_page=last_page,
                     url_arguments={'q':g.question_search_form.q.data})
 
 
     q = escape(q)
-    result = Question.search(q)
-    return render_template('question.html', mode='search', result=result)
+    paginate = Question.search(q)
+    return render_template('question.html', mode='search', result=paginate)
 
 @bp.route('/view')
 def view(id=None):
