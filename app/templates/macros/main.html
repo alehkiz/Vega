@@ -3,7 +3,7 @@
 
 <nav aria-label="pagination">
     <ul class="pagination justify-content-end">
-        {%- if first_page != pagination.page %}
+        {%- if first_page != pagination.page and not first_page is none%}
         <li class='page-item'>
             <a class="page-link" href="{{url_for(endpoint, page=first_page, **url_arguments)}} " aria-label='First'>
                 <span aria-hidden="true">&laquo;</span>

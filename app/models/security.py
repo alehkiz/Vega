@@ -37,7 +37,7 @@ class User(UserMixin, db.Model):
     articles_updated = db.relationship('Article', backref='updater', lazy='dynamic', foreign_keys='[Article.update_user_id]')
     articles_viewed = db.relationship('ArticleView', cascade='all, delete-orphan', backref='user', single_parent=True, lazy='dynamic')
     questions = db.relationship('Question', backref='author', lazy='dynamic', foreign_keys='[Question.create_user_id]')
-    answers = db.relationship('Question', backref='answered', lazy='dynamic', foreign_keys='[Question.answer_user_id]')
+    answers = db.relationship('Question', backref='answered_by', lazy='dynamic', foreign_keys='[Question.answer_user_id]')
     question_update = db.relationship('Question', backref='updater', lazy='dynamic', foreign_keys='[Question.update_user_id]')
     roles = db.relationship('Role', 
                 secondary=roles_users, 
