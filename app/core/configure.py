@@ -15,6 +15,7 @@ from app.blueprints import register_blueprints
 from app.core.db import db, user_datastore
 from app.models.security import User, Role
 from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView
+from app.models.search import Search
 
 security = Security()
 migrate = Migrate()
@@ -49,7 +50,8 @@ def init(app):
             Question=Question,
             QuestionLike=QuestionLike, 
             QuestionSave=QuestionSave, 
-            QuestionView=QuestionView
+            QuestionView=QuestionView, 
+            Search=Search
             )
     register_blueprints(app)
 

@@ -10,20 +10,27 @@
             </form>
             {% if mode == 'search' %}
             {% for item in pagination.items %}
-            <div class="article-post">
-                {{ item[0].question }}
-            </div>
+            <div class="alert alert-dark" role="alert">
+                {{item[0].question}}
+                {% if current_user.can_edit %}
+                <a href="{{url_for('question.remove', id=item[0].id)}}"
+                        class="text-decoration-none btn btn-danger btn-sm float-end"><i class="icon-remove"></i></a>
+                <a href="{{url_for('question.edit', id=item[0].id)}}"
+                        class="text-decoration-none btn btn-success btn-sm float-end"><i class="icon-edit"></i></a>
+                        {% endif %}  
+                        <hr> 
+                         {% if item[0].answered %}
+                         {{item[0].answer}}
+                         {% endif %}
+                    </div>
             {% endfor %}
             {{ render_pagination(pagination, first_page, last_page, 'question.search', url_arguments=url_arguments)}}
             {% endif %}
-
-
-
             {% if questions %}
             {% for question in questions %}
             <article class="article-post">
                 <div class="article-header">
-                    <h4>
+                    <!-- <h4>
                         <a href="{{url_for('question.view', id=question.id)}}"
                             class="text-decoration-none">{{question.title}}</a>
                         <a href="{{url_for('question.view', id=question.id)}}"
@@ -36,7 +43,7 @@
                             class="text-decoration-none btn btn-danger btn-sm"><i class="icon-remove"></i></a>
 
                         {% endif %}
-                    </h4>
+                    </h4> -->
 
                     {#<p class="article-meta">
                         {{question.get_create_time_elapsed}} por <a
@@ -47,17 +54,35 @@
 
                     </p>#}
                 </div>
-                <div class="article-text">
+                <div class="alert alert-dark" role="alert">
                     {{question.question}}
-                </div>
-                {% if question.answered %}
-                <div class="article-text">
-                    {{question.answer}}
-                </div>
-                {% endif %}
+                    {% if current_user.can_edit %}
+                    <a href="{{url_for('question.remove', id=question.id)}}"
+                            class="text-decoration-none btn btn-danger btn-sm float-end"><i class="icon-remove"></i></a>
+                    <a href="{{url_for('question.edit', id=question.id)}}"
+                            class="text-decoration-none btn btn-success btn-sm float-end"><i class="icon-edit"></i></a>
+                            {% endif %}  
+                            <hr> 
+                             {% if question.answered %}
+                             {{question.answer}}
+                             {% endif %}
+                        </div>
+                    <!-- {% if question.answered %}
+                    <div class="alert alert-info" role="alert">
+                        {{question.answer}}
+                    </div>
+                    {% endif %} -->
+                
             </article>
-            <hr>
             {% endfor %}
+            {% endif %}
+
+            {% if form %}
+            <form action="" method="POST">
+            {{ form.csrf_token }}
+            {{ render_field(form.question, size=32, class='form-control', placeholder='Titulo') }}
+            {{ render_field(form.submit)}}
+            </form>
             {% endif %}
         </div>
 

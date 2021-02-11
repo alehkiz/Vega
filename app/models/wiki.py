@@ -277,7 +277,9 @@ class Question(db.Model):
                 func.plainto_tsquery(
                     'pg_catalog.portuguese',
                     expression))) > 0).order_by(
-                    desc('similarity'))).paginate(page=page, per_page=per_page)
+                    desc('similarity')))
+        if per_page:
+            result = result.paginate(page=page, per_page=per_page)
         return result
 
     def add_view(self, user_id):
@@ -313,12 +315,24 @@ class Question(db.Model):
     def likes(self):
         return db.session.query(func.sum(QuestionLike.question_id)).filter(QuestionLike.question_id==self.id).scalar()
 
+    @property
+    def teste(self):
+        print('qui')
+        return False
 
     @property
     def answered(self):
+        print('funcionou')
         if self.answer != None:
             return True
         return False
+
+    # @property
+    # def answered(self):
+    #     print('Aqui')
+    #     if self.answer != None:
+    #         return True
+    #     return False
 
     @staticmethod
     def most_viewed(limit=5):

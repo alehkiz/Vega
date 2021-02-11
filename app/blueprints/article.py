@@ -68,7 +68,6 @@ def edit(id):
     form = ArticleForm()
     if form.validate_on_submit():
         try:
-            print('aqio')
             article.title = form.title.data
             article.description = form.description.data
             article.text = form.text.data

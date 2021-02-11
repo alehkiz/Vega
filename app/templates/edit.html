@@ -34,6 +34,16 @@
         {{ macros.render_field(form.active)}}
         <br>
         {{ form.submit }}
+
+        {% elif question %}
+        {{ form.csrf_token}}
+        {{ macros.render_field(form.question, size=256, class='form-control', placeholder='Pergunta')}}
+        {{ macros.render_field(form.answer, size=256, class='form-control', placeholder='Reposta')}}
+        {{ macros.render_field(form.tag, class='form-control')}}
+        {{ macros.render_field(form.topic, class='form-control')}}
+        <br>
+        {{ form.submit }}   
+
         {% endif %}
         {#<!-- <h1 class="h3 mb-3 fw-normal">Editar</h1>
         {{ form.title.label(class='visually-hidden')}}
