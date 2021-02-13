@@ -26,6 +26,9 @@ def search():
         if search is None:
             search = Search()
             search.text = g.question_search_form.q.data
+            question = Question.query.filter_by(Question.question.ilike(g.question_search_form.q.data)).first()
+            if not question is None:
+                search.question_id = question.id
             db.session.add(search)
             try:
                 db.session.commit()
@@ -41,26 +44,36 @@ def search():
         last_page = paginate.pages if paginate.pages > 0 else None#url_for('.search',page=iter_pages[-1] if iter_pages[-1] != first_page else None, q= g.question_search_form.q.data)
         
     if paginate.total == 0:
-        form = QuestionForm()
-        if form.validate_on_submit():
-            try:
-                question = Question()
-                question.question = form.question.data
-                if current_user.is_anonymous:
-                    question.create_user_id = 2
-                else:
-                    question.create_user_id = current_user.id
-                db.session.add(question)
-                db.session.commit()
-            except Exception as e:
-                app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-                app.logger.error(e)
-                db.session.rollback()
-                return render_template('question.html', form=form, question=True, mode='search',cls_question=Question, 
-                                pagination=paginate, first_page=first_page, last_page=last_page)
-        form.question.data = g.question_search_form.q.data
-        return render_template('question.html', form=form, question=True, mode='search',cls_question=Question, 
-                                pagination=paginate, first_page=first_page, last_page=last_page)
+        search = Search()
+        search.text = g.question_search_form.q.data
+        db.session.add(search)
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(app.config.get('_ERROR').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            return abort(500)
+        # form = QuestionForm()
+        # if form.validate_on_submit():
+        #     try:
+        #         question = Question()
+        #         question.question = form.question.data
+        #         if current_user.is_anonymous:
+        #             question.create_user_id = 2
+        #         else:
+        #             question.create_user_id = current_user.id
+        #         db.session.add(question)
+        #         db.session.commit()
+        #     except Exception as e:
+        #         app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+        #         app.logger.error(e)
+        #         db.session.rollback()
+        #         return render_template('question.html', form=form, question=True, mode='search',cls_question=Question, 
+        #                         pagination=paginate, first_page=first_page, last_page=last_page)
+        # form.question.data = g.question_search_form.q.data
+        # return render_template('question.html', form=form, question=True, mode='search',cls_question=Question, 
+        #                         pagination=paginate, first_page=first_page, last_page=last_page)
                 
     return render_template('question.html', mode='search',cls_question=Question, 
                     pagination=paginate, first_page=first_page, last_page=last_page,

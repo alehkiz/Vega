@@ -12,6 +12,7 @@ class Search(db.Model):
     count_search = db.Column(db.Integer, default=1)
     search_date = db.Column(db.DateTime, default=datetime.utcnow)
     last_search = db.Column(db.DateTime, default=datetime.utcnow)
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'))
 
 
     def __repr__(self):
