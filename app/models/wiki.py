@@ -316,13 +316,7 @@ class Question(db.Model):
         return db.session.query(func.sum(QuestionLike.question_id)).filter(QuestionLike.question_id==self.id).scalar()
 
     @property
-    def teste(self):
-        print('qui')
-        return False
-
-    @property
     def answered(self):
-        print('funcionou')
         if self.answer != None:
             return True
         return False

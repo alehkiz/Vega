@@ -76,14 +76,6 @@
             </article>
             {% endfor %}
             {% endif %}
-
-            {% if form %}
-            <form action="" method="POST">
-            {{ form.csrf_token }}
-            {{ render_field(form.question, size=32, class='form-control', placeholder='Titulo') }}
-            {{ render_field(form.submit)}}
-            </form>
-            {% endif %}
         </div>
 
         <div class="col-md-4">
