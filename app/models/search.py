@@ -25,7 +25,7 @@ class Search(db.Model):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            app.logger.error(app.config.get('_ERROR').get('DB_COMMIT_ERROR'))
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             return abort(500)
 
