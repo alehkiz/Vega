@@ -1,8 +1,10 @@
 from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g
+from flask.globals import current_app
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
 from app.core.db import db
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView
+from app.models.security import User
 from app.models.search import Search
 
 
@@ -22,11 +24,11 @@ def search():
     page = request.args.get('page', 1, type=int)
     if g.question_search_form.validate():
         paginate = Question.search(g.question_search_form.q.data, per_page = app.config.get('ITEMS_PER_PAGE'), page = page)#
-        search = Search.query.filter(Search.text == g.question_search_form.q.data).first()
+        search = Search.query.filter(Search.text.ilike(g.question_search_form.q.data)).first()
         if search is None:
             search = Search()
             search.text = g.question_search_form.q.data
-            question = Question.query.filter_by(Question.question.ilike(g.question_search_form.q.data)).first()
+            question = Question.query.filter(Question.question.ilike(g.question_search_form.q.data)).first()
             if not question is None:
                 search.question_id = question.id
             db.session.add(search)
@@ -34,7 +36,7 @@ def search():
                 db.session.commit()
             except Exception as e:
                 db.session.rollback()
-                app.logger.error(app.config.get('_ERROR').get('DB_COMMIT_ERROR'))
+                app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 return abort(500)
         else:
@@ -43,17 +45,21 @@ def search():
         first_page =  iter_pages[0] if len(iter_pages) >= 1 else None#url_for('.search',page=iter_pages[0], q= g.question_search_form.q.data)
         last_page = paginate.pages if paginate.pages > 0 else None#url_for('.search',page=iter_pages[-1] if iter_pages[-1] != first_page else None, q= g.question_search_form.q.data)
         
-    if paginate.total == 0:
-        search = Search()
-        search.text = g.question_search_form.q.data
-        db.session.add(search)
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            app.logger.error(app.config.get('_ERROR').get('DB_COMMIT_ERROR'))
-            app.logger.error(e)
-            return abort(500)
+    # if paginate.total == 0:
+    #     search = Search.query.filter(Search.text.ilike(g.question_search_form.q.data)).first()
+    #     if not search is None:
+    #         search.add_count()
+    #     else:
+    #         search = Search()
+    #         search.text = g.question_search_form.q.data
+    #         db.session.add(search)
+    #         try:
+    #             db.session.commit()
+    #         except Exception as e:
+    #             db.session.rollback()
+    #             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+    #             app.logger.error(e)
+    #             return abort(500)
         # form = QuestionForm()
         # if form.validate_on_submit():
         #     try:
@@ -79,9 +85,24 @@ def search():
                     pagination=paginate, first_page=first_page, last_page=last_page,
                     url_arguments={'q':g.question_search_form.q.data})
 
-@bp.route('/view')
+@bp.route('/view/<int:id>')
 def view(id=None):
-    return 'value'
+    question = Question.query.filter(Question.id == id).first_or_404()
+    dict_view = {}
+    dict_view['id'] = question.id
+    dict_view['values'] = {
+    'Duvida':question.question,
+    'Criado em' : question.format_create_date,
+    'answer' : question.answer}
+    if current_user.is_authenticated:
+        user_id = current_user.id
+    else:
+        user = User.query.filter(User.name == 'anon').first()
+        if user is None:
+            raise Exception('Usuário anônimo não criado')
+        user_id = user.id
+    question.add_view(user_id)
+    return render_template('question.html', mode='view', question=question, cls_question=Question)
 
 @bp.route('edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):

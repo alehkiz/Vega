@@ -89,22 +89,46 @@ class Article(db.Model):
         return f'<Article {self.title}>'
 
 
-    def search(text):
+    def search(text, per_page, page=1, resume=False):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
-        result = (db.session.query(Article, (
-            func.ts_rank_cd(
-                Article.search_vector, 
-                func.plainto_tsquery(
-                    'pg_catalog.portuguese',
-                    text))).label(
-                        'similarity')).filter((
-            func.ts_rank_cd(
-                Article.search_vector, 
-                func.plainto_tsquery(
-                    'pg_catalog.portuguese',
-                    text))) > 0).order_by(
-                    desc('similarity'))).all()
+        if resume:
+            result = (db.session.query(Article.title, (
+                func.ts_rank_cd(
+                    Article.search_vector, 
+                    func.plainto_tsquery(
+                        'pg_catalog.portuguese',
+                        text))).label(
+                            'similarity')).filter((
+                func.ts_rank_cd(
+                    Article.search_vector, 
+                    func.plainto_tsquery(
+                        'pg_catalog.portuguese',
+                        text))) > 0).order_by(
+                        desc('similarity')))
+        else:
+            result = (db.session.query(Article, (
+                func.ts_rank_cd(
+                    Article.search_vector, 
+                    func.plainto_tsquery(
+                        'pg_catalog.portuguese',
+                        text))).label(
+                            'similarity')).filter((
+                func.ts_rank_cd(
+                    Article.search_vector, 
+                    func.plainto_tsquery(
+                        'pg_catalog.portuguese',
+                        text))) > 0).order_by(
+                        desc('similarity')))
+        if per_page:
+            result = result.paginate(page=page, per_page=per_page)
         return result
+
+    @property
+    def resume(self):
+        return self.title
+    # def get_resume(self):
+    #     return self.title
+
 
     def get_body_html(self, resume=False, size=256):
         html_classes = {'table': 'table table-bordered',
@@ -261,26 +285,71 @@ class Question(db.Model):
     def __repr__(self):
 
         return f'<Question {self.question[:15] if not self.question  is None else None}>'
+    @property
+    def get_create_time_elapsed(self):
+        return format_elapsed_time(self.create_at)
+    @property
+    def get_update_time_elapsed(self):
+        return format_elapsed_time(self.update_at)
+    
+    @property
+    def get_answer_time_elapsed(self):
+        return format_elapsed_time(self.answer_at)
+
+    @property
+    def format_create_date(self):
+        return self.create_at.strftime("%d/%m/%Y")
+    @property
+    def format_update_date(self):
+        return self.update_at.strftime("%d/%m/%Y")
+    @property
+    def format_answer_date(self):
+        return self.answer_at.strftime("%d/%m/%Y")
+
 
     @staticmethod
-    def search(expression, per_page, page = 1):
+    def search(expression, per_page, page = 1, resume=False):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
-        result = (db.session.query(Question, (
-            func.ts_rank_cd(
-                Question.search_vector, 
-                func.plainto_tsquery(
-                    'pg_catalog.portuguese',
-                    expression))).label(
-                        'similarity')).filter((
-            func.ts_rank_cd(
-                Question.search_vector, 
-                func.plainto_tsquery(
-                    'pg_catalog.portuguese',
-                    expression))) > 0).order_by(
-                    desc('similarity')))
+        if resume:
+            result = (db.session.query(Question.question, (
+                func.ts_rank_cd(
+                    Question.search_vector, 
+                    func.plainto_tsquery(
+                        'pg_catalog.portuguese',
+                        expression))).label(
+                            'similarity')).filter((
+                func.ts_rank_cd(
+                    Question.search_vector, 
+                    func.plainto_tsquery(
+                        'pg_catalog.portuguese',
+                        expression))) > 0).order_by(
+                        desc('similarity')))
+        else:
+            result = (db.session.query(Question, (
+                func.ts_rank_cd(
+                    Question.search_vector, 
+                    func.plainto_tsquery(
+                        'pg_catalog.portuguese',
+                        expression))).label(
+                            'similarity')).filter((
+                func.ts_rank_cd(
+                    Question.search_vector, 
+                    func.plainto_tsquery(
+                        'pg_catalog.portuguese',
+                        expression))) > 0).order_by(
+                        desc('similarity')))
         if per_page:
             result = result.paginate(page=page, per_page=per_page)
         return result
+
+    @property
+    def resume(self):
+        return self.question
+
+    def was_updated(self):
+        if self.update_at is None and self.update_user_id is None:
+            return False
+        return True
 
     def add_view(self, user_id):
         user = User.query.filter(User.id == user_id).first()
