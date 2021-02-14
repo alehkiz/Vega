@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% from "macros/form.html" import render_field %}
+{% from "macros/main.html" import render_pagination %}
+
+{% block app_content %}
+<main class="conteiner">
+    <div class='row'>
+        <div class="col-md-8">
+            <!-- <form method="GET" action="{{ url_for('question.search')}}">
+                {{ render_field(g.search_form.q, size=256, class='form-control', placeholder='Buscar', nolabel=true) }}
+            </form> -->
+            {% if pagination.total == 0 %}
+                Nenhum resultado encontrado
+            <div class="d-flex justify-content-between mt-5">
+            <a type="button" class="btn btn-info" href="{{url_for('question.index')}}">Voltar</a>
+            </div>
+            {% else %}
+                {% for item in pagination.items %}
+                <div class="alert alert-dark" role="alert">
+                    <a href="{{url_for('question.view', id=item[0].id)}}" class='badge bg-info text-dark text-wrap text-break text-decoration-none'>
+                    {{item[0].question}}</a>
+                    {% if current_user.can_edit %}
+                    <a href="{{url_for('question.remove', id=item[0].id)}}"
+                            class="text-decoration-none btn btn-danger btn-sm float-end"><i class="icon-remove"></i></a>
+                    <a href="{{url_for('question.edit', id=item[0].id)}}"
+                            class="text-decoration-none btn btn-success btn-sm float-end"><i class="icon-edit"></i></a>
+                            {% endif %}  
+                            <!-- <hr> 
+                            {% if item[0].answered %}
+                            {{item[0].answer}}
+                            {% endif %} -->
+                        </div>
+                {% endfor %}
+                {{ render_pagination(pagination, first_page, last_page, 'question.search', url_arguments=url_arguments)}}
+                {% endif %}
+
+            
+        </div>
+        {% if cls_question.most_viewed(config['ITEMS_PER_PAGE']) | length > 0 %}
+        <div class="col-md-4">
+            <div class="p-4 mb-3 bg-light rounded">
+                <h4 class="font-italic">Mais visualizados</h4>
+                {% for question in cls_question.most_viewed(config['ITEMS_PER_PAGE']) %}
+                <p class="mb-0"><a href="{{url_for('question.view', id=question.id)}}"
+                        class="text-decoration-none">{{question.question[0:50]}}</a></p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+{% endblock %}

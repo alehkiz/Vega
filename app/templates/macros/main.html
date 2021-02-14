@@ -1,9 +1,11 @@
-{% macro render_pagination(pagination, first_page, last_page, endpoint) %}
+{% macro render_pagination(pagination, first_page, last_page, endpoint, url_arguments = {}) %}
+
+
 <nav aria-label="pagination">
     <ul class="pagination justify-content-end">
-        {%- if first_page != pagination.page %}
+        {%- if first_page != pagination.page and not first_page is none%}
         <li class='page-item'>
-            <a class="page-link" href="{{url_for(endpoint, page=first_page)}}" aria-label='First'>
+            <a class="page-link" href="{{url_for(endpoint, page=first_page, **url_arguments)}} " aria-label='First'>
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
@@ -18,22 +20,28 @@
         {% if page %}
         {% if page != pagination.page %}
         <li class="page-item">
-            <a class="page-link" href="{{url_for(endpoint, page=page)}}">{{page}}</a>
+            <a class="page-link" href="{{url_for(endpoint, page=page, **url_arguments)}}">{{page}}</a>
         </li>
+
         {% else %}
-        <li class="page-item active">
-            <a class="page-link active" href="#" aria-current="page">
+
+        <li class="page-item disabled">
+            <a class="page-link active" href="{{ url_for(endpoint, page=page, **url_arguments) }}" aria-current="page">
                 {{page}}
             </a>
         </li>
         {% endif %}
         {% else %}
-        ...
+        <li class='page-item disabled'>
+            <a class="page-link" href="#" aria-label='Last'>
+                <span aria-hidden="true">...</span>
+            </a>
+        </li>
         {% endif %}
         {%- endfor %}
         {%- if last_page != pagination.page and not last_page is none %}
         <li class='page-item'>
-            <a class="page-link" href="{{url_for(endpoint, page=last_page)}}" aria-label='Last'>
+            <a class="page-link" href="{{ url_for(endpoint, page=last_page, **url_arguments)}}" aria-label='Last'>
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>

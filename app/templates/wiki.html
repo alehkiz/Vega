@@ -20,10 +20,10 @@
                     </h4>
 
                     <p class="article-meta">
-                        {{article.get_created_time_elapsed}} por <a
+                        {{article.get_create_time_elapsed}} por <a
                             href="{{ url_for('user.view', id=article.author.id) }}"
                             class="text-decoration-none">{{article.author.name}}</a>
-                        em <a href="{{ url_for('wiki.topic', topic_name=article.topic.formated_name)}}"
+                        em <a href="{{ url_for('wiki.topic', topic_name=article.topic.format_name)}}"
                             class="text-decoration-none">{{article.topic.name}}</a>
 
                     </p>

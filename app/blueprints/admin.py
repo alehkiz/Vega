@@ -3,7 +3,7 @@ from flask_security import current_user, login_required
 from flask_security import roles_accepted
 from datetime import datetime
 
-from app.models.wiki import Article, User
+from app.models.wiki import Article, User, Question
 from app.forms.wiki import ArticleForm
 from app.core.db import db
 
@@ -22,7 +22,7 @@ def users():
     page = request.args.get('page', 1, type=int)
     paginate = User.query.paginate(page, app.config['ITEMS_PER_PAGE'], False)
     first_page = list(paginate.iter_pages())[0]
-    last_page = list(paginate.iter_pages())[-1] if list(paginate.iter_pages())[-1] != first_page else None
+    last_page = paginate.pages#list(paginate.iter_pages())[-1]
     return render_template('admin.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint='admin.users', cls_table=User, list=True, page_name='Usuários')
 
 @bp.route('/articles/')
@@ -31,7 +31,20 @@ def users():
 def articles():
     page = request.args.get('page', 1, type=int)
     paginate = Article.query.paginate(page, app.config['ITEMS_PER_PAGE'], False)
-    first_page = None if not list(paginate.iter_pages()) else list(paginate.iter_pages())[0] 
-    last_page = None if not list(paginate.iter_pages()) else (list(paginate.iter_pages())[-1] if list(paginate.iter_pages())[-1] != first_page else None)
-    return render_template('admin.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint, cls_table=Article, list=True, page_name='Artigos')
+    first_page = list(paginate.iter_pages())[0]
+    last_page = paginate.pages#list(paginate.iter_pages())[-1] if list(paginate.iter_pages())[-1] != first_page else None
+    return render_template('admin.html', pagination=paginate, first_page=first_page, 
+                        last_page=last_page, endpoint=request.url_rule.endpoint, 
+                        cls_table=Article, list=True, page_name='Artigos')
 
+@bp.route('/questions')
+@login_required
+@roles_accepted('admin')
+def questions():
+    page = request.args.get('page', 1, type=int)
+    paginate = Question.query.paginate(page, app.config.get('ITEMS_PER_PAGE', 1), False)
+    first_page = list(paginate.iter_pages())[0] if len(list(paginate.iter_pages())) >= 1 else None
+    last_page = paginate.pages
+    return render_template('admin.html', pagination=paginate, first_page=first_page, 
+                        last_page=last_page, endpoint=request.url_rule.endpoint, 
+                        cls_table=Question, list=True, page_name='Dúvidas')
