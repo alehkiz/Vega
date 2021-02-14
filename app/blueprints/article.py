@@ -16,17 +16,17 @@ bp = Blueprint('article', __name__, url_prefix='/article/')
 @bp.route('/view/<int:id>')
 def view(id=None):
     if id is None:
-        #TODO em caso do artumento id é vazio, retornar todos os artigos
+        #TODO em caso do argumento id é vazio, retornar todos os artigos
         return abort(404)
     if not str(id).isnumeric():
         return abort(404)
-    try:
-        article = Article.query.filter_by(id=int(id)).first_or_404()
-    except Exception as e:
-        db.session.rollback()
-        app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-        app.logger.error(e)
-        return abort(500)
+    # try:
+    article = Article.query.filter_by(id=int(id)).first_or_404()
+    # except Exception as e:
+    #     db.session.rollback()
+    #     app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+    #     app.logger.error(e)
+    #     return abort(500)
     user_id = current_user.id if current_user.is_authenticated else None
     article.add_view(user_id)
     return render_template('article.html', article=article)
@@ -41,13 +41,14 @@ def add():
         article = Article.query.filter(Article.title.ilike(form.title.data)).first()
         if not article is None:
             form.title.errors.append('Título inválido ou já existente')
-            
+        print(form.topic.data)
         if not form.errors:
             article = Article()
             article.title = form.title.data
             article.description = form.description.data
             article.text = form.text.data
             article.user_id = current_user.id
+            article.topic_id = form.topic.data.id
             try:
                 db.session.add(article)
                 db.session.commit()
@@ -67,12 +68,11 @@ def edit(id):
     form = ArticleForm()
     if form.validate_on_submit():
         try:
-            print('aqio')
             article.title = form.title.data
             article.description = form.description.data
             article.text = form.text.data
-            article.updated_timestamp = datetime.utcnow()
-            article.updated_user_id = current_user.id
+            article.update_at = datetime.utcnow()
+            article.update_user_id = current_user.id
             db.session.commit()
             return redirect(url_for('article.view', id=article.id))
         except Exception as e:

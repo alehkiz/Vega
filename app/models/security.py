@@ -34,8 +34,11 @@ class User(UserMixin, db.Model):
     updated_at = db.Column(db.DateTime, nullable=True)
     login_count = db.Column(db.Integer, nullable=True, default=0)
     articles = db.relationship('Article', backref='author', lazy='dynamic', foreign_keys='[Article.user_id]')
-    articles_updated = db.relationship('Article', backref='updater', lazy='dynamic', foreign_keys='[Article.updated_user_id]')
+    articles_updated = db.relationship('Article', backref='updater', lazy='dynamic', foreign_keys='[Article.update_user_id]')
     articles_viewed = db.relationship('ArticleView', cascade='all, delete-orphan', backref='user', single_parent=True, lazy='dynamic')
+    questions = db.relationship('Question', backref='author', lazy='dynamic', foreign_keys='[Question.create_user_id]')
+    answers = db.relationship('Question', backref='answered_by', lazy='dynamic', foreign_keys='[Question.answer_user_id]')
+    question_update = db.relationship('Question', backref='updater', lazy='dynamic', foreign_keys='[Question.update_user_id]')
     roles = db.relationship('Role', 
                 secondary=roles_users, 
                 backref=db.backref('users', lazy='dynamic'), 
@@ -85,7 +88,6 @@ class User(UserMixin, db.Model):
             self._password = hash_password(password)
         else:
             raise ValueError('Não foi possível validar a senha')
-    
     @property
     def last_seen_elapsed(self):
         return format_elapsed_time(self.last_seen)
@@ -93,7 +95,7 @@ class User(UserMixin, db.Model):
         return verify_password(password, self.password)
 
     @property
-    def format_created_date(self):
+    def format_create_date(self):
         return self.created_at.strftime("%d/%m/%Y")
 
     @property

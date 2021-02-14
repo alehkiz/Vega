@@ -1,4 +1,4 @@
-{% macro render_field(field, size, class, placeholder, nosize) %}
+{% macro render_field(field, size, class, placeholder, nosize, nolabel) %}
 {% if nolabel %}
 {{ field.label(class='visually-hidden') }}
 {% else %}

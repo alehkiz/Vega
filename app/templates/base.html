@@ -1,3 +1,4 @@
+{% from "macros/form.html" import render_field %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -32,13 +33,23 @@
                 <li class="nav-item">
                     <a href="{{ url_for('wiki.index') }}" class="nav-link">Wiki</a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('question.index')}}" class='nav-link'>Dúvidas</a>
+                </li>
             </ul>
-            {% if g.search_form %}
+            <!-- {% if g.search_form %}
             <form class="form-inline my-2 my-lg-0" method="get" action="{{ url_for('main.search') }}">
                 {{ g.search_form.q(size=20, class='form-control', placeholder=g.search_form.q.label.text) }}
             </form>
-            {% endif %}
-            
+            {% endif %} -->
+            <ul class="navbar-nav w-100 justify-content-center">
+            <form class="d-flex al" method="GET" action="{{ url_for('main.search') }}">
+                {{ render_field(g.search_form.q, size=20, class='form-control me-2', placeholder='Buscar', nolabel=true, type='search')}}
+                {{ render_field(g.search_form.submit, class='btn btn-outline-success', nolabel=true)}}
+                <!-- <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"> -->
+                <!-- <button class="btn btn-outline-success" type="submit">Search</button> -->
+              </form>
+            </ul>
             <ul class="navbar-nav d-flex">
                 {% if current_user.is_anonymous %}
                 <li class="nav-item">
@@ -52,6 +63,7 @@
                       <li><a class="dropdown-item" href="{{url_for('admin.index')}}">adm</a></li>
                       <li><a class="dropdown-item" href="{{url_for('admin.users')}}">Usuários</a></li>
                       <li><a class="dropdown-item" href="{{url_for('admin.articles')}}">Artigos</a></li>
+                      <li><a class="dropdown-item" href="{{url_for('admin.questions')}}">Dúvidas</a></li>
                     </ul>
                     
                 </li>{% endif %}
@@ -63,10 +75,7 @@
                 </li>
                 {% endif %}
 
-                <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                  </form>
+                
             </ul>
             
         </div>
