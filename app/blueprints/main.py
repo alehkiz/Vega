@@ -4,7 +4,7 @@ from flask_security import login_required, current_user
 from datetime import datetime
 
 from app.core.db import db
-from app.models.wiki import Article, Question
+from app.models.wiki import Article, Question, Tag
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
 
@@ -21,6 +21,7 @@ def before_request():
             app.logger.error(e)
         # g.question_search_form = QuestionSearchForm()
     g.search_form = SearchForm()
+    g.tags = Tag.query.all()
 
 @bp.route('/')
 @bp.route('/index')

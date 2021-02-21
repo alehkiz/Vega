@@ -160,6 +160,9 @@ def add():
                 return render_template('add.html', form=form, title='Editar', question=True)
     return render_template('add.html', form=form, title='Editar', question=True)
 
+@bp.route('/tag/<int:id>')
+def tag(id):
+    return f"<{id}>"
 
 # @bp.route('/topic/<string:topic_name>')
 # def topic(topic_name):
