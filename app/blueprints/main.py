@@ -22,6 +22,9 @@ def before_request():
         # g.question_search_form = QuestionSearchForm()
     g.search_form = SearchForm()
     g.tags = Tag.query.all()
+    g.questions_most_viewed = Question.most_viewed(app.config.get('ITEMS_PER_PAGE', 5))
+    g.questions_most_recent = Question.query.order_by(Question.create_at.desc()).limit(app.config.get('ITEMS_PER_PAGE', 5)).all()
+
 
 @bp.route('/')
 @bp.route('/index')
@@ -33,6 +36,7 @@ def index():
 
 @bp.route('/search')
 def search():
+    print(g.tags)
     page = request.args.get('page', 1, type=int)
     if g.search_form.validate():
         print('validado')
