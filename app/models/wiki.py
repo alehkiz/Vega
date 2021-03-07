@@ -16,7 +16,7 @@ from app.utils.html import process_html
 from app.models.security import User
 
 
-make_searchable(db.metadata, options={'regconfig': 'pg_catalog.portuguese'})
+make_searchable(db.metadata, options={'regconfig': 'public.pt'})
 
 def create_tsvector(*args):
     exp = args[0]
@@ -96,13 +96,13 @@ class Article(db.Model):
                 func.ts_rank_cd(
                     Article.search_vector, 
                     func.plainto_tsquery(
-                        'pg_catalog.portuguese',
+                        'public.pt',
                         text))).label(
                             'similarity')).filter((
                 func.ts_rank_cd(
                     Article.search_vector, 
                     func.plainto_tsquery(
-                        'pg_catalog.portuguese',
+                        'public.pt',
                         text))) > 0).order_by(
                         desc('similarity')))
         else:
@@ -110,13 +110,13 @@ class Article(db.Model):
                 func.ts_rank_cd(
                     Article.search_vector, 
                     func.plainto_tsquery(
-                        'pg_catalog.portuguese',
+                        'public.pt',
                         text))).label(
                             'similarity')).filter((
                 func.ts_rank_cd(
                     Article.search_vector, 
                     func.plainto_tsquery(
-                        'pg_catalog.portuguese',
+                        'public.pt',
                         text))) > 0).order_by(
                         desc('similarity')))
         if per_page:
@@ -315,13 +315,13 @@ class Question(db.Model):
                 func.ts_rank_cd(
                     Question.search_vector, 
                     func.plainto_tsquery(
-                        'pg_catalog.portuguese',
+                        'public.pt',
                         expression))).label(
                             'similarity')).filter((
                 func.ts_rank_cd(
                     Question.search_vector, 
                     func.plainto_tsquery(
-                        'pg_catalog.portuguese',
+                        'public.pt',
                         expression))) > 0).order_by(
                         desc('similarity')))
         else:
@@ -329,18 +329,28 @@ class Question(db.Model):
                 func.ts_rank_cd(
                     Question.search_vector, 
                     func.plainto_tsquery(
-                        'pg_catalog.portuguese',
+                        'public.pt',
                         expression))).label(
                             'similarity')).filter((
                 func.ts_rank_cd(
                     Question.search_vector, 
                     func.plainto_tsquery(
-                        'pg_catalog.portuguese',
+                        'public.pt',
                         expression))) > 0).order_by(
                         desc('similarity')))
         if per_page:
             result = result.paginate(page=page, per_page=per_page)
         return result
+    @staticmethod
+    def ns(expression):
+
+        return db.session.query(Question, 
+                func.ts_rank_cd(Question.search_vector, 
+                    func.plainto_tsquery('pt', '580'))).filter(
+                        Question.search_vector.op('@@')(
+                            func.plainto_tsquery('pt','580'))).all()
+
+
 
     @property
     def resume(self):
