@@ -16,7 +16,7 @@ from app.utils.html import process_html
 from app.models.security import User
 
 
-make_searchable(db.metadata, options={'regconfig': 'pg_catalog.portuguese'})
+make_searchable(db.metadata, options={'regconfig': 'public.pt'})
 
 def create_tsvector(*args):
     exp = args[0]
@@ -261,6 +261,20 @@ class Tag(db.Model):
 class Question(db.Model):
     '''
     Classe responsável pelas perguntas da wiki, com indexação para ``full text search``
+
+
+    #cria configuração para remover acentos
+    CREATE TEXT SEARCH CONFIGURATION pt (COPY = pg_catalog.portuguese);
+    ALTER TEXT SEARCH CONFIGURATION pt
+    ALTER MAPPING
+    FOR hword, hword_part, word with unaccent, portuguese_stem;
+
+    #Trigger para remover os acentos no FTS
+    CREATE TRIGGER question_search_vector_trigger
+    BEFORE INSERT OR UPDATE 
+    ON public.question
+    FOR EACH ROW
+    EXECUTE PROCEDURE tsvector_update_trigger('search_vector', 'public.pt', 'question', 'answer');
     '''
     __searchable__ = ['question', 'answer']
     id = db.Column(db.Integer, primary_key=True)
@@ -277,7 +291,7 @@ class Question(db.Model):
     tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
 
-    search_vector = db.Column(TSVectorType('question', 'answer', regconfig='pg_catalog.portuguese'))
+    search_vector = db.Column(TSVectorType('question', 'answer', regconfig='pg_catalog.portuguese'))#regconfig='public.pt'))
 
     view = db.relationship('QuestionView', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
     like = db.relationship('QuestionLike', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
@@ -315,13 +329,13 @@ class Question(db.Model):
                 func.ts_rank_cd(
                     Question.search_vector, 
                     func.plainto_tsquery(
-                        'pg_catalog.portuguese',
+                        'public.pt',
                         expression))).label(
                             'similarity')).filter((
                 func.ts_rank_cd(
                     Question.search_vector, 
                     func.plainto_tsquery(
-                        'pg_catalog.portuguese',
+                        'public.pt',
                         expression))) > 0).order_by(
                         desc('similarity')))
         else:
@@ -329,13 +343,13 @@ class Question(db.Model):
                 func.ts_rank_cd(
                     Question.search_vector, 
                     func.plainto_tsquery(
-                        'pg_catalog.portuguese',
+                        'public.pt',
                         expression))).label(
                             'similarity')).filter((
                 func.ts_rank_cd(
                     Question.search_vector, 
                     func.plainto_tsquery(
-                        'pg_catalog.portuguese',
+                        'public.pt',
                         expression))) > 0).order_by(
                         desc('similarity')))
         if per_page:

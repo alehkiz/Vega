@@ -1,10 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'base_question.html' %}
 {% from "macros/form.html" import render_field %}
 {% from "macros/main.html" import render_pagination %}
 
-{% block app_content %}
-<main class="conteiner">
-    <div class='row'>
+{% block question_content %}
         <div class="col-md-8">
             <!-- <form method="GET" action="{{ url_for('question.search')}}">
                 {{ render_field(g.search_form.q, size=256, class='form-control', placeholder='Buscar', nolabel=true) }}
@@ -36,18 +34,5 @@
 
             
         </div>
-        {% if cls_question.most_viewed(config['ITEMS_PER_PAGE']) | length > 0 %}
-        <div class="col-md-4">
-            <div class="p-4 mb-3 bg-light rounded">
-                <h4 class="font-italic">Mais visualizados</h4>
-                {% for question in cls_question.most_viewed(config['ITEMS_PER_PAGE']) %}
-                <p class="mb-0"><a href="{{url_for('question.view', id=question.id)}}"
-                        class="text-decoration-none">{{question.question[0:50]}}</a></p>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-    </div>
-</main>
 
 {% endblock %}

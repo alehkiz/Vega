@@ -5,6 +5,15 @@ from datetime import datetime
 from app.core.db import db
 from app.utils.kernel import format_elapsed_time
 
+class QuestionSearch(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'))
+    search_id = db.Column(db.Integer, db.ForeignKey('search.id'))
+    count_access = db.Column(db.Integer, default=1)
+    last_search = db.Column(db.DateTime, default=datetime.utcnow)
+    first_search = db.Column(db.DateTime, default=datetime.utcnow)
+
 class Search(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
