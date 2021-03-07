@@ -6,9 +6,6 @@
 <main class="conteiner">
     <div class='row'>
         <div class="col-md-8">
-            <!-- <form method="GET" action="{{ url_for('question.search')}}">
-                {{ render_field(g.search_form.q, size=256, class='form-control', placeholder='Buscar', nolabel=true) }}
-            </form> -->
             {% if pagination.total == 0 %}
                 Nenhum resultado encontrado
             <div class="d-flex justify-content-between mt-5">
