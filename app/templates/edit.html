@@ -38,9 +38,9 @@
         {% elif question %}
         {{ form.csrf_token}}
         {{ macros.render_field(form.question, size=256, class='form-control', placeholder='Pergunta')}}
-        {{ macros.render_field(form.answer, size=256, class='form-control', placeholder='Reposta')}}
-        {{ macros.render_field(form.tag, class='form-control')}}
-        {{ macros.render_field(form.topic, class='form-control')}}
+        {{ macros.render_field(form.answer, size=256, class='form-control', placeholder='Reposta', style="height: 250px;")}}
+        {{ macros.render_field(form.tag, class='form-select', nosize=true)}}
+        {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
         <br>
         {{ form.submit }}   
 
