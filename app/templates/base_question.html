@@ -1,0 +1,54 @@
+
+{% extends 'base.html' %}
+
+{% block app_content %}
+<main class="conteiner">
+    <div class='row'>
+        <div class="col-md-8">
+            {% block question_content %}
+            {% endblock %}
+        </div>
+
+<div class="col-md-4">
+    {% if g.questions_most_viewed | length > 0 %}
+
+        <div class="p-4 mb-3 bg-light rounded">
+            <h4 class="font-italic">Mais visualizados</h4>
+            {% for question in g.questions_most_viewed %}
+            <p class="mb-0"><a href="{{url_for('question.view', id=question.id)}}"
+                    class="text-decoration-none">{{question.question[0:50]}}</a></p>
+            {% endfor %}
+        </div>
+    
+    {% endif %}
+
+    {% if g.questions_most_recent | length > 0 %}
+
+        <div class="p-4 md-3 bh-light rounded">
+            <h4 class="font-italic">Recentes</h4>
+            {% for question in g.questions_most_recent %}
+            <p class="mb-0"><a href="{{url_for('question.view', id=question.id)}}"
+                class="text-decoration-none">{{question.question[0:50]}}</a></p>
+            {% endfor %}
+        </div>
+
+    {% endif %}
+
+    {% if g.tags | length > 0 %}
+
+        <div class="p-4 md-3 bh-light rounded">
+            <h4 class="font-italic">Marcações</h4>
+            {% for tag in g.tags %}
+            <p class="mb-0"><a href="{{url_for('question.tag', name=tag.name)}}" class="text-decoration-none">{{tag.name}}</a></p>
+            {% endfor %}
+        </div>
+
+    {% endif %}
+
+
+</div>
+
+</div>
+</main>
+
+{% endblock %}

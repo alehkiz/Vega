@@ -3,7 +3,7 @@ from flask.globals import current_app
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
 from app.core.db import db
-from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView
+from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag
 from app.models.security import User
 from app.models.search import Search
 
@@ -160,6 +160,12 @@ def add():
                 return render_template('add.html', form=form, title='Editar', question=True)
     return render_template('add.html', form=form, title='Editar', question=True)
 
+@bp.route('/tag/<string:name>')
+def tag(name):
+
+    tag = Tag.query.filter_by(name=name).first_or_404()
+    questions = tag.questions.all()
+    return render_template('question.html', questions=questions, cls_question=Question)
 
 # @bp.route('/topic/<string:topic_name>')
 # def topic(topic_name):
