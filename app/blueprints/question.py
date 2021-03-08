@@ -14,9 +14,15 @@ bp = Blueprint('question', __name__, url_prefix='/question/')
 @bp.route('/')
 @bp.route('/index')
 def index():
-    search_form = QuestionSearchForm()
-    questions = Question.query.order_by(Question.create_at.desc()).all()
-    return render_template('question.html', questions=questions, cls_question=Question, form=search_form)
+    page = request.args.get('page', 1, type=int)
+    # search_form = QuestionSearchForm()
+    questions = Question.query.order_by(Question.create_at.desc()).paginate(page=page, per_page=app.config.get('ITEMS_PER_PAGE'))
+    iter_pages = list(questions.iter_pages())
+    first_page = iter_pages[0] if len(iter_pages) >= 1 else None
+    last_page = questions.pages if questions.pages > 0 else None
+
+    return render_template('question.html', questions=questions, cls_question=Question, first_page=first_page, last_page=last_page,
+                    url_arguments={'q':g.search_form.q.data})
 
 
 @bp.route('/search/', methods=['GET', 'POST'])
