@@ -13,7 +13,7 @@
                 {% for item in pagination.items %}
                 <div class="alert alert-dark" role="alert">
                     <a href="{{url_for('question.view', id=item[0].id)}}" class='badge bg-info text-dark text-wrap text-break text-decoration-none'>
-                    {{item[0].question}}</a>
+                    {{item[0].question[0:60]}}</a>
                     {% if current_user.can_edit %}
                     <a href="{{url_for('question.remove', id=item[0].id)}}"
                             class="text-decoration-none btn btn-danger btn-sm float-end"><i class="icon-remove"></i></a>

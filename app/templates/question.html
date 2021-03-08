@@ -15,7 +15,7 @@
                 {% for item in pagination.items %}
                 <div class="alert alert-dark" role="alert">
                     <p class="fw-bold">Q: </p>
-                    {{item[0].question}}
+                    {{item[0].question[0:60]}}
                     {% if current_user.can_edit %}
                     <a href="{{url_for('question.remove', id=item[0].id)}}"
                             class="text-decoration-none btn btn-danger btn-sm float-end"><i class="icon-remove"></i></a>
@@ -28,12 +28,12 @@
                             {% endif %} -->
                         </div>
                 {% endfor %}
-                {{ render_pagination(pagination, first_page, last_page, 'question.search', url_arguments=url_arguments)}}
+                {{ render_pagination(pagination, first_page, last_page, 'question.index', url_arguments=url_arguments)}}
                 {% endif %}
 
             {% endif %}
             {% if questions %}
-            {% for question in questions %}
+            {% for question in questions.items %}
             <article class="article-post">
                 <div class="article-header">
                     {#<p class="article-meta">
@@ -46,7 +46,7 @@
                 <div class="alert alert-dark" role="alert">
                     <span class="fw-bold">Q: </span>
                     <a href="{{url_for('question.view', id=question.id)}}" class='badge bg-info text-dark text-wrap text-break text-decoration-none'>
-                    {{question.question}}</a>
+                    {{question.question[0:60]}}</a>
                     {% if current_user.can_edit %}
                     <a href="{{url_for('question.remove', id=question.id)}}"
                             class="text-decoration-none btn btn-danger btn-sm float-end"><i class="icon-remove"></i></a>
@@ -67,6 +67,7 @@
                 
             </article>
             {% endfor %}
+            {{ render_pagination(questions, first_page, last_page, 'question.index', url_arguments=url_arguments)}}
             {% endif %}
     {% if mode == 'view' %}
     <article class="article-post">
