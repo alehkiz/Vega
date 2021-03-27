@@ -39,6 +39,7 @@ class BaseConfig(object):
     DEFAULT_PASS = 'Abc123'
 
     ITEMS_PER_PAGE = 5
+    QUESTIONS_PER_PAGE = 10
 
     # Variável responsável pelo DE-PARA entre as colunas das tabelas
     TABULATE = {

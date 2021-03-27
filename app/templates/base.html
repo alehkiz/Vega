@@ -43,9 +43,9 @@
             </form>
             {% endif %} -->
             <ul class="navbar-nav w-100 justify-content-center">
-            <form class="d-flex al" method="GET" action="{{ url_for('main.search') }}">
-                {{ render_field(g.search_form.q, size=20, class='form-control me-2', placeholder='Buscar', nolabel=true, type='search')}}
-                {{ render_field(g.search_form.submit, class='btn btn-outline-success', nolabel=true)}}
+            <form class="d-flex al" method="GET" action="{{ url_for('question.search') }}">
+                {{ render_field(g.question_search_form.q, size=20, class='form-control me-2', placeholder='Buscar', nolabel=true, type='search')}}
+                {{ render_field(g.question_search_form.submit, class='btn btn-outline-success', nolabel=true)}}
                 <!-- <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"> -->
                 <!-- <button class="btn btn-outline-success" type="submit">Search</button> -->
               </form>
