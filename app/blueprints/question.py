@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g
 from flask.globals import current_app
 from flask_security import login_required, current_user
@@ -14,16 +15,20 @@ bp = Blueprint('question', __name__, url_prefix='/question/')
 @bp.route('/')
 @bp.route('/index')
 def index():
+    page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
-    questions = Question.query.order_by(Question.create_at.desc()).all()
-    return render_template('question.html', questions=questions, cls_question=Question, form=search_form)
+    paginate = Question.query.order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    iter_pages = list(paginate.iter_pages())
+    first_page = iter_pages[0] if len(iter_pages) >= 1 else None
+    last_page = paginate.pages if paginate.pages > 0 else None
+    return render_template('question.html', pagination=paginate, cls_question=Question, form=search_form, mode='views', first_page=first_page, last_page=last_page)
 
 
 @bp.route('/search/', methods=['GET', 'POST'])
 def search():
     page = request.args.get('page', 1, type=int)
     if g.question_search_form.validate():
-        paginate = Question.search(g.question_search_form.q.data, per_page = app.config.get('ITEMS_PER_PAGE'), page = page)#
+        paginate = Question.search(g.question_search_form.q.data, per_page = app.config.get('QUESTIONS_PER_PAGE', 1), page = page)#
         search = Search.query.filter(Search.text.ilike(g.question_search_form.q.data)).first()
         if search is None:
             search = Search()
@@ -114,6 +119,8 @@ def edit(id):
             question.answer = form.answer.data
             question.tag = form.tag.data
             question.topic = form.topic.data
+            question.updater = current_user
+            question.update_at = datetime.utcnow()
             db.session.commit()
             return redirect(url_for('question.view', id=question.id))
         except Exception as e:

@@ -3,33 +3,29 @@
 {% from "macros/main.html" import render_pagination %}
 
 {% block question_content %}
-        <div class="col-md-8">
-            {% if pagination.total == 0 %}
-                Nenhum resultado encontrado
-            <div class="d-flex justify-content-between mt-5">
-            <a type="button" class="btn btn-info" href="{{url_for('question.index')}}">Voltar</a>
-            </div>
-            {% else %}
-                {% for item in pagination.items %}
-                <div class="alert alert-dark" role="alert">
-                    <a href="{{url_for('question.view', id=item[0].id)}}" class='badge bg-info text-dark text-wrap text-break text-decoration-none'>
-                    {{item[0].question}}</a>
-                    {% if current_user.can_edit %}
-                    <a href="{{url_for('question.remove', id=item[0].id)}}"
-                            class="text-decoration-none btn btn-danger btn-sm float-end"><i class="icon-remove"></i></a>
-                    <a href="{{url_for('question.edit', id=item[0].id)}}"
-                            class="text-decoration-none btn btn-success btn-sm float-end"><i class="icon-edit"></i></a>
-                            {% endif %}  
-                            <!-- <hr> 
-                            {% if item[0].answered %}
-                            {{item[0].answer}}
-                            {% endif %} -->
-                        </div>
-                {% endfor %}
-                {{ render_pagination(pagination, first_page, last_page, 'question.search', url_arguments=url_arguments)}}
-                {% endif %}
+{% if pagination.total == 0 %}
+Nenhum resultado encontrado
+<div class="d-flex justify-content-between mt-5">
+        <a type="button" class="btn btn-info" href="{{url_for('question.index')}}">Voltar</a>
+</div>
+{% else %}
+<!-- {% for item in pagination.items %}
+<div class="alert alert-dark" role="alert">
+        <a href="{{url_for('question.view', id=item[0].id)}}"
+                class='badge bg-info text-dark text-wrap text-break text-decoration-none'>
+                {{item[0].question}}</a>
+        {% if current_user.can_edit %}
+        <a href="{{url_for('question.remove', id=item[0].id)}}"
+                class="text-decoration-none btn btn-danger btn-sm float-end"><i class="icon-remove"></i></a>
+        <a href="{{url_for('question.edit', id=item[0].id)}}"
+                class="text-decoration-none btn btn-success btn-sm float-end"><i class="icon-edit"></i></a>
+        {% endif %}
 
-            
-        </div>
+</div>
+{% endfor %} -->
 
+{% set mode = 'search' %}
+{% include '_question.html' %}
+{{ render_pagination(pagination, first_page, last_page, 'main.search', url_arguments=url_arguments)}}
+{% endif %}
 {% endblock %}
