@@ -7,8 +7,8 @@ regras/
 logs/
 
 
-!*/static/css/login.css
-!*/static/css/main.css
+!*static/css/login.css
+!*static/css/main.css
 
 
 # Byte-compiled / optimized / DLL files
