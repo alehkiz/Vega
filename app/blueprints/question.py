@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify
 from flask.globals import current_app
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
@@ -186,3 +186,44 @@ def tag(name):
 #         return abort(404)
 #     tag = Tag.query.filter_by(name=tag_name).first_or_404()
 #     return render_template('tags.html', tag=tag)
+
+
+@bp.route('/like/<int:question_id>', methods=['GET','POST'])
+@login_required
+def like_action(question_id):
+    question = Question.query.filter(Question.id==question_id).first_or_404()
+    action = request.form.get('action', False)
+    if action is False or action not in ['like', 'unlike']:
+        return jsonify({
+            'status':'error',
+            'message': 'ação inválida'}), 404
+    if action == 'like':
+        if question.is_liked(current_user.id):
+            return jsonify({
+                'status':'error',
+                'message': 'Usuário já gostou dessa questão'}), 404
+        rs = question.add_like(current_user.id)
+        if rs is False:
+            return jsonify({
+                'status':'error',
+                'message': 'Usuário já gostou dessa questão'}), 404
+        return jsonify({
+                'status':'success',
+                'message': 'Ação concluída'}), 200
+    if action == 'unlike':
+        if not question.is_liked(current_user.id):
+            return jsonify({
+                'status':'error',
+                'message': 'Usuário não curtiu essa questão'}), 404
+        rs = question.remove_like(current_user.id)
+        if rs is False:
+            return jsonify({
+                'status':'error',
+                'message': 'Não foi possível remover o gostar'}), 404
+        return jsonify({
+                'status':'success',
+                'message': 'Ação concluída'}), 200
+            
+
+
+

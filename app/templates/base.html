@@ -105,7 +105,12 @@
     <script src="{{url_for('static', filename='js/jquery/jquery.min.js')}}"></script>
 
     <script src="{{url_for('static', filename='js/bootstrap/bootstrap.min.js')}}"></script>
+    
     <!-- <script src="{{url_for('static', filename='js/main.js')}}"></script> -->
+    <script type="text/javascript">
+        $CSRF_TOKEN = '{{ csrf_token() }}';
+     </script>
+     <script src="{{url_for('static', filename='js/main.js')}}"></script>
     {% endblock %}
 </body>
 

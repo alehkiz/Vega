@@ -115,12 +115,26 @@ form > textarea:hover {
 } */
 
 
+.accordion-body {
+    padding-top: 2rem !important;
 
+}
 .accordion-footer {
     padding: 1rem 1.25rem;
     color: #999;
     font-size: 60% !important;
 }
 
-teste 
- ads
+.accordion-head {
+    padding: 0rem 1.5rem;
+    float: right;
+    /* border: solid #dee2e6;
+    border-radius: .25rem;
+    border-width: 1px; */
+}
+
+.accordion-border {
+    border: solid #63a1df !important;
+    border-radius: .25rem;
+    border-width: 1px !important;
+}
