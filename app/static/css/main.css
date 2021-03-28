@@ -1,0 +1,126 @@
+html,
+body {
+    height: 100%;
+}
+
+body {
+    /* display: flex; */
+    align-items: center;
+    padding-top: 80px;
+    padding-bottom: 40px;
+    background-color: #f5f5f5;
+    margin-bottom: 60px;
+}
+
+
+/* Article */
+
+
+/* .article-header {
+  padding-top: 20px;
+  padding-bottom: 20px;
+} */
+
+.article-title {
+    margin-top: 30px;
+    margin-bottom: 0;
+    font-size: 60px;
+    font-weight: 400;
+}
+
+.article-description {
+    font-size: 20px;
+    color: #999
+}
+
+.article-meta {
+    margin-bottom: 0;
+    color: #999;
+    font-size: 60% !important;
+}
+
+.article-text {
+    /* font-size: 18px; */
+    padding-top: 1rem;
+    line-height: 1.5em;
+    font-size: 1.0em;
+}
+
+.article.tag {
+    margin-bottom: 0;
+    color: #999;
+    font-size: xx-small;
+}
+
+.article-post {
+    margin-bottom: 2rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+}
+
+.nounderline {
+    text-decoration: none !important
+}
+
+blockquote {
+    padding: 10px 20px;
+    margin: 0 0 20px;
+    margin-bottom: 20px;
+    font-size: 17.5px;
+    border-left: 5px solid #eee;
+    font-size: 80% !important;
+}
+
+form > input[type=text],
+textarea {
+    border: 1px solid #ccc;
+    margin: 10px 0;
+    padding: 10px 0 10px 5px;
+    width: 100%;
+}
+
+/* form > input[type="submit"] {
+    background: #39506e none repeat scroll 0 0;
+    border: 1px solid #4f5c04;
+    border-radius: 25px;
+    color: #fff;
+    font-size: 16px;
+    font-style: normal;
+    line-height: 35px;
+    margin: 10px 0;
+    padding: 0;
+    text-transform: uppercase;
+    width: 30%; 
+}*/
+
+form > input:hover,
+form > textarea:hover {
+    background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
+    color: #5793ef;
+    transition: all 0.5s ease 0s;
+}
+
+/* form > input[type="submit"]:hover {
+    background: rgba(0, 0, 0, 50) none repeat scroll 0 0;
+    color: #5793ef;
+    transition: all 0.5s ease 0s;
+} */
+
+
+
+.accordion-footer {
+    padding: 1rem 1.25rem;
+    color: #999;
+    font-size: 60% !important;
+}
+
+teste 
+ ads
