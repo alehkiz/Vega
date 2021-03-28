@@ -10,6 +10,8 @@ logs/
 !*/static/css/login.css
 !*/static/css/main.css
 
+!login.css
+!main.css
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
