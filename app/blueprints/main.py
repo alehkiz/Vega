@@ -37,7 +37,7 @@ def index():
 
 @bp.route('/search')
 def search():
-    print(g.tags)
+    # print(g.tags)
     page = request.args.get('page', 1, type=int)
     if g.search_form.validate():
         search = Search.query.filter(Search.text.ilike(g.search_form.q.data)).first()
@@ -54,7 +54,7 @@ def search():
                 return abort(500)
         else:
             search.add_count()
-    paginate = Question.search(g.search_form.q.data, page=page, per_page=app.config.get('ITEMS_PER_PAGE'))
+        paginate = Question.search(g.search_form.q.data, page=page, per_page=app.config.get('ITEMS_PER_PAGE'))
     # article = Article.search(g.search_form.q.data, False, resume=True)
     # result = question.union_all(article).paginate(page=page, per_page=app.config.get('ITEMS_PER_PAGE'))
     iter_pages = list(paginate.iter_pages())
