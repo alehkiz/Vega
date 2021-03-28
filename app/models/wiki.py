@@ -355,14 +355,14 @@ class Question(db.Model):
         if per_page:
             result = result.paginate(page=page, per_page=per_page)
         return result
-    @staticmethod
-    def ns(expression):
+    # @staticmethod
+    # def ns(expression):
 
-        return db.session.query(Question, 
-                func.ts_rank_cd(Question.search_vector, 
-                    func.plainto_tsquery('pt', '580'))).filter(
-                        Question.search_vector.op('@@')(
-                            func.plainto_tsquery('pt','580'))).all()
+    #     return db.session.query(Question, 
+    #             func.ts_rank_cd(Question.search_vector, 
+    #                 func.plainto_tsquery('pt', '580'))).filter(
+    #                     Question.search_vector.op('@@')(
+    #                         func.plainto_tsquery('pt','580'))).all()
 
 
 
