@@ -2,10 +2,11 @@
 from flask import Markup, escape, current_app as app, abort, flash
 from sqlalchemy import func, text, Index, cast, desc
 from sqlalchemy.ext.hybrid import hybrid_property
-from datetime import datetime
+from datetime import date, datetime
 from markdown2 import markdown
 from bs4 import BeautifulSoup
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.sql.expression import false
 from sqlalchemy_utils.types import TSVectorType
 
 from sqlalchemy_searchable import make_searchable
@@ -398,8 +399,56 @@ class Question(db.Model):
             db.session.rollback()
             flash('Não foi possível atualizar a visualização')
         return qv
-        
-
+    
+    def add_like(self, user_id):
+        user = User.query.filter(User.id == user_id).first()
+        if user is None:
+            raise Exception('Usuário informado não existe')
+        ql = QuestionLike.query.filter(QuestionLike.question_id==self.id)
+        like_user = ql.filter(QuestionLike.user_id==user_id).first()
+        if not like_user is None:
+            print('Questão já curtida')
+        ql = ql.first()
+        if ql is None or like_user is None:
+            ql = QuestionLike()
+            ql.user_id = user.id
+            ql.question_id = self.id
+            ql.create_at = datetime.utcnow()
+            db.session.add(ql)
+            try:
+                db.session.commit()
+            except Exception as e:
+                app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(e)
+                db.session.rollback()
+                flash('Não foi possível atualizar a visualização')
+                return False
+        return ql
+    def remove_like(self, user_id):
+        user = User.query.filter(User.id==user_id).first()
+        if user is None:
+            raise Exception('Usuário informado não existe')
+        ql = QuestionLike.query.filter(QuestionLike.question_id==self.id, QuestionLike.user_id==user_id).first()
+        if ql is None:
+            raise Exception('Questão não foi curtida')
+        db.session.delete(ql)
+        try:
+            db.session.commit()
+        except Exception as e:
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            db.session.rollback()
+            flash('Não foi possível atualizar a visualização')
+            return false
+        return True
+    def is_liked(self, user_id):
+        user = User.query.filter(User.id == user_id).first()
+        if user is None:
+            raise Exception('Usuários informado não existe')
+        ql = QuestionLike.query.filter(QuestionLike.question_id == self.id, QuestionLike.user_id==user.id).first()
+        if ql is None:
+            return False
+        return True
     @property
     def views(self):
         return db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.question_id==self.id).scalar()
@@ -433,6 +482,17 @@ class Question(db.Model):
             return abort(500)
         return [x[0] for x in rs if x != None]
 
+    @staticmethod
+    def most_liked(limit=5):
+        try:
+            rs = db.session.query(Question, func.count(QuestionLike.id).label('likes')).join(
+                Question.like).group_by(Question).order_by(text('likes DESC')).limit(limit).all()
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            return abort(500)
+        return [x[0] for x in rs if x != None] 
 class QuestionView(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
