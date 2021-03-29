@@ -66,10 +66,21 @@
                       <li><a class="dropdown-item" href="{{url_for('admin.questions')}}">Dúvidas</a></li>
                     </ul>
                     
-                </li>{% endif %}
-                <li class="nav-item">
-                    <a href="{{ url_for('user.view', id=current_user.id) }}" class="nav-link">{{ _('Profile') }}</a>
                 </li>
+                {% endif %}
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Profile</a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                      <li><a class="dropdown-item" href="{{ url_for('user.view', id=current_user.id) }}">{{ _('Profile') }}</a></li>
+                      <li><a class="dropdown-item" href="{{url_for('question.saves')}}">Saves</a></li>
+                      <li><a class="dropdown-item" href="{{url_for('question.likes')}}">Likes</a></li>
+                    </ul>
+                    
+                </li>
+                <!-- <li class="nav-item">
+                    <a href="{{ url_for('user.view', id=current_user.id) }}" class="nav-link">{{ _('Profile') }}</a>
+                </li> -->
                 <li class="nav-item">
                     <a href="{{ url_for('auth.logout') }}" class="nav-link">{{ _('Logout') }}</a>
                 </li>
