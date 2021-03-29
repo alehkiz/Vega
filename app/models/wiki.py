@@ -296,7 +296,7 @@ class Question(db.Model):
 
     view = db.relationship('QuestionView', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
     like = db.relationship('QuestionLike', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
-
+    save = db.relationship('QuestionSave', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
     def __repr__(self):
 
         return f'<Question {self.question[:15] if not self.question  is None else None}>'
@@ -449,6 +449,58 @@ class Question(db.Model):
         if ql is None:
             return False
         return True
+
+    def add_save(self, user_id):
+        user = User.query.filter(User.id == user_id).first()
+        if user is None:
+            raise Exception('Usuário informado não existe')
+        qs = QuestionSave.query.filter(QuestionSave.question_id==self.id)
+        save_user = qs.filter(QuestionSave.user_id==user_id).first()
+        if not save_user is None:
+            print('Questão já curtida')
+        qs = qs.first()
+        if qs is None or save_user is None:
+            qs = QuestionSave()
+            qs.user_id = user.id
+            qs.question_id = self.id
+            qs.create_at = datetime.utcnow()
+            db.session.add(qs)
+            try:
+                db.session.commit()
+                
+            except Exception as e:
+                app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(e)
+                db.session.rollback()
+                flash('Não foi possível atualizar a visualização')
+                return False
+        return qs
+    def remove_save(self, user_id):
+        user = User.query.filter(User.id==user_id).first()
+        if user is None:
+            raise Exception('Usuário informado não existe')
+        qs = QuestionSave.query.filter(QuestionSave.question_id==self.id, QuestionSave.user_id==user_id).first()
+        if qs is None:
+            raise Exception('Questão não foi curtida')
+        db.session.delete(qs)
+        try:
+            db.session.commit()
+        except Exception as e:
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            db.session.rollback()
+            flash('Não foi possível atualizar a visualização')
+            return false
+        return True
+    def is_saved(self, user_id):
+        user = User.query.filter(User.id == user_id).first()
+        if user is None:
+            raise Exception('Usuários informado não existe')
+        qs = QuestionSave.query.filter(QuestionSave.question_id == self.id, QuestionSave.user_id==user.id).first()
+        if qs is None:
+            return False
+        return True
+
     @property
     def views(self):
         return db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.question_id==self.id).scalar()
@@ -493,6 +545,22 @@ class Question(db.Model):
             app.logger.error(e)
             return abort(500)
         return [x[0] for x in rs if x != None] 
+
+    @staticmethod
+    def likes_by_user(user_id):
+        user = User.query.filter(User.id==user_id).first_or_404()
+        rs = db.session.query(Question).join(
+            QuestionLike.question).filter(
+                QuestionLike.user_id==user.id).order_by(Question.create_at.desc())
+        return rs
+    @staticmethod
+    def saves_by_user(user_id):
+        user = User.query.filter(User.id==user_id).first_or_404()
+        rs = db.session.query(Question).join(
+            QuestionSave.question).filter(
+                QuestionSave.user_id==user.id).order_by(Question.create_at.desc())
+        return rs
+
 class QuestionView(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -522,6 +590,7 @@ class QuestionLike(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     create_at = db.Column(db.DateTime, nullable=False)
+    # user_like = db.relationship()
 
     def __repr__(self):
         return f'<Question Like id: {self.question_id} by {self.user_id}>'

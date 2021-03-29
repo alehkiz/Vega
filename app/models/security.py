@@ -1,7 +1,7 @@
 from flask_security import UserMixin, RoleMixin
 from flask_security.utils import hash_password, verify_password
 from sqlalchemy.ext.hybrid import hybrid_property
-
+# from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView
 
 from app.core.db import db
 from app.utils.kernel import validate_password, format_elapsed_time
@@ -39,6 +39,7 @@ class User(UserMixin, db.Model):
     questions = db.relationship('Question', backref='author', lazy='dynamic', foreign_keys='[Question.create_user_id]')
     answers = db.relationship('Question', backref='answered_by', lazy='dynamic', foreign_keys='[Question.answer_user_id]')
     question_update = db.relationship('Question', backref='updater', lazy='dynamic', foreign_keys='[Question.update_user_id]')
+    question_like = db.relationship('QuestionLike', backref='users_liked', lazy='dynamic', foreign_keys='[QuestionLike.user_id]')
     roles = db.relationship('Role', 
                 secondary=roles_users, 
                 backref=db.backref('users', lazy='dynamic'), 
@@ -101,6 +102,8 @@ class User(UserMixin, db.Model):
     @property
     def format_active(self):
         return 'Sim' if self.active else 'Não'
+
+    
 
 
     def __repr__(self):
