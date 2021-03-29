@@ -2,8 +2,8 @@
 <div class="accordion accordion-flush" id="accordionFlushQuestion">
     {% for question in pagination.items %}
     {% if mode == 'search' %}
-
-    <div class="accordion-item">
+    {% set question, pos = question %}
+    {#<div class="accordion-item">
         <h2 class="accordion-header" id="flush-heading{{question[0].id}}">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                 data-bs-target="#flush-collapse{{question[0].id}}" aria-expanded="false"
@@ -16,9 +16,9 @@
             <div class="accordion-header">teste</div>
             <div class="accordion-body">{{question[0].answer}}</div>
         </div>
-    </div>
+    </div>#}
 
-    {% else %}
+    {% endif %}
 
     <div class="accordion-item">
         <h2 class="accordion-header" id="flush-heading{{question.id}}">
@@ -31,6 +31,12 @@
         <div id="flush-collapse{{question.id}}" class="accordion-collapse collapse accordion-border"
             aria-labelledby="flush-heading{{question.id}}" data-bs-parent="#accordionFlushQuestion">
             <div class="accordion-head">
+                {% if current_user.can_edit %}
+                <a class="edit text-decoration-none" id="edit_{{question.id}}" href="{{url_for('question.edit', id=question.id)}}">
+                    <i class="icon-edit"></i>
+                </a>
+                
+                {% endif %}
                 {% if question.is_liked(current_user.id) %}
                 <a class="like-button unlike" id="unlike_{{question.id}}" href="{{url_for('question.like_action', question_id=question.id)}}"><i class="icon-heart"></i></a>
                 {% else %}
@@ -54,7 +60,6 @@
             </div>
         </div>
     </div>
-    {% endif %}
     {% endfor %}
 </div>
 
