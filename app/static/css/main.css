@@ -138,3 +138,23 @@ form > textarea:hover {
     border-radius: .25rem;
     border-width: 1px !important;
 }
+
+.like-button, .save-button {
+    /* color: currentColor !important; */
+    text-decoration: none !important;
+    /* text-decoration-color: transparent; */
+}
+
+.unlike {
+    color: red !important;
+}
+.unsave {
+    color: blue !important;
+}
+.save {
+    color: black !important;
+}
+
+.saved {
+    color: blue;
+}

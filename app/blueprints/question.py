@@ -223,7 +223,71 @@ def like_action(question_id):
         return jsonify({
                 'status':'success',
                 'message': 'Ação concluída'}), 200
-            
 
+@bp.route('/save/<int:question_id>', methods=['GET','POST'])
+@login_required
+def save_action(question_id):
+    question = Question.query.filter(Question.id==question_id).first_or_404()
+    action = request.form.get('action', False)
+    print(action)
+    if action is False or action not in ['save', 'unsave']:
+        return jsonify({
+            'status':'error',
+            'message': 'ação inválida'}), 404
+    if action == 'save':
+        if question.is_saved(current_user.id):
+            return jsonify({
+                'status':'error',
+                'message': 'Usuário já salvou dessa questão'}), 404
+        rs = question.add_save(current_user.id)
+        if rs is False:
+            return jsonify({
+                'status':'error',
+                'message': 'Usuário já salvou dessa questão'}), 404
+        return jsonify({
+                'status':'success',
+                'message': 'Ação concluída'}), 200
+    if action == 'unsave':
+        if not question.is_saved(current_user.id):
+            return jsonify({
+                'status':'error',
+                'message': 'Usuário não salvou essa questão'}), 404
+        rs = question.remove_save(current_user.id)
+        if rs is False:
+            return jsonify({
+                'status':'error',
+                'message': 'Não foi possível remover o gostar'}), 404
+        return jsonify({
+                'status':'success',
+                'message': 'Ação concluída'}), 200
 
+@bp.route('/likes')
+@login_required
+def likes():
+    page = request.args.get('page', 1, type=int)
+    paginate = Question.likes_by_user(current_user.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+
+    # paginate = Question.query.order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    iter_pages = list(paginate.iter_pages())
+    first_page = iter_pages[0] if len(iter_pages) >= 1 else None
+    last_page = paginate.pages if paginate.pages > 0 else None
+    return render_template('question.html', pagination=paginate, cls_question=Question, mode='views', first_page=first_page, last_page=last_page)
+
+@bp.route('/saves')
+@login_required
+def saves():
+    page = request.args.get('page', 1, type=int)
+    paginate = Question.saves_by_user(current_user.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+
+    # paginate = Question.query.order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    iter_pages = list(paginate.iter_pages())
+    first_page = iter_pages[0] if len(iter_pages) >= 1 else None
+    last_page = paginate.pages if paginate.pages > 0 else None
+    return render_template('question.html', pagination=paginate, cls_question=Question, mode='views', first_page=first_page, last_page=last_page)
+
+    
+@bp.route('/saved')
+@login_required
+def saved():
+    ...
 

@@ -97,3 +97,4 @@ def remove(id):
     db.session.delete(user)
     db.session.commit()
     return render_template('base.html'  )
+
