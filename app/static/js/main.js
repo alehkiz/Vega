@@ -2,10 +2,17 @@ $(document).ready(function () {
 
     // like and unlike click
     $(".like, .unlike").click(function (e) {
+        var link = $(this)
         var id = this.id;
         var split_id = id.split("_");
         var action = split_id[0];
+        var link_href = $(this).attr('href');
+        if (link_href == "#"){
+            return false;
+        }
+        $(this).attr('href', '#');
         var question_id = split_id[1];
+
         if ($(this).hasClass('like')){
             action = 'like';
             invert = 'unlike';
@@ -19,7 +26,7 @@ $(document).ready(function () {
         }
         // AJAX Request
         $.ajax({
-            url: this.href,
+            url: link_href,
             type: 'post',
             data: { action:action },
             dataType: 'json',
@@ -29,7 +36,8 @@ $(document).ready(function () {
             success: function (data) {
                 $("#" + id).removeClass(action);
                 $("#" + id).addClass(invert);
-                i = $('#' + id).children()
+                i = $('#' + id).children();
+                link.attr('href', link_href);
                 i.toggleClass(function(){
 
                     if ($(this).hasClass('icon-heart-empty')){

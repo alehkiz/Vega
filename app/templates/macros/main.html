@@ -26,6 +26,7 @@
         {% else %}
 
         <li class="page-item disabled">
+            <!-- {{url_arguments}} -->
             <a class="page-link active" href="{{ url_for(endpoint, page=page, **url_arguments) }}" aria-current="page">
                 {{page}}
             </a>
