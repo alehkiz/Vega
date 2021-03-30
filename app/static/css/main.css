@@ -126,11 +126,23 @@ form > textarea:hover {
 }
 
 .accordion-head {
-    padding: 0rem 1.5rem;
-    float: right;
+    padding: 0.5rem 0.25rem;
+
     /* border: solid #dee2e6;
     border-radius: .25rem;
     border-width: 1px; */
+}
+
+.accordion-head-info {
+    float: left;
+    padding: 0.5rem 1rem;
+    color: #999;
+    font-size: 80% !important;
+}
+
+.accordion-head-buttons {
+    float: right;
+    padding: 0.5rem 1rem;
 }
 
 .accordion-border {

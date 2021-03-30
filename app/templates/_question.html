@@ -31,31 +31,44 @@
         <div id="flush-collapse{{question.id}}" class="accordion-collapse collapse accordion-border"
             aria-labelledby="flush-heading{{question.id}}" data-bs-parent="#accordionFlushQuestion">
             <div class="accordion-head">
-                {% if current_user.can_edit %}
-                <a class="edit text-decoration-none" id="edit_{{question.id}}" href="{{url_for('question.edit', id=question.id)}}">
-                    <i class="icon-edit"></i>
-                </a>
-                
-                {% endif %}
-                {% if question.is_liked(current_user.id) %}
-                <a class="like-button unlike" id="unlike_{{question.id}}" href="{{url_for('question.like_action', question_id=question.id)}}"><i class="icon-heart"></i></a>
-                {% else %}
-                <a class="like-button like" id="like_{{question.id}}" href="{{url_for('question.like_action', question_id=question.id)}}"><i class="icon-heart-empty"></i></a>
-                {% endif %}
-                {% if question.is_saved(current_user.id) %}
-                <a class="save-button unsave" id='unsave_{{question.id}}' href="{{url_for('question.save_action', question_id=question.id)}}"><i class="icon-save"></i></a>
-                {% else %}
-                <a class="save-button save" id='save_{{question.id}}' href="{{url_for('question.save_action', question_id=question.id)}}"><i class="icon-save"></i></a>
-                {% endif %}
-                
+                <div class="accordion-head-info">
+                    {% if question.was_updated() %}
+                    Atualizado {{question.get_update_time_elapsed}} por {{question.updater.name}}
+                    {% else %}
+                    Criado {{question.get_create_time_elapsed}} por {{question.author.name}}
+                    {% endif %}
+                </div>
+                <div class="accordion-head-buttons">
+                    {% if current_user.can_edit %}
+                    <a class="edit text-decoration-none" id="edit_{{question.id}}"
+                        href="{{url_for('question.edit', id=question.id)}}">
+                        <i class="icon-edit"></i>
+                    </a>
+
+                    {% endif %}
+                    {% if question.is_liked(current_user.id) %}
+                    <a class="like-button unlike" id="unlike_{{question.id}}"
+                        href="{{url_for('question.like_action', question_id=question.id)}}"><i
+                            class="icon-heart"></i></a>
+                    {% else %}
+                    <a class="like-button like" id="like_{{question.id}}"
+                        href="{{url_for('question.like_action', question_id=question.id)}}"><i
+                            class="icon-heart-empty"></i></a>
+                    {% endif %}
+                    {% if question.is_saved(current_user.id) %}
+                    <a class="save-button unsave" id='unsave_{{question.id}}'
+                        href="{{url_for('question.save_action', question_id=question.id)}}"><i
+                            class="icon-save"></i></a>
+                    {% else %}
+                    <a class="save-button save" id='save_{{question.id}}'
+                        href="{{url_for('question.save_action', question_id=question.id)}}"><i
+                            class="icon-save"></i></a>
+                    {% endif %}
+                </div>
             </div>
-            <div class="accordion-body">{{question.answer}}</div>
+            <div class="accordion-body">{{question.get_body_html()}}</div>
             <div class="accordion-footer">
-                {% if question.was_updated() %}
-                atualizado {{question.get_update_time_elapsed}} por {{question.updater.name}}
-                {% else %}
-                criado {{question.get_create_time_elapsed}} por {{question.author.name}}
-                {% endif %}
+
 
             </div>
         </div>

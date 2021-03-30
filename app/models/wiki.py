@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql.expression import false
 from sqlalchemy_utils.types import TSVectorType
+from sqlalchemy.orm import backref
 
 from sqlalchemy_searchable import make_searchable
 
@@ -19,11 +20,11 @@ from app.models.security import User
 
 make_searchable(db.metadata, options={'regconfig': 'public.pt'})
 
-def create_tsvector(*args):
-    exp = args[0]
-    for e in args[1:]:
-        exp += ' ' + e
-    return func.to_tsvector('portuguese', exp)
+# def create_tsvector(*args):
+#     exp = args[0]
+#     for e in args[1:]:
+#         exp += ' ' + e
+#     return func.to_tsvector('portuguese', exp)
 
 
 article_tag = db.Table('article_tag',
@@ -31,6 +32,10 @@ article_tag = db.Table('article_tag',
                                  db.ForeignKey('article.id')),
                        db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')))
 
+question_tag = db.Table('question_tag',
+                        db.Column('question_id', db.Integer,
+                                db.ForeignKey('question.id')),
+                        db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')))
 
 class ArticleView(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -257,7 +262,7 @@ class Tag(db.Model):
     name = db.Column(db.String(48), index=True, nullable=False)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    questions = db.relationship('Question', backref='tag', lazy='dynamic', foreign_keys='[Question.tag_id]')
+    # questions = db.relationship('Question', backref=backref('tag', lazy='dynamic'), lazy='dynamic', foreign_keys='[Question.tag_id]')
 
 class Question(db.Model):
     '''
@@ -289,9 +294,14 @@ class Question(db.Model):
     update_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_at = db.Column(db.DateTime)
-    tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
+    # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
 
+    tags = db.relationship('Tag',
+                           secondary=question_tag,
+                           backref=db.backref('questions',
+                                              lazy='dynamic'),
+                           lazy='dynamic')
     search_vector = db.Column(TSVectorType('question', 'answer', regconfig='pg_catalog.portuguese'))#regconfig='public.pt'))
 
     view = db.relationship('QuestionView', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
@@ -535,7 +545,7 @@ class Question(db.Model):
         return [x[0] for x in rs if x != None]
 
     @staticmethod
-    def most_liked(limit=5):
+    def most_liked(limit=5, classification=True):
         try:
             rs = db.session.query(Question, func.count(QuestionLike.id).label('likes')).join(
                 Question.like).group_by(Question).order_by(text('likes DESC')).limit(limit).all()
@@ -544,7 +554,9 @@ class Question(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             return abort(500)
-        return [x[0] for x in rs if x != None] 
+        if classification:
+            return [x for x in rs if x != None]
+        return [x[0] for x in rs if x != None]
 
     @staticmethod
     def likes_by_user(user_id):
@@ -560,6 +572,18 @@ class Question(db.Model):
             QuestionSave.question).filter(
                 QuestionSave.user_id==user.id).order_by(Question.create_at.desc())
         return rs
+
+    def get_body_html(self, resume=False, size=1500):
+        html_classes = {'table': 'table table-bordered',
+                        'img': 'img img-fluid'}
+        if resume:
+            l_text = list(filter(lambda x: x not in [
+                          '', ' ', '\t'], self.answer.split('\n')))
+            # text = get_list_max_len(l_text, 256)
+            return Markup(process_html(markdown('\n'.join(l_text), extras={"tables": None, "html-classes": html_classes}))).striptags()[0:size] + '...'
+            # return Markup(process_html(markdown(text))).striptags()
+
+        return Markup(process_html(markdown(self.answer, extras={"tables": None, "html-classes": html_classes})))
 
 class QuestionView(db.Model):
 
