@@ -24,8 +24,19 @@
 
     {% if g.questions_most_recent | length > 0 %}
 
-        <div class="p-4 md-3 bh-light rounded">
+        <div class="p-4 md-3 bg-light rounded">
             <h4 class="font-italic">Recentes</h4>
+            {% for question in g.questions_most_recent %}
+            <p class="mb-0"><a href="{{url_for('question.view', id=question.id)}}"
+                class="text-decoration-none">{{question.question[0:50]}}</a></p>
+            {% endfor %}
+        </div>
+
+    {% endif %}
+    {% if g.questions_most_liked | length > 0 %}
+
+        <div class="p-4 md-3 bg-light rounded">
+            <h4 class="font-italic">Mais curtidos</h4>
             {% for question in g.questions_most_recent %}
             <p class="mb-0"><a href="{{url_for('question.view', id=question.id)}}"
                 class="text-decoration-none">{{question.question[0:50]}}</a></p>
@@ -36,10 +47,13 @@
 
     {% if g.tags | length > 0 %}
 
-        <div class="p-4 md-3 bh-light rounded">
+        <div class="p-4 md-3 bg-light rounded">
             <h4 class="font-italic">Marcações</h4>
             {% for tag in g.tags %}
-            <p class="mb-0"><a href="{{url_for('question.tag', name=tag.name)}}" class="text-decoration-none">{{tag.name}}</a></p>
+            <p class="mb-0">
+                <a href="{{url_for('question.tag', name=tag.name)}}" class="text-decoration-none">{{tag.name}}</a>
+                <span class="badge bg-secondary">{{tag.questions.count()}}</span>
+            </p>
             {% endfor %}
         </div>
 

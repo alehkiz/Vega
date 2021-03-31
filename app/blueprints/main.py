@@ -25,7 +25,7 @@ def before_request():
     g.tags = Tag.query.all()
     g.questions_most_viewed = Question.most_viewed(app.config.get('ITEMS_PER_PAGE', 5))
     g.questions_most_recent = Question.query.order_by(Question.create_at.desc()).limit(app.config.get('ITEMS_PER_PAGE', 5)).all()
-
+    g.questions_most_liked = Question.most_liked(app.config.get('ITEMS_PER_PAGE', 5), classification=False)
 
 @bp.route('/')
 @bp.route('/index')
