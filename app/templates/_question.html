@@ -46,6 +46,7 @@
                     </a>
 
                     {% endif %}
+                    {% if current_user.is_authenticated %}
                     {% if question.is_liked(current_user.id) %}
                     <a class="like-button unlike" id="unlike_{{question.id}}"
                         href="{{url_for('question.like_action', question_id=question.id)}}"><i
@@ -55,6 +56,8 @@
                         href="{{url_for('question.like_action', question_id=question.id)}}"><i
                             class="icon-heart-empty"></i></a>
                     {% endif %}
+                    {% endif %}
+                    {% if current_user.is_authenticated %}
                     {% if question.is_saved(current_user.id) %}
                     <a class="save-button unsave" id='unsave_{{question.id}}'
                         href="{{url_for('question.save_action', question_id=question.id)}}"><i
@@ -64,11 +67,15 @@
                         href="{{url_for('question.save_action', question_id=question.id)}}"><i
                             class="icon-save"></i></a>
                     {% endif %}
+                    {% endif %}
                 </div>
             </div>
             <div class="accordion-body">{{question.get_body_html()}}</div>
             <div class="accordion-footer">
-
+                {% for tag in question.tags.all() %}
+                <a href="{{url_for('question.tag', name=tag.name)}}">
+                    <span class="badge bg-secondary">{{tag.name}}</span></a>
+                {% endfor %}
 
             </div>
         </div>

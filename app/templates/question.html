@@ -18,18 +18,6 @@
         <a type="button" class="btn btn-info" href="{{url_for('question.index')}}">Voltar</a>
     </div>
     {% else %}
-    <!-- {% for question in pagination.items %}
-    <div class="alert alert-dark" role="alert">
-        <p class="fw-bold">Q: </p>
-        {{question[0].question}}
-        {% if current_user.can_edit %}
-        <a href="{{url_for('question.remove', id=question[0].id)}}"
-            class="text-decoration-none btn btn-danger btn-sm float-end"><i class="icon-remove"></i></a>
-        <a href="{{url_for('question.edit', id=question[0].id)}}"
-            class="text-decoration-none btn btn-success btn-sm float-end"><i class="icon-edit"></i></a>
-        {% endif %}
-    </div>
-    {% endfor %} -->
     {% include '_question.html' %}
 
     {{ render_pagination(pagination, first_page, last_page, request.endpoint, url_arguments=url_arguments)}}
@@ -39,8 +27,6 @@
     {% if mode == 'views' %}
 
     {% include '_question.html' %}
-    <!-- {{url_arguments}}
-    {% set x={"name": "Vazio"} %} -->
     {{ render_pagination(pagination, first_page, last_page, request.endpoint, url_arguments=url_arguments)}}
     {% endif %}
     {% if mode == 'view' %}
