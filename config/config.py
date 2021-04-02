@@ -40,6 +40,7 @@ class BaseConfig(object):
 
     ITEMS_PER_PAGE = 5
     QUESTIONS_PER_PAGE = 10
+    TABLE_ITEMS_PER_PAGE = 15
 
     # Variável responsável pelo DE-PARA entre as colunas das tabelas
     TABULATE = {
@@ -92,6 +93,22 @@ class BaseConfig(object):
             'answer' : {
                 'name' : 'Resposta',
                 'attr' : None
+            }
+
+        },
+        'tag' :{
+            'id' :{
+                'name' : 'id',
+                'attr' : None
+            },
+            'name': {
+                'name' : 'Nome',
+                'attr' : None
+            },
+            'user': {
+                'name' : 'criado por',
+                'attr': 'username'
+
             }
 
         }
