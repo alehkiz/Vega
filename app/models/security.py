@@ -40,6 +40,7 @@ class User(UserMixin, db.Model):
     answers = db.relationship('Question', backref='answered_by', lazy='dynamic', foreign_keys='[Question.answer_user_id]')
     question_update = db.relationship('Question', backref='updater', lazy='dynamic', foreign_keys='[Question.update_user_id]')
     question_like = db.relationship('QuestionLike', backref='users_liked', lazy='dynamic', foreign_keys='[QuestionLike.user_id]')
+    question_save = db.relationship('QuestionSave', backref='users_saved', lazy='dynamic', foreign_keys='[QuestionSave.user_id]')
     roles = db.relationship('Role', 
                 secondary=roles_users, 
                 backref=db.backref('users', lazy='dynamic'), 
@@ -103,8 +104,13 @@ class User(UserMixin, db.Model):
     def format_active(self):
         return 'Sim' if self.active else 'Não'
 
-    
+    @property
+    def questions_liked_count(self):
+        return self.question_like.count()
 
+    @property
+    def questions_saved_count(self):
+        return self.question_save.count()
 
     def __repr__(self):
         return f'<User {self.username}>'

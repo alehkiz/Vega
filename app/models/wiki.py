@@ -1,4 +1,5 @@
 # from sqlalchemy import func
+from os import stat
 from flask import Markup, escape, current_app as app, abort, flash
 from sqlalchemy import func, text, Index, cast, desc
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -262,8 +263,13 @@ class Tag(db.Model):
     name = db.Column(db.String(48), index=True, nullable=False)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref='tag')
     # questions = db.relationship('Question', backref=backref('tag', lazy='dynamic'), lazy='dynamic', foreign_keys='[Question.tag_id]')
-
+    @hybrid_property
+    def username(self):
+        if self.user is None:
+            return ''
+        return self.user.name
 class Question(db.Model):
     '''
     Classe responsável pelas perguntas da wiki, com indexação para ``full text search``

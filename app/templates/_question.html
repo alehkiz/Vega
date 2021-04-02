@@ -46,6 +46,7 @@
                     </a>
 
                     {% endif %}
+                    {% if current_user.is_authenticated %}
                     {% if question.is_liked(current_user.id) %}
                     <a class="like-button unlike" id="unlike_{{question.id}}"
                         href="{{url_for('question.like_action', question_id=question.id)}}"><i
@@ -63,6 +64,7 @@
                     <a class="save-button save" id='save_{{question.id}}'
                         href="{{url_for('question.save_action', question_id=question.id)}}"><i
                             class="icon-save"></i></a>
+                    {% endif %}
                     {% endif %}
                 </div>
             </div>

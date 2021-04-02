@@ -164,8 +164,8 @@ def add():
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                return render_template('add.html', form=form, title='Editar', question=True)
-    return render_template('add.html', form=form, title='Editar', question=True)
+                return render_template('add.html', form=form, title='Incluir dúvida', question=True)
+    return render_template('add.html', form=form, title='Incluir dúvida', question=True)
 
 @bp.route('/tag/<string:name>')
 def tag(name):

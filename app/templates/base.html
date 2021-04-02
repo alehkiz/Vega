@@ -5,21 +5,26 @@
     {% block head %}
     <!-- Required meta tags -->
     <meta charset="utf-8" />
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">--> {% block styles %} 
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">--> 
+    {% block styles %} 
     <!-- Bootstrap CSS -->
     <link href="{{url_for('static', filename='css/main.css')}}" rel="stylesheet">
     <link href="{{url_for('static', filename='css/bootstrap/bootstrap.min.css')}}" rel="stylesheet">
-    <link href="{{url_for('static', filename='css/fontawesome/font-awesome.min.css')}}" rel="stylesheet"> {% endblock %}
+    <link href="{{url_for('static', filename='css/fontawesome/all.min.css')}}" rel="stylesheet"> 
+    
+    {% endblock %}
 
     <title>
-        {% block title %} {% if title %}{{ title }} - {{config['PROJECT_NAME']}}{% else %}Welcome to {{config['PROJECT_NAME']}}{% endif %} {% endblock %}
+        {% block title %} 
+        {% if title %}{{ title }} - {{config['PROJECT_NAME']}}{% else %}Welcome to {{config['PROJECT_NAME']}}{% endif %} 
+        {% endblock %}
     </title>
     {% endblock %}
 </head>
 
 <body>
     {% block navbar %}
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4 fixed-top">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4 fixed-top border-bottom" style="height: 4.2em;">
         <div class="container-fluid">
         <a class="navbar-brand" href="#">{{config['PROJECT_NAME']}}</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +55,7 @@
                 <!-- <button class="btn btn-outline-success" type="submit">Search</button> -->
               </form>
             </ul>
-            <ul class="navbar-nav d-flex">
+            <ul class="navbar-nav w-100 justify-content-center">
                 {% if current_user.is_anonymous %}
                 <li class="nav-item">
                     <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
@@ -58,40 +63,62 @@
                 {% else %}
                 {% if current_user.is_admin %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Admin</a>
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-tools circle"></i>
+                    </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                      <li><a class="dropdown-item" href="{{url_for('admin.index')}}">adm</a></li>
                       <li><a class="dropdown-item" href="{{url_for('admin.users')}}">Usuários</a></li>
                       <li><a class="dropdown-item" href="{{url_for('admin.articles')}}">Artigos</a></li>
                       <li><a class="dropdown-item" href="{{url_for('admin.questions')}}">Dúvidas</a></li>
-                      <li class="dropdown dropend"><a class="dropdown-item" href="#">Gerenciar &raquo; </a>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="{{url_for('admin.tag')}}">Marcação</a></li>
+                      <li><a class="dropdown-item" href="{{url_for('admin.topic')}}">Tópico</a></li>
+                      <!-- <li class="dropdown dropend"><a class="dropdown-item" href="#">Gerenciar &raquo; </a>
                         <ul class="submenu dropdown-menu">
                             <li><a class="dropdown-item" href="#">Tópicos</a></li>
                             <li><a class="dropdown-item" href="#">Tags</a></li>
                           </ul>
-                    </li>
+                    </li> -->
 
                     </ul>
                     
                 </li>
+                <!-- <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Gerenciar</a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                      
+                    </ul>
+                    
+                </li> -->
                 {% endif %}
+
+
                 
 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Profile</a>
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">
+                        <!-- <img src="https://github.com/mdo.png" alt="mdo" class="rounded-circle" width="32" height="32"> -->
+                        <i class="fas fa-user circle"></i>
+                    </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown01">
                       <li><a class="dropdown-item" href="{{ url_for('user.view', id=current_user.id) }}">{{ _('Profile') }}</a></li>
-                      <li><a class="dropdown-item" href="{{url_for('question.saves')}}">Saves</a></li>
-                      <li><a class="dropdown-item" href="{{url_for('question.likes')}}">Likes</a></li>
+                      <li>
+                          <a class="dropdown-item" href="{{url_for('question.saves')}}">Saves
+                              <span class="badge bg-info  text-dark">{{current_user.questions_saved_count}}</span>
+                      </a></li>
+                      <li><a class="dropdown-item" href="{{url_for('question.likes')}}">Likes
+                        <span class="badge bg-info  text-dark">{{current_user.questions_liked_count}}</span>
+
+                      </a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">{{ _('Logout') }}</a></li>
                     </ul>
                     
                 </li>
                 <!-- <li class="nav-item">
                     <a href="{{ url_for('user.view', id=current_user.id) }}" class="nav-link">{{ _('Profile') }}</a>
                 </li> -->
-                <li class="nav-item">
-                    <a href="{{ url_for('auth.logout') }}" class="nav-link">{{ _('Logout') }}</a>
-                </li>
+
                 {% endif %}
 
                 
@@ -100,7 +127,22 @@
         </div>
     </div>
     </nav>
-    <!-- END OF NAV -->
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     {% endblock %} 
     {% block content %}
     <div class="container">
@@ -123,7 +165,7 @@
     <!-- <script src="{{url_for('static', filename='js/fontawesome/all.js')}}"></script> -->
     <script src="{{url_for('static', filename='js/jquery/jquery.min.js')}}"></script>
 
-    <script src="{{url_for('static', filename='js/bootstrap/bootstrap.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bootstrap/bootstrap.bundle.min.js')}}"></script>
     
     <!-- <script src="{{url_for('static', filename='js/main.js')}}"></script> -->
     <script type="text/javascript">
