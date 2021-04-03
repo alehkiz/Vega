@@ -372,15 +372,6 @@ class Question(db.Model):
         if per_page:
             result = result.paginate(page=page, per_page=per_page)
         return result
-    # @staticmethod
-    # def ns(expression):
-
-    #     return db.session.query(Question, 
-    #             func.ts_rank_cd(Question.search_vector, 
-    #                 func.plainto_tsquery('pt', '580'))).filter(
-    #                     Question.search_vector.op('@@')(
-    #                         func.plainto_tsquery('pt','580'))).all()
-
 
 
     @property
@@ -526,17 +517,11 @@ class Question(db.Model):
         return db.session.query(func.sum(QuestionLike.question_id)).filter(QuestionLike.question_id==self.id).scalar()
 
     @property
-    def answered(self):
+    def was_answered(self):
         if self.answer != None:
             return True
         return False
 
-    # @property
-    # def answered(self):
-    #     print('Aqui')
-    #     if self.answer != None:
-    #         return True
-    #     return False
 
     @staticmethod
     def most_viewed(limit=5):
@@ -590,6 +575,20 @@ class Question(db.Model):
             # return Markup(process_html(markdown(text))).striptags()
 
         return Markup(process_html(markdown(self.answer, extras={"tables": None, "html-classes": html_classes})))
+
+    def to_dict(self):
+        return {'id': self.id,
+                'question':self.get_body_html(),
+                'create_at': self.get_create_time_elapsed,
+                'author':self.author.name,
+                'update_at': self.get_update_time_elapsed if self.was_updated() else None,
+                'updater' : self.updater.name if self.was_updated() else None,
+                'answer': self.get_body_html() if self.was_answered else None,
+                'answered_by' : self.answered_by.name if self.was_answered else None,
+                'answered_at' : self.get_answer_time_elapsed if self.was_answered else None,
+                'topic' : self.topic.name,
+                'tags' : [x.name for x in self.tags]
+                }
 
 class QuestionView(db.Model):
 
