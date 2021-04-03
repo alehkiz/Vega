@@ -131,7 +131,7 @@ class BaseConfig(object):
         #     'remove': '.remove'
         # }
     }
-
+    USER_ANON_ID = 4
 
     # ELASTICSEARCH_URL = 'http://localhost:9200'
 
