@@ -7,9 +7,9 @@
 
     <div class="accordion-item">
         <h2 class="accordion-header" id="flush-heading_{{question.id}}">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            <button id='button-accordion-{{question.id}}' class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                 data-bs-target="#flush-collapse_{{question.id}}" aria-expanded="false"
-                aria-controls="flush-collapse_{{question.id}}" href="{{url_for('api.question', id=question.id)}}"">
+                aria-controls="flush-collapse_{{question.id}}" href="{{url_for('api.question', id=question.id)}}">
                 {{question.question}}
             </button>
         </h2>

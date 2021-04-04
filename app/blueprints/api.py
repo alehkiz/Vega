@@ -6,6 +6,7 @@ from app.core.db import db
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag
 from app.models.security import User
 from app.models.search import Search
+# import time
 
 bp = Blueprint('api', __name__, url_prefix='/api/')
 
