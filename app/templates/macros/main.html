@@ -26,6 +26,7 @@
         {% else %}
 
         <li class="page-item disabled">
+            <!-- {{url_arguments}} -->
             <a class="page-link active" href="{{ url_for(endpoint, page=page, **url_arguments) }}" aria-current="page">
                 {{page}}
             </a>
@@ -79,12 +80,12 @@
     </div> -->
 
     <div class="col-md-6">
-        <a href="{{ url_for(cls_table.__tablename__+'.add')}}" class="btn btn-primary pull-right h2">Adicionar </a>
+        <a href="{{ url_for(cls_table.__tablename__+'.add')}}" class="btn btn-primary pull-right h2 float-end">Adicionar </a>
     </div>
 </div>
 <div class="table-responsive col-md-12">
-    <table class="table table-striped table-hover" cellspacing="0" cellpadding="0">
-        <thead>
+    <table class="table table-striped table-hover table-bordered" cellspacing="0" cellpadding="0">
+        <thead class="table-dark">
             <tr>
                 {% for value in config['TABULATE'].get(cls_table.__tablename__).values() %}
                 <th>{{value['name'].capitalize()}}</th>
@@ -107,13 +108,17 @@
                 {% endif %}
                 {% endfor %}
                 <td class="actions">
-                    <a class="btn btn-success btn-sm"
-                        href="{{ url_for(cls_table.__tablename__+'.view', id=item.id)}}"><i
-                            class="icon-zoom-in"></i></a>
-                    <a class="btn btn-warning btn-sm"
-                        href="{{ url_for(cls_table.__tablename__+'.edit', id=item.id)}}"><i class="icon-edit"></i></a>
-                    <a class="btn btn-danger btn-sm" href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}"
-                        data-toggle="modal" data-target="#delete-modal"><i class="icon-remove"></i></a>
+                    <a class="btn btn-outline-primary btn-sm" href="{{ url_for(cls_table.__tablename__+'.view', id=item.id)}}">
+                        <i class="fas fa-search-plus"></i></a>
+                        <a class="btn btn-outline-success btn-sm"
+                            href="{{ url_for(cls_table.__tablename__+'.edit', id=item.id)}}">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a class="btn btn-outline-danger btn-sm"
+                            href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}" data-toggle="modal"
+                            data-target="#delete-modal">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
                 </td>
             </tr>
             {% endfor %}

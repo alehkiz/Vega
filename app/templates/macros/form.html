@@ -10,7 +10,7 @@
 style=style, **kwargs)|safe }}
 {% else %}
 {% if nosize %}
-{{ field(class=(class if class else '') + (" is-invalid" if field.errors else ""))|safe }}
+{{ field(class=(class if class else '') + (" is-invalid" if field.errors else ""), **kwargs)|safe }}
 {% else %}
 {{ field(class=(class if class else '') + (" is-invalid" if field.errors else ""), size=size, placeholder=placeholder,
 **kwargs)|safe }}
