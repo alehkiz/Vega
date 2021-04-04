@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify
 from flask.globals import current_app
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
@@ -117,10 +117,11 @@ def edit(id):
         try:
             question.question = form.question.data
             question.answer = form.answer.data
-            question.tag = form.tag.data
+            question.tags = form.tag.data
             question.topic = form.topic.data
             question.updater = current_user
             question.update_at = datetime.utcnow()
+            question.answer_approved = form.approved.data
             db.session.commit()
             return redirect(url_for('question.view', id=question.id))
         except Exception as e:
@@ -130,9 +131,10 @@ def edit(id):
             return render_template('edit.html', form=form, title='Editar', question=True)
     
     form.question.data = question.question
-    form.tag.data = question.tag
+    form.tag.data = question.tags
     form.topic.data = question.topic
     form.answer.data = question.answer
+    form.approved.data = question.answer_approved
 
 
     return render_template('edit.html',form=form, title='Editar', question=True)
@@ -155,6 +157,7 @@ def add():
             question = Question()
             question.question = form.question.data
             question.answer = form.answer.data
+            question.answer_approved = form.approved.data
             question.create_user_id = current_user.id
             try:
                 db.session.add(question)
@@ -164,15 +167,27 @@ def add():
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                return render_template('add.html', form=form, title='Editar', question=True)
-    return render_template('add.html', form=form, title='Editar', question=True)
+                return render_template('add.html', form=form, title='Incluir dúvida', question=True)
+    return render_template('add.html', form=form, title='Incluir dúvida', question=True)
 
 @bp.route('/tag/<string:name>')
 def tag(name):
-
+    page = request.args.get('page', 1, type=int)
+    search_form = QuestionSearchForm()
+    pagination_args = {'name':name}
     tag = Tag.query.filter_by(name=name).first_or_404()
-    questions = tag.questions.all()
-    return render_template('question.html', questions=questions, cls_question=Question)
+    paginate = tag.questions.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    iter_pages = list(paginate.iter_pages())
+    first_page = iter_pages[0] if len(iter_pages) >= 1 else None
+    last_page = paginate.pages if paginate.pages > 0 else None
+    print(pagination_args)
+    return render_template('question.html', 
+                                pagination=paginate, 
+                                cls_question=Question, 
+                                form=search_form, mode='views', 
+                                first_page=first_page, 
+                                last_page=last_page, 
+                                url_arguments=pagination_args)
 
 # @bp.route('/topic/<string:topic_name>')
 # def topic(topic_name):
@@ -186,3 +201,112 @@ def tag(name):
 #         return abort(404)
 #     tag = Tag.query.filter_by(name=tag_name).first_or_404()
 #     return render_template('tags.html', tag=tag)
+
+
+@bp.route('/like/<int:question_id>', methods=['GET','POST'])
+@login_required
+def like_action(question_id):
+    question = Question.query.filter(Question.id==question_id).first_or_404()
+    action = request.form.get('action', False)
+    if action is False or action not in ['like', 'unlike']:
+        return jsonify({
+            'status':'error',
+            'message': 'ação inválida'}), 404
+    if action == 'like':
+        if question.is_liked(current_user.id):
+            return jsonify({
+                'status':'error',
+                'message': 'Usuário já gostou dessa questão'}), 404
+        rs = question.add_like(current_user.id)
+        if rs is False:
+            return jsonify({
+                'status':'error',
+                'message': 'Usuário já gostou dessa questão'}), 404
+        return jsonify({
+                'status':'success',
+                'message': 'Ação concluída'}), 200
+    if action == 'unlike':
+        if not question.is_liked(current_user.id):
+            return jsonify({
+                'status':'error',
+                'message': 'Usuário não curtiu essa questão'}), 404
+        rs = question.remove_like(current_user.id)
+        if rs is False:
+            return jsonify({
+                'status':'error',
+                'message': 'Não foi possível remover o gostar'}), 404
+        return jsonify({
+                'status':'success',
+                'message': 'Ação concluída'}), 200
+
+@bp.route('/save/<int:question_id>', methods=['GET','POST'])
+@login_required
+def save_action(question_id):
+    question = Question.query.filter(Question.id==question_id).first_or_404()
+    action = request.form.get('action', False)
+    print(action)
+    if action is False or action not in ['save', 'unsave']:
+        return jsonify({
+            'status':'error',
+            'message': 'ação inválida'}), 404
+    if action == 'save':
+        if question.is_saved(current_user.id):
+            return jsonify({
+                'status':'error',
+                'message': 'Usuário já salvou dessa questão'}), 404
+        rs = question.add_save(current_user.id)
+        if rs is False:
+            return jsonify({
+                'status':'error',
+                'message': 'Usuário já salvou dessa questão'}), 404
+        return jsonify({
+                'status':'success',
+                'message': 'Ação concluída'}), 200
+    if action == 'unsave':
+        if not question.is_saved(current_user.id):
+            return jsonify({
+                'status':'error',
+                'message': 'Usuário não salvou essa questão'}), 404
+        rs = question.remove_save(current_user.id)
+        if rs is False:
+            return jsonify({
+                'status':'error',
+                'message': 'Não foi possível remover o gostar'}), 404
+        return jsonify({
+                'status':'success',
+                'message': 'Ação concluída'}), 200
+
+
+
+
+
+@bp.route('/likes')
+@login_required
+def likes():
+    page = request.args.get('page', 1, type=int)
+    paginate = Question.likes_by_user(current_user.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+
+    # paginate = Question.query.order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    iter_pages = list(paginate.iter_pages())
+    first_page = iter_pages[0] if len(iter_pages) >= 1 else None
+    last_page = paginate.pages if paginate.pages > 0 else None
+    return render_template('question.html', pagination=paginate, cls_question=Question, mode='views', first_page=first_page, last_page=last_page)
+
+@bp.route('/saves')
+@login_required
+def saves():
+    page = request.args.get('page', 1, type=int)
+    paginate = Question.saves_by_user(current_user.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+
+    # paginate = Question.query.order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    iter_pages = list(paginate.iter_pages())
+    first_page = iter_pages[0] if len(iter_pages) >= 1 else None
+    last_page = paginate.pages if paginate.pages > 0 else None
+    return render_template('question.html', pagination=paginate, cls_question=Question, mode='views', first_page=first_page, last_page=last_page)
+
+    
+@bp.route('/saved')
+@login_required
+def saved():
+    ...
+

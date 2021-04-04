@@ -5,6 +5,12 @@
 
 
 {% block question_content %}
+{#{% set url_arguments= {} if not url_arguments is mapping else none %}#}
+
+{% if not url_arguments is mapping or url_arguments is none %}
+    {% set url_arguments= {} %}
+{% endif %}
+<!-- {{url_arguments}} -->
     {% if mode == 'search' %}
     {% if pagination.total == 0 %}
     Nenhum resultado encontrado
@@ -26,39 +32,16 @@
     {% endfor %} -->
     {% include '_question.html' %}
 
-    {{ render_pagination(pagination, first_page, last_page, 'question.search', url_arguments=url_arguments)}}
+    {{ render_pagination(pagination, first_page, last_page, request.endpoint, url_arguments=url_arguments)}}
     {% endif %}
 
     {% endif %}
     {% if mode == 'views' %}
 
     {% include '_question.html' %}
-    <!-- {% for question in pagination.items %}
-    <article class="article-post">
-        <div class="article-header">
-            {#<p class="article-meta">
-                {{question.get_create_time_elapsed}} por {{question.author.name}}
-                em <a href="{{ url_for('wiki.topic', topic_name=question.topic.format_name)}}"
-                    class="text-decoration-none">{{question.topic.name}}</a>
-
-            </p>#}
-        </div>
-        <div class="alert alert-dark" role="alert">
-            <span class="fw-bold">Q: </span>
-            <a href="{{url_for('question.view', id=question.id)}}"
-                class='badge bg-info text-dark text-wrap text-break text-decoration-none'>
-                {{question.question}}</a>
-            {% if current_user.can_edit %}
-            <a href="{{url_for('question.remove', id=question.id)}}"
-                class="text-decoration-none btn btn-danger btn-sm float-end"><i class="icon-remove"></i></a>
-            <a href="{{url_for('question.edit', id=question.id)}}"
-                class="text-decoration-none btn btn-success btn-sm float-end"><i class="icon-edit"></i></a>
-            {% endif %}
-        </div>
-
-    </article>
-    {% endfor %} -->
-    {{ render_pagination(pagination, first_page, last_page, 'question.index')}}
+    <!-- {{url_arguments}}
+    {% set x={"name": "Vazio"} %} -->
+    {{ render_pagination(pagination, first_page, last_page, request.endpoint, url_arguments=url_arguments)}}
     {% endif %}
     {% if mode == 'view' %}
     <article class="article-post">
@@ -80,23 +63,41 @@
             </p>
         </div>
         <div class="article-text">
-            {{question.answer}}
+            {{question.get_body_html()}}
         </div>
         {% if question.tag != none %}
         <br>
-        <!-- <div class="article-tag card border-dark">
-            <div class="card-header">Tags</div>
-            <div class="card-body text-dark"> -->
-        <!-- <p class="card-text">
-                    <a href="{{url_for('wiki.tag', tag_name=question.tag.name)}}">{{question.tag.name}}</a> 
-                </p> -->
-        <span class="badge bg-secondary"><a href="{{url_for('question.tag', name=question.tag.name)}}"
-                class="text-white">{{question.tag.name}}</a> </span>
-        <!-- </div>
-        </div> -->
+        {% for tag in question.tags %}
+        <span class="badge bg-secondary"><a href="{{url_for('question.tag', name=tag.name)}}"
+                class="text-white">{{tag.name}}</a> </span>
+        {% endfor %}
         {% endif %}
     </article>
-
-
     {% endif %}
+{% endblock %}
+
+
+
+{% block scripts %}
+{{ super() }}
+{% if article == true %}
+<!-- <script src="{{url_for('static', filename='js/editormd/editormd.min.js')}}"></script> -->
+<script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}"></script>
+
+<script type="text/javascript">
+    var simplemde = new SimpleMDE({ 
+        element: document.getElementById("text"),
+        renderingConfig: {
+            singleLineBreaks: true,
+            codeSyntaxHighlighting: true,
+        },
+        forceSync: true,
+        shortcuts: {
+            drawTable: "Cmd-Alt-T"
+        },
+        showIcons: ["code", "table"]
+    });
+
+</script>
+{% endif %}
 {% endblock %}

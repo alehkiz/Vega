@@ -16,10 +16,10 @@ body {
 /* Article */
 
 
-/* .article-header {
-  padding-top: 20px;
-  padding-bottom: 20px;
-} */
+.article-header {
+  /* padding-top: 20px;
+  padding-bottom: 20px; */
+}
 
 .article-title {
     margin-top: 30px;
@@ -115,12 +115,103 @@ form > textarea:hover {
 } */
 
 
+.accordion-body {
+    padding-top: 2rem !important;
 
+}
 .accordion-footer {
     padding: 1rem 1.25rem;
     color: #999;
     font-size: 60% !important;
 }
 
-teste 
- ads
+.accordion-head {
+    padding: 0.5rem 0.25rem;
+
+    /* border: solid #dee2e6;
+    border-radius: .25rem;
+    border-width: 1px; */
+}
+
+.accordion-header {
+    border: solid #dee2e6;
+    border-radius: .25rem;
+    border-width: 0.5px;
+}
+
+.accordion-head-info {
+    float: left;
+    padding: 0.5rem 1rem;
+    color: #999;
+    font-size: 80% !important;
+}
+
+.accordion-head-buttons {
+    float: right;
+    padding: 0.5rem 1rem;
+}
+
+.accordion-border {
+    border: solid #63a1df !important;
+    border-radius: .25rem;
+    border-width: 1px !important;
+}
+
+.like-button, .save-button {
+    /* color: currentColor !important; */
+    text-decoration: none !important;
+    /* text-decoration-color: transparent; */
+}
+
+.unlike {
+    color: red !important;
+}
+.unsave {
+    color: blue !important;
+}
+.save {
+    color: black !important;
+}
+
+.saved {
+    color: blue;
+}
+
+
+@media all and (min-width: 992px) {
+	.dropdown-menu li{ position: relative; 	}
+	.nav-item .submenu{ 
+		display: none;
+		position: absolute;
+		left:100%; top:-7px;
+	}
+	.nav-item .submenu-left{ 
+		right:100%; left:auto;
+	}
+	.dropdown-menu > li:hover{ background-color: #f1f1f1 }
+	.dropdown-menu > li:hover > .submenu{ display: block; }
+}	
+/* ============ desktop view .end// ============ */
+
+/* ============ small devices ============ */
+@media (max-width: 991px) {
+  .dropdown-menu .dropdown-menu{
+      margin-left:0.7rem; margin-right:0.7rem; margin-bottom: .5rem;
+  }
+}	
+
+
+
+
+i.fas.circle {
+    display: inline-block;
+    border-radius: 60px;
+    box-shadow: 0px 0px 2px #888;
+    padding: 0.5em 0.6em;
+    background-color:#5793ef;
+  }
+
+  i.fas.circle:hover {
+    box-shadow: 0px 0px 2px #5793ef;
+    background-color:#287eff
+  }

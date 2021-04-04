@@ -1,7 +1,7 @@
 from flask_security import UserMixin, RoleMixin
 from flask_security.utils import hash_password, verify_password
 from sqlalchemy.ext.hybrid import hybrid_property
-
+# from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView
 
 from app.core.db import db
 from app.utils.kernel import validate_password, format_elapsed_time
@@ -19,6 +19,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(512), index=True, nullable=False)
     email = db.Column(db.String(128), index=True, unique=True, nullable=False)
     _password = db.Column(db.String(512), nullable=False)
+    temp_password = db.Column(db.Boolean, nullable=False, default=True)
     about_me = db.Column(db.String(512))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     location = db.Column(db.String(128), nullable=True)
@@ -39,6 +40,8 @@ class User(UserMixin, db.Model):
     questions = db.relationship('Question', backref='author', lazy='dynamic', foreign_keys='[Question.create_user_id]')
     answers = db.relationship('Question', backref='answered_by', lazy='dynamic', foreign_keys='[Question.answer_user_id]')
     question_update = db.relationship('Question', backref='updater', lazy='dynamic', foreign_keys='[Question.update_user_id]')
+    question_like = db.relationship('QuestionLike', backref='users_liked', lazy='dynamic', foreign_keys='[QuestionLike.user_id]')
+    question_save = db.relationship('QuestionSave', backref='users_saved', lazy='dynamic', foreign_keys='[QuestionSave.user_id]')
     roles = db.relationship('Role', 
                 secondary=roles_users, 
                 backref=db.backref('users', lazy='dynamic'), 
@@ -102,6 +105,13 @@ class User(UserMixin, db.Model):
     def format_active(self):
         return 'Sim' if self.active else 'Não'
 
+    @property
+    def questions_liked_count(self):
+        return self.question_like.count()
+
+    @property
+    def questions_saved_count(self):
+        return self.question_save.count()
 
     def __repr__(self):
         return f'<User {self.username}>'
