@@ -19,6 +19,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(512), index=True, nullable=False)
     email = db.Column(db.String(128), index=True, unique=True, nullable=False)
     _password = db.Column(db.String(512), nullable=False)
+    temp_password = db.Column(db.Boolean, nullable=False, default=True)
     about_me = db.Column(db.String(512))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     location = db.Column(db.String(128), nullable=True)

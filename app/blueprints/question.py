@@ -121,6 +121,7 @@ def edit(id):
             question.topic = form.topic.data
             question.updater = current_user
             question.update_at = datetime.utcnow()
+            question.answer_approved = form.approved.data
             db.session.commit()
             return redirect(url_for('question.view', id=question.id))
         except Exception as e:
@@ -133,6 +134,7 @@ def edit(id):
     form.tag.data = question.tags
     form.topic.data = question.topic
     form.answer.data = question.answer
+    form.approved.data = question.answer_approved
 
 
     return render_template('edit.html',form=form, title='Editar', question=True)
@@ -155,6 +157,7 @@ def add():
             question = Question()
             question.question = form.question.data
             question.answer = form.answer.data
+            question.answer_approved = form.approved.data
             question.create_user_id = current_user.id
             try:
                 db.session.add(question)
@@ -272,6 +275,10 @@ def save_action(question_id):
         return jsonify({
                 'status':'success',
                 'message': 'Ação concluída'}), 200
+
+
+
+
 
 @bp.route('/likes')
 @login_required

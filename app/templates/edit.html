@@ -44,6 +44,8 @@
         {{ macros.render_field(form.tag, class='form-select', nosize=true, multiple=true)}}
         {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
         <br>
+        {{ macros.render_field(form.approved)}}
+        <br>
         {{ form.submit }}
 
         {% elif edit %}

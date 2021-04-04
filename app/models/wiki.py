@@ -292,7 +292,8 @@ class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.String(256), index=True,
                          nullable=False, unique=True)
-    answer = db.Column(db.Text, index=True, nullable=True, unique=False)
+    _answer = db.Column('answer', db.Text, index=True, nullable=True, unique=False)
+    answer_approved = db.Column(db.Boolean, nullable=False)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     create_user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -337,6 +338,14 @@ class Question(db.Model):
     def format_answer_date(self):
         return self.answer_at.strftime("%d/%m/%Y")
 
+    @hybrid_property
+    def answer(self):
+        return self._answer
+    
+    @answer.setter
+    def answer(self, answer):
+        self._answer = answer
+        self.answer_approved = False
 
     @staticmethod
     def search(expression, per_page, page = 1, resume=False):

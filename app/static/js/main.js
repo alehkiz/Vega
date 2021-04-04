@@ -1,34 +1,46 @@
 $(document).ready(function () {
 
     // like and unlike click
-    
 
-    
+    accordion_link = false;
+    like_link = false;
+    save_link = false;
+
 
     $('.accordion-button').click(function (e) {
-        h2_obj = $(this).parent()
-        // console.log(h2_obj)
+        if (accordion_link === true){
+            return false;
+        }
+        if ($($(this).attr('data-bs-target')).length > 0) {
+            return false;
+        }
+        h2_obj = $(this).parent();
+        button_accordion = $("#" + this.id);
+        // console.log(this.id);
         var id = h2_obj.attr('id');
         var split_id = id.split('_');
         var question_id = split_id[1];
-
-        // console.log(e)
-        var target = $(this).attr('data-bs-target')
-        var url = $(this).attr('href')
-        // console.log(url)
-        if ($(target).length > 0) {
-            return false;
-        }
+        var target = $(this).attr('data-bs-target');
+        var url = button_accordion.attr('href');
+        
         $.ajax({
             url: url,
             type: 'post',
             dataType: 'json',
+            // async: false,
             headers: {
                 'X-CSRFToken': $CSRF_TOKEN
+            },
+            beforeSend: function(){
+                accordion_link = true;
+            },
+            complete: function(){
+                accordion_link = false;
             },
             success: function (data) {
                 // console.log(data)
                 // console.log(id)
+                accordion_link = false;
                 h2_obj.parent().append('<div id="flush-collapse_' + question_id + '" class="accordion-collapse collapse accordion-border"' +
                     'aria-labelledby="flush-heading_' + question_id + '" data-bs-parent="#accordionFlushQuestion">')
                 $('#flush-collapse_' + question_id).append('<div class="accordion-head">' +
@@ -39,42 +51,48 @@ $(document).ready(function () {
                 accordion_collapse = $('#flush-collapse_' + question_id);
                 head_info = $('#flush-collapse_' + question_id).find(".accordion-head-info")
                 if (!data.update_at || !data.updater) {
-                    head_info.append('Criado '+ data.create_at + ' por ' + data.author)
+                    head_info.append('Criado ' + data.create_at + ' por ' + data.author)
                 }
-                else{
+                else {
                     head_info.append('Atualizado ' + data.update_at + ' por ' + data.updater)
                 }
 
                 accordion_collapse.append('<div class="accordion-head-buttons"></div>')
                 accordion_buttons = accordion_collapse.find('.accordion-head-buttons')
-                if (data.url_edit !== null){
-                    accordion_buttons.append('<a class="edit text-decoration-none" id="edit_'+question_id+'"'+
-                        'href="'+data.url_edit+'">'+
-                        '<i class="fas fa-edit"></i>'+
+                if (data.url_edit !== undefined) {
+                    accordion_buttons.append('<a class="edit text-decoration-none" id="edit_' + question_id + '"' +
+                        'href="' + data.url_edit + '">' +
+                        '<i class="fas fa-edit"></i>' +
                         '</a>');
                 }
-                like_icon = data.like_action == 'like' ? 'far' : 'fas';
-                save_icon = data.save_action == 'save' ? 'far' : 'fas';
 
-                accordion_buttons.append(
-                    '<a class="like-button '+data.like_action+'" id="like_'+question_id+'"'+
-                        'href="'+data.url_like+'">'+
-                        '<i class="'+like_icon+' fa-heart"></i></a>'
-                )
+                if (data.like_action !== undefined) {
+                    like_icon = data.like_action == 'like' ? 'far' : 'fas';
+                    accordion_buttons.append(
+                        '<a class="like-button ' + data.like_action + '" id="like_' + question_id + '"' +
+                        'href="' + data.url_like + '">' +
+                        '<i class="' + like_icon + ' fa-heart"></i></a>'
+                    );
+                }
+                if (data.save_action !== undefined) {
+                    save_icon = data.save_action == 'save' ? 'far' : 'fas';
+                    accordion_buttons.append(
+                        '<a class="save-button ' + data.save_action + '" id="save_' + question_id + '"' +
+                        'href="' + data.url_save + '">' +
+                        '<i class="' + save_icon + ' fa-save"></i></a>'
+                    );
+                }
 
-                accordion_buttons.append(
-                    '<a class="save-button '+data.save_action+'" id="save_'+question_id+'"'+
-                    'href="'+data.url_save+'">'+
-                    '<i class="'+save_icon+' fa-save"></i></a>'
-                    )
 
                 accordion_collapse.append(
-                    '<div class="accordion-body">'+data.answer+'</div>'
-                )
-                $(target).collapse()
-
+                    '<div class="accordion-body">' + data.answer + '</div>'
+                );
+                $(target).collapse();
+                
+            },
+            error: function(data){
+                accordion_link = false;
             }
-
         });
         return false;
     });
@@ -82,17 +100,18 @@ $(document).ready(function () {
 
 });
 
-
 $(document).on('click', ".like, .unlike", function (e) {
+    if (like_link === true) {
+        return false;
+    }
     var link = $(this)
     var id = this.id;
     var split_id = id.split("_");
     var action = split_id[0];
     var link_href = $(this).attr('href');
-    if (link_href == "#") {
-        return false;
-    }
-    $(this).attr('href', '#');
+    like_link = true;
+    
+    // $(this).attr('href', '#');
     var question_id = split_id[1];
 
     if ($(this).hasClass('like')) {
@@ -115,11 +134,17 @@ $(document).on('click', ".like, .unlike", function (e) {
         headers: {
             "X-CSRFToken": $CSRF_TOKEN,
         },
+        beforeSend: function(){
+            like_link = false;
+        },
+        complete: function(){
+            like_link = false;
+        },
         success: function (data) {
             $("#" + id).removeClass(action);
             $("#" + id).addClass(invert);
             i = $('#' + id).children();
-            link.attr('href', link_href);
+            like_link = false
             i.toggleClass(function () {
 
                 if ($(this).hasClass('fas')) {
@@ -132,15 +157,21 @@ $(document).on('click', ".like, .unlike", function (e) {
             });
         },
         error: function (data) {
-            console.log('Erro')
+            console.log('Erro');
+            like_link = false;
         }
     });
+    // link.attr('href', link_href);
     return false;
 });
 
 
 
 $(document).on('click', ".save, .unsave", function (e) {
+    if (save_link === true){
+        return false;
+    }
+    save_link = true;
     var id = this.id;
     var split_id = id.split("_");
     var action = split_id[0];
@@ -165,10 +196,17 @@ $(document).on('click', ".save, .unsave", function (e) {
         headers: {
             "X-CSRFToken": $CSRF_TOKEN,
         },
+        beforeSend: function(){
+            save_link = true;
+        },
+        complete: function(){
+            save_link = false;
+        },
         success: function (data) {
             $("#" + id).removeClass(action);
             $("#" + id).addClass(invert);
-            i = $('#' + id).children()
+            i = $('#' + id).children();
+            save_link = false;
             i.toggleClass(function () {
 
                 if ($(this).hasClass('fas')) {
@@ -181,7 +219,8 @@ $(document).on('click', ".save, .unsave", function (e) {
             });
         },
         error: function (data) {
-            console.log('Erro')
+            console.log('Erro');
+            save_link = false;
         }
     });
     return false;
