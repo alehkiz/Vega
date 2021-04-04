@@ -129,14 +129,11 @@ def edit(id):
             app.logger.error(e)
             db.session.rollback()
             return render_template('edit.html', form=form, title='Editar', question=True)
-    
     form.question.data = question.question
     form.tag.data = question.tags
     form.topic.data = question.topic
     form.answer.data = question.answer
     form.approved.data = question.answer_approved
-
-
     return render_template('edit.html',form=form, title='Editar', question=True)
 
 @bp.route('remove')
