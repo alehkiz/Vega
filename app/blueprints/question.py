@@ -17,7 +17,7 @@ bp = Blueprint('question', __name__, url_prefix='/question/')
 def index():
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
-    paginate = Question.query.order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    paginate = Question.query.filter(Question.answer_approved==True).order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None

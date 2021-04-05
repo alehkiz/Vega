@@ -13,6 +13,8 @@ bp = Blueprint('api', __name__, url_prefix='/api/')
 @bp.route('question/<int:id>', methods=['GET', 'POST'])
 def question(id):
     question = Question.query.filter(Question.id==id).first_or_404()
+    if question.answer_approved == False:
+        abort(404)
     to_dict = question.to_dict()
     if current_user.is_authenticated:
         if question.is_liked(current_user.id):

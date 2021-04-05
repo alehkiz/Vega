@@ -96,7 +96,7 @@ class Article(db.Model):
         return f'<Article {self.title}>'
 
 
-    def search(text, per_page, page=1, resume=False):
+    def search(text, pagination = False, per_page = 1, page=1, resume=False):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         if resume:
             result = (db.session.query(Article.title, (
@@ -126,7 +126,7 @@ class Article(db.Model):
                         'public.pt',
                         text))) > 0).order_by(
                         desc('similarity')))
-        if per_page:
+        if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
 
@@ -348,7 +348,7 @@ class Question(db.Model):
         self.answer_approved = False
 
     @staticmethod
-    def search(expression, per_page, page = 1, resume=False):
+    def search(expression, pagination = False, per_page = 1, page = 1, resume=False):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         if resume:
             result = (db.session.query(Question.question, (
@@ -378,7 +378,7 @@ class Question(db.Model):
                         'public.pt',
                         expression))) > 0).order_by(
                         desc('similarity')))
-        if per_page:
+        if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
 
