@@ -3,7 +3,7 @@
 
 {% block styles %}
 {{ super()}}
-<link href="{{url_for('static', filename='css/simplemde/simplemde.min.css')}}" rel="stylesheet" />
+<link href="{{url_for('static', filename='css/simplemde/simplemde.min.css')}}" rel="stylesheet">
 {% if article %}
 <!-- <link href="{{url_for('static', filename='css/editormd/editormd.css')}}" rel="stylesheet" /> -->
 
@@ -43,6 +43,14 @@
         250px;")}}
         {{ macros.render_field(form.tag, class='form-select', nosize=true, multiple=true)}}
         {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
+        <br>
+        {{ macros.render_field(form.approved)}}
+        <br>
+        {{ form.submit }}
+
+        {% elif edit %}
+        {{ form.csrf_token}}
+        {{ macros.render_field(form.name, size=256, class='form-control', placeholder='Tag')}}
         <br>
         {{ form.submit }}
 

@@ -3,33 +3,19 @@
     {% for question in pagination.items %}
     {% if mode == 'search' %}
     {% set question, pos = question %}
-    {#<div class="accordion-item">
-        <h2 class="accordion-header" id="flush-heading{{question[0].id}}">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#flush-collapse{{question[0].id}}" aria-expanded="false"
-                aria-controls="flush-collapse{{question[0].id}}">
-                {{question[0].question}}
-            </button>
-        </h2>
-        <div id="flush-collapse{{question[0].id}}" class="accordion-collapse collapse"
-            aria-labelledby="flush-heading{{question[0].id}}" data-bs-parent="#accordionFlushQuestion">
-            <div class="accordion-header">teste</div>
-            <div class="accordion-body">{{question[0].answer}}</div>
-        </div>
-    </div>#}
-
     {% endif %}
 
     <div class="accordion-item">
-        <h2 class="accordion-header" id="flush-heading{{question.id}}">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#flush-collapse{{question.id}}" aria-expanded="false"
-                aria-controls="flush-collapse{{question.id}}">
+        <h2 class="accordion-header" id="flush-heading_{{question.id}}">
+            <button id='button-accordion-{{question.id}}' class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#flush-collapse_{{question.id}}" aria-expanded="false"
+                aria-controls="flush-collapse_{{question.id}}" href="{{url_for('api.question', id=question.id)}}">
                 {{question.question}}
             </button>
         </h2>
-        <div id="flush-collapse{{question.id}}" class="accordion-collapse collapse accordion-border"
-            aria-labelledby="flush-heading{{question.id}}" data-bs-parent="#accordionFlushQuestion">
+        {#a
+            <div id="flush-collapse_{{question.id}}" class="accordion-collapse collapse accordion-border"
+            aria-labelledby="flush-heading_{{question.id}}" data-bs-parent="#accordionFlushQuestion">
             <div class="accordion-head">
                 <div class="accordion-head-info">
                     {% if question.was_updated() %}
@@ -42,30 +28,31 @@
                     {% if current_user.can_edit %}
                     <a class="edit text-decoration-none" id="edit_{{question.id}}"
                         href="{{url_for('question.edit', id=question.id)}}">
-                        <i class="icon-edit"></i>
+                        <i class="fas fa-edit"></i>
                     </a>
 
                     {% endif %}
                     {% if current_user.is_authenticated %}
                     {% if question.is_liked(current_user.id) %}
                     <a class="like-button unlike" id="unlike_{{question.id}}"
-                        href="{{url_for('question.like_action', question_id=question.id)}}"><i
-                            class="icon-heart"></i></a>
+                        href="{{url_for('question.like_action', question_id=question.id)}}">
+                        <i class="fas fa-heart"></i></a>
                     {% else %}
                     <a class="like-button like" id="like_{{question.id}}"
-                        href="{{url_for('question.like_action', question_id=question.id)}}"><i
-                            class="icon-heart-empty"></i></a>
+                        href="{{url_for('question.like_action', question_id=question.id)}}">
+                        <i class="far fa-heart"></i></a>
                     {% endif %}
                     {% endif %}
                     {% if current_user.is_authenticated %}
                     {% if question.is_saved(current_user.id) %}
                     <a class="save-button unsave" id='unsave_{{question.id}}'
-                        href="{{url_for('question.save_action', question_id=question.id)}}"><i
-                            class="icon-save"></i></a>
+                        href="{{url_for('question.save_action', question_id=question.id)}}">
+                        <i class="fas fa-save"></i></a>
                     {% else %}
                     <a class="save-button save" id='save_{{question.id}}'
-                        href="{{url_for('question.save_action', question_id=question.id)}}"><i
-                            class="icon-save"></i></a>
+                        href="{{url_for('question.save_action', question_id=question.id)}}">
+                        <i class="fas fa-save"></i></a>
+                    {% endif %}
                     {% endif %}
                     {% endif %}
                 </div>
@@ -79,6 +66,7 @@
 
             </div>
         </div>
+        #}
     </div>
     {% endfor %}
 </div>

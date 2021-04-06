@@ -2,8 +2,8 @@
 {% import "macros/form.html" as macros %}
 
 {% block styles %}
-{{ super()}}
-<link href="{{url_for('static', filename='css/simplemde/simplemde.min.css')}}" rel="stylesheet" />s
+{{- super() -}}
+    <link href="{{url_for('static', filename='css/simplemde/simplemde.min.css')}}" rel="stylesheet">
 {% if article %}
 
 {% endif %}
@@ -49,6 +49,13 @@
         {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
         
         {{ form.submit }}
+
+        {% elif tag is defined %}
+        {{ form.csrf_token }}
+        {{ macros.render_field(form.name, size=32, class='form-control', placeholder='Titulo') }}
+
+        {{ form.submit }}
+
         {% elif user %},
         {{ form.csrf_token}}
         {{ macros.render_field(form.username, size=32, class='form-control', placeholder='Username')}}

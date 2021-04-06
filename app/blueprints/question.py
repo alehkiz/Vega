@@ -17,7 +17,7 @@ bp = Blueprint('question', __name__, url_prefix='/question/')
 def index():
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
-    paginate = Question.query.order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    paginate = Question.query.filter(Question.answer_approved==True).order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
@@ -121,6 +121,7 @@ def edit(id):
             question.topic = form.topic.data
             question.updater = current_user
             question.update_at = datetime.utcnow()
+            question.answer_approved = form.approved.data
             db.session.commit()
             return redirect(url_for('question.view', id=question.id))
         except Exception as e:
@@ -128,13 +129,11 @@ def edit(id):
             app.logger.error(e)
             db.session.rollback()
             return render_template('edit.html', form=form, title='Editar', question=True)
-    
     form.question.data = question.question
     form.tag.data = question.tags
     form.topic.data = question.topic
     form.answer.data = question.answer
-
-
+    form.approved.data = question.answer_approved
     return render_template('edit.html',form=form, title='Editar', question=True)
 
 @bp.route('remove')
@@ -155,6 +154,7 @@ def add():
             question = Question()
             question.question = form.question.data
             question.answer = form.answer.data
+            question.answer_approved = form.approved.data
             question.create_user_id = current_user.id
             try:
                 db.session.add(question)
@@ -164,8 +164,8 @@ def add():
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                return render_template('add.html', form=form, title='Editar', question=True)
-    return render_template('add.html', form=form, title='Editar', question=True)
+                return render_template('add.html', form=form, title='Incluir dúvida', question=True)
+    return render_template('add.html', form=form, title='Incluir dúvida', question=True)
 
 @bp.route('/tag/<string:name>')
 def tag(name):
@@ -272,6 +272,10 @@ def save_action(question_id):
         return jsonify({
                 'status':'success',
                 'message': 'Ação concluída'}), 200
+
+
+
+
 
 @bp.route('/likes')
 @login_required
