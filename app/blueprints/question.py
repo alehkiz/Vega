@@ -142,7 +142,7 @@ def remove():
     confirm = request.form.get('confirm', False)
     if confirm != 'true':
         abort(404)
-
+    
     return jsonify({'teste':'a'})
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
