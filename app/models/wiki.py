@@ -346,6 +346,8 @@ class Question(db.Model):
     def answer(self, answer):
         self._answer = answer
         self.answer_approved = False
+        if self.answer_user_id is None:
+            raise Exception('´answer_user_id´ deve ser informado para responder uma questão')
 
     @staticmethod
     def search(expression, pagination = False, per_page = 1, page = 1, resume=False):
@@ -595,7 +597,7 @@ class Question(db.Model):
                 'answer': self.get_body_html() if self.was_answered else None,
                 'answered_by' : self.answered_by.name if self.was_answered else None,
                 'answered_at' : self.get_answer_time_elapsed if self.was_answered else None,
-                'topic' : self.topic.name,
+                'topic' : self.topic.name if not self.topic is None else None,
                 'tags' : [x.name for x in self.tags]
                 }
 

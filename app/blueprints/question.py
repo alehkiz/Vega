@@ -9,6 +9,7 @@ from app.models.security import User
 from app.models.search import Search
 
 
+
 from app.forms.question import QuestionEditForm, QuestionSearchForm, QuestionForm
 bp = Blueprint('question', __name__, url_prefix='/question/')
 
@@ -136,10 +137,13 @@ def edit(id):
     form.approved.data = question.answer_approved
     return render_template('edit.html',form=form, title='Editar', question=True)
 
-@bp.route('remove')
+@bp.route('remove', methods=['POST'])
 def remove():
-    return 'none'
+    confirm = request.form.get('confirm', False)
+    if confirm != 'true':
+        abort(404)
 
+    return jsonify({'teste':'a'})
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'editor', 'aux_editor')

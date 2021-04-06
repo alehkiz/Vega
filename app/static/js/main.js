@@ -5,6 +5,7 @@ $(document).ready(function () {
     accordion_link = false;
     like_link = false;
     save_link = false;
+    load_modal = true;
 
 
     $('.accordion-button').click(function (e) {
@@ -224,4 +225,83 @@ $(document).on('click', ".save, .unsave", function (e) {
         }
     });
     return false;
+});
+
+$(document).on('click', ".remove", function(e){
+    // e.preventDefault();
+    // if (load_modal === false){
+    //     return false
+    // }
+    // load_modal = false;
+    var removeModal = new bootstrap.Modal(document.getElementById("delete-modal"), {});
+    console.log(removeModal)
+    
+    remove_link = true;
+    var remove_href = $(this).attr('href');
+    remove_confirm = $("#delete-modal").find('.delete')
+    // console.log(remove_confirm)
+    remove_confirm.attr('href', remove_href)
+    removeModal.show();
+
+    // $.ajax({
+    //     url: remove_href,
+    //     type: 'post',
+    //     data: {confirm: true},
+    //     dataType: 'json',
+    //     headers: {
+    //         "X-CSRFToken": $CSRF_TOKEN,
+    //     },
+    //     beforeSend: function(){
+    //         remove_link = false;
+    //     },
+    //     success: function(data){
+    //         remove_link = true;
+            
+    //         console.log(data)
+    //     }
+    // });
+    
+
+});
+
+$(document).on('click', "#confirm-delete", function(e){
+    bt_confirm_delete = $("#" + e.currentTarget.id)
+    confirm_delete_href = bt_confirm_delete.attr('href')
+    $.ajax({
+        url:confirm_delete_href,
+        type:'post',
+        data: {confirm: true},
+        dataType: 'json',
+        headers: {
+            "X-CSRFToken": $CSRF_TOKEN,
+        },
+        success: function(data){
+            console.log(data)
+        }
+    });
+    console.log(confirm_delete_href)
+
+});
+
+$("#delete-modal").on("show.bs.modal", function(e) {
+    // if (load_modal === false){
+    //     e.preventDefault();
+    // }
+    console.log(e.currentTarget.id)
+    
+    // e.preventDefault()
+    var link = $(e.relatedTarget);
+    console.log(e)    
+    var myModal = new bootstrap.Modal(document.getElementById(e.currentTarget.id), {});
+    console.log(e.currentTarget.id)
+    console.log(myModal)
+    setTimeout(
+        function() 
+        {
+          console.log('aqui')
+        }, 5000);
+    // $(this).find(".modal-body").load(link.attr("href"));
+    // load_modal = false
+    // myModal.show()
+    // load_modal = true;
 });
