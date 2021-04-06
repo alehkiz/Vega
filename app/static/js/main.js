@@ -276,7 +276,8 @@ $(document).on('click', "#confirm-delete", function(e){
             "X-CSRFToken": $CSRF_TOKEN,
         },
         success: function(data){
-            console.log(data)
+            console.log(data);
+            
         }
     });
     console.log(confirm_delete_href)
