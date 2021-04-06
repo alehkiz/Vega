@@ -1,4 +1,5 @@
 # from sqlalchemy import func
+from os import stat
 from flask import Markup, escape, current_app as app, abort, flash
 from sqlalchemy import func, text, Index, cast, desc
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -95,7 +96,7 @@ class Article(db.Model):
         return f'<Article {self.title}>'
 
 
-    def search(text, per_page, page=1, resume=False):
+    def search(text, pagination = False, per_page = 1, page=1, resume=False):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         if resume:
             result = (db.session.query(Article.title, (
@@ -125,7 +126,7 @@ class Article(db.Model):
                         'public.pt',
                         text))) > 0).order_by(
                         desc('similarity')))
-        if per_page:
+        if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
 
@@ -262,8 +263,13 @@ class Tag(db.Model):
     name = db.Column(db.String(48), index=True, nullable=False)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref='tag')
     # questions = db.relationship('Question', backref=backref('tag', lazy='dynamic'), lazy='dynamic', foreign_keys='[Question.tag_id]')
-
+    @hybrid_property
+    def username(self):
+        if self.user is None:
+            return ''
+        return self.user.name
 class Question(db.Model):
     '''
     Classe responsável pelas perguntas da wiki, com indexação para ``full text search``
@@ -286,7 +292,8 @@ class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.String(256), index=True,
                          nullable=False, unique=True)
-    answer = db.Column(db.Text, index=True, nullable=True, unique=False)
+    _answer = db.Column('answer', db.Text, index=True, nullable=True, unique=False)
+    answer_approved = db.Column(db.Boolean, nullable=False)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     create_user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -331,9 +338,17 @@ class Question(db.Model):
     def format_answer_date(self):
         return self.answer_at.strftime("%d/%m/%Y")
 
+    @hybrid_property
+    def answer(self):
+        return self._answer
+    
+    @answer.setter
+    def answer(self, answer):
+        self._answer = answer
+        self.answer_approved = False
 
     @staticmethod
-    def search(expression, per_page, page = 1, resume=False):
+    def search(expression, pagination = False, per_page = 1, page = 1, resume=False):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         if resume:
             result = (db.session.query(Question.question, (
@@ -363,18 +378,9 @@ class Question(db.Model):
                         'public.pt',
                         expression))) > 0).order_by(
                         desc('similarity')))
-        if per_page:
+        if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
-    # @staticmethod
-    # def ns(expression):
-
-    #     return db.session.query(Question, 
-    #             func.ts_rank_cd(Question.search_vector, 
-    #                 func.plainto_tsquery('pt', '580'))).filter(
-    #                     Question.search_vector.op('@@')(
-    #                         func.plainto_tsquery('pt','580'))).all()
-
 
 
     @property
@@ -520,17 +526,11 @@ class Question(db.Model):
         return db.session.query(func.sum(QuestionLike.question_id)).filter(QuestionLike.question_id==self.id).scalar()
 
     @property
-    def answered(self):
+    def was_answered(self):
         if self.answer != None:
             return True
         return False
 
-    # @property
-    # def answered(self):
-    #     print('Aqui')
-    #     if self.answer != None:
-    #         return True
-    #     return False
 
     @staticmethod
     def most_viewed(limit=5):
@@ -584,6 +584,20 @@ class Question(db.Model):
             # return Markup(process_html(markdown(text))).striptags()
 
         return Markup(process_html(markdown(self.answer, extras={"tables": None, "html-classes": html_classes})))
+
+    def to_dict(self):
+        return {'id': self.id,
+                'question':self.get_body_html(),
+                'create_at': self.get_create_time_elapsed,
+                'author':self.author.name,
+                'update_at': self.get_update_time_elapsed if self.was_updated() else None,
+                'updater' : self.updater.name if self.was_updated() else None,
+                'answer': self.get_body_html() if self.was_answered else None,
+                'answered_by' : self.answered_by.name if self.was_answered else None,
+                'answered_at' : self.get_answer_time_elapsed if self.was_answered else None,
+                'topic' : self.topic.name,
+                'tags' : [x.name for x in self.tags]
+                }
 
 class QuestionView(db.Model):
 
