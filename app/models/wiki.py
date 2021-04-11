@@ -110,8 +110,9 @@ class Article(db.Model):
                     Article.search_vector, 
                     func.plainto_tsquery(
                         'public.pt',
-                        text))) > 0).order_by(
-                        desc('similarity')))
+                        text))) > 0)#.order_by(
+                        #desc('similarity'))
+                        )
         else:
             result = (db.session.query(Article, (
                 func.ts_rank_cd(
@@ -124,8 +125,9 @@ class Article(db.Model):
                     Article.search_vector, 
                     func.plainto_tsquery(
                         'public.pt',
-                        text))) > 0).order_by(
-                        desc('similarity')))
+                        text))) > 0)#.order_by(
+                        #desc('similarity'))
+                        )
         if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
@@ -364,8 +366,9 @@ class Question(db.Model):
                     Question.search_vector, 
                     func.plainto_tsquery(
                         'public.pt',
-                        expression))) > 0).order_by(
-                        desc('similarity')))
+                        expression))) > 0)#.order_by(
+                        #desc('similarity'))
+                        )
         else:
             result = (db.session.query(Question, (
                 func.ts_rank_cd(
@@ -375,11 +378,9 @@ class Question(db.Model):
                         expression))).label(
                             'similarity')).filter((
                 func.ts_rank_cd(
-                    Question.search_vector, 
-                    func.plainto_tsquery(
-                        'public.pt',
-                        expression))) > 0).order_by(
-                        desc('similarity')))
+                    Question.search_vector, func.plainto_tsquery('public.pt',expression))) > 0)#.order_by(
+                        #desc('similarity'))
+                        )
         if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
@@ -585,7 +586,7 @@ class Question(db.Model):
             return Markup(process_html(markdown('\n'.join(l_text), extras={"tables": None, "html-classes": html_classes}))).striptags()[0:size] + '...'
             # return Markup(process_html(markdown(text))).striptags()
 
-        return Markup(process_html(markdown(self.answer, extras={"tables": None, "html-classes": html_classes})))
+        return Markup(markdown(self.answer, extras={"tables": None, "html-classes": html_classes}))
 
     def to_dict(self):
         return {'id': self.id,
