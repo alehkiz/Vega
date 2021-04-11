@@ -4,7 +4,7 @@ from flask_security import login_required, current_user
 from datetime import datetime
 
 from app.core.db import db
-from app.models.wiki import Article, Question, Tag
+from app.models.wiki import Article, Question, Tag, Topic
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
 
@@ -23,6 +23,7 @@ def before_request():
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
     g.tags = Tag.query.all()
+    g.topics = Topic.query.all()
     g.questions_most_viewed = Question.most_viewed(app.config.get('ITEMS_PER_PAGE', 5))
     g.questions_most_recent = Question.query.order_by(Question.create_at.desc()).limit(app.config.get('ITEMS_PER_PAGE', 5)).all()
     g.questions_most_liked = Question.most_liked(app.config.get('ITEMS_PER_PAGE', 5), classification=False)
