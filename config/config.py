@@ -119,11 +119,11 @@ class BaseConfig(object):
             'edit': 'user.edit',
             'remove': 'user.remove'
         },
-        'article':{
-            'add': 'article.view',
-            'edit': '.edit',
-            'remove': '.remove'
-        }   
+        # 'article':{
+        #     'add': 'article.view',
+        #     'edit': '.edit',
+        #     'remove': '.remove'
+        # }   
         # ,
         # 'article':{
         #     'add': '.add',

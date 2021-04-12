@@ -26,18 +26,18 @@
     {% block navbar %}
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4 fixed-top border-bottom" style="height: 4.2em;">
         <div class="container-fluid">
-        <a class="navbar-brand" href="#">{{config['PROJECT_NAME']}}</a>
+        <a class="navbar-brand" href="{{url_for('question.index')}}">{{config['PROJECT_NAME']}}</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                <li class="nav-item">
+                {#<li class="nav-item">
                     <a href="{{ url_for('main.index') }}" class="nav-link">Home</a>
-                </li>
-                <li class="nav-item">
+                </li>#}
+                {#<li class="nav-item">
                     <a href="{{ url_for('wiki.index') }}" class="nav-link">Wiki</a>
-                </li>
+                </li>#}
                 <li class="nav-item">
                     <a href="{{ url_for('question.index')}}" class='nav-link'>Dúvidas</a>
                 </li>
@@ -68,7 +68,7 @@
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown01">
                       <li><a class="dropdown-item" href="{{url_for('admin.users')}}">Usuários</a></li>
-                      <li><a class="dropdown-item" href="{{url_for('admin.articles')}}">Artigos</a></li>
+                      {#<li><a class="dropdown-item" href="{{url_for('admin.articles')}}">Artigos</a></li>#}
                       <li><a class="dropdown-item" href="{{url_for('admin.questions')}}">Dúvidas</a></li>
                       <li><hr class="dropdown-divider"></li>
                       <li><a class="dropdown-item" href="{{url_for('admin.tag')}}">Marcação</a></li>

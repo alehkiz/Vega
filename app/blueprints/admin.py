@@ -20,10 +20,22 @@ def index():
 @roles_accepted('admin')
 def users():
     page = request.args.get('page', 1, type=int)
-    paginate = User.query.paginate(page, app.config.get('TABLE_ITEMS_PER_PAGE', 10), False)
+    order = request.args.get('order', False)
+    order_type = request.args.get('order_type', 'desc')
+    if not order is False:
+        try:
+            column = getattr(User, order)
+            column_type = getattr(column, order_type)
+        except Exception as e:
+            column = User.id
+            column_type = User.id.desc
+        u = User.query.order_by(column_type()) 
+    paginate = u.paginate(page, app.config.get('TABLE_ITEMS_PER_PAGE', 10), False)
+    # paginate = User.query.paginate(page, app.config.get('TABLE_ITEMS_PER_PAGE', 10), False)
     first_page = list(paginate.iter_pages())[0]
+    order_type = 'asc' if order_type == 'desc' else 'desc'
     last_page = paginate.pages#list(paginate.iter_pages())[-1]
-    return render_template('admin.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint='admin.users', cls_table=User, list=True, page_name='Usuários')
+    return render_template('admin.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint='admin.users', cls_table=User, list=True, page_name='Usuários', order_type=order_type)
 
 @bp.route('/articles/')
 @login_required
@@ -42,12 +54,23 @@ def articles():
 @roles_accepted('admin')
 def questions():
     page = request.args.get('page', 1, type=int)
-    paginate = Question.query.paginate(page, app.config.get('TABLE_ITEMS_PER_PAGE', 10), False)
+    order = request.args.get('order', False)
+    order_type = request.args.get('order_type', 'desc')
+    if not order is False:
+        try:
+            column = getattr(Question, order)
+            column_type = getattr(column, order_type)
+        except Exception as e:
+            column = Question.id
+            column_type = Question.id.desc
+        q = Question.query.order_by(column_type()) 
+    paginate = q.paginate(page, app.config.get('TABLE_ITEMS_PER_PAGE', 10), False)
     first_page = list(paginate.iter_pages())[0] if len(list(paginate.iter_pages())) >= 1 else None
     last_page = paginate.pages
+    order_type = 'asc' if order_type == 'desc' else 'desc'
     return render_template('admin.html', pagination=paginate, first_page=first_page, 
                         last_page=last_page, endpoint=request.url_rule.endpoint, 
-                        cls_table=Question, list=True, page_name='Dúvidas')
+                        cls_table=Question, list=True, page_name='Dúvidas', order_type=order_type)
 
 @bp.route('/topic')
 @login_required

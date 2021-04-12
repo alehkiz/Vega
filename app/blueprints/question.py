@@ -16,7 +16,7 @@ from sqlalchemy import desc, nullslast
 
 
 from app.forms.question import QuestionEditForm, QuestionSearchForm, QuestionForm
-bp = Blueprint('question', __name__, url_prefix='/question/')
+bp = Blueprint('question', __name__, url_prefix='/duvidas/')
 
 @bp.route('/')
 @bp.route('/index')
@@ -129,8 +129,6 @@ def edit(id):
             question.update_at = datetime.utcnow()
             
             if form.approved.data == True:
-                print('aio')
-                print(form.approved.data)
                 question.answer_user_id = current_user.id
                 question.answer = process_html(form.answer.data).text
                 question.answer_approved = form.approved.data
@@ -150,13 +148,27 @@ def edit(id):
     form.approved.data = question.answer_approved
     return render_template('edit.html',form=form, title='Editar', question=True)
 
-@bp.route('remove', methods=['POST'])
-def remove():
+@bp.route('remove/<int:id>', methods=['POST'])
+def remove(id):
     confirm = request.form.get('confirm', False)
     if confirm != 'true':
+        
         abort(404)
+    q = Question.query.filter(Question.id == id).first_or_404()
+    id = q.id 
+    try:
+        db.session.delete(q)
+        db.session.commit()
+        return jsonify({'id':id,
+                    'status': 'success'})
+    except Exception as e:
+        app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+        app.logger.error(e)
+        db.session.rollback()
+        return abort(404)
+    # return jsonify(q.to_dict())
+    return jsonify({'status': 'error'})
     
-    return jsonify({'teste':'a'})
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'editor', 'aux_editor')
@@ -173,9 +185,10 @@ def add():
             question.question = process_html(form.question.data).text
             if form.approved.data == True:
                 question.answer_user_id = current_user.id
-                question.answer_approved = form.approved.data
+                
                 # remove tag html
                 question.answer = process_html(form.answer.data).text
+                question.answer_approved = form.approved.data
             question.create_user_id = current_user.id
             try:
                 db.session.add(question)
