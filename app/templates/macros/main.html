@@ -61,6 +61,7 @@
 
 
 {% macro render_table(cls_table, pagination, page_name) %}
+
 {% if cls_table %}
 
 {% if config['TABULATE'].get(cls_table.__tablename__) %}
@@ -88,8 +89,8 @@
     <table class="table table-striped table-hover table-bordered" cellspacing="0" cellpadding="0">
         <thead class="table-dark">
             <tr>
-                {% for value in config['TABULATE'].get(cls_table.__tablename__).values() %}
-                <th>{{value['name'].capitalize()}}</th>
+                {% for key, value in config['TABULATE'].get(cls_table.__tablename__).items() %}
+                <th><a href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type'])}}">{{value['name'].capitalize()}}</a></th>
 
 
                 {% endfor %}
@@ -100,7 +101,7 @@
 
             {% if pagination %}
             {% for item in pagination.items %}
-            <tr>
+            <tr id='{{item.id}}'>
                 {% for tabulate_item in config['TABULATE'].get(cls_table.__tablename__).items() %}
                 {% if not tabulate_item[1].get('attr') is none %}
                 <td>{{item | attr(tabulate_item[1].get('attr')) | string | truncate(40, True)}}</td>

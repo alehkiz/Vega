@@ -522,11 +522,13 @@ class Question(db.Model):
 
     @property
     def views(self):
-        return db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.question_id==self.id).scalar()
+        count_views = db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.question_id==self.id).scalar()
+        return 0 if count_views is None else count_views
 
     @property
     def likes(self):
-        return db.session.query(func.sum(QuestionLike.question_id)).filter(QuestionLike.question_id==self.id).scalar()
+        count_likes = db.session.query(func.sum(QuestionLike.question_id)).filter(QuestionLike.question_id==self.id).scalar()
+        return 0 if count_likes is None else count_likes
 
     @property
     def was_answered(self):

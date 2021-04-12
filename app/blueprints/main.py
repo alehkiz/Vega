@@ -31,7 +31,7 @@ def before_request():
 @bp.route('/')
 @bp.route('/index')
 def index():
-    print(current_user.is_anonymous)
+    return redirect(url_for('question.index'))
     article = Article.query.first()
     return render_template('article.html', article=article)
 
