@@ -56,14 +56,17 @@ def questions():
     page = request.args.get('page', 1, type=int)
     order = request.args.get('order', False)
     order_type = request.args.get('order_type', 'desc')
-    if not order is False:
+    if not order is False or not order_type is False:
         try:
             column = getattr(Question, order)
             column_type = getattr(column, order_type)
         except Exception as e:
             column = Question.id
             column_type = Question.id.desc
-        q = Question.query.order_by(column_type()) 
+    else:
+        column = Question.id
+        column_type = column.desc
+    q = Question.query.order_by(column_type()) 
     paginate = q.paginate(page, app.config.get('TABLE_ITEMS_PER_PAGE', 10), False)
     first_page = list(paginate.iter_pages())[0] if len(list(paginate.iter_pages())) >= 1 else None
     last_page = paginate.pages
@@ -77,12 +80,26 @@ def questions():
 @roles_accepted('admin')
 def topic():
     page = request.args.get('page', 1, type=int)
-    paginate = Topic.query.paginate(page, app.config.get('TABLE_ITEMS_PER_PAGE', 10), False)
+    order = request.args.get('order', False)
+    order_type = request.args.get('order_type', 'desc')
+    if not order is False or not order_type is False:
+        try:
+            column = getattr(Topic, order)
+            column_type = getattr(column, order_type)
+        except Exception as e:
+            column = Topic.id
+            column_type = Topic.id.desc
+    else:
+        column = Topic.id
+        column_type = column.desc
+    t = Topic.query.order_by(column_type()) 
+    paginate = t.paginate(page, app.config.get('TABLE_ITEMS_PER_PAGE', 10), False)
     first_page = list(paginate.iter_pages())[0] if len(list(paginate.iter_pages())) >= 1 else None
     last_page = paginate.pages
+    order_type = 'asc' if order_type == 'desc' else 'desc'
     return render_template('admin.html', pagination=paginate, first_page=first_page, 
                         last_page=last_page, endpoint=request.url_rule.endpoint, 
-                        cls_table=Topic, list=True, page_name='Dúvidas')
+                        cls_table=Topic, list=True, page_name='Topics', order_type=order_type)
 
 @bp.route('/tag')
 @login_required
