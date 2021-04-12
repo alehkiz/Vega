@@ -8,7 +8,7 @@ $(document).ready(function () {
     load_modal = true;
 
     if ($("#delete-modal").length){
-        removeModal = new bootstrap.Modal($("#delete-modal"), {});
+        removeModal = new bootstrap.Modal($("#delete-modal")[0], {});
     }
     $('.accordion-button').click(function (e) {
         if (accordion_link === true){
