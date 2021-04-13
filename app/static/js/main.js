@@ -55,7 +55,7 @@ $(document).ready(function () {
                 head_info = $('#flush-collapse_' + question_id).find(".accordion-head-info")
                 head_info.append(question_id + ' ')
                 if (!data.update_at || !data.updater) {
-                    head_info.append('Criado ' + data.create_at + ' por ' + data.author)
+                    head_info.append('Criado ' + data.create_time_elapsed + ' por ' + data.author)
                 }
                 else {
                     head_info.append('Atualizado ' + data.update_at + ' por ' + data.updater)

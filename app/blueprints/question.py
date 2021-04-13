@@ -100,12 +100,12 @@ def search():
 @bp.route('/view/<int:id>')
 def view(id=None):
     question = Question.query.filter(Question.id == id).first_or_404()
-    dict_view = {}
-    dict_view['id'] = question.id
-    dict_view['values'] = {
-    'Duvida':question.question,
-    'Criado em' : question.format_create_date,
-    'answer' : question.answer}
+    # dict_view = {}
+    # dict_view['id'] = question.id
+    # dict_view['values'] = {
+    # 'Duvida':question.question,
+    # 'Criado em' : question.get_create_datetime,
+    # 'answer' : question.answer}
     if current_user.is_authenticated:
         user_id = current_user.id
     else:

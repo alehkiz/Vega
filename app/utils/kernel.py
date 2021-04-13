@@ -1,6 +1,6 @@
 from re import search
 from dateutil.tz import tzutc
-from babel.dates import format_timedelta
+from babel.dates import format_timedelta, format_datetime, get_timezone
 from functools import wraps
 from datetime import datetime
 from unicodedata import normalize, category
@@ -33,6 +33,12 @@ def format_elapsed_time(timestamp):
     if isinstance(timestamp, datetime):
         timestamp = timestamp.replace(microsecond=0)
         return format_timedelta(timestamp - datetime.utcnow(), add_direction=True)
+
+def format_datetime_local(timestamp, format='short'):
+    if not format in ['full', 'long', 'medium', 'short']:
+        format = 'short'
+    if isinstance(timestamp, datetime):
+        return format_datetime(timestamp, locale='pt_BR', format=format, tzinfo=get_timezone('America/Sao_Paulo'))
 
 def get_list_max_len(l, max_value):
     '''
