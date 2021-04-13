@@ -14,7 +14,7 @@ from sqlalchemy.orm import backref
 from sqlalchemy_searchable import make_searchable
 
 from app.core.db import db
-from app.utils.kernel import format_elapsed_time, get_list_max_len, only_letters
+from app.utils.kernel import format_elapsed_time, get_list_max_len, only_letters, format_datetime_local
 from app.utils.html import process_html
 from app.models.security import User
 
@@ -322,23 +322,36 @@ class Question(db.Model):
     @property
     def get_create_time_elapsed(self):
         return format_elapsed_time(self.create_at)
+    
+    @property
+    def get_create_datetime(self):
+        return format_datetime_local(self.create_at)
+
     @property
     def get_update_time_elapsed(self):
         return format_elapsed_time(self.update_at)
     
     @property
+    def get_update_datetime(self):
+        return format_datetime_local(self.update_at)
+    
+    @property
     def get_answer_time_elapsed(self):
         return format_elapsed_time(self.answer_at)
+    
+    @property
+    def get_anser_datetime(self):
+        return format_datetime_local(self.answer_at)
 
-    @property
-    def format_create_date(self):
-        return self.create_at.strftime("%d/%m/%Y")
-    @property
-    def format_update_date(self):
-        return self.update_at.strftime("%d/%m/%Y")
-    @property
-    def format_answer_date(self):
-        return self.answer_at.strftime("%d/%m/%Y")
+    # @property
+    # def format_create_date(self):
+    #     return self.create_at.strftime("%d/%m/%Y")
+    # @property
+    # def format_update_date(self):
+    #     return self.update_at.strftime("%d/%m/%Y")
+    # @property
+    # def format_answer_date(self):
+    #     return self.answer_at.strftime("%d/%m/%Y")
 
     @hybrid_property
     def answer(self):
@@ -593,7 +606,8 @@ class Question(db.Model):
     def to_dict(self):
         return {'id': self.id,
                 'question':self.get_body_html(),
-                'create_at': self.get_create_time_elapsed,
+                'create_time_elapsed': self.get_create_time_elapsed,
+                'create_at': self.get_create_datetime,
                 'author':self.author.name,
                 'update_at': self.get_update_time_elapsed if self.was_updated() else None,
                 'updater' : self.updater.name if self.was_updated() else None,
