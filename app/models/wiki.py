@@ -21,12 +21,6 @@ from app.models.security import User
 
 make_searchable(db.metadata, options={'regconfig': 'public.pt'})
 
-# def create_tsvector(*args):
-#     exp = args[0]
-#     for e in args[1:]:
-#         exp += ' ' + e
-#     return func.to_tsvector('portuguese', exp)
-
 
 article_tag = db.Table('article_tag',
                        db.Column('post_id', db.Integer,
@@ -412,17 +406,23 @@ class Question(db.Model):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
             raise Exception('Usuário informado não existe')
-        qv = QuestionView.query.filter(QuestionView.question_id==self.id, QuestionView.user_id==user.id).first()
-        if qv == None:
-            qv = QuestionView()
-            qv.user_id = user_id
-            qv.question_id = self.id
-            qv.last_view = datetime.utcnow()
-            qv.count_view = 1
-            db.session.add(qv)
-        else:
-            qv.count_view += 1
-            qv.last_view = datetime.utcnow()
+        # qv = QuestionView.query.filter(QuestionView.question_id==self.id, QuestionView.user_id==user.id).first()
+        qv = QuestionView()
+
+        qv.question_id = self.id
+        qv.user_id = user_id
+        db.session.add(qv)
+
+        # if qv == None:
+        #     qv = QuestionView()
+        #     qv.user_id = user_id
+        #     qv.question_id = self.id
+        #     qv.last_view = datetime.utcnow()
+        #     qv.count_view = 1
+        #     db.session.add(qv)
+        # else:
+        #     qv.count_view += 1
+        #     qv.last_view = datetime.utcnow()
         try:
             db.session.commit()
         except Exception as e:
@@ -535,7 +535,7 @@ class Question(db.Model):
 
     @property
     def views(self):
-        count_views = db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.question_id==self.id).scalar()
+        count_views = db.session.query(func.count(QuestionView.id)).filter(QuestionView.question_id==self.id).scalar()
         return 0 if count_views is None else count_views
 
     @property
@@ -553,7 +553,7 @@ class Question(db.Model):
     @staticmethod
     def most_viewed(limit=5):
         try:
-            rs = db.session.query(Question, func.sum(QuestionView.count_view).label('views')).join(
+            rs = db.session.query(Question, func.count(QuestionView.id).label('views')).join(
                 Question.view).group_by(Question).order_by(text('views DESC')).limit(limit).all()
         except Exception as e:
             db.session.rollback()
@@ -623,22 +623,20 @@ class QuestionView(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer,  db.ForeignKey('user.id'))
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
-    first_view = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    last_view = db.Column(db.DateTime, index=True, nullable=False)
-    count_view = db.Column(db.Integer, default=1)
+    datetime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    
-
+    # last_view = db.Column(db.DateTime, index=True, nullable=False)
+    # count_view = db.Column(db.Integer, default=1)
 
     def __repr__(self):
         return f'<Question View id: {self.question_id} by {self.user_id}>'
 
     
     def views_by_question(self, question_id : int):
-        return db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.question_id == question_id).scalar()
+        return db.session.query(func.count(QuestionView.id)).filter(QuestionView.question_id == question_id).scalar()
 
     def views_by_user(self, user_id : int):
-        return db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.user_id == user_id).scalar()
+        return db.session.query(func.count(QuestionView.id)).filter(QuestionView.user_id == user_id).scalar()
 
 
 class QuestionLike(db.Model):

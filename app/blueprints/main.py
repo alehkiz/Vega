@@ -45,16 +45,24 @@ def search():
         if search is None:
             search = Search()
             search.text = g.search_form.q.data
+            search.add_search(current_user.id)
             db.session.add(search)
             try:
                 db.session.commit()
+                if current_user.is_authenticated:
+                    search.add_search(current_user.id)
+                else:
+                    search.add_search()
             except Exception as e:
                 db.session.rollback()
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 return abort(500)
         else:
-            search.add_count()
+            if current_user.is_authenticated:
+                search.add_search(current_user.id)
+            else:
+                search.add_search()
         paginate = Question.search(g.search_form.q.data, page=page, per_page=app.config.get('ITEMS_PER_PAGE'))
     # article = Article.search(g.search_form.q.data, False, resume=True)
     # result = question.union_all(article).paginate(page=page, per_page=app.config.get('ITEMS_PER_PAGE'))

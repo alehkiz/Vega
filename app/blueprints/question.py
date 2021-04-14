@@ -52,7 +52,11 @@ def search():
                 app.logger.error(e)
                 return abort(500)
         else:
-            search.add_count()
+            if current_user.is_authenticated:
+                search.add_search(current_user.id)
+            else:
+                search.add_search()
+            # search.add_count()
         iter_pages = list(paginate.iter_pages())
         first_page =  iter_pages[0] if len(iter_pages) >= 1 else None#url_for('.search',page=iter_pages[0], q= g.question_search_form.q.data)
         last_page = paginate.pages if paginate.pages > 0 else None#url_for('.search',page=iter_pages[-1] if iter_pages[-1] != first_page else None, q= g.question_search_form.q.data)
