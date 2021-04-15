@@ -25,7 +25,7 @@
         </div>
         <br>
         <div id='editormd'>
-            {{ macros.render_field(form.text, rows=30, placeholder='Texto', style='display:none')}}
+            {{ macros.render_field(form.text, rows=30, placeholder='Texto')}}
         </div>
         {{ form.submit }}
         {% elif user %}
@@ -41,8 +41,7 @@
         {% elif question %}
         {{ form.csrf_token}}
         {{ macros.render_field(form.question, size=256, class='form-control', placeholder='Pergunta')}}
-        {{ macros.render_field(form.answer, size=256, class='form-control', placeholder='Reposta', style="height:
-        250px;")}}
+        {{ macros.render_field(form.answer, size=256, class='form-control', placeholder='Reposta')}}
         {{ macros.render_field(form.tag, class='form-select', nosize=true, multiple=true)}}
         {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
         <br>

@@ -8,7 +8,7 @@ from flask import request
 
 class QuestionEditForm(FlaskForm):
     question = StringField('Dúvida', validators=[DataRequired('Item obrigatório'), Length(min=5, max=256, message='A duvida deve conter um texto entre 5 e 256 caracteres')])
-    answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=10000, message='A descrição deve conter um texto entre 10 e 10000 caracteres')])
+    answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=1500, message='A descrição deve conter um texto entre 10 e 10000 caracteres')])
     tag = QuerySelectMultipleField('Tag', allow_blank=False, query_factory= lambda : Tag.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
     topic = QuerySelectField('Topico', allow_blank=False, query_factory= lambda : Topic.query, get_label = 'name', validators = [DataRequired('Item Obrigatório')])
     # text = TextAreaField('Text', validators=[DataRequired('Item obrigatório'), Length(min=32, message='O campo texto deve conter pelo menos 32 caracteres')])
@@ -31,3 +31,13 @@ class QuestionSearchForm(FlaskForm):
         if 'csrf_enabled' not in kwargs:
             kwargs['csrf_enabled'] = False
         super(QuestionSearchForm, self).__init__(*args, **kwargs)
+
+class QuestionAnswerForm(FlaskForm):
+    # question = StringField('Dúvida', validators=[DataRequired('Item obrigatório'), Length(min=5, max=256, message='A duvida deve conter um texto entre 5 e 256 caracteres')])
+    answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=15000, message='A descrição deve conter um texto entre 10 e 10000 caracteres')])
+    tag = QuerySelectMultipleField('Tag', allow_blank=False, query_factory= lambda : Tag.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
+    topic = QuerySelectField('Topico', allow_blank=False, query_factory= lambda : Topic.query, get_label = 'name', validators = [DataRequired('Item Obrigatório')])
+    # text = TextAreaField('Text', validators=[DataRequired('Item obrigatório'), Length(min=32, message='O campo texto deve conter pelo menos 32 caracteres')])
+    # topic = QuerySelectField('Topico', validators=[DataRequired('Item obrigatório')], query_factory=lambda: Topic.query, get_label='name', allow_blank=False)
+    # approved = BooleanField('Aprovada')
+    submit = SubmitField('Enviar')

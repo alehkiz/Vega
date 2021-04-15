@@ -21,7 +21,7 @@
             {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
         </div>
         <br>
-            {{ macros.render_field(form.text, rows=30, placeholder='Texto', style='display:none')}}
+            {{ macros.render_field(form.text, rows=30, placeholder='Texto')}}
 
         {{ form.submit }}
         {% elif user %}

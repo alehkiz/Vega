@@ -10,6 +10,7 @@ from app.models.search import Search
 from app.utils.sql import unaccent
 from app.utils.kernel import strip_accents
 from app.utils.html import process_html
+from app.forms.question import QuestionAnswerForm
 
 from sqlalchemy import desc, nullslast
 
@@ -204,6 +205,24 @@ def add():
                 db.session.rollback()
                 return render_template('add.html', form=form, title='Incluir dúvida', question=True)
     return render_template('add.html', form=form, title='Incluir dúvida', question=True)
+
+@bp.route('/responder/<int:id>')
+@login_required
+@roles_accepted(['admin', 'editor', 'aux_editor'])
+def answer(id: int):
+    q = Question.query.filter(Question.id == id).first_or_404()
+    if q.was_answered():
+        flash('Questão não pode ser respondida')
+        return redirect(url_for('question.index'))
+    form = QuestionAnswerForm()
+    if form.validate_on_submit():
+        q.answer_user_id = current_user.id
+        q.answer = form.answer.data
+        q.tag = form.tag.data
+        q.topic = form.topic.data
+        # TODO terminar
+
+    
 
 @bp.route('/tag/<string:name>')
 def tag(name):

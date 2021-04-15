@@ -43,7 +43,8 @@ csp = {
     ],
     'style-src-elem': "'unsafe-inline'",
     'img-src': ["'self'", 
-                '*'],
+                '*',
+                'data:;'],
     'media-src': '*'
 }
 def init(app):
