@@ -24,7 +24,7 @@
 
 <body>
     {% block navbar %}
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4 fixed-top border-bottom" style="height: 4.2em;">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4 fixed-top border-bottom" id='nav_bar'>
         <div class="container-fluid">
         <a class="navbar-brand" href="{{url_for('question.index')}}">{{config['PROJECT_NAME']}}</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -168,7 +168,7 @@
     <script src="{{url_for('static', filename='js/bootstrap/bootstrap.bundle.min.js')}}"></script>
     
     <!-- <script src="{{url_for('static', filename='js/main.js')}}"></script> -->
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="{{ csp_nonce() }}">
         $CSRF_TOKEN = '{{ csrf_token() }}';
      </script>
      <script src="{{url_for('static', filename='js/main.js')}}"></script>
