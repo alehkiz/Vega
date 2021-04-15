@@ -202,7 +202,9 @@ form > textarea:hover {
   }
 }	
 
-
+#nav_bar {
+    height: 4.2em;
+}
 
 
 i.fas.circle {

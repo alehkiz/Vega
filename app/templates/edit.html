@@ -118,9 +118,9 @@
 {% block scripts %}
 {{ super() }}
 
-<script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}" nonce="{{ csp_nonce() }}"></script>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="{{ csp_nonce() }}">
 
 
     element = document.getElementById("text");
