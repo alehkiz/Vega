@@ -28,6 +28,7 @@ login.login_view = 'auth.login'
 login.login_message = 'Please login to access this page'
 csrf = CSRFProtect()
 
+
 csp = {
     'default-src': ['\'self\'',
                     'https://cdn.jsdelivr.net/codemirror.spell-checker/',
@@ -54,6 +55,7 @@ csp = {
                 'data:;'],
     'media-src': '*'
 }
+
 def init(app):
     security.init_app(app, datastore=user_datastore, register_blueprint=False)
     db.init_app(app)
@@ -62,6 +64,7 @@ def init(app):
     csrf.init_app(app)
     login.init_app(app)
     login.session_protection = 'strong'
+
     # talisman.init_app(app,
     #                     force_https_permanent=True,
     #                     content_security_policy=csp,
@@ -71,6 +74,7 @@ def init(app):
     # dash.init_app(app=app)
     
     # app = dash.dash_appication()
+
 
     ### SEARCH
 
