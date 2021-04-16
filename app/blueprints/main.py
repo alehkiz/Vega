@@ -4,7 +4,7 @@ from flask_security import login_required, current_user
 from datetime import datetime
 
 from app.core.db import db
-from app.models.wiki import Article, Question, Tag
+from app.models.wiki import Article, Question, Tag, Topic
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
 
@@ -23,14 +23,15 @@ def before_request():
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
     g.tags = Tag.query.all()
+    g.topics = Topic.query.all()
     g.questions_most_viewed = Question.most_viewed(app.config.get('ITEMS_PER_PAGE', 5))
     g.questions_most_recent = Question.query.order_by(Question.create_at.desc()).limit(app.config.get('ITEMS_PER_PAGE', 5)).all()
-
+    g.questions_most_liked = Question.most_liked(app.config.get('ITEMS_PER_PAGE', 5), classification=False)
 
 @bp.route('/')
 @bp.route('/index')
 def index():
-    print(current_user.is_anonymous)
+    return redirect(url_for('question.index'))
     article = Article.query.first()
     return render_template('article.html', article=article)
 
@@ -44,16 +45,24 @@ def search():
         if search is None:
             search = Search()
             search.text = g.search_form.q.data
+            search.add_search(current_user.id)
             db.session.add(search)
             try:
                 db.session.commit()
+                if current_user.is_authenticated:
+                    search.add_search(current_user.id)
+                else:
+                    search.add_search()
             except Exception as e:
                 db.session.rollback()
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 return abort(500)
         else:
-            search.add_count()
+            if current_user.is_authenticated:
+                search.add_search(current_user.id)
+            else:
+                search.add_search()
         paginate = Question.search(g.search_form.q.data, page=page, per_page=app.config.get('ITEMS_PER_PAGE'))
     # article = Article.search(g.search_form.q.data, False, resume=True)
     # result = question.union_all(article).paginate(page=page, per_page=app.config.get('ITEMS_PER_PAGE'))

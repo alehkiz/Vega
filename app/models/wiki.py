@@ -14,18 +14,12 @@ from sqlalchemy.orm import backref
 from sqlalchemy_searchable import make_searchable
 
 from app.core.db import db
-from app.utils.kernel import format_elapsed_time, get_list_max_len, only_letters
+from app.utils.kernel import format_elapsed_time, get_list_max_len, only_letters, format_datetime_local
 from app.utils.html import process_html
 from app.models.security import User
 
 
 make_searchable(db.metadata, options={'regconfig': 'public.pt'})
-
-# def create_tsvector(*args):
-#     exp = args[0]
-#     for e in args[1:]:
-#         exp += ' ' + e
-#     return func.to_tsvector('portuguese', exp)
 
 
 article_tag = db.Table('article_tag',
@@ -96,7 +90,7 @@ class Article(db.Model):
         return f'<Article {self.title}>'
 
 
-    def search(text, per_page, page=1, resume=False):
+    def search(text, pagination = False, per_page = 1, page=1, resume=False):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         if resume:
             result = (db.session.query(Article.title, (
@@ -110,8 +104,9 @@ class Article(db.Model):
                     Article.search_vector, 
                     func.plainto_tsquery(
                         'public.pt',
-                        text))) > 0).order_by(
-                        desc('similarity')))
+                        text))) > 0)#.order_by(
+                        #desc('similarity'))
+                        )
         else:
             result = (db.session.query(Article, (
                 func.ts_rank_cd(
@@ -124,9 +119,10 @@ class Article(db.Model):
                     Article.search_vector, 
                     func.plainto_tsquery(
                         'public.pt',
-                        text))) > 0).order_by(
-                        desc('similarity')))
-        if per_page:
+                        text))) > 0)#.order_by(
+                        #desc('similarity'))
+                        )
+        if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
 
@@ -320,23 +316,36 @@ class Question(db.Model):
     @property
     def get_create_time_elapsed(self):
         return format_elapsed_time(self.create_at)
+    
+    @property
+    def get_create_datetime(self):
+        return format_datetime_local(self.create_at)
+
     @property
     def get_update_time_elapsed(self):
         return format_elapsed_time(self.update_at)
     
     @property
+    def get_update_datetime(self):
+        return format_datetime_local(self.update_at)
+    
+    @property
     def get_answer_time_elapsed(self):
         return format_elapsed_time(self.answer_at)
+    
+    @property
+    def get_anser_datetime(self):
+        return format_datetime_local(self.answer_at)
 
-    @property
-    def format_create_date(self):
-        return self.create_at.strftime("%d/%m/%Y")
-    @property
-    def format_update_date(self):
-        return self.update_at.strftime("%d/%m/%Y")
-    @property
-    def format_answer_date(self):
-        return self.answer_at.strftime("%d/%m/%Y")
+    # @property
+    # def format_create_date(self):
+    #     return self.create_at.strftime("%d/%m/%Y")
+    # @property
+    # def format_update_date(self):
+    #     return self.update_at.strftime("%d/%m/%Y")
+    # @property
+    # def format_answer_date(self):
+    #     return self.answer_at.strftime("%d/%m/%Y")
 
     @hybrid_property
     def answer(self):
@@ -346,9 +355,11 @@ class Question(db.Model):
     def answer(self, answer):
         self._answer = answer
         self.answer_approved = False
+        if self.answer_user_id is None:
+            raise Exception('´answer_user_id´ deve ser informado para responder uma questão')
 
     @staticmethod
-    def search(expression, per_page, page = 1, resume=False):
+    def search(expression, pagination = False, per_page = 1, page = 1, resume=False):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         if resume:
             result = (db.session.query(Question.question, (
@@ -362,8 +373,9 @@ class Question(db.Model):
                     Question.search_vector, 
                     func.plainto_tsquery(
                         'public.pt',
-                        expression))) > 0).order_by(
-                        desc('similarity')))
+                        expression))) > 0)#.order_by(
+                        #desc('similarity'))
+                        )
         else:
             result = (db.session.query(Question, (
                 func.ts_rank_cd(
@@ -373,12 +385,10 @@ class Question(db.Model):
                         expression))).label(
                             'similarity')).filter((
                 func.ts_rank_cd(
-                    Question.search_vector, 
-                    func.plainto_tsquery(
-                        'public.pt',
-                        expression))) > 0).order_by(
-                        desc('similarity')))
-        if per_page:
+                    Question.search_vector, func.plainto_tsquery('public.pt',expression))) > 0)#.order_by(
+                        #desc('similarity'))
+                        )
+        if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
 
@@ -396,17 +406,23 @@ class Question(db.Model):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
             raise Exception('Usuário informado não existe')
-        qv = QuestionView.query.filter(QuestionView.question_id==self.id, QuestionView.user_id==user.id).first()
-        if qv == None:
-            qv = QuestionView()
-            qv.user_id = user_id
-            qv.question_id = self.id
-            qv.last_view = datetime.utcnow()
-            qv.count_view = 1
-            db.session.add(qv)
-        else:
-            qv.count_view += 1
-            qv.last_view = datetime.utcnow()
+        # qv = QuestionView.query.filter(QuestionView.question_id==self.id, QuestionView.user_id==user.id).first()
+        qv = QuestionView()
+
+        qv.question_id = self.id
+        qv.user_id = user_id
+        db.session.add(qv)
+
+        # if qv == None:
+        #     qv = QuestionView()
+        #     qv.user_id = user_id
+        #     qv.question_id = self.id
+        #     qv.last_view = datetime.utcnow()
+        #     qv.count_view = 1
+        #     db.session.add(qv)
+        # else:
+        #     qv.count_view += 1
+        #     qv.last_view = datetime.utcnow()
         try:
             db.session.commit()
         except Exception as e:
@@ -519,11 +535,13 @@ class Question(db.Model):
 
     @property
     def views(self):
-        return db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.question_id==self.id).scalar()
+        count_views = db.session.query(func.count(QuestionView.id)).filter(QuestionView.question_id==self.id).scalar()
+        return 0 if count_views is None else count_views
 
     @property
     def likes(self):
-        return db.session.query(func.sum(QuestionLike.question_id)).filter(QuestionLike.question_id==self.id).scalar()
+        count_likes = db.session.query(func.sum(QuestionLike.question_id)).filter(QuestionLike.question_id==self.id).scalar()
+        return 0 if count_likes is None else count_likes
 
     @property
     def was_answered(self):
@@ -535,7 +553,7 @@ class Question(db.Model):
     @staticmethod
     def most_viewed(limit=5):
         try:
-            rs = db.session.query(Question, func.sum(QuestionView.count_view).label('views')).join(
+            rs = db.session.query(Question, func.count(QuestionView.id).label('views')).join(
                 Question.view).group_by(Question).order_by(text('views DESC')).limit(limit).all()
         except Exception as e:
             db.session.rollback()
@@ -583,19 +601,20 @@ class Question(db.Model):
             return Markup(process_html(markdown('\n'.join(l_text), extras={"tables": None, "html-classes": html_classes}))).striptags()[0:size] + '...'
             # return Markup(process_html(markdown(text))).striptags()
 
-        return Markup(process_html(markdown(self.answer, extras={"tables": None, "html-classes": html_classes})))
+        return Markup(markdown(self.answer, extras={"tables": None, "html-classes": html_classes}))
 
     def to_dict(self):
         return {'id': self.id,
                 'question':self.get_body_html(),
-                'create_at': self.get_create_time_elapsed,
+                'create_time_elapsed': self.get_create_time_elapsed,
+                'create_at': self.get_create_datetime,
                 'author':self.author.name,
                 'update_at': self.get_update_time_elapsed if self.was_updated() else None,
                 'updater' : self.updater.name if self.was_updated() else None,
                 'answer': self.get_body_html() if self.was_answered else None,
                 'answered_by' : self.answered_by.name if self.was_answered else None,
                 'answered_at' : self.get_answer_time_elapsed if self.was_answered else None,
-                'topic' : self.topic.name,
+                'topic' : self.topic.name if not self.topic is None else None,
                 'tags' : [x.name for x in self.tags]
                 }
 
@@ -604,22 +623,20 @@ class QuestionView(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer,  db.ForeignKey('user.id'))
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
-    first_view = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    last_view = db.Column(db.DateTime, index=True, nullable=False)
-    count_view = db.Column(db.Integer, default=1)
+    datetime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    
-
+    # last_view = db.Column(db.DateTime, index=True, nullable=False)
+    # count_view = db.Column(db.Integer, default=1)
 
     def __repr__(self):
         return f'<Question View id: {self.question_id} by {self.user_id}>'
 
     
     def views_by_question(self, question_id : int):
-        return db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.question_id == question_id).scalar()
+        return db.session.query(func.count(QuestionView.id)).filter(QuestionView.question_id == question_id).scalar()
 
     def views_by_user(self, user_id : int):
-        return db.session.query(func.sum(QuestionView.count_view)).filter(QuestionView.user_id == user_id).scalar()
+        return db.session.query(func.count(QuestionView.id)).filter(QuestionView.user_id == user_id).scalar()
 
 
 class QuestionLike(db.Model):

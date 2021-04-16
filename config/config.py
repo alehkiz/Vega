@@ -93,6 +93,10 @@ class BaseConfig(object):
             'answer' : {
                 'name' : 'Resposta',
                 'attr' : None
+            },
+            "create_at": {
+                'name' : 'criado em',
+                'attr' : 'get_create_datetime'
             }
 
         },
@@ -110,7 +114,21 @@ class BaseConfig(object):
                 'attr': 'username'
 
             }
+        },
+        'topic' :{
+            'id' :{
+                'name' : 'id',
+                'attr' : None
+            },
+            'name': {
+                'name' : 'Nome',
+                'attr' : None
+            },
+            'user': {
+                'name' : 'criado por',
+                'attr': 'username'
 
+            }
         }
     }
     ROUTES_NAMES = {
@@ -119,11 +137,11 @@ class BaseConfig(object):
             'edit': 'user.edit',
             'remove': 'user.remove'
         },
-        'article':{
-            'add': 'article.view',
-            'edit': '.edit',
-            'remove': '.remove'
-        }   
+        # 'article':{
+        #     'add': 'article.view',
+        #     'edit': '.edit',
+        #     'remove': '.remove'
+        # }   
         # ,
         # 'article':{
         #     'add': '.add',

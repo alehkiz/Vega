@@ -5,6 +5,7 @@ from flask.cli import with_appcontext
 from flask_login import LoginManager
 from logging.handlers import RotatingFileHandler
 import logging
+from flask_talisman import Talisman
 # from elasticsearch import Elasticsearch
 
 from os.path import exists
@@ -15,7 +16,7 @@ from app.blueprints import register_blueprints
 from app.core.db import db, user_datastore
 from app.models.security import User, Role
 from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView
-from app.models.search import Search
+from app.models.search import Search, SearchDateTime
 
 from app.dashboard import dash
 
@@ -26,10 +27,10 @@ login = LoginManager()
 login.login_view = 'auth.login'
 login.login_message = 'Please login to access this page'
 csrf = CSRFProtect()
+talisman = Talisman()
+SELF = "'self'"
 
-<<<<<<< Updated upstream
 
-=======
 csp = {
     'default-src': ['\'self\'',
                     'https://cdn.jsdelivr.net/codemirror.spell-checker/',
@@ -56,7 +57,7 @@ csp = {
                 'data:;'],
     'media-src': '*'
 }
->>>>>>> Stashed changes
+
 def init(app):
     security.init_app(app, datastore=user_datastore, register_blueprint=False)
     db.init_app(app)
@@ -65,8 +66,7 @@ def init(app):
     csrf.init_app(app)
     login.init_app(app)
     login.session_protection = 'strong'
-<<<<<<< Updated upstream
-=======
+
     # talisman.init_app(app,
     #                     force_https_permanent=True,
     #                     content_security_policy=csp,
@@ -76,7 +76,7 @@ def init(app):
     # dash.init_app(app=app)
     
     # app = dash.dash_appication()
->>>>>>> Stashed changes
+
 
     ### SEARCH
 
@@ -95,7 +95,8 @@ def init(app):
             QuestionLike=QuestionLike, 
             QuestionSave=QuestionSave, 
             QuestionView=QuestionView, 
-            Search=Search
+            Search=Search,
+            SearchDateTime = SearchDateTime
             )
     register_blueprints(app)
 

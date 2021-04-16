@@ -7,4 +7,4 @@ def process_html(text):
     # TODO enhancement a way implement a iterate
     [x.attrs.__setitem__('class', 'blockquote') for x in html.findAll('blockquote')]
 
-    return html 
+    return html

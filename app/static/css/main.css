@@ -12,6 +12,9 @@ body {
     margin-bottom: 60px;
 }
 
+a {
+    text-decoration: none !important;
+}
 
 /* Article */
 
@@ -122,7 +125,6 @@ form > textarea:hover {
 .accordion-footer {
     padding: 1rem 1.25rem;
     color: #999;
-    font-size: 60% !important;
 }
 
 .accordion-head {
@@ -200,7 +202,9 @@ form > textarea:hover {
   }
 }	
 
-
+#nav_bar {
+    height: 4.2em;
+}
 
 
 i.fas.circle {
