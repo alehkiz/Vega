@@ -5,7 +5,7 @@ from flask.cli import with_appcontext
 from flask_login import LoginManager
 from logging.handlers import RotatingFileHandler
 import logging
-from flask_talisman import Talisman
+# from flask_talisman import Talisman
 # from elasticsearch import Elasticsearch
 
 from os.path import exists
@@ -27,8 +27,6 @@ login = LoginManager()
 login.login_view = 'auth.login'
 login.login_message = 'Please login to access this page'
 csrf = CSRFProtect()
-talisman = Talisman()
-SELF = "'self'"
 
 
 csp = {
@@ -96,7 +94,7 @@ def init(app):
             QuestionSave=QuestionSave, 
             QuestionView=QuestionView, 
             Search=Search,
-            SearchDateTime = SearchDateTime
+            SearchDateTime=SearchDateTime
             )
     register_blueprints(app)
 
