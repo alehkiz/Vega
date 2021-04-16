@@ -21,7 +21,7 @@
             {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
         </div>
         <br>
-            {{ macros.render_field(form.text, rows=30, placeholder='Texto', style='display:none')}}
+            {{ macros.render_field(form.text, rows=30, placeholder='Texto')}}
 
         {{ form.submit }}
         {% elif user %}
@@ -47,6 +47,10 @@
         {{ macros.render_field(form.answer, size=128, class='form-control', placeholder='Descrição')}}
         {{ macros.render_field(form.tag, class='form-select', nosize=true)}}
         {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
+        <br>
+        {{ macros.render_field(form.approved, nosize=true, checked=true)}}
+
+        <br>
         
         {{ form.submit }}
 
