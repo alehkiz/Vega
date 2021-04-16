@@ -18,6 +18,9 @@ from app.models.security import User, Role
 from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView
 from app.models.search import Search, SearchDateTime
 
+from app.dashboard import dash
+
+# dash = dash.dash_appication()
 security = Security()
 migrate = Migrate()
 login = LoginManager()
@@ -27,19 +30,26 @@ csrf = CSRFProtect()
 talisman = Talisman()
 SELF = "'self'"
 
+
 csp = {
     'default-src': ['\'self\'',
                     'https://cdn.jsdelivr.net/codemirror.spell-checker/',
-                    'https://maxcdn.bootstrapcdn.com/font-awesome/'
+                    'https://maxcdn.bootstrapcdn.com/font-awesome/',
+                    'https://unpkg.com/',
+                    'https://cdn.plot.ly/'
     ],
     'script-src': ['\'self\'', 
                     'https://maxcdn.bootstrapcdn.com/font-awesome/',
-                    'https://cdn.jsdelivr.net/codemirror.spell-checker/'
+                    'https://cdn.jsdelivr.net/codemirror.spell-checker/',
+                    'https://unpkg.com/',
+                    'https://cdn.plot.ly/'
     ],
     'style-src': ["'self'",
-                    "https: 'unsafe-inline'",
+                    "'unsafe-inline'",
                     'https://maxcdn.bootstrapcdn.com/font-awesome/',
-                    'https://cdn.jsdelivr.net/codemirror.spell-checker/'
+                    'https://cdn.jsdelivr.net/codemirror.spell-checker/',
+                    'https://unpkg.com/',
+                    'https://cdn.plot.ly/'
     ],
     'style-src-elem': "'unsafe-inline'",
     'img-src': ["'self'", 
@@ -47,6 +57,7 @@ csp = {
                 'data:;'],
     'media-src': '*'
 }
+
 def init(app):
     security.init_app(app, datastore=user_datastore, register_blueprint=False)
     db.init_app(app)
@@ -55,11 +66,18 @@ def init(app):
     csrf.init_app(app)
     login.init_app(app)
     login.session_protection = 'strong'
-    talisman.init_app(app,
-                        force_https_permanent=True,
-                        content_security_policy=csp,
-                        content_security_policy_nonce_in=['script-src','style-src','style-src-elem','script-src-elem','default-src']
-    )
+
+    # talisman.init_app(app,
+    #                     force_https_permanent=True,
+    #                     content_security_policy=csp,
+    #                     content_security_policy_nonce_in=['script-src','style-src','style-src-elem','script-src-elem','default-src']
+    # )
+
+    # dash.init_app(app=app)
+    
+    # app = dash.dash_appication()
+
+
     ### SEARCH
 
     # app.elasticsearch = Elasticsearch(app.config['ELASTICSEARCH_URL']) if app.config['ELASTICSEARCH_URL'] else None
@@ -103,4 +121,6 @@ def init(app):
             app.logger.error(e)
             return None
         return user
+
+    app = dash.dash_appication(app)
     return app
