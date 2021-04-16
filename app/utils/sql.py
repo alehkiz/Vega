@@ -5,3 +5,4 @@ class unaccent(ReturnTypeFromArgs):
     Remove accents
     '''
     pass
+
