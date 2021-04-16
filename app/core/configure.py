@@ -5,6 +5,7 @@ from flask.cli import with_appcontext
 from flask_login import LoginManager
 from logging.handlers import RotatingFileHandler
 import logging
+from flask_talisman import Talisman
 # from elasticsearch import Elasticsearch
 
 from os.path import exists
@@ -15,7 +16,7 @@ from app.blueprints import register_blueprints
 from app.core.db import db, user_datastore
 from app.models.security import User, Role
 from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView
-from app.models.search import Search
+from app.models.search import Search, SearchDateTime
 
 security = Security()
 migrate = Migrate()
@@ -23,8 +24,29 @@ login = LoginManager()
 login.login_view = 'auth.login'
 login.login_message = 'Please login to access this page'
 csrf = CSRFProtect()
+talisman = Talisman()
+SELF = "'self'"
 
-
+csp = {
+    'default-src': ['\'self\'',
+                    'https://cdn.jsdelivr.net/codemirror.spell-checker/',
+                    'https://maxcdn.bootstrapcdn.com/font-awesome/'
+    ],
+    'script-src': ['\'self\'', 
+                    'https://maxcdn.bootstrapcdn.com/font-awesome/',
+                    'https://cdn.jsdelivr.net/codemirror.spell-checker/'
+    ],
+    'style-src': ["'self'",
+                    "https: 'unsafe-inline'",
+                    'https://maxcdn.bootstrapcdn.com/font-awesome/',
+                    'https://cdn.jsdelivr.net/codemirror.spell-checker/'
+    ],
+    'style-src-elem': "'unsafe-inline'",
+    'img-src': ["'self'", 
+                '*',
+                'data:;'],
+    'media-src': '*'
+}
 def init(app):
     security.init_app(app, datastore=user_datastore, register_blueprint=False)
     db.init_app(app)
@@ -33,7 +55,11 @@ def init(app):
     csrf.init_app(app)
     login.init_app(app)
     login.session_protection = 'strong'
-
+    talisman.init_app(app,
+                        force_https_permanent=True,
+                        content_security_policy=csp,
+                        content_security_policy_nonce_in=['script-src','style-src','style-src-elem','script-src-elem','default-src']
+    )
     ### SEARCH
 
     # app.elasticsearch = Elasticsearch(app.config['ELASTICSEARCH_URL']) if app.config['ELASTICSEARCH_URL'] else None
@@ -51,7 +77,8 @@ def init(app):
             QuestionLike=QuestionLike, 
             QuestionSave=QuestionSave, 
             QuestionView=QuestionView, 
-            Search=Search
+            Search=Search,
+            SearchDateTime = SearchDateTime
             )
     register_blueprints(app)
 

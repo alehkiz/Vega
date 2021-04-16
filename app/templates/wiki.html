@@ -23,9 +23,10 @@
                         {{article.get_create_time_elapsed}} por <a
                             href="{{ url_for('user.view', id=article.author.id) }}"
                             class="text-decoration-none">{{article.author.name}}</a>
+                            {% if article.topic.format_name != none %}
                         em <a href="{{ url_for('wiki.topic', topic_name=article.topic.format_name)}}"
                             class="text-decoration-none">{{article.topic.name}}</a>
-
+                            {% endif %}
                     </p>
                 </div>
                 <div class="article-text">
