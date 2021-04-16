@@ -61,6 +61,7 @@
 
 
 {% macro render_table(cls_table, pagination, page_name) %}
+
 {% if cls_table %}
 
 {% if config['TABULATE'].get(cls_table.__tablename__) %}
@@ -80,15 +81,16 @@
     </div> -->
 
     <div class="col-md-6">
-        <a href="{{ url_for(cls_table.__tablename__+'.add')}}" class="btn btn-primary pull-right h2 float-end">Adicionar </a>
+        <a href="{{ url_for(cls_table.__tablename__+'.add')}}" class="btn btn-primary pull-right h2 float-end">Adicionar
+        </a>
     </div>
 </div>
 <div class="table-responsive col-md-12">
     <table class="table table-striped table-hover table-bordered" cellspacing="0" cellpadding="0">
         <thead class="table-dark">
             <tr>
-                {% for value in config['TABULATE'].get(cls_table.__tablename__).values() %}
-                <th>{{value['name'].capitalize()}}</th>
+                {% for key, value in config['TABULATE'].get(cls_table.__tablename__).items() %}
+                <th><a href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type'])}}">{{value['name'].capitalize()}}</a></th>
 
 
                 {% endfor %}
@@ -99,7 +101,7 @@
 
             {% if pagination %}
             {% for item in pagination.items %}
-            <tr>
+            <tr id='{{item.id}}'>
                 {% for tabulate_item in config['TABULATE'].get(cls_table.__tablename__).items() %}
                 {% if not tabulate_item[1].get('attr') is none %}
                 <td>{{item | attr(tabulate_item[1].get('attr')) | string | truncate(40, True)}}</td>
@@ -108,19 +110,38 @@
                 {% endif %}
                 {% endfor %}
                 <td class="actions">
-                    <a class="btn btn-outline-primary btn-sm" href="{{ url_for(cls_table.__tablename__+'.view', id=item.id)}}">
+                    <a class="btn btn-outline-primary btn-sm"
+                        href="{{ url_for(cls_table.__tablename__+'.view', id=item.id)}}">
                         <i class="fas fa-search-plus"></i></a>
-                        <a class="btn btn-outline-success btn-sm"
-                            href="{{ url_for(cls_table.__tablename__+'.edit', id=item.id)}}">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a class="btn btn-outline-danger btn-sm"
-                            href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}" data-toggle="modal"
-                            data-target="#delete-modal">
-                            <i class="fas fa-trash-alt"></i>
-                        </a>
+                    <a class="btn btn-outline-success btn-sm"
+                        href="{{ url_for(cls_table.__tablename__+'.edit', id=item.id)}}">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}"
+                        href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
                 </td>
             </tr>
+            <!-- Modal -->
+            <div class="modal fade" id="delete-modal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Deseja realmente excluir esse item?</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Ao clicar em excluir esse item será removido e não será possível retornar. 
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-danger delete" id='confirm-delete' href='#'>Remover</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% endfor %}
             {% endif %}
 

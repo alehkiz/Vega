@@ -2,7 +2,7 @@
 {% extends 'base.html' %}
 {% block app_content %}
 <div id="list" class="row">
-{{ macros.render_table(cls_table, pagination, page_name) }}
+{{ macros.render_table(cls_table, pagination, page_name, order_type=order_type) }}
 {{ macros.render_pagination(pagination, first_page, last_page, endpoint)}}
 </div>
 {% endblock %}

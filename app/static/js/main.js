@@ -5,8 +5,11 @@ $(document).ready(function () {
     accordion_link = false;
     like_link = false;
     save_link = false;
+    load_modal = true;
 
-
+    if ($("#delete-modal").length){
+        removeModal = new bootstrap.Modal($("#delete-modal")[0], {});
+    }
     $('.accordion-button').click(function (e) {
         if (accordion_link === true){
             return false;
@@ -50,20 +53,21 @@ $(document).ready(function () {
                 )
                 accordion_collapse = $('#flush-collapse_' + question_id);
                 head_info = $('#flush-collapse_' + question_id).find(".accordion-head-info")
+                head_info.append(question_id + ' ')
                 if (!data.update_at || !data.updater) {
-                    head_info.append('Criado ' + data.create_at + ' por ' + data.author)
+                    head_info.append('Criado ' + data.create_time_elapsed + ' por ' + data.author)
                 }
                 else {
                     head_info.append('Atualizado ' + data.update_at + ' por ' + data.updater)
                 }
 
-                accordion_collapse.append('<div class="accordion-head-buttons"></div>')
+                accordion_collapse.append('<div class="accordion-head-buttons"></div>\n')
                 accordion_buttons = accordion_collapse.find('.accordion-head-buttons')
                 if (data.url_edit !== undefined) {
                     accordion_buttons.append('<a class="edit text-decoration-none" id="edit_' + question_id + '"' +
                         'href="' + data.url_edit + '">' +
                         '<i class="fas fa-edit"></i>' +
-                        '</a>');
+                        '</a>\n');
                 }
 
                 if (data.like_action !== undefined) {
@@ -71,7 +75,7 @@ $(document).ready(function () {
                     accordion_buttons.append(
                         '<a class="like-button ' + data.like_action + '" id="like_' + question_id + '"' +
                         'href="' + data.url_like + '">' +
-                        '<i class="' + like_icon + ' fa-heart"></i></a>'
+                        '<i class="' + like_icon + ' fa-heart"></i></a>\n'
                     );
                 }
                 if (data.save_action !== undefined) {
@@ -79,7 +83,7 @@ $(document).ready(function () {
                     accordion_buttons.append(
                         '<a class="save-button ' + data.save_action + '" id="save_' + question_id + '"' +
                         'href="' + data.url_save + '">' +
-                        '<i class="' + save_icon + ' fa-save"></i></a>'
+                        '<i class="' + save_icon + ' fa-save"></i></a>\n'
                     );
                 }
 
@@ -87,6 +91,13 @@ $(document).ready(function () {
                 accordion_collapse.append(
                     '<div class="accordion-body">' + data.answer + '</div>'
                 );
+                accordion_collapse.append(
+                    '<div class="accordion-footer"></div>'
+                );
+                
+                // $('.accordion-footer').append('<span class="badge bg-secondary">' +item+'</span>')
+                data.tags.forEach(item => $('.accordion-footer').append('<span class="badge bg-secondary">' +item+'</span>\n'))
+
                 $(target).collapse();
                 
             },
@@ -157,7 +168,7 @@ $(document).on('click', ".like, .unlike", function (e) {
             });
         },
         error: function (data) {
-            console.log('Erro');
+            // console.log('Erro');
             like_link = false;
         }
     });
@@ -219,9 +230,95 @@ $(document).on('click', ".save, .unsave", function (e) {
             });
         },
         error: function (data) {
-            console.log('Erro');
+            // console.log('Erro');
             save_link = false;
         }
     });
     return false;
+});
+
+$(document).on('click', ".remove", function(e){
+    // e.preventDefault();
+    // if (load_modal === false){
+    //     return false
+    // }
+    // load_modal = false;
+    
+    // console.log(removeModal)
+    
+    remove_link = true;
+    var remove_href = $(this).attr('href');
+    remove_confirm = $("#delete-modal").find('.delete')
+    // console.log(remove_confirm)
+    remove_confirm.attr('href', remove_href)
+    removeModal.show();
+
+    // $.ajax({
+    //     url: remove_href,
+    //     type: 'post',
+    //     data: {confirm: true},
+    //     dataType: 'json',
+    //     headers: {
+    //         "X-CSRFToken": $CSRF_TOKEN,
+    //     },
+    //     beforeSend: function(){
+    //         remove_link = false;
+    //     },
+    //     success: function(data){
+    //         remove_link = true;
+            
+    //         console.log(data)
+    //     }
+    // });
+    
+
+});
+
+$(document).on('click', "#confirm-delete", function(e){
+    bt_confirm_delete = $("#" + e.currentTarget.id)
+    confirm_delete_href = bt_confirm_delete.attr('href')
+    
+    $.ajax({
+        url:confirm_delete_href,
+        type:'post',
+        data: {confirm: true},
+        dataType: 'json',
+        headers: {
+            "X-CSRFToken": $CSRF_TOKEN,
+        },
+        success: function(data){
+            // console.log(data);
+            // var teste = new bootstrap.Modal(document.getElementById("delete-modal"), {});
+            removeModal.toggle();
+            if (data.status === 'success'){
+                $('.table').find("#"+data.id).remove()
+            }
+            // console.log(data)
+        }
+    });
+    // console.log(confirm_delete_href)
+
+});
+
+$("#delete-modal").on("show.bs.modal", function(e) {
+    // if (load_modal === false){
+    //     e.preventDefault();
+    // }
+    // console.log(e.currentTarget.id)
+    
+    // e.preventDefault()
+    var link = $(e.relatedTarget);
+    // console.log(e)    
+    // var myModal = new bootstrap.Modal(document.getElementById(e.currentTarget.id), {});
+    // console.log(e.currentTarget.id)
+    // console.log(myModal)
+    // setTimeout(
+    //     function() 
+    //     {
+    //       console.log('aqui')
+    //     }, 5000);
+    // $(this).find(".modal-body").load(link.attr("href"));
+    // load_modal = false
+    // myModal.show()
+    // load_modal = true;
 });
