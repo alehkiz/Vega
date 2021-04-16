@@ -168,7 +168,11 @@
     <script src="{{url_for('static', filename='js/bootstrap/bootstrap.bundle.min.js')}}"></script>
     
     <!-- <script src="{{url_for('static', filename='js/main.js')}}"></script> -->
+<<<<<<< Updated upstream
     <script type="text/javascript">
+=======
+    <script type="text/javascript" {#nonce="{{ csp_nonce() }}"#}>
+>>>>>>> Stashed changes
         $CSRF_TOKEN = '{{ csrf_token() }}';
      </script>
      <script src="{{url_for('static', filename='js/main.js')}}"></script>
