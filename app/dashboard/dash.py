@@ -8,7 +8,10 @@ from app.models.wiki import Article, Question, Tag, Topic
 
 from dash import Dash
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import dash_html_components as html
+from bs4 import BeautifulSoup
+
 # import plotly.express as px
 import pandas as pd
 
@@ -23,48 +26,51 @@ def dash_appication(app):
 
     dash_app = Dash(__name__, 
                     server=app, # Don't give dash a server just yet.
-                    url_base_pathname='/dashboard/', external_stylesheets=external_stylesheets)
+                    url_base_pathname='/dashboard/', external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-    df = pd.DataFrame({
-        "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
-        "Amount": [4, 1, 2, 2, 4, 5],
-        "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-    })
+    with app.app_context():
+        df = pd.read_sql_table('question_view', db.session.connection())
+        df['date'] = df.datetime.dt.date#.strftime("%d/%m/%Y")
+        df = df.groupby(['date'], as_index=False).agg({'id':'count'})
 
 
-    # fig.update_layout(
-    #     plot_bgcolor=colors['background'],
-    #     paper_bgcolor=colors['background'],
-    #     font_color=colors['text']
-    # )
+        # fig.update_layout(
+        #     plot_bgcolor=colors['background'],
+        #     paper_bgcolor=colors['background'],
+        #     font_color=colors['text']
+        # )
 
-    dash_app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
-        html.H1(
-            children='Hello Dash',
-            style={
+        dash_app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
+            html.H1(
+                children='Relatório de serviços',
+                style={
+                    'textAlign': 'center',
+                    'color': colors['text']
+                }
+            ),
+
+            html.Div(children=f'Relatório de: 2020', style={
                 'textAlign': 'center',
                 'color': colors['text']
-            }
-        ),
-
-        html.Div(children='Dash: A web application framework for Python.', style={
-            'textAlign': 'center',
-            'color': colors['text']
-        }),
-        dcc.Graph(
-        id='example-graph',
-        figure={
-            'data': [
-                {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'SF'},
-                {'x': [1, 2, 3], 'y': [2, 4, 5], 'type': 'bar', 'name': u'Montréal'},
-            ],
-            'layout': {
-                'title': 'Dash Data Visualization'
-            }
-        }, 
-        config={
-        'displayModeBar': False
-    }
-    )
-    ])
-    return dash_app.server
+            }),
+            dcc.Graph(
+            id='example-graph',
+            figure={
+                'data': [
+                    {'x': df['date'], 'y': df['id'], 'type': 'bar', 'name': 'Habilitação'},
+                    # {'x': [1, 2, 3], 'y': [2, 4, 5], 'type': 'bar', 'name': u'Veículos'},
+                ],
+                'layout': {
+                    'title': 'Dash Data Visualization',
+                    'xaxis': {
+                        'tickformat': '%d/%m/%y'
+                    }
+                }
+            }, 
+            config={
+            'displayModeBar': False,
+            'locale': 'pt_BR'
+        }
+        )
+        ])
+        return dash_app

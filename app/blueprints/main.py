@@ -1,5 +1,5 @@
 from app.models.search import Search
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, g, abort, request
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, g, abort, request, current_app as app
 from flask_security import login_required, current_user
 from datetime import datetime
 
@@ -7,6 +7,8 @@ from app.core.db import db
 from app.models.wiki import Article, Question, Tag, Topic
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
+
+from app.dashboard import dash
 
 bp = Blueprint('main', __name__, url_prefix='/')
 
@@ -73,3 +75,8 @@ def search():
     return render_template('search.html',cls_question=Question, 
                     pagination=paginate, first_page=first_page, last_page=last_page,
                     url_arguments={'q':g.search_form.q.data})
+
+@bp.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html', dash_url=url_for('/dashboard/'))
+    # return redirect('/dashboard/')
