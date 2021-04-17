@@ -120,5 +120,5 @@ def init(app):
             return None
         return user
 
-    app = dash.dash_appication(app)
+    app = dash.dash_appication(app).server
     return app
