@@ -78,5 +78,6 @@ def search():
 
 @bp.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html', dash_url=url_for('/dashboard/'))
+    # print(app.index())
+    return render_template('dashboard/dashboard.html', dash_url=url_for('/dash_app/'))
     # return redirect('/dashboard/')
