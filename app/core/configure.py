@@ -17,6 +17,7 @@ from app.core.db import db, user_datastore
 from app.models.security import User, Role
 from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView
 from app.models.search import Search, SearchDateTime
+from app.models.app import Visit, Page
 
 from app.dashboard import dash
 
@@ -75,7 +76,7 @@ def init(app):
     
     
     # dash_app.init_app(app=app)
-    app = dash.dash_appication(app).server
+    # app = dash.dash_appication(app).server
     ### SEARCH
 
     # app.elasticsearch = Elasticsearch(app.config['ELASTICSEARCH_URL']) if app.config['ELASTICSEARCH_URL'] else None
@@ -94,7 +95,9 @@ def init(app):
             QuestionSave=QuestionSave, 
             QuestionView=QuestionView, 
             Search=Search,
-            SearchDateTime=SearchDateTime
+            SearchDateTime=SearchDateTime,
+            Visit=Visit,
+            Page=Page
             )
     with app.app_context():
         register_blueprints(app)

@@ -1,6 +1,9 @@
 from flask_security import UserMixin, RoleMixin
 from flask_security.utils import hash_password, verify_password
+from sqlalchemy import func, text, Index, cast, desc, extract, Date
 from sqlalchemy.ext.hybrid import hybrid_property
+from datetime import date, datetime
+from sqlalchemy.orm import backref
 # from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView
 
 from app.core.db import db
@@ -42,6 +45,8 @@ class User(UserMixin, db.Model):
     question_update = db.relationship('Question', backref='updater', lazy='dynamic', foreign_keys='[Question.update_user_id]')
     question_like = db.relationship('QuestionLike', backref='users_liked', lazy='dynamic', foreign_keys='[QuestionLike.user_id]')
     question_save = db.relationship('QuestionSave', backref='users_saved', lazy='dynamic', foreign_keys='[QuestionSave.user_id]')
+    visits = db.relationship('Visit', backref='visitor', lazy='dynamic', foreign_keys='[Visit.user_id]')
+
     roles = db.relationship('Role', 
                 secondary=roles_users, 
                 backref=db.backref('users', lazy='dynamic'), 
@@ -115,6 +120,20 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return f'<User {self.username}>'
+
+    @staticmethod
+    def query_by_month_year(year : int, month : int):
+        return User.query.filter(extract('year', User.created_at) == year, extract('month', User.created_at) == month)
+    @staticmethod
+    def query_by_year(year : int):
+        return User.query.filter(extract('year', User.created_at) == year)
+    @staticmethod
+    def query_by_date(date: date):
+        return User.query.filter(cast(User.created_at, Date) == date)
+    
+    @staticmethod
+    def query_by_interval(start : date, end: date):
+        return User.query.filter(cast(User.created_at, Date) == start, cast(User.created_at, Date) == end)
 
 class Role(RoleMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
