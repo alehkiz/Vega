@@ -19,13 +19,14 @@ from sqlalchemy import desc, nullslast
 from app.forms.question import QuestionEditForm, QuestionSearchForm, QuestionForm
 bp = Blueprint('question', __name__, url_prefix='/duvidas/')
 
-@bp.before_request
-@counter
-def before_request():
-    pass
+# @bp.before_request
+# @counter
+# def before_request():
+#     pass
 
 @bp.route('/')
 @bp.route('/index')
+@counter
 def index():
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
@@ -37,6 +38,7 @@ def index():
 
 
 @bp.route('/search/', methods=['GET', 'POST'])
+@counter
 def search():
     page = request.args.get('page', 1, type=int)
     if g.question_search_form.validate():
@@ -108,6 +110,7 @@ def search():
                     url_arguments={'q':g.question_search_form.q.data})
 
 @bp.route('/view/<int:id>')
+@counter
 def view(id=None):
     question = Question.query.filter(Question.id == id).first_or_404()
     # dict_view = {}
@@ -127,6 +130,7 @@ def view(id=None):
     return render_template('question.html', mode='view', question=question, cls_question=Question)
 
 @bp.route('edit/<int:id>', methods=['GET', 'POST'])
+@counter
 def edit(id):
     question = Question.query.filter(Question.id == id).first_or_404()
     form = QuestionEditForm()
@@ -159,6 +163,7 @@ def edit(id):
     return render_template('edit.html',form=form, title='Editar', question=True)
 
 @bp.route('remove/<int:id>', methods=['POST'])
+@counter
 def remove(id):
     confirm = request.form.get('confirm', False)
     if confirm != 'true':
@@ -182,6 +187,7 @@ def remove(id):
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'editor', 'aux_editor')
+@counter
 def add():
     form = QuestionEditForm()
 
@@ -214,6 +220,7 @@ def add():
 @bp.route('/responder/<int:id>')
 @login_required
 @roles_accepted(['admin', 'editor', 'aux_editor'])
+@counter
 def answer(id: int):
     q = Question.query.filter(Question.id == id).first_or_404()
     if q.was_answered():
@@ -230,6 +237,7 @@ def answer(id: int):
     
 
 @bp.route('/tag/<string:name>')
+@counter
 def tag(name):
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
@@ -250,6 +258,7 @@ def tag(name):
 
 
 @bp.route('/topic/<string:name>')
+@counter
 def topic(name):
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
@@ -360,6 +369,7 @@ def save_action(question_id):
 
 @bp.route('/likes')
 @login_required
+@counter
 def likes():
     page = request.args.get('page', 1, type=int)
     paginate = Question.likes_by_user(current_user.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
@@ -372,6 +382,7 @@ def likes():
 
 @bp.route('/saves')
 @login_required
+@counter
 def saves():
     page = request.args.get('page', 1, type=int)
     paginate = Question.saves_by_user(current_user.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
@@ -385,6 +396,7 @@ def saves():
     
 @bp.route('/saved')
 @login_required
+@counter
 def saved():
     ...
 
