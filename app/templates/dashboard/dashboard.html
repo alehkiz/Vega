@@ -77,7 +77,7 @@
     </div>
     <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
       <span class="count_top"><i class="fa fa-question"></i> Questões vistas mês</span>
-      <div class="count">{{dash.question_views.count}}</div>
+      <div class="count">{{ "{:,}".format(dash.question_views.month).replace(',','.') }}</div>
       <span class="count_bottom"><i class="{{'green' if dash.question_views_compare_last_month > 0 else 'red' }}"><i
         class="fa fa-sort-{{'asc' if dash.question_views_compare_last_month > 0 else 'desc' }}"></i>
       {{dash.question_views_compare_last_month}}%</i> Do ultimo mês</span>
