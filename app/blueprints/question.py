@@ -11,13 +11,18 @@ from app.utils.sql import unaccent
 from app.utils.kernel import strip_accents
 from app.utils.html import process_html
 from app.forms.question import QuestionAnswerForm
-
+from app.utils.routes import counter
 from sqlalchemy import desc, nullslast
 
 
 
 from app.forms.question import QuestionEditForm, QuestionSearchForm, QuestionForm
 bp = Blueprint('question', __name__, url_prefix='/duvidas/')
+
+@bp.before_request
+@counter
+def before_request():
+    pass
 
 @bp.route('/')
 @bp.route('/index')

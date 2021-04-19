@@ -6,8 +6,14 @@ from datetime import datetime
 from app.models.wiki import Article, Topic, User, Question, Tag
 from app.forms.wiki import ArticleForm
 from app.core.db import db
+from app.utils.routes import counter
 
 bp = Blueprint('admin', __name__, url_prefix='/admin/')
+
+@bp.before_request
+@counter
+def before_request():
+    pass
 
 @bp.route('/')
 @login_required
