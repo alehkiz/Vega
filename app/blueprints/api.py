@@ -11,13 +11,14 @@ from app.utils.routes import counter
 
 bp = Blueprint('api', __name__, url_prefix='/api/')
 
-@bp.before_request
-@counter
-def before_request():
-    print('aqui before_request')
-    pass
+# @bp.before_request
+# @counter
+# def before_request():
+#     print('aqui before_request')
+#     pass
 
 @bp.route('question/<int:id>', methods=['GET', 'POST'])
+@counter
 def question(id):
     question = Question.query.filter(Question.id==id).first_or_404()
     if question.answer_approved == False:

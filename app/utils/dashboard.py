@@ -88,7 +88,7 @@ class Dashboard():
             last_year=Question.query_by_year(
                 self.date.last_year).count()
         )
-        self.questionviews = question_views(
+        self.question_views = question_views(
             count=QuestionView.query.count(),
             today=QuestionView.query_by_date(
                 self.date.today).count(),
@@ -129,7 +129,8 @@ class Dashboard():
                                             self.visitors.last_month != 0 else self.visitors.month * 100)
         self.questions_compare_last_month = int((1-(self.questions.last_month / self.questions.month))*100 if \
                                             self.questions.last_month != 0 else self.questions.month * 100)
-
+        self.question_views_compare_last_month = int((1-(self.question_views.last_month / self.question_views.month))*100 if \
+                                            self.question_views.last_month != 0 else self.question_views.month * 100)
         # (self.visitors.month / self.visitors.last_month)*100 if \
         #                                     self.visitors.last_month != 0 else \
         #                                         self.visitors.month * 100
