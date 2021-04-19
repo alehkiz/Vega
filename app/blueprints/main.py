@@ -9,6 +9,7 @@ from app.models.app import Page, Visit
 from app.models.security import User
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
+from app.utils.routes import counter
 
 from app.dashboard import dash
 from app.utils.dashboard import Dashboard
@@ -19,19 +20,19 @@ bp = Blueprint('main', __name__, url_prefix='/')
 def before_request():
     if current_user.is_authenticated:
         current_user.last_seen = datetime.utcnow()
-        user = current_user
+        # user = current_user
         try:
             db.session.commit()
         except Exception as e:
             app.logger.error('Não foi possível')
             app.logger.error(e)
         # g.question_search_form = QuestionSearchForm()
-    else:
-        user = User.query.filter(User.id == app.config.get('USER_ANON_ID')).first()
-        if user is None:
-            app.logger.error('Usuário anonimo não encontrado')
-            app.logger.error()
-            abort(500)
+    # else:
+    #     user = User.query.filter(User.id == app.config.get('USER_ANON_ID')).first()
+    #     if user is None:
+    #         app.logger.error('Usuário anonimo não encontrado')
+    #         app.logger.error()
+    #         abort(500)
 
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
@@ -40,26 +41,30 @@ def before_request():
     g.questions_most_viewed = Question.most_viewed(app.config.get('ITEMS_PER_PAGE', 5))
     g.questions_most_recent = Question.query.order_by(Question.create_at.desc()).limit(app.config.get('ITEMS_PER_PAGE', 5)).all()
     g.questions_most_liked = Question.most_liked(app.config.get('ITEMS_PER_PAGE', 5), classification=False)
-    if request.endpoint != 'static' and not request.endpoint is None:
-        print(request.url_rule.rule)
-        page = Page.query.filter(Page.endpoint == request.endpoint).first()
-        if page is None:
-            page = Page()
-            page.endpoint = request.endpoint
-            page.route = request.url_rule.rule.split('<')[0]
-            db.session.add(page)
-            try:
-                db.session.commit()
-                page.add_view(user.id)
-            except Exception as e:
-                db.session.rollback()
-                app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-                app.logger.error(e)
-                return abort(500)
-        else:
-            page.add_view(user.id)
-        print(request.endpoint)
+    # if request.endpoint != 'static' and not request.endpoint is None:
+    #     print(request.url_rule.rule)
+    #     page = Page.query.filter(Page.endpoint == request.endpoint).first()
+    #     if page is None:
+    #         page = Page()
+    #         page.endpoint = request.endpoint
+    #         page.route = request.url_rule.rule.split('<')[0]
+    #         db.session.add(page)
+    #         try:
+    #             db.session.commit()
+    #             page.add_view(user.id)
+    #         except Exception as e:
+    #             db.session.rollback()
+    #             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+    #             app.logger.error(e)
+    #             return abort(500)
+    #     else:
+    #         page.add_view(user.id)
+        # print(request.endpoint)
 
+@bp.before_request
+@counter
+def before_request():
+    pass
 
 @bp.route('/')
 @bp.route('/index')
@@ -107,10 +112,3 @@ def search():
                     pagination=paginate, first_page=first_page, last_page=last_page,
                     url_arguments={'q':g.search_form.q.data})
 
-@bp.route('/dashboard')
-def dashboard():
-    # print(app.index())
-    dashboard = Dashboard()
-    dashboard.start()
-    return render_template('dashboard/dashboard.html', dash=dashboard)
-    # return redirect('/dashboard/')

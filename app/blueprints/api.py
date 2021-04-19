@@ -6,9 +6,16 @@ from app.core.db import db
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag
 from app.models.security import User
 from app.models.search import Search
+from app.utils.routes import counter
 # import time
 
 bp = Blueprint('api', __name__, url_prefix='/api/')
+
+@bp.before_request
+@counter
+def before_request():
+    print('aqui before_request')
+    pass
 
 @bp.route('question/<int:id>', methods=['GET', 'POST'])
 def question(id):

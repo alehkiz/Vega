@@ -5,12 +5,17 @@ from app.core.db import db
 from app.models.wiki import Article, Tag, Topic
 from app.forms.wiki import ArticleForm
 from app.utils.kernel import url_in_host
+from app.utils.routes import counter
 from datetime import datetime
 
 bp = Blueprint('article', __name__, url_prefix='/article/')
 
 
 
+@bp.before_request
+@counter
+def before_request():
+    pass
 
 
 @bp.route('/view/<int:id>')

@@ -5,11 +5,16 @@ from datetime import datetime
 
 from app.models.security import User
 from app.forms.login import LoginForm
+from app.utils.routes import counter
 from app.core.db import db
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
+@bp.before_request
+@counter
+def before_request():
+    pass
 
 @bp.route('/login/', methods=['GET', 'POST'])
 def login():

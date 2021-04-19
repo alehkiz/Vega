@@ -7,7 +7,15 @@ from app.core.db import db
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Topic
 from app.forms.topic import TopicEditForm
 from app.forms.question import QuestionSearchForm
+from app.utils.routes import counter
+
 bp = Blueprint('topic', __name__, url_prefix='/topic/')
+
+
+@bp.before_request
+@counter
+def before_request():
+    pass
 
 @bp.route('/')
 @bp.route('/index')
