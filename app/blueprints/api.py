@@ -7,6 +7,7 @@ from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, 
 from app.models.security import User
 from app.models.search import Search
 from app.utils.routes import counter
+from app.utils.kernel import order_dict
 # import time
 
 bp = Blueprint('api', __name__, url_prefix='/api/')
@@ -42,3 +43,63 @@ def question(id):
         # anon_user = User.query.filter_by(id=app.config.get('USER_ANON_ID')).first_or_404()
         question.add_view(app.config.get('USER_ANON_ID'))
     return jsonify(to_dict)
+
+
+# api dashboard
+@bp.route('dashboard/tags_data', methods=['GET', 'POST'])
+def tags_data():
+    '''
+    Gera dados das 10 maiores categorias, caso tenham mais de 10 categorias a 10ª será Outros
+    '''
+    questions = order_dict(Tag._dict_count_questions(), size= 10)
+    return jsonify({
+        'labels': list(questions.keys()),
+        'datasets': [{
+            'data': list(questions.values()),
+            'backgroundColor': [
+                "#BDC3C7",
+                "#9B59B6",
+                "#E74C3C",
+                "#26B99A",
+                "#3498DB"
+                "#ed8a34",
+                "#43fad5",
+                "#4a2a38",
+                "#362b4f",
+                "#3b8a3b",
+            ]#,
+            # 'hoverBackgroundColor': [
+            #     "#CFD4D8",
+            #     "#B370CF",
+            #     "#E95E4F",
+            #     "#36CAAB",
+            #     "#49A9EA"
+            # ]
+        }]
+    })
+    {
+        labels: [
+            "Symbian",
+            "Blackberry",
+            "Other",
+            "Android",
+            "IOS"
+        ],
+        datasets: [{
+            data: [600, 20, 30, 10, 30],
+            backgroundColor: [
+                "#BDC3C7",
+                "#9B59B6",
+                "#E74C3C",
+                "#26B99A",
+                "#3498DB"
+            ],
+            hoverBackgroundColor: [
+                "#CFD4D8",
+                "#B370CF",
+                "#E95E4F",
+                "#36CAAB",
+                "#49A9EA"
+            ]
+        }]
+    }

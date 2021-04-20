@@ -1,3 +1,4 @@
+import enum
 from re import search
 from dateutil.tz import tzutc
 from babel.dates import format_timedelta, format_datetime, get_timezone
@@ -74,3 +75,29 @@ def url_in_host(url):
     if url_parse(url).netloc == url_parse(request.base_url).netloc:
         return True
     return False
+
+
+def order_dict(dictionary: dict, size:int =5, other_key:str='Outros', extra_size:bool=False):
+    '''
+    Ordena um dicionário recebido pelos valores, recorda de acordo com o `size` informado.
+    insere os valores restantes em uma chave `other_key`
+    '''
+
+    _nd = dict(sorted(dictionary.items(), key= lambda item: item[1], reverse=True))
+    agg = 0
+    print(_nd)
+    if not extra_size:
+        size = size-1
+    for i, _d in enumerate(list(_nd.items())):
+        if i >= size:
+            agg += dictionary[_d[0]]
+            _nd.pop(_d[0], None)
+    # print(_nd)
+
+    if other_key in _nd.keys():
+        agg += _nd[other_key]
+        _nd[other_key] = agg
+    else:
+        _nd[other_key] = agg
+    return _nd
+

@@ -1,3 +1,48 @@
+function init_chart_doughnut() {
+
+    if (typeof (Chart) === 'undefined') { return; }
+
+    console.log('Gráfico de pizza');
+
+    if ($('.canvasDoughnut').length) {
+
+
+        var chart_doughnut_settings = {
+            type: 'pie',
+            tooltipFillColor: "rgba(51, 51, 51, 0.55)",
+            data: function () {
+                var tmp = null;
+                console.log('teste1')
+                $.ajax({
+                    'async': false,
+                    'type': "GET",
+                    'global': false,
+                    'dataType': 'json',
+                    'url': urls.d_tags,
+                    // 'data': { 'request': "", 'target': 'arrange_url', 'method': 'method_target' },
+                    'success': function (data) {
+                        tmp = data;
+                    }
+                });
+                return tmp;
+            }()
+            ,
+            options: {
+                legend: false,
+                responsive: false
+            }
+    }
+
+    $('.canvasDoughnut').each(function () {
+
+        var chart_element = $(this);
+        var chart_doughnut = new Chart(chart_element, chart_doughnut_settings);
+
+    });
+
+}
+
+}
 
 
 
@@ -283,12 +328,14 @@ $(document).ready(function () {
     save_link = false;
     load_modal = true;
     init_flot_chart();
+    // init_charts();
+    init_chart_doughnut();
 
-    if ($("#delete-modal").length){
+    if ($("#delete-modal").length) {
         removeModal = new bootstrap.Modal($("#delete-modal")[0], {});
     }
     $('.accordion-button').click(function (e) {
-        if (accordion_link === true){
+        if (accordion_link === true) {
             return false;
         }
         if ($($(this).attr('data-bs-target')).length > 0) {
@@ -302,7 +349,7 @@ $(document).ready(function () {
         var question_id = split_id[1];
         var target = $(this).attr('data-bs-target');
         var url = button_accordion.attr('href');
-        
+
         $.ajax({
             url: url,
             type: 'post',
@@ -311,10 +358,10 @@ $(document).ready(function () {
             headers: {
                 'X-CSRFToken': $CSRF_TOKEN
             },
-            beforeSend: function(){
+            beforeSend: function () {
                 accordion_link = true;
             },
-            complete: function(){
+            complete: function () {
                 accordion_link = false;
             },
             success: function (data) {
@@ -371,14 +418,14 @@ $(document).ready(function () {
                 accordion_collapse.append(
                     '<div class="accordion-footer"></div>'
                 );
-                
+
                 // $('.accordion-footer').append('<span class="badge bg-secondary">' +item+'</span>')
-                data.tags.forEach(item => $('.accordion-footer').append('<span class="badge bg-secondary">' +item+'</span>\n'))
+                data.tags.forEach(item => $('.accordion-footer').append('<span class="badge bg-secondary">' + item + '</span>\n'))
 
                 $(target).collapse();
-                
+
             },
-            error: function(data){
+            error: function (data) {
                 accordion_link = false;
             }
         });
@@ -398,7 +445,7 @@ $(document).on('click', ".like, .unlike", function (e) {
     var action = split_id[0];
     var link_href = $(this).attr('href');
     like_link = true;
-    
+
     // $(this).attr('href', '#');
     var question_id = split_id[1];
 
@@ -422,10 +469,10 @@ $(document).on('click', ".like, .unlike", function (e) {
         headers: {
             "X-CSRFToken": $CSRF_TOKEN,
         },
-        beforeSend: function(){
+        beforeSend: function () {
             like_link = false;
         },
-        complete: function(){
+        complete: function () {
             like_link = false;
         },
         success: function (data) {
@@ -456,7 +503,7 @@ $(document).on('click', ".like, .unlike", function (e) {
 
 
 $(document).on('click', ".save, .unsave", function (e) {
-    if (save_link === true){
+    if (save_link === true) {
         return false;
     }
     save_link = true;
@@ -484,10 +531,10 @@ $(document).on('click', ".save, .unsave", function (e) {
         headers: {
             "X-CSRFToken": $CSRF_TOKEN,
         },
-        beforeSend: function(){
+        beforeSend: function () {
             save_link = true;
         },
-        complete: function(){
+        complete: function () {
             save_link = false;
         },
         success: function (data) {
@@ -514,15 +561,15 @@ $(document).on('click', ".save, .unsave", function (e) {
     return false;
 });
 
-$(document).on('click', ".remove", function(e){
+$(document).on('click', ".remove", function (e) {
     // e.preventDefault();
     // if (load_modal === false){
     //     return false
     // }
     // load_modal = false;
-    
+
     // console.log(removeModal)
-    
+
     remove_link = true;
     var remove_href = $(this).attr('href');
     remove_confirm = $("#delete-modal").find('.delete')
@@ -543,32 +590,32 @@ $(document).on('click', ".remove", function(e){
     //     },
     //     success: function(data){
     //         remove_link = true;
-            
+
     //         console.log(data)
     //     }
     // });
-    
+
 
 });
 
-$(document).on('click', "#confirm-delete", function(e){
+$(document).on('click', "#confirm-delete", function (e) {
     bt_confirm_delete = $("#" + e.currentTarget.id)
     confirm_delete_href = bt_confirm_delete.attr('href')
-    
+
     $.ajax({
-        url:confirm_delete_href,
-        type:'post',
-        data: {confirm: true},
+        url: confirm_delete_href,
+        type: 'post',
+        data: { confirm: true },
         dataType: 'json',
         headers: {
             "X-CSRFToken": $CSRF_TOKEN,
         },
-        success: function(data){
+        success: function (data) {
             // console.log(data);
             // var teste = new bootstrap.Modal(document.getElementById("delete-modal"), {});
             removeModal.toggle();
-            if (data.status === 'success'){
-                $('.table').find("#"+data.id).remove()
+            if (data.status === 'success') {
+                $('.table').find("#" + data.id).remove()
             }
             // console.log(data)
         }
@@ -577,12 +624,12 @@ $(document).on('click', "#confirm-delete", function(e){
 
 });
 
-$("#delete-modal").on("show.bs.modal", function(e) {
+$("#delete-modal").on("show.bs.modal", function (e) {
     // if (load_modal === false){
     //     e.preventDefault();
     // }
     // console.log(e.currentTarget.id)
-    
+
     // e.preventDefault()
     var link = $(e.relatedTarget);
     // console.log(e)    
@@ -605,11 +652,11 @@ function iframeLoaded(frame_id) {
     console.log('aqui')
     console.log(frame_id.id)
     console.log(iFrameID)
-    if(iFrameID) {
-          // here you can make the height, I delete it first, then I make it again
-          iFrameID.height = "";
-          iFrameID.height = iFrameID.contentWindow.document.body.scrollHeight + "px";
-    }   
+    if (iFrameID) {
+        // here you can make the height, I delete it first, then I make it again
+        iFrameID.height = "";
+        iFrameID.height = iFrameID.contentWindow.document.body.scrollHeight + "px";
+    }
 }
 
 
