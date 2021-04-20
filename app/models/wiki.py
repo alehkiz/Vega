@@ -266,6 +266,11 @@ class Tag(db.Model):
         if self.user is None:
             return ''
         return self.user.name
+
+    @staticmethod
+    def _dict_count_questions():
+        return {_.name:_.questions.count() for _ in Tag.query.all()}
+    
 class Question(db.Model):
     '''
     Classe responsável pelas perguntas da wiki, com indexação para ``full text search``

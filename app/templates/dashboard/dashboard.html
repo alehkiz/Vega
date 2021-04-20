@@ -87,22 +87,19 @@
 
   <div class="row">
 
-    <div class="col-md-6 col-sm-6 col-xs-12">
-      <div class="x_panel">
+    <div class="col-md-4 col-sm-4 ">
+      <div class="x_panel tile fixed_height_320 overflow_hidden">
         <div class="x_title">
-          <h2>Recent Activities <small>Sessions</small></h2>
+          <h2>Device Usage</h2>
           <ul class="nav navbar-right panel_toolbox">
             <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i
-                  class="fa fa-wrench"></i></a>
-              <ul class="dropdown-menu" role="menu">
-                <li><a href="#">Settings 1</a>
-                </li>
-                <li><a href="#">Settings 2</a>
-                </li>
-              </ul>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="#">Settings 1</a>
+                  <a class="dropdown-item" href="#">Settings 2</a>
+                </div>
             </li>
             <li><a class="close-link"><i class="fa fa-close"></i></a>
             </li>
@@ -110,10 +107,60 @@
           <div class="clearfix"></div>
         </div>
         <div class="x_content">
-          <iframe id='dash01' noresize='noresize'
-            style='position: relative; background: transparent; width: 100%; height: 100%;' src={{ dash_url }}
-            frameborder="0"> {# onload="iframeLoaded(dash01)" height="50px"#}
-          </iframe>
+          <table class="" style="width:100%">
+            <tr>
+              <th style="width:37%;">
+                <p>Top 5</p>
+              </th>
+              <th>
+                <div class="col-lg-7 col-md-7 col-sm-7 ">
+                  <p class="">Device</p>
+                </div>
+                <div class="col-lg-5 col-md-5 col-sm-5 ">
+                  <p class="">Progress</p>
+                </div>
+              </th>
+            </tr>
+            <tr>
+              <td>
+                <canvas class="canvasDoughnut" height="140" width="140" style="margin: 15px 10px 10px 0"></canvas>
+              </td>
+              <td>
+                <table class="tile_info">
+                  <tr>
+                    <td>
+                      <p><i class="fa fa-square blue"></i>IOS </p>
+                    </td>
+                    <td>30%</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p><i class="fa fa-square green"></i>Android </p>
+                    </td>
+                    <td>10%</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p><i class="fa fa-square purple"></i>Blackberry </p>
+                    </td>
+                    <td>20%</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p><i class="fa fa-square aero"></i>Symbian </p>
+                    </td>
+                    <td>15%</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p><i class="fa fa-square red"></i>Others </p>
+                    </td>
+                    <td>30%</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
         </div>
       </div>
     </div>
