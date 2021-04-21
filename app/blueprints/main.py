@@ -11,7 +11,7 @@ from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
 from app.utils.routes import counter
 
-from app.dashboard import dash
+# from app.dashboard import dash
 from app.utils.dashboard import Dashboard
 
 bp = Blueprint('main', __name__, url_prefix='/')

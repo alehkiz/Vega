@@ -1,3 +1,5 @@
+from app.models.app import Visit
+import re
 from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify
 from flask.globals import current_app
 from flask_security import login_required, current_user
@@ -6,6 +8,7 @@ from app.core.db import db
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag
 from app.models.security import User
 from app.models.search import Search
+from app.utils.kernel import order_dict
 # import time
 
 bp = Blueprint('api', __name__, url_prefix='/api/')
@@ -49,6 +52,7 @@ def tags_data():
     Gera dados das 10 maiores categorias, caso tenham mais de 10 categorias a 10ª será Outros
     '''
     questions = Tag._dict_count_questions()
+    questions = order_dict(Tag._dict_count_questions(), 5)
     return jsonify({
         'labels': list(questions.keys()),
         'datasets': [{
@@ -64,39 +68,50 @@ def tags_data():
                 "cyan",
                 "gray",
                 "black"
-            ],
-            'hoverBackgroundColor': [
-                "#CFD4D8",
-                "#B370CF",
-                "#E95E4F",
-                "#36CAAB",
-                "#49A9EA"
-            ]
-        }]
+            ]  # ,
+            # 'hoverBackgroundColor': [
+            #     "#CFD4D8",
+            #     "#B370CF",
+            #     "#E95E4F",
+            #     "#36CAAB",
+            #     "#49A9EA"
+            # ]
+        }],
+        'totalQuestions': Question.query.count()
     })
-    {
-        labels: [
-            "Symbian",
-            "Blackberry",
-            "Other",
-            "Android",
-            "IOS"
-        ],
-        datasets: [{
-            data: [600, 20, 30, 10, 30],
-            backgroundColor: [
-                "#BDC3C7",
-                "#9B59B6",
-                "#E74C3C",
-                "#26B99A",
-                "#3498DB"
-            ],
-            hoverBackgroundColor: [
-                "#CFD4D8",
-                "#B370CF",
-                "#E95E4F",
-                "#36CAAB",
-                "#49A9EA"
-            ]
-        }]
-    }
+
+
+@bp.route('dashboard/visits', methods=['GET', 'POST'])
+def visits_data():
+    if request.method == 'POST':
+        year = request.form.get('year', False)
+        month = request.form.get('month', None)
+        if not year.isnumeric():
+            return jsonify({
+                'erro': True,
+                'message': 'Ano inválido'
+            })
+        year = int(year)
+        print(year)
+        if year is False:
+            return jsonify({
+                'erro': True,
+                'message': 'Ano inválido'
+            })
+        if month is None:
+            return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),_[0]] for _ in Visit.total_by_date(year=year).all()])
+            try:
+                return jsonify({_[1]:_[0] for _ in Visit.total_by_date(year=year).all()})
+            except Exception as e:
+                return jsonify({
+                    'erro': True,
+                    'message': 'Valor inválido YEAR'
+                })
+        try:
+            return Visit.total_by_date(year, month).all()
+        except Exception as e:
+            return jsonify({
+                'erro': True,
+                'message': 'Valor inválido'
+            })
+    return ''

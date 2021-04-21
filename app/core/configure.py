@@ -19,7 +19,7 @@ from app.models.wiki import Article, Topic, Tag, ArticleView, Question, Question
 from app.models.search import Search, SearchDateTime
 from app.models.app import Visit, Page
 
-from app.dashboard import dash
+# from app.dashboard import dash
 
 # dash = dash.dash_appication()
 security = Security()
