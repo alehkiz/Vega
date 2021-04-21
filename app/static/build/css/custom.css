@@ -404,22 +404,44 @@ body .container.body .right_col {
     max-height: 400px !important
 }
 .blue {
-    color: #3498DB
+    color: blue;
 }
 .purple {
-    color: #9B59B6
+    color: purple;
 }
 .green {
-    color: #1ABB9C
+    color: green
 }
 .aero {
     color: #9CC2CB
 }
 .red {
-    color: #E74C3C
+    color: red
 }
 .dark {
     color: #34495E
+}
+
+.pink {
+    color: pink;
+}
+
+.orange {
+    color: orange;
+}
+yellow {
+    color: yellow;
+}
+cyan {
+    color: cyan;
+}
+
+gray {
+    color: gray;
+}
+
+black {
+    color: black;
 }
 .border-blue {
     border-color: #3498DB !important

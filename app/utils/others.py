@@ -1,7 +1,7 @@
 import random
 import time
 
-def str_time_prop(start, end, format, prop):
+def str_time_prop(start, end, format='%d-%m-%Y %H:%M:%S', prop=0):
     """Get a time at a proportion of a range of two formatted times.
 
     start and end should be strings specifying times formated in the

@@ -104,3 +104,8 @@ def remove(id):
     db.session.commit()
     return render_template('base.html'  )
 
+
+@bp.route('/user/settings')
+@login_required
+def settings():
+    return 'not implemented'

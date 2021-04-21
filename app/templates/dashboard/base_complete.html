@@ -115,10 +115,8 @@
       <script src="{{url_for('static', filename='js/main.js')}}" type="text/javascript"></script>
       <script type="text/javascript">
       var urls = {
-        'd_tags' : "{{url_for('api.tags_data')}}",
-        'd_visits' : "{{url_for('api.visits_data')}}"
+        'd_tags' : "{{url_for('api.tags_data')}}"
       }
-      $CSRF_TOKEN = '{{ csrf_token() }}';
       </script>
     {% endblock body %}
   </body>
