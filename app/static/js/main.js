@@ -1,7 +1,7 @@
 var tags_r;
 var visits_r;
 var arr_data1;
-
+var data_visit;
 function init_chart_doughnut() {
 
     if (typeof (Chart) === 'undefined') { return; }
@@ -93,10 +93,10 @@ function init_flot_chart() {
             },
             'dataType': 'json',
             'url': urls.d_visits,
-            'data': { 'year': 2021},
+            'data': { 'year': 2021, 'month': 4},
             'success': function (data) {
                 tmp = data;
-            }
+            },
         });
         return tmp;
     }()
@@ -110,11 +110,16 @@ function init_flot_chart() {
     //     [gd(2012, 1, 6), 85],
     //     [gd(2012, 1, 7), 7]
     // ];
-    var arr_data1 = []
-    visits_r.forEach(function (item, index) {
-        arr_data1.push([new Date(item[0]).getTime(), item[1]])
-        // return 
-      });
+    arr_data1 = []
+    // visits_r.forEach(function (item, index) {
+    //     arr_data1.push([new Date(item[0]).getTime(), item[1]])
+    //     // return 
+    //   });
+    data = {data:[],
+            label: []}
+    for (let key in visits_r){
+        arr_data1.push([new Date(key).getTime(), visits_r[key]])
+    }
     // $.each(visits_r, function(i, obj){
     //     return [new Date(obj[0]).getTime(), i]
     // })
@@ -190,7 +195,7 @@ function init_flot_chart() {
                 fill: 0.4
             },
             points: {
-                radius: 0,
+                radius: 2,
                 show: true
             },
             shadowSize: 2
@@ -213,13 +218,26 @@ function init_flot_chart() {
             axisLabelUseCanvas: true,
             axisLabelFontSizePixels: 12,
             axisLabelFontFamily: 'Verdana, Arial',
-            axisLabelPadding: 10
+            axisLabelPadding: 10//,
+            // min: new Date(2021, 1).getTime(),
+            // max: new Date(2021, 4).getTime()
         },
         yaxis: {
-            ticks: 8,
-            tickColor: "rgba(51, 51, 51, 0.06)",
+            ticks: 15,
+            tickColor: "rgba(51, 51, 51, 0.06)"
         },
-        tooltip: false
+        tooltip: {show:true, 
+            content: "%s em %x foram %y acessos",
+            xDateFormat: "%d/%m/%y",},
+        tooltipOpts: {
+            content: "<span style='display:block; padding:7px;'>%x - <strong style='color:yellow;'>%y</strong></span>",
+            xDateFormat: "%b %d, %Y %I:%M %P",
+            shifts: {
+                x: 20,
+                y: 0
+            },
+            defaultTheme: false
+        }
     }
 
     // var chart_plot_02_settings = {

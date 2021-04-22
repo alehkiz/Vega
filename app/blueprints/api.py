@@ -105,10 +105,23 @@ def visits_data():
             except Exception as e:
                 return jsonify({
                     'erro': True,
-                    'message': 'Valor inválido YEAR'
+                    'message': 'Valor inválido Mês'
                 })
+        if not month.isnumeric():
+            return jsonify(
+                {'erro':True, 
+                'message': 'Mês inválido'}
+            )
         try:
-            return Visit.total_by_date(year, month).all()
+            print(month)
+            month = int(month)
+        #     _dict = {_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'):_[0] for _ in Visit.total_by_date(year=year, month=month).all()}
+        #     return jsonify({
+        # 'labels': list(_dict.keys()),
+        # 'datasets': [{
+        #     'labels': list(_dict.keys()),
+        #     'data': list(_dict.values())}]})
+            return jsonify({_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'):_[0] for _ in Visit.total_by_date(year=year, month=month).all()})
         except Exception as e:
             return jsonify({
                 'erro': True,
