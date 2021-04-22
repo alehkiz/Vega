@@ -79,5 +79,5 @@ class Visit(db.Model):
             cast(Visit.datetime, Date).label('date')
         ).filter(
             extract('year', Visit.datetime) == year,
-            extract('month') == month
+            extract('month', Visit.datetime) == month
         ).group_by('date')
