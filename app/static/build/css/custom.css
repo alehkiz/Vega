@@ -1101,7 +1101,11 @@ h2 {
     width: 40%;
     float: right
 }
-.x_title h2 {
+.x_title h2,
+.x_title h3,
+.x_title h4,
+.x_title h5
+ {
     margin: 5px 0 6px;
     float: left;
     display: block;
