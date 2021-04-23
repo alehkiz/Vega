@@ -294,12 +294,13 @@ function init_flot_chart() {
             axisLabelUseCanvas: true,
             axisLabelFontSizePixels: 12,
             axisLabelFontFamily: 'Verdana, Arial',
-            axisLabelPadding: 10//,
+            axisLabelPadding: 10,
             // min: new Date(2021, 1).getTime(),
             // max: new Date(2021, 4).getTime()
+            timeformat: "%d/%m"
         },
         yaxis: {
-            ticks: 15,
+            ticks: 20,
             tickColor: "rgba(51, 51, 51, 0.06)"
         },
         tooltip: {
@@ -479,6 +480,10 @@ $(document).ready(function () {
 
     if ($("#delete-modal").length) {
         removeModal = new bootstrap.Modal($("#delete-modal")[0], {});
+    }
+
+    if ($(".progress .progress-bar")[0]) {
+        $('.progress .progress-bar').progressbar();
     }
     $('.accordion-button').click(function (e) {
         if (accordion_link === true) {
