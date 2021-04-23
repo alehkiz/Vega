@@ -1,1 +1,1 @@
-flask run --cert=cert.pem --key=key.pem
+flask run --cert=cert.pem --key=key.pem --port=80
