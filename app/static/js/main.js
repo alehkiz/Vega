@@ -1,7 +1,14 @@
 var tags_r;
-var visits_r;
+var visits_interval;
 var arr_data1;
 var data_visit;
+var plot_visit;
+var plt;
+
+function config(){
+    moment.locale('pt-br');
+}
+
 function init_chart_doughnut() {
 
     if (typeof (Chart) === 'undefined') { return; }
@@ -72,7 +79,7 @@ function init_daterangepicker() {
 
     var cb = function (start, end, label) {
         console.log(start.toISOString(), end.toISOString(), label);
-        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+        $('#reportrange span').html(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
     };
 
     var optionSet1 = {
@@ -81,7 +88,7 @@ function init_daterangepicker() {
         minDate: '01/01/2021',
         maxDate: '12/31/2030',
         dateLimit: {
-            days: 60
+            days: 30
         },
         showDropdowns: true,
         showWeekNumbers: true,
@@ -103,11 +110,11 @@ function init_daterangepicker() {
         format: 'MM/DD/YYYY',
         separator: ' to ',
         locale: {
-            applyLabel: 'Submit',
-            cancelLabel: 'Clear',
-            fromLabel: 'From',
-            toLabel: 'To',
-            customRangeLabel: 'Custom',
+            applyLabel: 'Enviar',
+            cancelLabel: 'Limpar',
+            fromLabel: 'De',
+            toLabel: 'Para',
+            customRangeLabel: 'Customizar',
             daysOfWeek: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
             monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
             firstDay: 1
@@ -124,6 +131,7 @@ function init_daterangepicker() {
     });
     $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
         console.log("apply event fired, start/end dates are " + picker.startDate.format('MMMM D, YYYY') + " to " + picker.endDate.format('MMMM D, YYYY'));
+        
     });
     $('#reportrange').on('cancel.daterangepicker', function (ev, picker) {
         console.log("cancel event fired");
@@ -155,7 +163,7 @@ function init_flot_chart() {
         return (Math.floor(Math.random() * (1 + 40 - 20))) + 20;
     };
 
-    visits_r = function () {
+    visits_interval = function () {
         var tmp = null;
         console.log('aqui')
         $.ajax({
@@ -166,8 +174,9 @@ function init_flot_chart() {
                 "X-CSRFToken": $CSRF_TOKEN,
             },
             'dataType': 'json',
-            'url': urls.d_visits,
-            'data': { 'year': 2021, 'month': 4 },
+            'url': urls.d_visit_interval,
+            // 'data': { 'year':2021, 'month': 4},
+            'data': { 'start': moment().subtract(22, 'days').format('DD-MM-YYYY'), 'end': moment().subtract(2, 'days').format('DD-MM-YYYY')},
             'success': function (data) {
                 tmp = data;
             },
@@ -175,91 +184,22 @@ function init_flot_chart() {
         return tmp;
     }()
 
-    // var arr_data1 = [
-    //     [gd(2012, 1, 1), 17],
-    //     [gd(2012, 1, 2), 74],
-    //     [gd(2012, 1, 3), 6],
-    //     [gd(2012, 1, 4), 39],
-    //     [gd(2012, 1, 5), 20],
-    //     [gd(2012, 1, 6), 85],
-    //     [gd(2012, 1, 7), 7]
-    // ];
+
     arr_data1 = []
-    // visits_r.forEach(function (item, index) {
-    //     arr_data1.push([new Date(item[0]).getTime(), item[1]])
-    //     // return 
-    //   });
     data = {
         data: [],
         label: []
     }
-    for (let key in visits_r) {
-        arr_data1.push([new Date(key).getTime(), visits_r[key]])
+    for (let key in visits_interval) {
+        arr_data1.push([new Date(visits_interval[key][0]).getTime(), visits_interval[key][1]])
     }
-    // $.each(visits_r, function(i, obj){
-    //     return [new Date(obj[0]).getTime(), i]
-    // })
-    // var arr_data1 = visits_r
-    // var arr_data2 = [
-    //     [gd(2012, 1, 1), 82],
-    //     [gd(2012, 1, 2), 23],
-    //     [gd(2012, 1, 3), 66],
-    //     [gd(2012, 1, 4), 9],
-    //     [gd(2012, 1, 5), 119],
-    //     [gd(2012, 1, 6), 6],
-    //     [gd(2012, 1, 7), 9]
-    // ];
-
-    // var arr_data3 = [
-    //     [0, 1],
-    //     [1, 9],
-    //     [2, 6],
-    //     [3, 10],
-    //     [4, 5],
-    //     [5, 17],
-    //     [6, 6],
-    //     [7, 10],
-    //     [8, 7],
-    //     [9, 11],
-    //     [10, 35],
-    //     [11, 9],
-    //     [12, 12],
-    //     [13, 5],
-    //     [14, 3],
-    //     [15, 4],
-    //     [16, 9]
-    // ];
-
-    // var chart_plot_02_data = [];
-
-    // var chart_plot_03_data = [
-    //     [0, 1],
-    //     [1, 9],
-    //     [2, 6],
-    //     [3, 10],
-    //     [4, 5],
-    //     [5, 17],
-    //     [6, 6],
-    //     [7, 10],
-    //     [8, 7],
-    //     [9, 11],
-    //     [10, 35],
-    //     [11, 9],
-    //     [12, 12],
-    //     [13, 5],
-    //     [14, 3],
-    //     [15, 4],
-    //     [16, 9]
-    // ];
-
-
-    // for (var i = 0; i < 30; i++) {
-    //     chart_plot_02_data.push([new Date(Date.today().add(i).days()).getTime(), randNum() + i + i + 10]);
-    // }
-
-
     var chart_plot_01_settings = {
         series: {
+            // curvedLines: {
+            //     apply: true,
+            //     active: true,
+            //     monotonicFit: true
+            //   },
             lines: {
                 show: false,
                 fill: true
@@ -288,8 +228,10 @@ function init_flot_chart() {
         xaxis: {
             tickColor: "rgba(51, 51, 51, 0.06)",
             mode: "time",
-            tickSize: [1, "day"],
-            //tickLength: 10,
+            tickSize: [22, "day"],
+            // minTickSize: [2, "month"],
+            // maxTickSize: [10, "month"],
+            tickLength: 10,
             axisLabel: "Date",
             axisLabelUseCanvas: true,
             axisLabelFontSizePixels: 12,
@@ -297,7 +239,8 @@ function init_flot_chart() {
             axisLabelPadding: 10,
             // min: new Date(2021, 1).getTime(),
             // max: new Date(2021, 4).getTime()
-            timeformat: "%d/%m"
+            timeformat: "%d/%m/%y",
+            // mode: "categories"
         },
         yaxis: {
             ticks: 20,
@@ -410,7 +353,7 @@ function init_flot_chart() {
     if ($("#chart_plot_01").length) {
         console.log('Plot1');
 
-        $.plot($("#chart_plot_01"), [arr_data1], chart_plot_01_settings);
+        plt = $.plot($("#chart_plot_01"), [arr_data1], chart_plot_01_settings);
     }
 
 
@@ -473,6 +416,7 @@ $(document).ready(function () {
     like_link = false;
     save_link = false;
     load_modal = true;
+    config();
     init_flot_chart();
     // init_charts();
     init_chart_doughnut();

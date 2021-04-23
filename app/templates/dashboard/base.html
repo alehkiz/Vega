@@ -83,7 +83,7 @@
         <!-- iCheck -->
         <script src="{{ url_for('static', filename='vendors/iCheck/icheck.min.js') }}"></script>
         <!-- bootstrap-daterangepicker -->
-        <script src="{{ url_for('static', filename='vendors/moment/min/moment.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='vendors/moment/moment.js') }}"></script>
         <script src="{{ url_for('static', filename='vendors/bootstrap-daterangepicker/daterangepicker.js') }}"></script>
         <script src="{{ url_for('static', filename='vendors/DateJS/build/production/date.min.js') }}"></script>
 
@@ -117,7 +117,7 @@
       <script type="text/javascript">
       var urls = {
         'd_tags' : "{{url_for('api.tags_data')}}",
-        'd_visits' : "{{url_for('api.visits_data')}}"
+        'd_visit_interval' : "{{url_for('api.visits_by_interval')}}"
       }
       $CSRF_TOKEN = '{{ csrf_token() }}';
       </script>

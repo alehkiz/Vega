@@ -60,7 +60,21 @@ class Visit(db.Model):
         return Visit.query.filter(cast(Visit.datetime, Date) == start, cast(Visit.datetime, Date) == end)
 
     @staticmethod
-    def total_by_date(year: int, month=None):
+    def total_by_date(start: str, end: str):
+        start = datetime.strptime(start, '%d-%m-%Y')
+        end = datetime.strptime(end, '%d-%m-%Y')
+        timedelta = (end - start).days
+        if timedelta > 60:
+            raise Exception('Intervalo de datas maior que 60 dias')
+        return db.session.query(
+                func.count(Visit.id).label('total'),
+                cast(Visit.datetime, Date).label('date')
+            ).filter(
+               Visit.datetime.between(start, end)
+            ).group_by('date')
+
+    @staticmethod
+    def total_by_year_month(year: int, month=None):
         if year < 2020:
             raise Exception('Ano deve ser maior de 2020')
 

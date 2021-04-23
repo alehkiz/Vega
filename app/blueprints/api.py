@@ -9,6 +9,7 @@ from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, 
 from app.models.security import User
 from app.models.search import Search
 from app.utils.kernel import order_dict
+from datetime import datetime
 # import time
 
 bp = Blueprint('api', __name__, url_prefix='/api/')
@@ -81,35 +82,66 @@ def tags_data():
     })
 
 
+
+
+@bp.route('dashboard/visit', methods=['GET', 'POST'])
+def visits_by_interval():
+    if request.method == 'POST':
+        start = request.form.get('start', False)
+        end = request.form.get('end', False)
+        print(type(start))
+        print(start)
+        print(end)
+        if start is False or end is False:
+            return jsonify({
+                'error': True,
+                'mensage': 'Data inicial ou final inválida;'
+            })
+        # try:
+        #     # start = datetime.strptime(start, '%d-%m-%Y')
+        #     # end = datetime.strptime(end, '%d-%m-%Y')
+            
+        # except Exception as e:
+        #     return jsonify({
+        #         'error': True,
+        #         'message': 'Não foi possível converter inicio e fim para uma data valida'
+        #     })
+        print('final')
+        return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),
+                        _[0]] for _ in Visit.total_by_date(start, end).all()])
+
+
 @bp.route('dashboard/visits', methods=['GET', 'POST'])
 def visits_data():
     if request.method == 'POST':
         year = request.form.get('year', False)
         month = request.form.get('month', None)
+        start = request.form.get('start', False)
+        end = request.form.get('end', False)
         if not year.isnumeric():
             return jsonify({
-                'erro': True,
+                'error': True,
                 'message': 'Ano inválido'
             })
         year = int(year)
         print(year)
         if year is False:
             return jsonify({
-                'erro': True,
+                'error': True,
                 'message': 'Ano inválido'
             })
         if month is None:
-            return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),_[0]] for _ in Visit.total_by_date(year=year).all()])
+            return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),_[0]] for _ in Visit.total_by_year_month(year=year).all()])
             try:
-                return jsonify({_[1]:_[0] for _ in Visit.total_by_date(year=year).all()})
+                return jsonify({_[1]:_[0] for _ in Visit.total_by_year_month(year=year).all()})
             except Exception as e:
                 return jsonify({
-                    'erro': True,
+                    'error': True,
                     'message': 'Valor inválido Mês'
                 })
         if not month.isnumeric():
             return jsonify(
-                {'erro':True, 
+                {'error':True, 
                 'message': 'Mês inválido'}
             )
         try:
@@ -121,10 +153,10 @@ def visits_data():
         # 'datasets': [{
         #     'labels': list(_dict.keys()),
         #     'data': list(_dict.values())}]})
-            return jsonify({_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'):_[0] for _ in Visit.total_by_date(year=year, month=month).all()})
+            return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),_[0]] for _ in Visit.total_by_year_month(year=year, month=month).all()])
         except Exception as e:
             return jsonify({
-                'erro': True,
+                'error': True,
                 'message': 'Valor inválido'
             })
     return ''
