@@ -2,7 +2,7 @@
 from enum import unique
 from os import stat
 from flask import Markup, escape, current_app as app, abort, flash
-from sqlalchemy import func, text, Index, cast, desc, extract, Date
+from sqlalchemy import func, text, Index, cast, desc, extract, Date, asc
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import date, datetime
 from sqlalchemy.orm import backref
@@ -63,15 +63,15 @@ class Visit(db.Model):
     def total_by_date(start: str, end: str):
         start = datetime.strptime(start, '%d-%m-%Y')
         end = datetime.strptime(end, '%d-%m-%Y')
-        timedelta = (end - start).days
-        if timedelta > 60:
-            raise Exception('Intervalo de datas maior que 60 dias')
+        # timedelta = (end - start).days
+        # if timedelta > 60:
+        #     raise Exception('Intervalo de datas maior que 60 dias')
         return db.session.query(
                 func.count(Visit.id).label('total'),
                 cast(Visit.datetime, Date).label('date')
             ).filter(
                Visit.datetime.between(start, end)
-            ).group_by('date')
+            ).group_by('date').order_by(asc('date'))
 
     @staticmethod
     def total_by_year_month(year: int, month=None):
