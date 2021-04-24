@@ -255,7 +255,7 @@ html , body{
 .menu_section>ul {
     margin-top: 10px
 }
-.profile_pic {
+/* .profile_pic {
     width: 35%;
     float: left
 }
@@ -268,18 +268,18 @@ html , body{
     margin-top: 10px;
     border: 1px solid rgba(52, 73, 94, 0.44);
     padding: 4px
-}
-.profile_info {
-    padding: 10px;
+} */
+.dashboard-info {
+    padding: 20px;
     width: 65%;
     float: left
 }
-.profile_info span {
+.dashboard-info span {
     font-size: 13px;
     line-height: 30px;
     color: #BAB8B8
 }
-.profile_info h2 {
+.dashboard-info h2 {
     font-size: 14px;
     color: #ECF0F1;
     margin: 0;
@@ -295,7 +295,7 @@ html , body{
     width: 50%;
     margin: 10px 0 0
 }
-.profile.img_2 .profile_info {
+.profile.img_2 .dashboard-info {
     padding: 15px 10px 0;
     width: 100%;
     margin-bottom: 10px;
