@@ -1,7 +1,7 @@
 # from sqlalchemy import func
 from os import stat
 from flask import Markup, escape, current_app as app, abort, flash
-from sqlalchemy import func, text, Index, cast, desc
+from sqlalchemy import func, text, Index, cast, desc, extract, Date
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import date, datetime
 from markdown2 import markdown
@@ -266,6 +266,11 @@ class Tag(db.Model):
         if self.user is None:
             return ''
         return self.user.name
+
+    @staticmethod
+    def _dict_count_questions():
+        return {_.name:_.questions.count() for _ in Tag.query.all()}
+    
 class Question(db.Model):
     '''
     Classe responsável pelas perguntas da wiki, com indexação para ``full text search``
@@ -617,6 +622,19 @@ class Question(db.Model):
                 'topic' : self.topic.name if not self.topic is None else None,
                 'tags' : [x.name for x in self.tags]
                 }
+    @staticmethod
+    def query_by_month_year(year : int, month : int):
+        return Question.query.filter(extract('year', Question.create_at) == year, extract('month', Question.create_at) == month)
+    @staticmethod
+    def query_by_year(year : int):
+        return Question.query.filter(extract('year', Question.create_at) == year)
+    @staticmethod
+    def query_by_date(date: date):
+        return Question.query.filter(cast(Question.create_at, Date) == date)
+    
+    @staticmethod
+    def query_by_interval(start : date, end: date):
+        return Question.query.filter(cast(Question.create_at, Date) == start, cast(Question.create_at, Date) == end)
 
 class QuestionView(db.Model):
 
@@ -633,10 +651,24 @@ class QuestionView(db.Model):
 
     
     def views_by_question(self, question_id : int):
-        return db.session.query(func.count(QuestionView.id)).filter(QuestionView.question_id == question_id).scalar()
+        return db.session.query(func.count(self.id)).filter(self.question_id == question_id).scalar()
 
     def views_by_user(self, user_id : int):
-        return db.session.query(func.count(QuestionView.id)).filter(QuestionView.user_id == user_id).scalar()
+        return db.session.query(func.count(self.id)).filter(self.user_id == user_id).scalar()
+
+    @staticmethod
+    def query_by_month_year(year : int, month : int):
+        return QuestionView.query.filter(extract('year', QuestionView.datetime) == year, extract('month', QuestionView.datetime) == month)
+    @staticmethod
+    def query_by_year(year : int):
+        return QuestionView.query.filter(extract('year', QuestionView.datetime) == year)
+    @staticmethod
+    def query_by_date(date: date):
+        return QuestionView.query.filter(cast(QuestionView.datetime, Date) == date)
+    
+    @staticmethod
+    def query_by_interval(start : date, end: date):
+        return QuestionView.query.filter(cast(QuestionView.datetime, Date) == start, cast(QuestionView.datetime, Date) == end)
 
 
 class QuestionLike(db.Model):
@@ -671,6 +703,9 @@ class QuestionSave(db.Model):
 
     def saves_by_user(self, user_id : int):
         return self.query.filter(self.question_id == user_id).count()
+
+    
+
 
 
 

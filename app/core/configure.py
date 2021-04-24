@@ -17,8 +17,9 @@ from app.core.db import db, user_datastore
 from app.models.security import User, Role
 from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView
 from app.models.search import Search, SearchDateTime
+from app.models.app import Visit, Page
 
-from app.dashboard import dash
+# from app.dashboard import dash
 
 # dash = dash.dash_appication()
 security = Security()
@@ -27,7 +28,7 @@ login = LoginManager()
 login.login_view = 'auth.login'
 login.login_message = 'Please login to access this page'
 csrf = CSRFProtect()
-
+# dash_app = dash.dash_appication()
 
 csp = {
     'default-src': ['\'self\'',
@@ -73,9 +74,9 @@ def init(app):
 
     # dash.init_app(app=app)
     
-    # app = dash.dash_appication()
-
-
+    
+    # dash_app.init_app(app=app)
+    # app = dash.dash_appication(app).server
     ### SEARCH
 
     # app.elasticsearch = Elasticsearch(app.config['ELASTICSEARCH_URL']) if app.config['ELASTICSEARCH_URL'] else None
@@ -94,9 +95,12 @@ def init(app):
             QuestionSave=QuestionSave, 
             QuestionView=QuestionView, 
             Search=Search,
-            SearchDateTime=SearchDateTime
+            SearchDateTime=SearchDateTime,
+            Visit=Visit,
+            Page=Page
             )
-    register_blueprints(app)
+    with app.app_context():
+        register_blueprints(app)
 
     # logger
     if not exists('logs'):
@@ -120,5 +124,6 @@ def init(app):
             return None
         return user
 
-    app = dash.dash_appication(app)
+    # app = dash.dash_appication(app)
+    
     return app

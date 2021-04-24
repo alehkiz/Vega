@@ -7,8 +7,14 @@ from wtforms.validators import IPAddress
 from app.core.db import db
 from app.models.security import User
 from app.forms.user import UserForm, CreateUserForm
+from app.utils.routes import counter
 
 bp = Blueprint('user', __name__, url_prefix='/user/')
+
+@bp.before_request
+@counter
+def before_request():
+    pass
 
 @bp.route('/')
 @bp.route('/index/')
@@ -98,3 +104,8 @@ def remove(id):
     db.session.commit()
     return render_template('base.html'  )
 
+
+@bp.route('/user/settings')
+@login_required
+def settings():
+    return 'not implemented'
