@@ -7,7 +7,14 @@ from app.core.db import db
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag
 from app.forms.tag import TagEditForm
 from app.forms.question import QuestionSearchForm
+from app.utils.routes import counter
+
 bp = Blueprint('tag', __name__, url_prefix='/tag/')
+
+@bp.before_request
+@counter
+def before_request():
+    pass
 
 @bp.route('/')
 @bp.route('/index')
