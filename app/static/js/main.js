@@ -1,9 +1,12 @@
 var tags_r;
 var visits_interval;
-var arr_data1;
+var visit_data;
 var data_visit;
 var plot_visit;
 var plt;
+var chart_plot_02_data;
+var arr_data2;
+var visit_plot;
 
 function config(){
     moment.locale('pt-br');
@@ -88,7 +91,7 @@ function init_daterangepicker() {
         minDate: '01/01/2021',
         maxDate: '12/31/2030',
         dateLimit: {
-            days: 30
+            days: 60
         },
         showDropdowns: true,
         showWeekNumbers: true,
@@ -96,8 +99,8 @@ function init_daterangepicker() {
         timePickerIncrement: 1,
         timePicker12Hour: true,
         ranges: {
-            'Hoje': [moment(), moment()],
-            'Ontem': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            // 'Hoje': [moment(), moment()],
+            // 'Ontem': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
             'Últimos 7 dias': [moment().subtract(6, 'days'), moment()],
             'Últimos 30 dias': [moment().subtract(29, 'days'), moment()],
             'Este mês': [moment().startOf('month'), moment().endOf('month')],
@@ -108,7 +111,7 @@ function init_daterangepicker() {
         applyClass: 'btn-small btn-primary',
         cancelClass: 'btn-small',
         format: 'MM/DD/YYYY',
-        separator: ' to ',
+        separator: ' para ',
         locale: {
             applyLabel: 'Enviar',
             cancelLabel: 'Limpar',
@@ -121,7 +124,7 @@ function init_daterangepicker() {
         }
     };
 
-    $('#reportrange span').html(moment().subtract(29, 'days').format('MMMM D, YYYY') + ' - ' + moment().format('MMMM D, YYYY'));
+    $('#reportrange span').html(start_visit + ' - ' + end_visit);
     $('#reportrange').daterangepicker(optionSet1, cb);
     $('#reportrange').on('show.daterangepicker', function () {
         console.log("show event fired");
@@ -131,6 +134,7 @@ function init_daterangepicker() {
     });
     $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
         console.log("apply event fired, start/end dates are " + picker.startDate.format('MMMM D, YYYY') + " to " + picker.endDate.format('MMMM D, YYYY'));
+        visit_chart(picker.startDate.format('DD-MM-YYYY'), picker.endDate.format('DD-MM-YYYY'))
         
     });
     $('#reportrange').on('cancel.daterangepicker', function (ev, picker) {
@@ -154,7 +158,7 @@ function gd(year, month, day) {
 }
 
 
-function init_flot_chart() {
+function visit_chart(start, end) {
 
     if (typeof ($.plot) === 'undefined') { return; }
 
@@ -176,33 +180,32 @@ function init_flot_chart() {
             'dataType': 'json',
             'url': urls.d_visit_interval,
             // 'data': { 'year':2021, 'month': 4},
-            'data': { 'start': moment().subtract(22, 'days').format('DD-MM-YYYY'), 'end': moment().subtract(2, 'days').format('DD-MM-YYYY')},
+            'data': { 'start': start, 'end': end},
             'success': function (data) {
                 tmp = data;
             },
+            'error': function (data){
+                console.log('Não foi possível recuperar dados de visitas');
+            }
         });
         return tmp;
     }()
 
 
-    arr_data1 = []
-    data = {
-        data: [],
-        label: []
-    }
+    visit_data = [];
+
     for (let key in visits_interval) {
-        arr_data1.push([new Date(visits_interval[key][0]).getTime(), visits_interval[key][1]])
+        visit_data.push([new Date(visits_interval[key][0]).getTime(), parseInt(visits_interval[key][1])])
     }
+    
     var chart_plot_01_settings = {
         series: {
-            // curvedLines: {
-            //     apply: true,
-            //     active: true,
-            //     monotonicFit: true
-            //   },
+
             lines: {
                 show: false,
-                fill: true
+                fill: true,
+                lineWidth: 2,
+                steps: false
             },
             splines: {
                 show: true,
@@ -216,181 +219,69 @@ function init_flot_chart() {
             },
             shadowSize: 2
         },
-        grid: {
-            verticalLines: true,
-            hoverable: true,
-            clickable: true,
-            tickColor: "#d5d5d5",
-            borderWidth: 1,
-            color: '#fff'
+        legend: {
+            position: "ne",
+            margin: [0, -25],
+            noColumns: 0,
+            labelBoxBorderColor: null,
+            labelFormatter: function (label, series) {
+                return label + '&nbsp;&nbsp;';
+            },
+            width: 40,
+            height: 1
         },
-        colors: ["rgba(38, 185, 154, 0.38)", "rgba(3, 88, 106, 0.38)"],
+        grid: {
+            show: true,
+            aboveData: true,
+            color: "#3f3f3f",
+            labelMargin: 10,
+            axisMargin: 0,
+            borderWidth: 0,
+            borderColor: null,
+            minBorderMargin: 5,
+            clickable: true,
+            hoverable: true,
+            autoHighlight: true,
+            mouseActiveRadius: 100
+        },
+        colors: ["orange", "blue"],
         xaxis: {
             tickColor: "rgba(51, 51, 51, 0.06)",
-            mode: "time",
-            tickSize: [22, "day"],
-            // minTickSize: [2, "month"],
-            // maxTickSize: [10, "month"],
             tickLength: 10,
             axisLabel: "Date",
             axisLabelUseCanvas: true,
             axisLabelFontSizePixels: 12,
             axisLabelFontFamily: 'Verdana, Arial',
             axisLabelPadding: 10,
-            // min: new Date(2021, 1).getTime(),
-            // max: new Date(2021, 4).getTime()
+            mode: "time",
+            minTickSize: [1, "day"],
             timeformat: "%d/%m/%y",
+            min: visit_data[0][0],
+            max: visit_data[visit_data.length-1][0],
             // mode: "categories"
         },
         yaxis: {
-            ticks: 20,
+            ticks: 10,
             tickColor: "rgba(51, 51, 51, 0.06)"
         },
         tooltip: {
             show: true,
-            content: "%s em %x foram %y acessos",
+            content: "%x - %y acessos",
             xDateFormat: "%d/%m/%y",
         },
-        tooltipOpts: {
-            content: "<span style='display:block; padding:7px;'>%x - <strong style='color:yellow;'>%y</strong></span>",
-            xDateFormat: "%b %d, %Y %I:%M %P",
-            shifts: {
-                x: 20,
-                y: 0
-            },
-            defaultTheme: false
-        }
     }
 
-    // var chart_plot_02_settings = {
-    //     grid: {
-    //         show: true,
-    //         aboveData: true,
-    //         color: "#3f3f3f",
-    //         labelMargin: 10,
-    //         axisMargin: 0,
-    //         borderWidth: 0,
-    //         borderColor: null,
-    //         minBorderMargin: 5,
-    //         clickable: true,
-    //         hoverable: true,
-    //         autoHighlight: true,
-    //         mouseActiveRadius: 100
-    //     },
-    //     series: {
-    //         lines: {
-    //             show: true,
-    //             fill: true,
-    //             lineWidth: 2,
-    //             steps: false
-    //         },
-    //         points: {
-    //             show: true,
-    //             radius: 4.5,
-    //             symbol: "circle",
-    //             lineWidth: 3.0
-    //         }
-    //     },
-    //     legend: {
-    //         position: "ne",
-    //         margin: [0, -25],
-    //         noColumns: 0,
-    //         labelBoxBorderColor: null,
-    //         labelFormatter: function (label, series) {
-    //             return label + '&nbsp;&nbsp;';
-    //         },
-    //         width: 40,
-    //         height: 1
-    //     },
-    //     colors: ['#96CA59', '#3F97EB', '#72c380', '#6f7a8a', '#f7cb38', '#5a8022', '#2c7282'],
-    //     shadowSize: 0,
-    //     tooltip: true,
-    //     tooltipOpts: {
-    //         content: "%s: %y.0",
-    //         xDateFormat: "%d/%m",
-    //         shifts: {
-    //             x: -30,
-    //             y: -50
-    //         },
-    //         defaultTheme: false
-    //     },
-    //     yaxis: {
-    //         min: 0
-    //     },
-    //     xaxis: {
-    //         mode: "time",
-    //         minTickSize: [1, "day"],
-    //         timeformat: "%d/%m/%y",
-    //         min: chart_plot_02_data[0][0],
-    //         max: chart_plot_02_data[20][0]
-    //     }
-    // };
 
-    // var chart_plot_03_settings = {
-    //     series: {
-    //         curvedLines: {
-    //             apply: true,
-    //             active: true,
-    //             monotonicFit: true
-    //         }
-    //     },
-    //     colors: ["#26B99A"],
-    //     grid: {
-    //         borderWidth: {
-    //             top: 0,
-    //             right: 0,
-    //             bottom: 1,
-    //             left: 1
-    //         },
-    //         borderColor: {
-    //             bottom: "#7F8790",
-    //             left: "#7F8790"
-    //         }
-    //     }
-    // };
-
+ 
 
     if ($("#chart_plot_01").length) {
         console.log('Plot1');
 
-        plt = $.plot($("#chart_plot_01"), [arr_data1], chart_plot_01_settings);
+        visit_plot = $.plot($("#chart_plot_01"), [{
+            // label: 'Acessos',
+            data: visit_data
+        }], chart_plot_01_settings);
     }
-
-
-    // if ($("#chart_plot_02").length) {
-    //     console.log('Plot2');
-
-    //     $.plot($("#chart_plot_02"),
-    //         [{
-    //             label: "Email Sent",
-    //             data: chart_plot_02_data,
-    //             lines: {
-    //                 fillColor: "rgba(150, 202, 89, 0.12)"
-    //             },
-    //             points: {
-    //                 fillColor: "#fff"
-    //             }
-    //         }], chart_plot_02_settings);
-
-    // }
-
-    // if ($("#chart_plot_03").length) {
-    //     console.log('Plot3');
-
-
-    //     $.plot($("#chart_plot_03"), [{
-    //         label: "Registrations",
-    //         data: chart_plot_03_data,
-    //         lines: {
-    //             fillColor: "rgba(150, 202, 89, 0.12)"
-    //         },
-    //         points: {
-    //             fillColor: "#fff"
-    //         }
-    //     }], chart_plot_03_settings);
-
-    // };
-
 }
 
 
@@ -411,13 +302,14 @@ function init_flot_chart() {
 $(document).ready(function () {
 
     // like and unlike click
-
+    start_visit = moment().subtract(7, 'days').format('DD-MM-YYYY')
+    end_visit = moment().format('DD-MM-YYYY')
     accordion_link = false;
     like_link = false;
     save_link = false;
     load_modal = true;
     config();
-    init_flot_chart();
+    visit_chart(start_visit, end_visit);
     // init_charts();
     init_chart_doughnut();
     init_daterangepicker();

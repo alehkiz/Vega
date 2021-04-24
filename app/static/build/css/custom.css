@@ -1,4 +1,3 @@
-
 html , body{
 	
  height:100%;
@@ -444,19 +443,19 @@ black {
     color: black;
 }
 .border-blue {
-    border-color: #3498DB !important
+    border-color: blue !important
 }
 .border-purple {
-    border-color: #9B59B6 !important
+    border-color: purple !important
 }
 .border-green {
-    border-color: #1ABB9C !important
+    border-color: green !important
 }
 .border-aero {
     border-color: #9CC2CB !important
 }
 .border-red {
-    border-color: #E74C3C !important
+    border-color: red !important
 }
 .border-dark {
     border-color: #34495E !important
@@ -467,28 +466,28 @@ black {
     color: #73879C
 }
 .bg-green {
-    background: #1ABB9C !important;
-    border: 1px solid #1ABB9C !important;
+    background: green !important;
+    border: 1px solid green !important;
     color: #fff
 }
 .bg-red {
-    background: #E74C3C !important;
+    background: red !important;
     border: 1px solid #E74C3C !important;
     color: #fff
 }
 .bg-blue {
-    background: #3498DB !important;
-    border: 1px solid #3498DB !important;
+    background: blue !important;
+    border: 1px solid blue !important;
     color: #fff
 }
 .bg-orange {
-    background: #F39C12 !important;
-    border: 1px solid #F39C12 !important;
+    background: orange !important;
+    border: 1px solid orange !important;
     color: #fff
 }
 .bg-purple {
-    background: #9B59B6 !important;
-    border: 1px solid #9B59B6 !important;
+    background: purple !important;
+    border: 1px solid purple !important;
     color: #fff
 }
 .bg-blue-sky {

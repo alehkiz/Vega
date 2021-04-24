@@ -59,27 +59,27 @@
       <div class="count">{{ "{:,}".format(dash.visitors.month).replace(',','.') }}</div>
 
       <span class="count_bottom"><i class="{{'green' if dash.visitors_compare_last_month > 0 else 'red' }}">
-          <i class="fa fa-sort-{{'asc' if dash.visitors_compare_last_month > 0 else 'desc' }}"></i>
+          <i class="fa fa-sort-{{'up' if dash.visitors_compare_last_month > 0 else 'down' }}"></i>
           {{dash.visitors_compare_last_month}}% </i> Do último mês</span>
     </div>
 
     <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
       <span class="count_top"><i class="fas fa-question"></i> Total de Questões</span>
       <div class="count">{{ "{:,}".format(dash.questions.count).replace(',','.') }}</div>
-      <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>12% </i> From last Week</span>
+      <!-- <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>12% </i> From last Week</span> -->
     </div>
     <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
       <span class="count_top"><i class="fas fa-question"></i> Questões no mês</span>
       <div class="count">{{ "{:,}".format(dash.questions.month).replace(',','.') }}</div>
       <span class="count_bottom"><i class="{{'green' if dash.questions_compare_last_month > 0 else 'red' }}"><i
-            class="fa fa-sort-{{'asc' if dash.questions_compare_last_month > 0 else 'desc' }}"></i>
+            class="fa fa-sort-{{'up' if dash.questions_compare_last_month > 0 else 'down' }}"></i>
           {{dash.questions_compare_last_month}}%</i> Do ultimo mês</span>
     </div>
     <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
       <span class="count_top"><i class="fa fa-question"></i> Questões vistas mês</span>
       <div class="count">{{ "{:,}".format(dash.question_views.month).replace(',','.') }}</div>
       <span class="count_bottom"><i class="{{'green' if dash.question_views_compare_last_month > 0 else 'red' }}"><i
-        class="fa fa-sort-{{'asc' if dash.question_views_compare_last_month > 0 else 'desc' }}"></i>
+        class="fa fa-sort-{{'up' if dash.question_views_compare_last_month > 0 else 'down' }}"></i>
       {{dash.question_views_compare_last_month}}%</i> Do ultimo mês</span>
     </div>
   </div>
@@ -264,7 +264,7 @@
 
         <div class="row x_title">
           <div class="col-md-6">
-            <h3>Evelução de acessos <small>Por período</small></h3>
+            <h3>Evolução de acessos <small>Por período</small></h3>
           </div>
           <div class="col-md-6">
             <div id="reportrange" class="pull-right"
@@ -275,10 +275,10 @@
           </div>
         </div>
 
-        <div class="col-md-9 col-sm-9 ">
+        <div class="col-md-12 col-sm-12 ">
           <div id="chart_plot_01" class="demo-placeholder"></div>
         </div>
-        <div class="col-md-3 col-sm-3  bg-white">
+        {#<div class="col-md-3 col-sm-3  bg-white">
           <div class="x_title">
             <h2>Top Campaign Performance</h2>
             <div class="clearfix"></div>
@@ -289,7 +289,7 @@
               <p>Facebook Campaign</p>
               <div class="">
                 <div class="progress progress_sm" style="width: 76%;">
-                  <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="80"></div>
+                  <div class="progress-bar bg-orange" role="progressbar" data-transitiongoal="80"></div>
                 </div>
               </div>
             </div>
@@ -297,7 +297,7 @@
               <p>Twitter Campaign</p>
               <div class="">
                 <div class="progress progress_sm" style="width: 76%;">
-                  <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="60"></div>
+                  <div class="progress-bar bg-orange" role="progressbar" data-transitiongoal="60"></div>
                 </div>
               </div>
             </div>
@@ -307,7 +307,7 @@
               <p>Conventional Media</p>
               <div class="">
                 <div class="progress progress_sm" style="width: 76%;">
-                  <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="40"></div>
+                  <div class="progress-bar bg-orange" role="progressbar" data-transitiongoal="40"></div>
                 </div>
               </div>
             </div>
@@ -315,19 +315,25 @@
               <p>Bill boards</p>
               <div class="">
                 <div class="progress progress_sm" style="width: 76%;">
-                  <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="50"></div>
+                  <div class="progress-bar bg-orange" role="progressbar" data-transitiongoal="50"></div>
                 </div>
               </div>
             </div>
           </div>
 
-        </div>
+        </div>#}
+
+        
 
         <div class="clearfix"></div>
       </div>
     </div>
 
   </div>
+
+
+
+
 
 
 
