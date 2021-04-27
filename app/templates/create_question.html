@@ -1,0 +1,12 @@
+{% import "macros/form.html" as macros %}
+
+{% if form %}
+
+<form action="" method="POST">
+    {{ form.csrf_token }}
+    {{ macros.render_field(form.question, size=64, class='form-control', placeholder='Dúvida')}}
+    {{ macros.render_field(form.topic, class='form-select', nosize=True)}}
+    {{ form.submit }}
+</form>
+
+{% endif %}

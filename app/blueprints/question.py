@@ -10,7 +10,7 @@ from app.models.search import Search
 from app.utils.sql import unaccent
 from app.utils.kernel import strip_accents
 from app.utils.html import process_html
-from app.forms.question import QuestionAnswerForm
+from app.forms.question import QuestionAnswerForm, CreateQuestion
 from app.utils.routes import counter
 from sqlalchemy import desc, nullslast
 
@@ -68,7 +68,25 @@ def search():
         iter_pages = list(paginate.iter_pages())
         first_page =  iter_pages[0] if len(iter_pages) >= 1 else None#url_for('.search',page=iter_pages[0], q= g.question_search_form.q.data)
         last_page = paginate.pages if paginate.pages > 0 else None#url_for('.search',page=iter_pages[-1] if iter_pages[-1] != first_page else None, q= g.question_search_form.q.data)
-        
+    if paginate.total == 0:
+        form = CreateQuestion()
+        if form.validate_on_submit():
+            question = Question.query.filter(Question.question.ilike(form.question.data)).first()
+            if not question is None:
+                form.quetion.errors.append('Dúvida já cadastrada')
+            if not form.errors:
+                print(current_user)
+                if current_user.is_authenticated:
+                    user = current_user
+                else:
+                    user = User.query.filter(User.id == app.config.get('USER_ANON_ID', False))
+
+                question = Question()
+                question.question = form.question.data
+                question.topic = form.topic.data
+                question.create_user_id = user.id
+    else:
+        form = False
     # if paginate.total == 0:
     #     search = Search.query.filter(Search.text.ilike(g.question_search_form.q.data)).first()
     #     if not search is None:
@@ -106,7 +124,7 @@ def search():
         #                         pagination=paginate, first_page=first_page, last_page=last_page)
                 
     return render_template('question.html', mode='search',cls_question=Question, 
-                    pagination=paginate, first_page=first_page, last_page=last_page,
+                    pagination=paginate, first_page=first_page, last_page=last_page, form=form,
                     url_arguments={'q':g.question_search_form.q.data})
 
 @bp.route('/view/<int:id>')
