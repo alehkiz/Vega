@@ -313,7 +313,6 @@ class Question(db.Model):
     search_vector = db.Column(TSVectorType('question', 'answer', regconfig='pg_catalog.portuguese'))#regconfig='public.pt'))
 
     view = db.relationship('QuestionView', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
-    like = db.relationship('QuestionLike', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
     save = db.relationship('QuestionSave', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
     def __repr__(self):
 
