@@ -41,10 +41,12 @@ def index():
 @counter
 def search():
     page = request.args.get('page', 1, type=int)
+    search_query = False
     if g.question_search_form.validate():
         q = Question.search(g.question_search_form.q.data, pagination=False).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
         paginate = q.paginate(per_page = app.config.get('QUESTIONS_PER_PAGE', 1), page = page)
-        search = Search.query.filter(unaccent(Search.text).ilike(strip_accents(g.question_search_form.q.data))).first()
+        search_query = strip_accents(g.question_search_form.q.data)
+        search = Search.query.filter(unaccent(Search.text).ilike(search_query)).first()
         if search is None:
             search = Search()
             search.text = strip_accents(g.question_search_form.q.data).lower()
@@ -73,7 +75,7 @@ def search():
         if form.validate_on_submit():
             question = Question.query.filter(Question.question.ilike(form.question.data)).first()
             if not question is None:
-                form.quetion.errors.append('Dúvida já cadastrada')
+                form.question.errors.append('Dúvida já cadastrada')
             if not form.errors:
                 print(current_user)
                 if current_user.is_authenticated:
@@ -82,9 +84,20 @@ def search():
                     user = User.query.filter(User.id == app.config.get('USER_ANON_ID', False))
 
                 question = Question()
+
                 question.question = form.question.data
                 question.topic = form.topic.data
                 question.create_user_id = user.id
+                db.session.add(question)
+                try:
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                    app.logger.error(e)
+                    return abort(500)
+        if search_query is not False:
+            form.question.data = strip_accents(g.question_search_form.q.data)
     else:
         form = False
     # if paginate.total == 0:

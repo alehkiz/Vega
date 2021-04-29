@@ -294,7 +294,7 @@ class Question(db.Model):
     question = db.Column(db.String(256), index=True,
                          nullable=False, unique=True)
     _answer = db.Column('answer', db.Text, index=True, nullable=True, unique=False)
-    answer_approved = db.Column(db.Boolean, nullable=False)
+    answer_approved = db.Column(db.Boolean, nullable=True)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     create_user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -314,6 +314,7 @@ class Question(db.Model):
 
     view = db.relationship('QuestionView', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
     save = db.relationship('QuestionSave', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
+    like = db.relationship('QuestionLike', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
     def __repr__(self):
 
         return f'<Question {self.question[:15] if not self.question  is None else None}>'
