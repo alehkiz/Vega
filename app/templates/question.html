@@ -11,10 +11,11 @@
     {% set url_arguments= {} %}
 {% endif %}
 <!-- {{url_arguments}} -->
+
     {% if mode == 'search' %}
     {% if pagination.total == 0 %}
+    <h2>Incluir</h2>
     {% include 'create_question.html' %}
-    Nenhum resultado encontradoaa
     <div class="d-flex justify-content-between mt-5">
         <a type="button" class="btn btn-info" href="{{url_for('question.index')}}">Voltar</a>
     </div>
