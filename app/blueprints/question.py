@@ -91,6 +91,8 @@ def search():
                 db.session.add(question)
                 try:
                     db.session.commit()
+                    flash('Dúvida cadastrada com sucesso!', category='success')
+                    return redirect(url_for('question.index'))
                 except Exception as e:
                     db.session.rollback()
                     app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
@@ -150,6 +152,8 @@ def view(id=None):
     # 'Duvida':question.question,
     # 'Criado em' : question.get_create_datetime,
     # 'answer' : question.answer}
+    if not question.was_answered:
+        return redirect(url_for('question.index'))
     if current_user.is_authenticated:
         user_id = current_user.id
     else:
