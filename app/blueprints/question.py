@@ -10,7 +10,7 @@ from app.models.search import Search
 from app.utils.sql import unaccent
 from app.utils.kernel import strip_accents
 from app.utils.html import process_html
-from app.forms.question import QuestionAnswerForm
+from app.forms.question import QuestionAnswerForm, CreateQuestion
 from app.utils.routes import counter
 from sqlalchemy import desc, nullslast
 
@@ -41,10 +41,12 @@ def index():
 @counter
 def search():
     page = request.args.get('page', 1, type=int)
+    search_query = False
     if g.question_search_form.validate():
         q = Question.search(g.question_search_form.q.data, pagination=False).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
         paginate = q.paginate(per_page = app.config.get('QUESTIONS_PER_PAGE', 1), page = page)
-        search = Search.query.filter(unaccent(Search.text).ilike(strip_accents(g.question_search_form.q.data))).first()
+        search_query = strip_accents(g.question_search_form.q.data)
+        search = Search.query.filter(unaccent(Search.text).ilike(search_query)).first()
         if search is None:
             search = Search()
             search.text = strip_accents(g.question_search_form.q.data).lower()
@@ -68,7 +70,38 @@ def search():
         iter_pages = list(paginate.iter_pages())
         first_page =  iter_pages[0] if len(iter_pages) >= 1 else None#url_for('.search',page=iter_pages[0], q= g.question_search_form.q.data)
         last_page = paginate.pages if paginate.pages > 0 else None#url_for('.search',page=iter_pages[-1] if iter_pages[-1] != first_page else None, q= g.question_search_form.q.data)
-        
+    if paginate.total == 0:
+        form = CreateQuestion()
+        if form.validate_on_submit():
+            question = Question.query.filter(Question.question.ilike(form.question.data)).first()
+            if not question is None:
+                form.question.errors.append('Dúvida já cadastrada')
+            if not form.errors:
+                print(current_user)
+                if current_user.is_authenticated:
+                    user = current_user
+                else:
+                    user = User.query.filter(User.id == app.config.get('USER_ANON_ID', False))
+
+                question = Question()
+
+                question.question = form.question.data
+                question.topic = form.topic.data
+                question.create_user_id = user.id
+                db.session.add(question)
+                try:
+                    db.session.commit()
+                    flash('Dúvida cadastrada com sucesso!', category='success')
+                    return redirect(url_for('question.index'))
+                except Exception as e:
+                    db.session.rollback()
+                    app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                    app.logger.error(e)
+                    return abort(500)
+        if search_query is not False:
+            form.question.data = strip_accents(g.question_search_form.q.data)
+    else:
+        form = False
     # if paginate.total == 0:
     #     search = Search.query.filter(Search.text.ilike(g.question_search_form.q.data)).first()
     #     if not search is None:
@@ -106,7 +139,7 @@ def search():
         #                         pagination=paginate, first_page=first_page, last_page=last_page)
                 
     return render_template('question.html', mode='search',cls_question=Question, 
-                    pagination=paginate, first_page=first_page, last_page=last_page,
+                    pagination=paginate, first_page=first_page, last_page=last_page, form=form,
                     url_arguments={'q':g.question_search_form.q.data})
 
 @bp.route('/view/<int:id>')
@@ -119,6 +152,8 @@ def view(id=None):
     # 'Duvida':question.question,
     # 'Criado em' : question.get_create_datetime,
     # 'answer' : question.answer}
+    if not question.was_answered:
+        return redirect(url_for('question.index'))
     if current_user.is_authenticated:
         user_id = current_user.id
     else:
