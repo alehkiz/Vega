@@ -102,17 +102,19 @@ def init(app):
     with app.app_context():
         register_blueprints(app)
 
-    # logger
-    if not exists('logs'):
-        mkdir('logs')
-    file_handler = RotatingFileHandler(
-        'logs/erros.log', maxBytes=1024000, backupCount=100)
-    file_handler.setFormatter(logging.Formatter(
-        "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"))
-    file_handler.setLevel(logging.INFO)
-    app.logger.addHandler(file_handler)
     
-
+    
+    if app.debug is not True:
+        # logger
+        if not exists('logs'):
+            mkdir('logs')
+        file_handler = RotatingFileHandler(
+            'logs/erros.log', maxBytes=1024000, backupCount=100)
+        file_handler.setFormatter(logging.Formatter(
+            "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+    #     print('aqui')
     @login.user_loader
     def load_user(id):
         try:
