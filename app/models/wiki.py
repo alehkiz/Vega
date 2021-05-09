@@ -10,6 +10,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql.expression import false
 from sqlalchemy_utils.types import TSVectorType
 from sqlalchemy.orm import backref
+from sqlalchemy.dialects.postgresql import INET
 
 from sqlalchemy_searchable import make_searchable
 
@@ -304,6 +305,7 @@ class Question(db.Model):
     answer_at = db.Column(db.DateTime)
     # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
+    created_ip = db.Column(INET, nullable=False)
 
     tags = db.relationship('Tag',
                            secondary=question_tag,
