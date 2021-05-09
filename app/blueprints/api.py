@@ -89,9 +89,9 @@ def visits_by_interval():
     if request.method == 'POST':
         start = request.form.get('start', False)
         end = request.form.get('end', False)
-        print(type(start))
-        print(start)
-        print(end)
+        # print(type(start))
+        # print(start)
+        # print(end)
         if start is False or end is False:
             return jsonify({
                 'error': True,
@@ -106,7 +106,7 @@ def visits_by_interval():
         #         'error': True,
         #         'message': 'Não foi possível converter inicio e fim para uma data valida'
         #     })
-        print('final')
+        # print('final')
         return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),
                         _[0]] for _ in Visit.total_by_date(start, end).all()])
 

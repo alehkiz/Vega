@@ -70,9 +70,10 @@
                         <i class="fas fa-tools circle"></i>
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                        <li><a class="dropdown-item" href="{{url_for('admin.questions')}}">Perguntas</a></li>
                       <li><a class="dropdown-item" href="{{url_for('admin.users')}}">Usuários</a></li>
                       {#<li><a class="dropdown-item" href="{{url_for('admin.articles')}}">Artigos</a></li>#}
-                      <li><a class="dropdown-item" href="{{url_for('admin.questions')}}">Dúvidas</a></li>
+                      <li><a class="dropdown-item" href="{{url_for('admin.answers')}}">Respondidas</a></li>
                       <li><hr class="dropdown-divider"></li>
                       <li><a class="dropdown-item" href="{{url_for('admin.tag')}}">Marcação</a></li>
                       <li><a class="dropdown-item" href="{{url_for('admin.topic')}}">Tópico</a></li>

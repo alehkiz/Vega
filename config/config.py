@@ -97,6 +97,10 @@ class BaseConfig(object):
             "create_at": {
                 'name' : 'criado em',
                 'attr' : 'get_create_datetime'
+            },
+            'answer':{
+                'name' : 'Respondida?',
+                'attr' : 'was_answered_to'
             }
 
         },
