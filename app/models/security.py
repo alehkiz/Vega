@@ -4,6 +4,7 @@ from sqlalchemy import func, text, Index, cast, desc, extract, Date
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import date, datetime
 from sqlalchemy.orm import backref
+from sqlalchemy.dialects.postgresql import INET
 # from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView
 
 from app.core.db import db
@@ -28,12 +29,12 @@ class User(UserMixin, db.Model):
     location = db.Column(db.String(128), nullable=True)
     active = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    created_ip = db.Column(db.String(255), nullable=False)
+    created_ip = db.Column(INET, nullable=False)
     last_login_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_login_ip = db.Column(db.String(255), nullable=True)
+    last_login_ip = db.Column(INET, nullable=True)
     current_login_at = db.Column(db.DateTime, nullable=True)
-    current_login_ip = db.Column(db.String(255), nullable=True)
-    confirmed_ip = db.Column(db.String(255), nullable=True)
+    current_login_ip = db.Column(INET, nullable=True)
+    confirmed_ip = db.Column(INET, nullable=True)
     confirmed_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=True)
     login_count = db.Column(db.Integer, nullable=True, default=0)

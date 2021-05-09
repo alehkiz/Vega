@@ -16,9 +16,9 @@
     {% if pagination.total == 0 %}
     <h2>Incluir</h2>
     {% include 'create_question.html' %}
-    <div class="d-flex justify-content-between mt-5">
+    <!-- <div class="d-flex justify-content-between mt-5">
         <a type="button" class="btn btn-info" href="{{url_for('question.index')}}">Voltar</a>
-    </div>
+    </div> -->
     {% else %}
     {% include '_question.html' %}
 
@@ -61,6 +61,10 @@
         {% endfor %}
         {% endif %}
     </article>
+    {% endif %}
+    {% if mode == 'make_question' %}
+    apenas um teste
+    {% include 'create_question.html' %}
     {% endif %}
 {% endblock %}
 

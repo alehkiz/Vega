@@ -77,7 +77,7 @@ def search():
             if not question is None:
                 form.question.errors.append('Dúvida já cadastrada')
             if not form.errors:
-                print(current_user)
+                # print(current_user)
                 if current_user.is_authenticated:
                     user = current_user
                 else:
@@ -434,4 +434,34 @@ def saves():
 @counter
 def saved():
     ...
-
+@bp.route('/make_question', methods=['GET', 'POST'])
+@counter
+def make_question():   
+    form = CreateQuestion()
+    if form.validate_on_submit():
+        question = Question.query.filter(Question.question.ilike(form.question.data)).first()
+        if not question is None:
+            form.question.errors.append('Dúvida já cadastrada')
+        if not form.errors:
+            if current_user.is_authenticated:
+                user = current_user
+            else:
+                user = User.query.filter(User.id == app.config.get('USER_ANON_ID', False)).first()
+            print(user.id)
+            ip = request.remote_addr
+            question = Question()
+            question.question = form.question.data
+            question.topic = form.topic.data
+            question.create_user_id = user.id
+            question.created_ip = ip
+            db.session.add(question)
+            try:
+                db.session.commit()
+                flash('Dúvida cadastrada com sucesso!', category='success')
+                return redirect(url_for('question.index'))
+            except Exception as e:
+                db.session.rollback()
+                app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(e)
+                return abort(500)
+    return render_template('question.html', mode='make_question', form=form)
