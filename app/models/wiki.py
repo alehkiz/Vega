@@ -341,7 +341,7 @@ class Question(db.Model):
         return format_elapsed_time(self.answer_at)
     
     @property
-    def get_anser_datetime(self):
+    def get_answer_datetime(self):
         return format_datetime_local(self.answer_at)
 
     # @property
@@ -556,7 +556,11 @@ class Question(db.Model):
             return True
         return False
 
-
+    @property
+    def was_answered_to(self):
+        if self.answer != None:
+            return 'Sim'
+        return 'Não'
     @staticmethod
     def most_viewed(limit=5):
         try:

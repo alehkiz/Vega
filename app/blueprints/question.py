@@ -254,11 +254,12 @@ def add():
 
 @bp.route('/responder/<int:id>')
 @login_required
-@roles_accepted(['admin', 'editor', 'aux_editor'])
+@roles_accepted('admin', 'editor', 'aux_editor')
 @counter
 def answer(id: int):
     q = Question.query.filter(Question.id == id).first_or_404()
-    if q.was_answered():
+    # print('asd')
+    if q.was_answered:
         flash('Questão não pode ser respondida')
         return redirect(url_for('question.index'))
     form = QuestionAnswerForm()
