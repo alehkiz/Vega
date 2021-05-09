@@ -125,11 +125,11 @@ class Dashboard():
         #                                         -(self.visitors.last_month / self.visitors.month)*100
         #                                     )
 
-        self.visitors_compare_last_month = int((1-(self.visitors.last_month / self.visitors.month))*100 if \
+        self.visitors_compare_last_month = int((1-(self.visitors.last_month / (self.visitors.month if self.visitors.month > 0 else 1)))*100 if \
                                             self.visitors.last_month != 0 else self.visitors.month * 100)
-        self.questions_compare_last_month = int((1-(self.questions.last_month / self.questions.month))*100 if \
+        self.questions_compare_last_month = int((1-(self.questions.last_month / (self.visitors.month if self.visitors.month > 0 else 1)))*100 if \
                                             self.questions.last_month != 0 else self.questions.month * 100)
-        self.question_views_compare_last_month = int((1-(self.question_views.last_month / self.question_views.month))*100 if \
+        self.question_views_compare_last_month = int((1-(self.question_views.last_month / (self.visitors.month if self.visitors.month > 0 else 1)))*100 if \
                                             self.question_views.last_month != 0 else self.question_views.month * 100)
         # (self.visitors.month / self.visitors.last_month)*100 if \
         #                                     self.visitors.last_month != 0 else \
