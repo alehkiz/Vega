@@ -6,6 +6,7 @@ from sqlalchemy import func, text, Index, cast, desc, extract, Date, asc
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import date, datetime
 from sqlalchemy.orm import backref
+from sqlalchemy.dialects.postgresql import INET
 
 
 from app.core.db import db
@@ -19,13 +20,14 @@ class Page(db.Model):
     visit = db.relationship('Visit', cascade='all, delete-orphan',
                             single_parent=True, backref='page', lazy='dynamic')
 
-    def add_view(self, user_id):
+    def add_view(self, user_id, network_id):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
             raise Exception('Usuário informado não existe')
         visit = Visit()
         visit.page_id = self.id
         visit.user_id = user.id
+        visit.network_id = network_id
         db.session.add(visit)
         try:
             db.session.commit()
@@ -33,7 +35,7 @@ class Page(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização')
+            flash('Não foi possível atualizar a visualização', category='alert')
         return visit
 
 
@@ -42,6 +44,7 @@ class Visit(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     page_id = db.Column(db.Integer, db.ForeignKey('page.id'), nullable=False)
     datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
 
     @staticmethod
     def query_by_month_year(year: int, month: int):
@@ -95,3 +98,11 @@ class Visit(db.Model):
             extract('year', Visit.datetime) == year,
             extract('month', Visit.datetime) == month
         ).group_by('date')
+
+class Network(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ip = db.Column(INET, nullable=False)
+    create_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # first_access = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    question_created_ip = db.relationship('Question', backref='question_created_network', lazy='dynamic', foreign_keys='[Question.question_network_id]')
+    answer_created_ip = db.relationship('Question', backref='answer_created_network', lazy='dynamic', foreign_keys='[Question.answer_network_id]')

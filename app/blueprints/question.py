@@ -6,6 +6,7 @@ from flask_security import roles_accepted
 from app.core.db import db
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag, Topic
 from app.models.security import User
+from app.models.app import Network
 from app.models.search import Search
 from app.utils.sql import unaccent
 from app.utils.kernel import strip_accents
@@ -268,6 +269,7 @@ def answer(id: int):
         q.answer = form.answer.data
         q.tag = form.tag.data
         q.topic = form.topic.data
+
         # TODO terminar
 
     
@@ -435,7 +437,7 @@ def saves():
 @counter
 def saved():
     ...
-@bp.route('/make_question', methods=['GET', 'POST'])
+@bp.route('/perguntar   ', methods=['GET', 'POST'])
 @counter
 def make_question():   
     form = CreateQuestion()
@@ -448,13 +450,28 @@ def make_question():
                 user = current_user
             else:
                 user = User.query.filter(User.id == app.config.get('USER_ANON_ID', False)).first()
-            print(user.id)
-            ip = request.remote_addr
+            # print(user.id)
+            ip = Network.query.filter(Network.ip == request.remote_addr).first()
+            if ip is None:
+                ip = Network()
+                ip.ip = request.remote_addr
+                db.session.add(ip)
+                try:
+                    db.session.commit()
+                    flash('Erro ao cadastrar o seu IP', category='success')
+                    return redirect(url_for('question.index'))
+                except Exception as e:
+                    db.session.rollback()
+                    app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                    app.logger.error(e)
+                    return abort(500)
+            
+
             question = Question()
             question.question = form.question.data
             question.topic = form.topic.data
             question.create_user_id = user.id
-            question.created_ip = ip
+            question.question_network_id = ip.id
             db.session.add(question)
             try:
                 db.session.commit()

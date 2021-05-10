@@ -305,8 +305,8 @@ class Question(db.Model):
     answer_at = db.Column(db.DateTime)
     # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
-    created_ip = db.Column(INET, nullable=False)
-
+    question_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
+    answer_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
     tags = db.relationship('Tag',
                            secondary=question_tag,
                            backref=db.backref('questions',
@@ -409,7 +409,7 @@ class Question(db.Model):
             return False
         return True
 
-    def add_view(self, user_id):
+    def add_view(self, user_id, network_id):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
             raise Exception('Usuário informado não existe')
@@ -418,6 +418,7 @@ class Question(db.Model):
 
         qv.question_id = self.id
         qv.user_id = user_id
+        qv.network_id = network_id
         db.session.add(qv)
 
         # if qv == None:
@@ -436,7 +437,7 @@ class Question(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização')
+            flash('Não foi possível atualizar a visualização', category='alert')
         return qv
     
     def add_like(self, user_id):
@@ -460,7 +461,7 @@ class Question(db.Model):
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                flash('Não foi possível atualizar a visualização')
+                flash('Não foi possível atualizar a visualização', category='alert')
                 return False
         return ql
     def remove_like(self, user_id):
@@ -477,7 +478,7 @@ class Question(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização')
+            flash('Não foi possível atualizar a visualização', category='alert')
             return false
         return True
     def is_liked(self, user_id):
@@ -511,7 +512,7 @@ class Question(db.Model):
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                flash('Não foi possível atualizar a visualização')
+                flash('Não foi possível atualizar a visualização', category='alert')
                 return False
         return qs
     def remove_save(self, user_id):
@@ -528,7 +529,7 @@ class Question(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização')
+            flash('Não foi possível atualizar a visualização', category='alert')
             return false
         return True
     def is_saved(self, user_id):
@@ -648,7 +649,8 @@ class QuestionView(db.Model):
     user_id = db.Column(db.Integer,  db.ForeignKey('user.id'))
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     datetime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-
+    network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
+    
     # last_view = db.Column(db.DateTime, index=True, nullable=False)
     # count_view = db.Column(db.Integer, default=1)
 
