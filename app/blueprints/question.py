@@ -147,6 +147,18 @@ def search():
 @counter
 def view(id=None):
     question = Question.query.filter(Question.id == id).first_or_404()
+    ip = Network.query.filter(Network.ip == request.remote_addr).first()
+    if ip is None:
+        ip = Network()
+        ip.ip = request.remote_addr
+        db.session.add(ip)
+        try:
+            db.session.commit()
+        except Exception as e:
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            db.session.rollback()
+            return abort(500)
     # dict_view = {}
     # dict_view['id'] = question.id
     # dict_view['values'] = {
@@ -162,7 +174,7 @@ def view(id=None):
         if user is None:
             raise Exception('Usuário anônimo não criado')
         user_id = user.id
-    question.add_view(user_id)
+    question.add_view(user_id, ip.id)
     return render_template('question.html', mode='view', question=question, cls_question=Question)
 
 @bp.route('edit/<int:id>', methods=['GET', 'POST'])
