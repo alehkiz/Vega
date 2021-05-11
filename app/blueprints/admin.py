@@ -3,7 +3,7 @@ from flask_security import current_user, login_required
 from flask_security import roles_accepted
 from datetime import datetime
 
-from app.models.wiki import Article, Topic, User, Question, Tag
+from app.models.wiki import Article, Topic, User, Question, Tag, SubTopic
 from app.forms.wiki import ArticleForm
 from app.core.db import db
 from app.utils.routes import counter
@@ -135,6 +135,33 @@ def topic():
     return render_template('admin.html', pagination=paginate, first_page=first_page, 
                         last_page=last_page, endpoint=request.url_rule.endpoint, 
                         cls_table=Topic, list=True, page_name='Topics', order_type=order_type)
+
+@bp.route('/sub_topic')
+@login_required
+@roles_accepted('admin')
+def sub_topic():
+    page = request.args.get('page', 1, type=int)
+    order = request.args.get('order', False)
+    order_type = request.args.get('order_type', 'desc')
+    if not order is False or not order_type is False:
+        try:
+            column = getattr(SubTopic, order)
+            column_type = getattr(column, order_type)
+        except Exception as e:
+            column = SubTopic.id
+            column_type = SubTopic.id.desc
+    else:
+        column = SubTopic.id
+        column_type = column.desc
+    t = SubTopic.query.order_by(column_type()) 
+    paginate = t.paginate(page, app.config.get('TABLE_ITEMS_PER_PAGE', 10), False)
+    first_page = list(paginate.iter_pages())[0] if len(list(paginate.iter_pages())) >= 1 else None
+    last_page = paginate.pages
+    order_type = 'asc' if order_type == 'desc' else 'desc'
+    return render_template('admin.html', pagination=paginate, first_page=first_page, 
+                        last_page=last_page, endpoint=request.url_rule.endpoint, 
+                        cls_table=SubTopic, list=True, page_name='SubTopics', order_type=order_type)
+
 
 @bp.route('/tag')
 @login_required
