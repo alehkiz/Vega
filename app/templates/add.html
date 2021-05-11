@@ -74,7 +74,17 @@
         {{ macros.render_field(form.active)}}
         <br>
         {{ form.submit }}
+        {% elif topic is defined %}
+        {{ form.csrf_token}}
+        {{ macros.render_field(form.name, size=512, class='form-control', placeholder='Topico Nome')}}
+        <br>
+        {{ form.submit }}
 
+        {% elif sub_topic is defined %}
+        {{ form.csrf_token}}
+        {{ macros.render_field(form.name, size=512, class='form-control', placeholder='Sub-Tópico Nome')}}
+        <br>
+        {{ form.submit }}
 
         {% endif %}
         <br />

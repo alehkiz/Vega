@@ -133,6 +133,21 @@ class BaseConfig(object):
                 'attr': 'username'
 
             }
+        },
+        'sub_topic' :{
+            'id' :{
+                'name' : 'id',
+                'attr' : None
+            },
+            'name': {
+                'name' : 'Nome',
+                'attr' : None
+            },
+            'user': {
+                'name' : 'criado por',
+                'attr': 'username'
+
+            }
         }
     }
     ROUTES_NAMES = {

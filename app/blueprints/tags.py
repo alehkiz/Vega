@@ -4,13 +4,12 @@ from flask.globals import current_app
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
 from app.core.db import db
-from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Topic
-from app.forms.topic import TopicEditForm
+from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag
+from app.forms.tag import TagEditForm
 from app.forms.question import QuestionSearchForm
 from app.utils.routes import counter
 
-bp = Blueprint('topic', __name__, url_prefix='/topic/')
-
+bp = Blueprint('tag', __name__, url_prefix='/tag/')
 
 @bp.before_request
 @counter
@@ -24,26 +23,26 @@ def index():
 
 @bp.route('edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
-    topic = Topic.query.filter(Topic.id == id).first_or_404()
-    form = TopicEditForm()
+    tag = Tag.query.filter(Tag.id == id).first_or_404()
+    form = TagEditForm()
     if form.validate_on_submit():
         try:
-            topic.name = form.name.data
+            tag.name = form.name.data
             # question.answer = form.answer.data
-            # question.topics = form.topic.data
+            # question.tags = form.tag.data
             # question.topic = form.topic.data
             # question.updater = current_user
             # question.update_at = datetime.utcnow()
             db.session.commit()
-            return redirect(url_for('admin.topic'))
+            return redirect(url_for('admin.tag'))
         except Exception as e:
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
             return render_template('edit.html', form=form, title='Editar', edit=True)
     
-    form.name.data = topic.name
-    # form.topic.data = question.topics
+    form.name.data = tag.name
+    # form.tag.data = question.tags
     # form.topic.data = question.topic
     # form.answer.data = question.answer
 
@@ -54,40 +53,40 @@ def edit(id):
 @login_required
 @roles_accepted('admin', 'editor', 'aux_editor')
 def add():
-    form = TopicEditForm()
+    form = TagEditForm()
     if form.validate_on_submit():
-        topic = Question.query.filter(Topic.name.ilike(form.name.data)).first()
-        if not topic is None:
+        tag = Question.query.filter(Tag.name.ilike(form.name.data)).first()
+        if not tag is None:
             form.name.errors.append('Marcação já existte')
         if not form.errors:
-            topic = Topic()
-            topic.name = form.name.data
-            topic.user_id = current_user.id
+            tag = Tag()
+            tag.name = form.name.data
+            tag.user_id = current_user.id
             try:
-                db.session.add(topic)
+                db.session.add(tag)
                 db.session.commit()
-                return redirect(url_for('admin.topic'))
+                return redirect(url_for('admin.tag'))
             except Exception as e:
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                return render_template('add.html', form=form, title='Incluir marcação', topic=True)
-    return render_template('add.html', form=form, title='Incluir marcação', topic=True)
+                return render_template('add.html', form=form, title='Incluir marcação', tag=True)
+    return render_template('add.html', form=form, title='Incluir marcação', tag=True)
 
 @bp.route('/view/<int:id>')
 def view(id):
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
     pagination_args = {'id':id}
-    topic = Topic.query.filter_by(id=id).first_or_404()
-    paginate = topic.questions.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    tag = Tag.query.filter_by(id=id).first_or_404()
+    paginate = tag.questions.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
     print(pagination_args)
     return render_template('question.html', 
                                 pagination=paginate, 
-                                cls_question=Topic, 
+                                cls_question=Tag, 
                                 form=search_form, mode='views', 
                                 first_page=first_page, 
                                 last_page=last_page, 

@@ -254,6 +254,26 @@ class Topic(db.Model):
     def __repr__(self):
         return f'<Topic {self.name}>'
 
+class SubTopic(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    _name = db.Column(db.String(32), index=True, nullable=False, unique=True)
+    format_name = db.Column(db.String(32), index=True,
+                            nullable=True, unique=True)
+    create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    # articles = db.relationship('Article', backref='topic', lazy='dynamic')
+    questions = db.relationship('Question', backref='sub_topic', lazy='dynamic', foreign_keys='[Question.sub_topic_id]')
+
+    @hybrid_property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, text):
+        self._name = text
+        self.format_name = only_letters(text)
+
+    def __repr__(self):
+        return f'<Topic {self.name}>'
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -305,6 +325,7 @@ class Question(db.Model):
     answer_at = db.Column(db.DateTime)
     # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
+    sub_topic_id = db.Column(db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
     question_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
     answer_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
     tags = db.relationship('Tag',
