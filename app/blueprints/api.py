@@ -50,7 +50,8 @@ def question(id):
         question.add_view(current_user.id, ip.id)
     else:
         # anon_user = User.query.filter_by(id=app.config.get('USER_ANON_ID')).first_or_404()
-        question.add_view(app.config.get('USER_ANON_ID'))
+        print(ip.id)
+        question.add_view(app.config.get('USER_ANON_ID'), ip.id)
     return jsonify(to_dict)
 
 

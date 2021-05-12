@@ -50,14 +50,43 @@
                 {{ g.search_form.q(size=20, class='form-control', placeholder=g.search_form.q.label.text) }}
             </form>
             {% endif %} -->
-            <ul class="navbar-nav w-100 justify-content-center">
+
+
+            
+            <div class="navbar-nav w-100 justify-content-center">
+                
+                    
+                <div class="row">
+                <form class="d-flex al" method="GET" action="{{ url_for('question.search') }}">
+                    <div class="col-lg-5 col-md-3 col-sm-12 p-0 px-md-1">
+                        <select class="form-select" id="exampleFormControlSelect1" name='Filter'>
+                        <option>Todos</option>
+                        <option>Retaguarda</option>
+                        <option>Cidadão</option>
+                        <option>Habilitação</option>
+                        <option>Veículos</option>
+                    </select>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 search"> <i class="fa fa-search"></i> 
+                    {{ render_field(g.question_search_form.q, size=20, class='form-control me-2', placeholder='Buscar...', nolabel=true, type='search')}}
+                     {{ render_field(g.question_search_form.submit, class='btn btn-primary', nolabel=true)}}
+                    <!-- <input type="search" placeholder="Buscar..." class="form-control me-2" id="search" name="search"> -->
+                    <!-- <button class="btn btn-primary">Search</button> -->
+                </div>
+            </form>
+        </div>
+            </div>
+
+
+            
+            <!-- <ul class="navbar-nav w-100 justify-content-center">
             <form class="d-flex al" method="GET" action="{{ url_for('question.search') }}">
                 {{ render_field(g.question_search_form.q, size=20, class='form-control me-2', placeholder='Buscar', nolabel=true, type='search')}}
                 {{ render_field(g.question_search_form.submit, class='btn btn-outline-success', nolabel=true)}}
                 <!-- <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"> -->
                 <!-- <button class="btn btn-outline-success" type="submit">Search</button> -->
               </form>
-            </ul>
+            </ul> -->
             <ul class="navbar-nav w-100 justify-content-center">
                 {% if current_user.is_anonymous %}
                 <li class="nav-item">
