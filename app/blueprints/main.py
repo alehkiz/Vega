@@ -1,5 +1,5 @@
 from app.models.search import Search
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, g, abort, request, current_app as app
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, g, abort, request, current_app as app, Response, make_response
 from flask_security import login_required, current_user
 from datetime import datetime
 
@@ -33,7 +33,18 @@ def before_request():
     #         app.logger.error('Usuário anonimo não encontrado')
     #         app.logger.error()
     #         abort(500)
-
+    # print('endpoint:    ', request.endpoint)
+    # print("url_rule:", request.url_rule)
+    #Selectiona o tipo de acesso
+    # print(request.cookies.get('AccessType', False))
+    if not request.cookies.get('AccessType', False):
+        current_rule = request.url_rule
+        if current_rule != None:
+            if request.url_rule.rule != url_for('main.select_access'):
+                # print('main.select_access:' , url_for('main.select_access'))
+                # print(request.url_rule != url_for('main.select_access'))
+                return redirect(url_for('main.select_access'))
+                # # print(request.url_rule)
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
     g.tags = Tag.query.all()
@@ -69,10 +80,21 @@ def before_request():
 @bp.route('/')
 @bp.route('/index')
 def index():
-    return redirect(url_for('question.index'))
-    article = Article.query.first()
-    return render_template('article.html', article=article)
+    # return redirect(url_for('question.index'))
+    # article = Article.query.first()
+    # return render_template('article.html', article=article)
+    #select user
+    resp = Response('teste')
+    resp.set_cookie(key='teste', value='outro teste', httponly=True)
+    print(request.cookies.get('AccessType'))
+    return resp
 
+@bp.route('/select_access')
+def select_access():
+    response = Response('teste')
+    response.set_cookie(key='AccessType', value='ValuePage')
+
+    return response
 
 @bp.route('/search')
 def search():

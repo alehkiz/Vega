@@ -33,7 +33,7 @@ def format_elapsed_time(timestamp):
     '''
     if isinstance(timestamp, datetime):
         timestamp = timestamp.replace(microsecond=0)
-        return format_timedelta(timestamp - datetime.utcnow(), add_direction=True)
+        return format_timedelta(timestamp - datetime.utcnow(), add_direction=True, locale='pt_BR')
 
 def format_datetime_local(timestamp, format='short'):
     if not format in ['full', 'long', 'medium', 'short']:

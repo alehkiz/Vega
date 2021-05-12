@@ -16,7 +16,7 @@ class BaseConfig(object):
     BLUEPRINTS_DIR = join(APP_DIR, 'blueprints')
     LOG_DIR = join(BASE_DIR, r'logs')
     DEV_DB = join(APP_DIR, r'db//db.db')
-
+    SESSION_COOKIE_SECURE = True
     SECURITY_PASSWORD_HASH = 'pbkdf2_sha512'
     SECURITY_PASSWORD_SALT = SECRET_KEY
     SECURITY_LOGIN_URL = 'auth.login'
@@ -28,6 +28,8 @@ class BaseConfig(object):
         'Você não tem permissão para acessar essa página', 'danger')
     SECURITY_MSG_LOGIN = (
         'É necessário se logar para acessar essa página', 'info')
+
+    BABEL_DEFAULT_LOCALE = 'pt_BR'
 
     _SQLALCHEMY_DATABASE_NAME = PROJECT_NAME.lower()
     _SQLALCHEMY_DATABASE_HOST = environ.get('DB_USER') or 'localhost'
