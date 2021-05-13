@@ -24,7 +24,7 @@ def before_request():
         try:
             db.session.commit()
         except Exception as e:
-            app.logger.error('Não foi possível')
+            app.logger.error('Não foi possível salvar ultima visualização do usuário')
             app.logger.error(e)
         # g.question_search_form = QuestionSearchForm()
     # else:
@@ -40,11 +40,13 @@ def before_request():
     if not request.cookies.get('AccessType', False):
         current_rule = request.url_rule
         if current_rule != None:
-            if request.url_rule.rule != url_for('main.select_access'):
-                # print('main.select_access:' , url_for('main.select_access'))
-                # print(request.url_rule != url_for('main.select_access'))
+            print(current_rule.endpoint)
+            endpoint = ['main.select_access', 'main.select_backoffice', 'main.select_citizen', 'static']
+            if request.url_rule.endpoint not in endpoint:
                 return redirect(url_for('main.select_access'))
                 # # print(request.url_rule)
+    else:
+        g.selected_access = request.cookies.get('AccessType', False)
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
     g.tags = Tag.query.all()
@@ -80,21 +82,32 @@ def before_request():
 @bp.route('/')
 @bp.route('/index')
 def index():
-    # return redirect(url_for('question.index'))
-    # article = Article.query.first()
-    # return render_template('article.html', article=article)
-    #select user
-    resp = Response('teste')
-    resp.set_cookie(key='teste', value='outro teste', httponly=True)
-    print(request.cookies.get('AccessType'))
-    return resp
+    return render_template('base.html')
 
 @bp.route('/select_access')
 def select_access():
-    response = Response('teste')
-    response.set_cookie(key='AccessType', value='ValuePage')
+    # if request.cookies.get('AccessType', False):
+    #     flash('Módulo selecionado')
+    #     return redirect(url_for('main.index'))
+    # response = Response()
+    # response.set_cookie(key='AccessType', value='ValuePage')
 
+    return render_template('select_access.html')
+
+
+@bp.route('/retaguarda')
+def select_backoffice():
+    response = make_response(redirect(url_for('main.index')))
+    response.set_cookie(key='AccessType', value='backoffice')
     return response
+
+
+@bp.route('/cidadao')
+def select_citizen():
+    response = make_response(redirect(url_for('main.index')))
+    response.set_cookie(key='AccessType', value='citizen')
+    return response
+
 
 @bp.route('/search')
 def search():
