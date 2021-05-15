@@ -112,6 +112,10 @@ $(document).ready(function () {
     });
 
 
+    $('.selectpicker').selectpicker({
+        'lang': 'pt_BR'
+    });
+
 });
 
 $(document).on('click', ".like, .unlike", function (e) {

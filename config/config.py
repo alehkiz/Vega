@@ -172,6 +172,11 @@ class BaseConfig(object):
     }
     USER_ANON_ID = 4
 
+    ACCESS_TYPE = {
+        'citizen' : 'Cidadão',
+        'backoffice' : 'Retaguarda'
+    }
+
     # ELASTICSEARCH_URL = 'http://localhost:9200'
 
 
