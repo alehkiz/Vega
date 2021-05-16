@@ -1,9 +1,10 @@
+from app.blueprints.admin import sub_topic
 from flask.globals import request
 from flask_wtf import FlaskForm
 from wtforms import TextAreaField, StringField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length
 from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
-from app.models.wiki import Topic, Tag
+from app.models.wiki import SubTopic, Topic, Tag
 from flask import request
 
 class QuestionEditForm(FlaskForm):
@@ -11,6 +12,7 @@ class QuestionEditForm(FlaskForm):
     answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=3000, message='A resposta deve conter um texto entre 10 e 3000 caracteres')])
     tag = QuerySelectMultipleField('Tag', allow_blank=False, query_factory= lambda : Tag.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
     topic = QuerySelectField('Topico', allow_blank=False, query_factory= lambda : Topic.query, get_label = 'name', validators = [DataRequired('Item Obrigatório')])
+    sub_topic = QuerySelectField('Sub-Tópico', allow_blank=False, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
     # text = TextAreaField('Text', validators=[DataRequired('Item obrigatório'), Length(min=32, message='O campo texto deve conter pelo menos 32 caracteres')])
     # topic = QuerySelectField('Topico', validators=[DataRequired('Item obrigatório')], query_factory=lambda: Topic.query, get_label='name', allow_blank=False)
     approved = BooleanField('Aprovada')

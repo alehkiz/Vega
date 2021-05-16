@@ -16,8 +16,15 @@ from app.utils.dashboard import Dashboard
 
 bp = Blueprint('main', __name__, url_prefix='/')
 
+@bp.before_app_first_request
+def before_first_request():
+    ...
+
+
 @bp.before_app_request
 def before_request():
+    g.search_form = SearchForm()
+    g.question_search_form = SearchForm()
     if current_user.is_authenticated:
         current_user.last_seen = datetime.utcnow()
         # user = current_user
@@ -27,30 +34,31 @@ def before_request():
             app.logger.error('Não foi possível salvar ultima visualização do usuário')
             app.logger.error(e)
         # g.question_search_form = QuestionSearchForm()
-    # else:
-    #     user = User.query.filter(User.id == app.config.get('USER_ANON_ID')).first()
-    #     if user is None:
-    #         app.logger.error('Usuário anonimo não encontrado')
-    #         app.logger.error()
-    #         abort(500)
-    # print('endpoint:    ', request.endpoint)
-    # print("url_rule:", request.url_rule)
-    #Selectiona o tipo de acesso
-    # print(request.cookies.get('AccessType', False))
-    if not request.cookies.get('AccessType', False):
-        current_rule = request.url_rule
-        if current_rule != None:
-            print(current_rule.endpoint)
-            endpoint = ['main.select_access', 'main.select_backoffice', 'main.select_citizen', 'static']
-            if request.url_rule.endpoint not in endpoint:
-                return redirect(url_for('main.select_access'))
-                # # print(request.url_rule)
-    else:
-        g.selected_access = request.cookies.get('AccessType', False)
-    g.search_form = SearchForm()
-    g.question_search_form = SearchForm()
+    
     g.tags = Tag.query.all()
     g.topics = Topic.query.all()
+    if not request.cookies.get('AccessType', False):
+        print(request.cookies.get('AccessType', False), 'aqio')
+        current_rule = request.url_rule
+        print(current_rule.endpoint)
+        if current_rule.endpoint not in ['main.select_access', 'static']:
+            return redirect(url_for('main.select_access'))
+            # # print(current_rule.endpoint)
+            # endpoint = ['main.select_access', 'main.select_backoffice', 'main.select_citizen', 'static']
+            # if request.url_rule.endpoint not in endpoint:
+            #     return redirect(url_for('main.select_access'))
+            #     # # print(request.url_rule)
+            ...
+    else:
+        print(request.cookies.get('AccessType', False))
+        if request.cookies.get('AccessType', False) in [_.name for _ in g.topics]:
+            g.selected_access = request.cookies.get('AccessType', False)
+        else:
+            resp = make_response(redirect(url_for('main.index')))
+            resp.set_cookie(key='AccessType', value='', expires=0)
+            flash('Ocorreu um erro', category='danger')
+            return resp
+
     g.questions_most_viewed = Question.most_viewed(app.config.get('ITEMS_PER_PAGE', 5))
     g.questions_most_recent = Question.query.order_by(Question.create_at.desc()).limit(app.config.get('ITEMS_PER_PAGE', 5)).all()
     g.questions_most_liked = Question.most_liked(app.config.get('ITEMS_PER_PAGE', 5), classification=False)
@@ -84,17 +92,36 @@ def before_request():
 def index():
     return render_template('base.html')
 
-@bp.route('/select_access')
-def select_access():
+@bp.route('/select_access/')
+@bp.route('/select_access/<string:topic>')
+def select_access(topic=None):
+    if topic is None:
+        return render_template('select_access.html')
+    obj_topic = Topic.query.filter(Topic.name.ilike(topic.lower())).first_or_404()
+    response = make_response(redirect(url_for('main.index')))
+    response.set_cookie(key='AccessType', value=obj_topic.name)
+    return response
+    # print(obj_topic)
+    # return topic
     # if request.cookies.get('AccessType', False):
     #     flash('Módulo selecionado')
     #     return redirect(url_for('main.index'))
     # response = Response()
     # response.set_cookie(key='AccessType', value='ValuePage')
 
-    return render_template('select_access.html')
+    
 
+@bp.route('/access/<string:topic>')
+def selected_access(topic=None):
+    if topic is None:
+        return redirect(url_for('main.select_access'))
 
+    obj_topic = Topic.query.filter(Topic.name.ilike(topic.lower())).first_or_404()
+    response = make_response(redirect(url_for('main.index')))
+    response.set_cookie(key='AccessType', value=obj_topic.name)
+    return response
+    print(obj_topic)
+    return topic
 @bp.route('/retaguarda')
 def select_backoffice():
     response = make_response(redirect(url_for('main.index')))
