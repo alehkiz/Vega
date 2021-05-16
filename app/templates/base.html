@@ -176,7 +176,7 @@
                 {% if g.selected_access is defined %}
                 <span class="float-end text-nowrap text-success p-1">
                     {% if g.selected_access %}
-                    {{ config['ACCESS_TYPE'].get(g.selected_access)}}
+                    {{ g.selected_access }}
                     {% endif %}
                 </span>
                 <a href="{{url_for('main.select_access')}}" class="btn btn-primary btn-sm">Alterar</a>

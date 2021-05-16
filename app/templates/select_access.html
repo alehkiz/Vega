@@ -4,6 +4,10 @@
     <h1 class="display-4"><strong>Selecione um dos módulos: </strong></h1>
     <br><br>
 <div class="btn-group pt-5" role="group" aria-label="Basic example">
+  {% for topic in g.topics %}
+    {{ topic.name|lower }}
+    <a type="button" class="btn btn-primary btn-lg" href="{{url_for('main.select_access', topic=topic.name)}}">{{topic.name}}</a>
+  {% endfor  %}
     <a type="button" class="btn btn-primary btn-lg" href="{{url_for('main.select_backoffice')}}">Retaguarda</a>
     <a type="button" class="btn btn-success btn-lg" href="{{url_for('main.select_citizen')}}">Cidadão</a>
     

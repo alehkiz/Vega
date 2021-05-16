@@ -58,7 +58,7 @@ class Article(db.Model):
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     # updater = db.relationship('User', foreign_keys = [update_user_id], backref='articles_updated')
     # author = db.relationship('User', foreign_keys = [user_id], backref='articles', lazy='dynamic')
-    search_vector = db.Column(TSVectorType('_text', 'title', regconfig='pg_catalog.portuguese'))
+    search_vector = db.Column(TSVectorType('_text', 'title', regconfig='public.pt'))
     # __ts_vector__ = create_tsvector(
     #     cast(func.coalesce(_text, ''), postgresql.TEXT))
 
@@ -324,8 +324,8 @@ class Question(db.Model):
     answer_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_at = db.Column(db.DateTime)
     # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
-    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
-    sub_topic_id = db.Column(db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
+    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
+    sub_topic_id = db.Column(db.Integer, db.ForeignKey('sub_topic.id'), nullable=False)
     question_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
     answer_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
     tags = db.relationship('Tag',
@@ -333,7 +333,7 @@ class Question(db.Model):
                            backref=db.backref('questions',
                                               lazy='dynamic'),
                            lazy='dynamic')
-    search_vector = db.Column(TSVectorType('question', 'answer', regconfig='pg_catalog.portuguese'))#regconfig='public.pt'))
+    search_vector = db.Column(TSVectorType('question', 'answer', regconfig='public.pt', cache_ok=False))#regconfig='public.pt'))
 
     view = db.relationship('QuestionView', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
     save = db.relationship('QuestionSave', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
@@ -387,12 +387,14 @@ class Question(db.Model):
             raise Exception('´answer_user_id´ deve ser informado para responder uma questão')
 
     @staticmethod
-    def search(expression, pagination = False, per_page = 1, page = 1, resume=False):
+    def search(expression, pagination = False, per_page = 1, page = 1, resume=False, sub_topics  : list=[]):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
+        if not sub_topics:
+            raise Exception('Topics não pode ser vazio')
         if resume:
             result = (db.session.query(Question.question, (
                 func.ts_rank_cd(
-                    Question.search_vector, 
+                    Question.search_vector(cache_ok=True), 
                     func.plainto_tsquery(
                         'public.pt',
                         expression))).label(
@@ -416,6 +418,7 @@ class Question(db.Model):
                     Question.search_vector, func.plainto_tsquery('public.pt',expression))) > 0)#.order_by(
                         #desc('similarity'))
                         )
+        result = result.filter(Question.sub_topic_id.in_([_.id for _ in sub_topics]))
         if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result

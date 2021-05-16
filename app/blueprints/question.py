@@ -1,10 +1,11 @@
+from app.blueprints.admin import sub_topic
 from datetime import datetime
 from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify
 from flask.globals import current_app
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
 from app.core.db import db
-from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag, Topic
+from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, SubTopic, Tag, Topic
 from app.models.security import User
 from app.models.app import Network
 from app.models.search import Search
@@ -43,9 +44,14 @@ def index():
 def search():
     page = request.args.get('page', 1, type=int)
     search_query = False
+    
     if g.question_search_form.validate():
-        q = Question.search(g.question_search_form.q.data, pagination=False).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
+        sub_topics = g.question_search_form.filter.data
+        if not sub_topics:
+            sub_topics = SubTopic.query.all()
+        q = Question.search(g.question_search_form.q.data, pagination=False, sub_topics=sub_topics).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
         print(g.question_search_form.filter.data)
+        
         paginate = q.paginate(per_page = app.config.get('QUESTIONS_PER_PAGE', 1), page = page)
         search_query = strip_accents(g.question_search_form.q.data)
         search = Search.query.filter(unaccent(Search.text).ilike(search_query)).first()
@@ -83,7 +89,7 @@ def search():
                     if current_user.is_authenticated:
                         user = current_user
                     else:
-                        user = User.query.filter(User.id == app.config.get('USER_ANON_ID', False))
+                        user = User.query.filter(User.id == app.config.get('USER_ANON_ID', False)).first()
 
                     question = Question()
 
