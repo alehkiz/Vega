@@ -111,7 +111,17 @@
                 {% endfor %}
                 <td class="actions">
                     {% if kwargs['mode'] is defined %}
-                    {% if kwargs['mode'] == 'answer' %}
+                    
+                    {% if kwargs['mode'] == 'question' %}
+                    <a class="btn btn-outline-primary btn-sm"
+                        href="{{ url_for(cls_table.__tablename__+'.answer', id=item.id)}}">
+                    <i class="fas fa-question"></i></a>
+                    <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}"
+                        href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}">
+                        <i class="fas fa-trash-alt"></i>
+                        </button>
+                    {% endif %}
+                    {% else %}
                     <a class="btn btn-outline-primary btn-sm"
                         href="{{ url_for(cls_table.__tablename__+'.view', id=item.id)}}">
                         <i class="fas fa-search-plus"></i></a>
@@ -123,15 +133,7 @@
                         href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}">
                         <i class="fas fa-trash-alt"></i>
                     </button>
-                    {% elif kwargs['mode'] == 'question' %}
-                    <a class="btn btn-outline-primary btn-sm"
-                        href="{{ url_for(cls_table.__tablename__+'.answer', id=item.id)}}">
-                    <i class="fas fa-question"></i></a>
-                    <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}"
-                        href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}">
-                        <i class="fas fa-trash-alt"></i>
-                        </button>
-                    {% endif %}
+                    
                     {% endif %}
                 </td>
 
