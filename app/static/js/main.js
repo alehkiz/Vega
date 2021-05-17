@@ -114,6 +114,8 @@ $(document).ready(function () {
 
     $('.selectpicker').selectpicker({
         'lang': 'pt_BR'
+        // 'actionsBox': true,
+        // 'selectAllText': 'Selecionar todos'
     });
 
 });

@@ -387,7 +387,7 @@ class Question(db.Model):
             raise Exception('´answer_user_id´ deve ser informado para responder uma questão')
 
     @staticmethod
-    def search(expression, pagination = False, per_page = 1, page = 1, resume=False, sub_topics  : list=[]):
+    def search(expression, pagination = False, per_page = 1, page = 1, resume=False, sub_topics  : list=[], topics:list=[]):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         if not sub_topics:
             raise Exception('Topics não pode ser vazio')
@@ -418,7 +418,7 @@ class Question(db.Model):
                     Question.search_vector, func.plainto_tsquery('public.pt',expression))) > 0)#.order_by(
                         #desc('similarity'))
                         )
-        result = result.filter(Question.sub_topic_id.in_([_.id for _ in sub_topics]))
+        result = result.filter(Question.sub_topic_id.in_([_.id for _ in sub_topics]), Question.topic_id.in_([_.id for _ in topics]))
         if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
@@ -590,7 +590,7 @@ class Question(db.Model):
     def most_viewed(limit=5):
         try:
             rs = db.session.query(Question, func.count(QuestionView.id).label('views')).join(
-                Question.view).group_by(Question).order_by(text('views DESC')).limit(limit).all()
+                Question.view).group_by(Question).order_by(text('views DESC')).filter(Question.answer_approved==True).limit(limit).all()
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
@@ -602,7 +602,7 @@ class Question(db.Model):
     def most_liked(limit=5, classification=True):
         try:
             rs = db.session.query(Question, func.count(QuestionLike.id).label('likes')).join(
-                Question.like).group_by(Question).order_by(text('likes DESC')).limit(limit).all()
+                Question.like).group_by(Question).order_by(text('likes DESC')).filter(Question.answer_approved==True).limit(limit).all()
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))

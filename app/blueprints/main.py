@@ -1,5 +1,5 @@
 from app.models.search import Search
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, g, abort, request, current_app as app, Response, make_response
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, g, abort, request, current_app as app, Response, make_response, session
 from flask_security import login_required, current_user
 from datetime import datetime
 
@@ -37,30 +37,26 @@ def before_request():
     
     g.tags = Tag.query.all()
     g.topics = Topic.query.all()
-    if not request.cookies.get('AccessType', False):
-        print(request.cookies.get('AccessType', False), 'aqio')
+    
+    if not session.get('AccessType', False):
+        # print(request.cookies.get('AccessType', False), 'Aqui')
+        # print(session.get('AccessType', False), 'Session')
         current_rule = request.url_rule
-        print(current_rule.endpoint)
+        # print(current_rule.endpoint)
         if current_rule.endpoint not in ['main.select_access', 'static']:
             return redirect(url_for('main.select_access'))
-            # # print(current_rule.endpoint)
-            # endpoint = ['main.select_access', 'main.select_backoffice', 'main.select_citizen', 'static']
-            # if request.url_rule.endpoint not in endpoint:
-            #     return redirect(url_for('main.select_access'))
-            #     # # print(request.url_rule)
-            ...
     else:
-        print(request.cookies.get('AccessType', False))
-        if request.cookies.get('AccessType', False) in [_.name for _ in g.topics]:
-            g.selected_access = request.cookies.get('AccessType', False)
+        # print(request.cookies.get('AccessType', False), 'Dois')
+        if session.get('AccessType', False) in [_.name for _ in g.topics]:
+            g.selected_access = session.get('AccessType', False)
         else:
-            resp = make_response(redirect(url_for('main.index')))
+            resp = make_response(redirect(url_for('question.index')))
             resp.set_cookie(key='AccessType', value='', expires=0)
             flash('Ocorreu um erro', category='danger')
             return resp
 
     g.questions_most_viewed = Question.most_viewed(app.config.get('ITEMS_PER_PAGE', 5))
-    g.questions_most_recent = Question.query.order_by(Question.create_at.desc()).limit(app.config.get('ITEMS_PER_PAGE', 5)).all()
+    g.questions_most_recent = Question.query.order_by(Question.create_at.desc()).filter(Question.answer_approved==True).limit(app.config.get('ITEMS_PER_PAGE', 5)).all()
     g.questions_most_liked = Question.most_liked(app.config.get('ITEMS_PER_PAGE', 5), classification=False)
     # if request.endpoint != 'static' and not request.endpoint is None:
     #     print(request.url_rule.rule)
@@ -98,14 +94,15 @@ def select_access(topic=None):
     if topic is None:
         return render_template('select_access.html')
     obj_topic = Topic.query.filter(Topic.name.ilike(topic.lower())).first_or_404()
-    response = make_response(redirect(url_for('main.index')))
+    response = make_response(redirect(url_for('question.index')))
     response.set_cookie(key='AccessType', value=obj_topic.name)
+    session['AccessType'] = obj_topic.name
     return response
     # print(obj_topic)
     # return topic
     # if request.cookies.get('AccessType', False):
     #     flash('Módulo selecionado')
-    #     return redirect(url_for('main.index'))
+    #     return redirect(url_for('question.index'))
     # response = Response()
     # response.set_cookie(key='AccessType', value='ValuePage')
 
@@ -120,21 +117,6 @@ def selected_access(topic=None):
     response = make_response(redirect(url_for('main.index')))
     response.set_cookie(key='AccessType', value=obj_topic.name)
     return response
-    print(obj_topic)
-    return topic
-@bp.route('/retaguarda')
-def select_backoffice():
-    response = make_response(redirect(url_for('main.index')))
-    response.set_cookie(key='AccessType', value='backoffice')
-    return response
-
-
-@bp.route('/cidadao')
-def select_citizen():
-    response = make_response(redirect(url_for('main.index')))
-    response.set_cookie(key='AccessType', value='citizen')
-    return response
-
 
 @bp.route('/search')
 def search():

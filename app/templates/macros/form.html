@@ -4,7 +4,6 @@
 {% else %}
 {{ field.label(class='form-label') }}
 {% endif %}
-
 {% if style %}
 {{ field(class=(class if class else '') + (" is-invalid" if field.errors else ""), size=size, placeholder=placeholder,
 style=style, **kwargs)|safe }}

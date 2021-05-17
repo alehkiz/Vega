@@ -1,6 +1,6 @@
 from app.blueprints.admin import sub_topic
 from datetime import datetime
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify, session
 from flask.globals import current_app
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
@@ -31,8 +31,11 @@ bp = Blueprint('question', __name__, url_prefix='/duvidas/')
 @counter
 def index():
     page = request.args.get('page', 1, type=int)
+    if not session.get('AccessType', False):
+        return redirect(url_for('main.index'))
+    topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
     search_form = QuestionSearchForm()
-    paginate = Question.query.filter(Question.answer_approved==True).order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    paginate = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
@@ -46,10 +49,13 @@ def search():
     search_query = False
     
     if g.question_search_form.validate():
+        if not session.get('AccessType', False):
+            return redirect(url_for('main.index'))
+        topic = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).first_or_404()
         sub_topics = g.question_search_form.filter.data
         if not sub_topics:
             sub_topics = SubTopic.query.all()
-        q = Question.search(g.question_search_form.q.data, pagination=False, sub_topics=sub_topics).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
+        q = Question.search(g.question_search_form.q.data, pagination=False, sub_topics=sub_topics, topics=[topic]).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
         print(g.question_search_form.filter.data)
         
         paginate = q.paginate(per_page = app.config.get('QUESTIONS_PER_PAGE', 1), page = page)
