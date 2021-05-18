@@ -42,7 +42,10 @@
         {{ form.csrf_token}}
         {{ macros.render_field(form.question, size=256, class='form-control', placeholder='Pergunta')}}
         {{ macros.render_field(form.answer, size=256, class='form-control', placeholder='Reposta')}}
-        {{ macros.render_field(form.tag, class='form-select', nosize=true, multiple=true)}}
+        {{ macros.render_field(form.tag, class='form-select', class='selectpicker', nolabel=true, multiple=true, **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
+        <br>
+        {{ macros.render_field(form.sub_topic, class='form-select')}}
+        <br>
         {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
         <br>
         {{ macros.render_field(form.approved)}}
@@ -117,7 +120,7 @@
 {% block scripts %}
 {{ super() }}
 
-<script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}" {#nonce="{{ csp_nonce() }}#}"></script>
+<script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}" {#nonce="{{ csp_nonce() }}"#}></script>
 
 <script type="text/javascript" {#nonce="{{ csp_nonce() }}#}">
 

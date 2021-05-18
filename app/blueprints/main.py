@@ -5,7 +5,7 @@ from datetime import datetime
 
 from app.core.db import db
 from app.models.wiki import Article, Question, Tag, Topic
-from app.models.app import Page, Visit
+from app.models.app import Network, Page, Visit
 from app.models.security import User
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
@@ -39,14 +39,10 @@ def before_request():
     g.topics = Topic.query.all()
     
     if not session.get('AccessType', False):
-        # print(request.cookies.get('AccessType', False), 'Aqui')
-        # print(session.get('AccessType', False), 'Session')
         current_rule = request.url_rule
-        # print(current_rule.endpoint)
         if current_rule.endpoint not in ['main.select_access', 'static']:
             return redirect(url_for('main.select_access'))
     else:
-        # print(request.cookies.get('AccessType', False), 'Dois')
         if session.get('AccessType', False) in [_.name for _ in g.topics]:
             g.selected_access = session.get('AccessType', False)
         else:
@@ -58,6 +54,22 @@ def before_request():
     g.questions_most_viewed = Question.most_viewed(app.config.get('ITEMS_PER_PAGE', 5))
     g.questions_most_recent = Question.query.order_by(Question.create_at.desc()).filter(Question.answer_approved==True).limit(app.config.get('ITEMS_PER_PAGE', 5)).all()
     g.questions_most_liked = Question.most_liked(app.config.get('ITEMS_PER_PAGE', 5), classification=False)
+    ip = Network.query.filter(Network.ip == request.remote_addr).first()
+    if ip is None:
+        ip = Network()
+        ip.ip = request.remote_addr
+        db.session.add(ip)
+        
+        try:
+            db.session.commit()
+            g.ip_id = ip.id
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            return abort(500)
+    else:
+        g.ip_id = ip.id
     # if request.endpoint != 'static' and not request.endpoint is None:
     #     print(request.url_rule.rule)
     #     page = Page.query.filter(Page.endpoint == request.endpoint).first()
