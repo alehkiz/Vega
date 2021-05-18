@@ -162,18 +162,18 @@ def search():
 @counter
 def view(id=None):
     question = Question.query.filter(Question.id == id).first_or_404()
-    ip = Network.query.filter(Network.ip == request.remote_addr).first()
-    if ip is None:
-        ip = Network()
-        ip.ip = request.remote_addr
-        db.session.add(ip)
-        try:
-            db.session.commit()
-        except Exception as e:
-            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-            app.logger.error(e)
-            db.session.rollback()
-            return abort(500)
+    # ip = Network.query.filter(Network.ip == request.remote_addr).first()
+    # if ip is None:
+    #     ip = Network()
+    #     ip.ip = request.remote_addr
+    #     db.session.add(ip)
+    #     try:
+    #         db.session.commit()
+    #     except Exception as e:
+    #         app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+    #         app.logger.error(e)
+    #         db.session.rollback()
+    #         return abort(500)
     # dict_view = {}
     # dict_view['id'] = question.id
     # dict_view['values'] = {
@@ -189,7 +189,7 @@ def view(id=None):
         if user is None:
             raise Exception('Usuário anônimo não criado')
         user_id = user.id
-    question.add_view(user_id, ip.id)
+    question.add_view(user_id, g.ip_id)
     return render_template('question.html', mode='view', question=question, cls_question=Question)
 
 @bp.route('edit/<int:id>', methods=['GET', 'POST'])
@@ -201,7 +201,8 @@ def edit(id):
         try:
             question.question = process_html(form.question.data).text
             question.tags = form.tag.data
-            question.topic = form.topic.data
+            question.topic_id = form.topic.data.id
+            question.sub_topic = form.sub_topic.data
             question.updater = current_user
             question.update_at = datetime.utcnow()
             
@@ -214,10 +215,13 @@ def edit(id):
             db.session.commit()
             return redirect(url_for('question.view', id=question.id))
         except Exception as e:
+            print('aqio')
+            form.question.errors.append('Não foi possível atualizar')
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
             return render_template('edit.html', form=form, title='Editar', question=True)
+
     form.question.data = question.question
     form.tag.data = question.tags
     form.topic.data = question.topic
@@ -280,23 +284,45 @@ def add():
                 return render_template('add.html', form=form, title='Incluir dúvida', question=True)
     return render_template('add.html', form=form, title='Incluir dúvida', question=True)
 
-@bp.route('/responder/<int:id>')
+@bp.route('/responder/<int:id>', methods=['POST', 'GET'])
 @login_required
 @roles_accepted('admin', 'editor', 'aux_editor')
 @counter
 def answer(id: int):
     q = Question.query.filter(Question.id == id).first_or_404()
-    # print('asd')
     if q.was_answered:
-        flash('Questão não pode ser respondida')
+        flash('Questão já foi respondida', category='danger')
         return redirect(url_for('question.index'))
     form = QuestionAnswerForm()
     if form.validate_on_submit():
+        q = Question.query.filter(Question.question.ilike(form.question.data.lower())).first()
+        # print(q)
+        if not q is None:
+            if q.id != id:
+                form.question.errors.append('Você alterou a pergunta para uma já cadastrada')
+                return render_template('answer.html', form=form)
         q.answer_user_id = current_user.id
+        q.answer_network_id = g.ip_id
         q.answer = form.answer.data
+        q.answer_at = datetime.now()
         q.tag = form.tag.data
-        q.topic = form.topic.data
+        q.topic_id = form.topic.data.id
+        q.sub_topic_id = form.sub_topic.data.id
+        try:
+            db.session.commit()
+            return redirect(url_for('question.view', id=q.id))
+        except Exception as e:
+            form.question.errors.append('Não foi possível atualizar')
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            db.session.rollback()
+            return render_template('answer.html', form=form)
+        return 'ok'
+    
+    form.question.data = q.question
 
+
+    return render_template('answer.html', form=form)
         # TODO terminar
 
     

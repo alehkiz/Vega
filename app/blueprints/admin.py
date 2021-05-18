@@ -82,7 +82,7 @@ def answers():
     order_type = 'asc' if order_type == 'desc' else 'desc'
     return render_template('admin.html', pagination=paginate, first_page=first_page, 
                         last_page=last_page, endpoint=request.url_rule.endpoint, 
-                        cls_table=Question, list=True, page_name='Respostas', order_type=order_type, mode='answer')
+                        cls_table=Question, list=True, page_name='Respostas', order_type=order_type)
 @bp.route('/perguntas')
 @login_required
 @roles_accepted('admin')

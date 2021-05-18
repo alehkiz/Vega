@@ -10,6 +10,7 @@ from app.models.security import User
 from app.models.app import Network
 from app.models.search import Search
 from app.utils.kernel import order_dict
+from app.utils.routes import counter
 from datetime import datetime
 # import time
 
@@ -17,20 +18,21 @@ bp = Blueprint('api', __name__, url_prefix='/api/')
 
 
 @bp.route('question/<int:id>', methods=['GET', 'POST'])
+@counter
 def question(id):
     question = Question.query.filter(Question.id == id).first_or_404()
-    ip = Network.query.filter(Network.ip == request.remote_addr).first()
-    if ip is None:
-        ip = Network()
-        ip.ip = request.remote_addr
-        db.session.add(ip)
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-            app.logger.error(e)
-            return abort(500)
+    # ip = Network.query.filter(Network.ip == request.remote_addr).first()
+    # if ip is None:
+    #     ip = Network()
+    #     ip.ip = request.remote_addr
+    #     db.session.add(ip)
+    #     try:
+    #         db.session.commit()
+    #     except Exception as e:
+    #         db.session.rollback()
+    #         app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+    #         app.logger.error(e)
+    #         return abort(500)
     if question.answer_approved == False:
         abort(404)
     to_dict = question.to_dict()
@@ -47,11 +49,13 @@ def question(id):
         to_dict['url_save'] = url_for('question.save_action', question_id=id)
         if current_user.can_edit:
             to_dict['url_edit'] = url_for('question.edit', id=id)
-        question.add_view(current_user.id, ip.id)
+        # if hasattr(g, 'ip_id'):
+        question.add_view(current_user.id, g.ip_id)
+        
     else:
         # anon_user = User.query.filter_by(id=app.config.get('USER_ANON_ID')).first_or_404()
-        print(ip.id)
-        question.add_view(app.config.get('USER_ANON_ID'), ip.id)
+        print(g.ip_id)
+        question.add_view(app.config.get('USER_ANON_ID'), g.ip_id)
     return jsonify(to_dict)
 
 
