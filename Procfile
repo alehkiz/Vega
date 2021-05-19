@@ -1,1 +1,1 @@
-web: flask db upgrade; app:create_app()
+web: app:create_app()
