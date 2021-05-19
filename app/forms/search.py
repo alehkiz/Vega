@@ -12,7 +12,8 @@ class SearchForm(FlaskForm):
     # filter = SelectField('Filter', choices=[('0', 'Todos'), ('1', 'Habilitação'), ('2', 'Veículos')])
     filter = QuerySelectMultipleField("Filter", query_factory=lambda: SubTopic.query, get_label='name')
     submit = SubmitField('Buscar', _name='search')
-    submit.name = 'search'
+    # submit = SubmitField(Markup('<i class="fa fa-search"></i>'))
+    # submit.name = 'search'
     
     def __init__(self, *args, **kwargs):
         if 'formdata' not in kwargs:

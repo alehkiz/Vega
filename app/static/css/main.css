@@ -104,7 +104,7 @@ textarea {
     width: 30%; 
 }*/
 
-form > input:hover,
+form > div > input:hover,
 form > textarea:hover {
     background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
     color: #5793ef;
@@ -116,7 +116,54 @@ form > textarea:hover {
     color: #5793ef;
     transition: all 0.5s ease 0s;
 } */
+.search {
+    width: 100%;
+    margin-bottom: auto;
+    margin-top: 20px;
+    height: 50px;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 5px
+}
 
+.search-input {
+    color: white;
+    border: 0;
+    outline: 0;
+    background: none;
+    width: 0;
+    margin-top: 5px;
+    caret-color: transparent;
+    line-height: 20px;
+    transition: width 0.4s linear;
+    width:350px !important;
+}
+
+.search .search-input {
+    padding: 0 10px;
+    width: 100%;
+    caret-color: #536bf6;
+    font-size: 19px;
+    font-weight: 300;
+    color: black;
+    transition: width 0.4s linear
+}
+
+.search-icon {
+    height: 35px;
+    width: 70px;
+    float: right;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    background-color: #536bf6;
+    font-size: 10px;
+    bottom: 36px;
+    position: relative;
+    border-radius: 5px;
+    right: 10px;
+}
 
 .accordion-body {
     padding-top: 2rem !important;
