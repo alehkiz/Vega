@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block app_content %}
+<div class="row justify-content-md-center">
+    <h1 class="display-4"><strong>Selecione um módulo: </strong></h1>
+    <br><br>
+<div class="btn-group pt-5" role="group" aria-label="Basic example">
+  {% for topic in g.topics %}
+    <a type="button" class="btn btn-{{ 'primary' if topic.id % 2 == 0 else 'success' }} btn-lg" href="{{url_for('main.select_access', topic=topic.name)}}">{{topic.name}}</a>
+  {% endfor  %}
+  </div>
+</div>
+{% endblock %}

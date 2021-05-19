@@ -1,3 +1,4 @@
+
 html , body{
 	
  height:100%;
@@ -255,7 +256,7 @@ html , body{
 .menu_section>ul {
     margin-top: 10px
 }
-/* .profile_pic {
+.profile_pic {
     width: 35%;
     float: left
 }
@@ -268,18 +269,18 @@ html , body{
     margin-top: 10px;
     border: 1px solid rgba(52, 73, 94, 0.44);
     padding: 4px
-} */
-.dashboard-info {
-    padding: 20px;
+}
+.profile_info {
+    padding: 10px;
     width: 65%;
     float: left
 }
-.dashboard-info span {
+.profile_info span {
     font-size: 13px;
     line-height: 30px;
     color: #BAB8B8
 }
-.dashboard-info h2 {
+.profile_info h2 {
     font-size: 14px;
     color: #ECF0F1;
     margin: 0;
@@ -295,7 +296,7 @@ html , body{
     width: 50%;
     margin: 10px 0 0
 }
-.profile.img_2 .dashboard-info {
+.profile.img_2 .profile_info {
     padding: 15px 10px 0;
     width: 100%;
     margin-bottom: 10px;
@@ -403,59 +404,37 @@ body .container.body .right_col {
     max-height: 400px !important
 }
 .blue {
-    color: blue;
+    color: #3498DB
 }
 .purple {
-    color: purple;
+    color: #9B59B6
 }
 .green {
-    color: green
+    color: #1ABB9C
 }
 .aero {
     color: #9CC2CB
 }
 .red {
-    color: red
+    color: #E74C3C
 }
 .dark {
     color: #34495E
 }
-
-.pink {
-    color: pink;
-}
-
-.orange {
-    color: orange;
-}
-yellow {
-    color: yellow;
-}
-cyan {
-    color: cyan;
-}
-
-gray {
-    color: gray;
-}
-
-black {
-    color: black;
-}
 .border-blue {
-    border-color: blue !important
+    border-color: #3498DB !important
 }
 .border-purple {
-    border-color: purple !important
+    border-color: #9B59B6 !important
 }
 .border-green {
-    border-color: green !important
+    border-color: #1ABB9C !important
 }
 .border-aero {
     border-color: #9CC2CB !important
 }
 .border-red {
-    border-color: red !important
+    border-color: #E74C3C !important
 }
 .border-dark {
     border-color: #34495E !important
@@ -466,28 +445,28 @@ black {
     color: #73879C
 }
 .bg-green {
-    background: green !important;
-    border: 1px solid green !important;
+    background: #1ABB9C !important;
+    border: 1px solid #1ABB9C !important;
     color: #fff
 }
 .bg-red {
-    background: red !important;
+    background: #E74C3C !important;
     border: 1px solid #E74C3C !important;
     color: #fff
 }
 .bg-blue {
-    background: blue !important;
-    border: 1px solid blue !important;
+    background: #3498DB !important;
+    border: 1px solid #3498DB !important;
     color: #fff
 }
 .bg-orange {
-    background: orange !important;
-    border: 1px solid orange !important;
+    background: #F39C12 !important;
+    border: 1px solid #F39C12 !important;
     color: #fff
 }
 .bg-purple {
-    background: purple !important;
-    border: 1px solid purple !important;
+    background: #9B59B6 !important;
+    border: 1px solid #9B59B6 !important;
     color: #fff
 }
 .bg-blue-sky {
@@ -1028,7 +1007,7 @@ article.media {
     float: left
 }
 h2 {
-    font-size: 18px;
+    font-size: 30px;
     font-weight: 400
 }
 #left,
@@ -1100,11 +1079,7 @@ h2 {
     width: 40%;
     float: right
 }
-.x_title h2,
-.x_title h3,
-.x_title h4,
-.x_title h5
- {
+.x_title h2 {
     margin: 5px 0 6px;
     float: left;
     display: block;
