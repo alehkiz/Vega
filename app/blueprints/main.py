@@ -40,7 +40,8 @@ def before_request():
     
     if not session.get('AccessType', False):
         current_rule = request.url_rule
-        if current_rule.endpoint not in ['main.select_access', 'static']:
+        print(current_rule)
+        if not current_rule is None and current_rule.endpoint not in ['main.select_access', 'static']:
             return redirect(url_for('main.select_access'))
     else:
         if session.get('AccessType', False) in [_.name for _ in g.topics]:
