@@ -9,7 +9,8 @@ import app
 class BaseConfig(object):
     PROJECT_NAME = 'Vega'
     SECRET_KEY = environ.get(
-        'SERVER_KEY') or 'ZdsQPA7z8fyFHV_aqB8ZrY-yTvAODWKV4qKOp-vzkcFZUsWVvuwd4GpdjfoV2uITNj8B6S_3bMyc68ciolUxOCFKN2tCJ5RhDJcI_Xm0I0b1xyCzoS7Kc03YURCYaoSQ2xZKxDMrYl1OvGREYjaUGRx4aJ6lNUH1qZm4mONjAHE'
+        'SERVER_KEY')
+    print(SECRET_KEY)
     APP_DIR = abspath(dirname(app.__file__))
     BASE_DIR = abspath(join(APP_DIR, '..'))
 
