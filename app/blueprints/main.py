@@ -33,6 +33,7 @@ def before_request():
         except Exception as e:
             app.logger.error('Não foi possível salvar ultima visualização do usuário')
             app.logger.error(e)
+            return abort(500)
         # g.question_search_form = QuestionSearchForm()
     
     g.tags = Tag.query.all()
