@@ -9,14 +9,15 @@ import app
 class BaseConfig(object):
     PROJECT_NAME = 'Vega'
     SECRET_KEY = environ.get(
-        'SERVER_KEY') or 'ZdsQPA7z8fyFHV_aqB8ZrY-yTvAODWKV4qKOp-vzkcFZUsWVvuwd4GpdjfoV2uITNj8B6S_3bMyc68ciolUxOCFKN2tCJ5RhDJcI_Xm0I0b1xyCzoS7Kc03YURCYaoSQ2xZKxDMrYl1OvGREYjaUGRx4aJ6lNUH1qZm4mONjAHE'
+        'SERVER_KEY')
+    print(SECRET_KEY)
     APP_DIR = abspath(dirname(app.__file__))
     BASE_DIR = abspath(join(APP_DIR, '..'))
 
     BLUEPRINTS_DIR = join(APP_DIR, 'blueprints')
     LOG_DIR = join(BASE_DIR, r'logs')
     DEV_DB = join(APP_DIR, r'db//db.db')
-
+    SESSION_COOKIE_SECURE = True
     SECURITY_PASSWORD_HASH = 'pbkdf2_sha512'
     SECURITY_PASSWORD_SALT = SECRET_KEY
     SECURITY_LOGIN_URL = 'auth.login'
@@ -28,6 +29,8 @@ class BaseConfig(object):
         'Você não tem permissão para acessar essa página', 'danger')
     SECURITY_MSG_LOGIN = (
         'É necessário se logar para acessar essa página', 'info')
+
+    BABEL_DEFAULT_LOCALE = 'pt_BR'
 
     _SQLALCHEMY_DATABASE_NAME = PROJECT_NAME.lower()
     _SQLALCHEMY_DATABASE_HOST = environ.get('DB_USER') or 'localhost'
@@ -97,6 +100,10 @@ class BaseConfig(object):
             "create_at": {
                 'name' : 'criado em',
                 'attr' : 'get_create_datetime'
+            },
+            'answer':{
+                'name' : 'Respondida?',
+                'attr' : 'was_answered_to'
             }
 
         },
@@ -116,6 +123,21 @@ class BaseConfig(object):
             }
         },
         'topic' :{
+            'id' :{
+                'name' : 'id',
+                'attr' : None
+            },
+            'name': {
+                'name' : 'Nome',
+                'attr' : None
+            },
+            'user': {
+                'name' : 'criado por',
+                'attr': 'username'
+
+            }
+        },
+        'sub_topic' :{
             'id' :{
                 'name' : 'id',
                 'attr' : None
@@ -150,6 +172,11 @@ class BaseConfig(object):
         # }
     }
     USER_ANON_ID = 4
+
+    # ACCESS_TYPE = {
+    #     'citizen' : 'Cidadão',
+    #     'backoffice' : 'Retaguarda'
+    # }
 
     # ELASTICSEARCH_URL = 'http://localhost:9200'
 

@@ -1,11 +1,11 @@
 from app.models.search import Search
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, g, abort, request, current_app as app
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, g, abort, request, current_app as app, Response, make_response, session
 from flask_security import login_required, current_user
 from datetime import datetime
 
 from app.core.db import db
 from app.models.wiki import Article, Question, Tag, Topic
-from app.models.app import Page, Visit
+from app.models.app import Network, Page, Visit
 from app.models.security import User
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
@@ -16,31 +16,61 @@ from app.utils.dashboard import Dashboard
 
 bp = Blueprint('main', __name__, url_prefix='/')
 
+@bp.before_app_first_request
+def before_first_request():
+    ...
+
+
 @bp.before_app_request
 def before_request():
+    g.search_form = SearchForm()
+    g.question_search_form = SearchForm()
     if current_user.is_authenticated:
         current_user.last_seen = datetime.utcnow()
         # user = current_user
         try:
             db.session.commit()
         except Exception as e:
-            app.logger.error('Não foi possível')
+            app.logger.error('Não foi possível salvar ultima visualização do usuário')
             app.logger.error(e)
         # g.question_search_form = QuestionSearchForm()
-    # else:
-    #     user = User.query.filter(User.id == app.config.get('USER_ANON_ID')).first()
-    #     if user is None:
-    #         app.logger.error('Usuário anonimo não encontrado')
-    #         app.logger.error()
-    #         abort(500)
-
-    g.search_form = SearchForm()
-    g.question_search_form = SearchForm()
+    
     g.tags = Tag.query.all()
     g.topics = Topic.query.all()
+    
+    if not session.get('AccessType', False):
+        current_rule = request.url_rule
+        print(current_rule)
+        if not current_rule is None and current_rule.endpoint not in ['main.select_access', 'static']:
+            return redirect(url_for('main.select_access'))
+    else:
+        if session.get('AccessType', False) in [_.name for _ in g.topics]:
+            g.selected_access = session.get('AccessType', False)
+        else:
+            resp = make_response(redirect(url_for('question.index')))
+            resp.set_cookie(key='AccessType', value='', expires=0)
+            flash('Ocorreu um erro', category='danger')
+            return resp
+
     g.questions_most_viewed = Question.most_viewed(app.config.get('ITEMS_PER_PAGE', 5))
-    g.questions_most_recent = Question.query.order_by(Question.create_at.desc()).limit(app.config.get('ITEMS_PER_PAGE', 5)).all()
+    g.questions_most_recent = Question.query.order_by(Question.create_at.desc()).filter(Question.answer_approved==True).limit(app.config.get('ITEMS_PER_PAGE', 5)).all()
     g.questions_most_liked = Question.most_liked(app.config.get('ITEMS_PER_PAGE', 5), classification=False)
+    ip = Network.query.filter(Network.ip == request.remote_addr).first()
+    if ip is None:
+        ip = Network()
+        ip.ip = request.remote_addr
+        db.session.add(ip)
+        
+        try:
+            db.session.commit()
+            g.ip_id = ip.id
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            return abort(500)
+    else:
+        g.ip_id = ip.id
     # if request.endpoint != 'static' and not request.endpoint is None:
     #     print(request.url_rule.rule)
     #     page = Page.query.filter(Page.endpoint == request.endpoint).first()
@@ -69,10 +99,37 @@ def before_request():
 @bp.route('/')
 @bp.route('/index')
 def index():
-    return redirect(url_for('question.index'))
-    article = Article.query.first()
-    return render_template('article.html', article=article)
+    return render_template('base.html')
 
+@bp.route('/select_access/')
+@bp.route('/select_access/<string:topic>')
+def select_access(topic=None):
+    if topic is None:
+        return render_template('select_access.html')
+    obj_topic = Topic.query.filter(Topic.name.ilike(topic.lower())).first_or_404()
+    response = make_response(redirect(url_for('question.index')))
+    response.set_cookie(key='AccessType', value=obj_topic.name)
+    session['AccessType'] = obj_topic.name
+    return response
+    # print(obj_topic)
+    # return topic
+    # if request.cookies.get('AccessType', False):
+    #     flash('Módulo selecionado')
+    #     return redirect(url_for('question.index'))
+    # response = Response()
+    # response.set_cookie(key='AccessType', value='ValuePage')
+
+    
+
+@bp.route('/access/<string:topic>')
+def selected_access(topic=None):
+    if topic is None:
+        return redirect(url_for('main.select_access'))
+
+    obj_topic = Topic.query.filter(Topic.name.ilike(topic.lower())).first_or_404()
+    response = make_response(redirect(url_for('main.index')))
+    response.set_cookie(key='AccessType', value=obj_topic.name)
+    return response
 
 @bp.route('/search')
 def search():

@@ -4,12 +4,13 @@ from flask.globals import current_app
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
 from app.core.db import db
-from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag
-from app.forms.tag import TagEditForm
+from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, SubTopic
+from app.forms.sub_topic import SubTopicEditForm
 from app.forms.question import QuestionSearchForm
 from app.utils.routes import counter
 
-bp = Blueprint('tag', __name__, url_prefix='/tag/')
+bp = Blueprint('sub_topic', __name__, url_prefix='/sub_topic/')
+
 
 @bp.before_request
 @counter
@@ -23,27 +24,27 @@ def index():
 
 @bp.route('edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
-    tag = Tag.query.filter(Tag.id == id).first_or_404()
-    form = TagEditForm()
+    sub_topic = SubTopic.query.filter(SubTopic.id == id).first_or_404()
+    form = SubTopicEditForm()
     if form.validate_on_submit():
         try:
-            tag.name = form.name.data
+            sub_topic.name = form.name.data
             # question.answer = form.answer.data
-            # question.tags = form.tag.data
-            # question.topic = form.topic.data
+            # question.sub_topics = form.sub_topic.data
+            # question.sub_topic = form.sub_topic.data
             # question.updater = current_user
             # question.update_at = datetime.utcnow()
             db.session.commit()
-            return redirect(url_for('admin.tag'))
+            return redirect(url_for('admin.sub_topic'))
         except Exception as e:
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
             return render_template('edit.html', form=form, title='Editar', edit=True)
     
-    form.name.data = tag.name
-    # form.tag.data = question.tags
-    # form.topic.data = question.topic
+    form.name.data = sub_topic.name
+    # form.sub_topic.data = question.sub_topics
+    # form.sub_topic.data = question.sub_topic
     # form.answer.data = question.answer
 
 
@@ -53,40 +54,40 @@ def edit(id):
 @login_required
 @roles_accepted('admin', 'editor', 'aux_editor')
 def add():
-    form = TagEditForm()
+    form = SubTopicEditForm()
     if form.validate_on_submit():
-        tag = Question.query.filter(Tag.name.ilike(form.name.data)).first()
-        if not tag is None:
+        sub_topic = Question.query.filter(SubTopic.name.ilike(form.name.data)).first()
+        if not sub_topic is None:
             form.name.errors.append('Marcação já existte')
         if not form.errors:
-            tag = Tag()
-            tag.name = form.name.data
-            tag.user_id = current_user.id
+            sub_topic = SubTopic()
+            sub_topic.name = form.name.data
+            sub_topic.user_id = current_user.id
             try:
-                db.session.add(tag)
+                db.session.add(sub_topic)
                 db.session.commit()
-                return redirect(url_for('admin.tag'))
+                return redirect(url_for('admin.sub_topic'))
             except Exception as e:
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                return render_template('add.html', form=form, title='Incluir marcação', tag=True)
-    return render_template('add.html', form=form, title='Incluir marcação', tag=True)
+                return render_template('add.html', form=form, title='Incluir Sub-Tópico', topic=True)
+    return render_template('add.html', form=form, title='Incluir Sub-Tópico', topic=True)
 
 @bp.route('/view/<int:id>')
 def view(id):
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
     pagination_args = {'id':id}
-    tag = Tag.query.filter_by(id=id).first_or_404()
-    paginate = tag.questions.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    sub_topic = SubTopic.query.filter_by(id=id).first_or_404()
+    paginate = sub_topic.questions.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
     print(pagination_args)
     return render_template('question.html', 
                                 pagination=paginate, 
-                                cls_question=Tag, 
+                                cls_question=SubTopic, 
                                 form=search_form, mode='views', 
                                 first_page=first_page, 
                                 last_page=last_page, 

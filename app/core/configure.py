@@ -3,6 +3,7 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from flask.cli import with_appcontext
 from flask_login import LoginManager
+# from flask_babel import Babel
 from logging.handlers import RotatingFileHandler
 import logging
 # from flask_talisman import Talisman
@@ -27,7 +28,9 @@ migrate = Migrate()
 login = LoginManager()
 login.login_view = 'auth.login'
 login.login_message = 'Please login to access this page'
+login.login_message_category = 'danger'
 csrf = CSRFProtect()
+# babel = Babel()
 # dash_app = dash.dash_appication()
 
 csp = {
@@ -65,6 +68,7 @@ def init(app):
     csrf.init_app(app)
     login.init_app(app)
     login.session_protection = 'strong'
+    # babel.init_app(app)
 
     # talisman.init_app(app,
     #                     force_https_permanent=True,

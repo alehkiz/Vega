@@ -10,6 +10,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql.expression import false
 from sqlalchemy_utils.types import TSVectorType
 from sqlalchemy.orm import backref
+from sqlalchemy.dialects.postgresql import INET
 
 from sqlalchemy_searchable import make_searchable
 
@@ -57,7 +58,7 @@ class Article(db.Model):
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     # updater = db.relationship('User', foreign_keys = [update_user_id], backref='articles_updated')
     # author = db.relationship('User', foreign_keys = [user_id], backref='articles', lazy='dynamic')
-    search_vector = db.Column(TSVectorType('_text', 'title', regconfig='pg_catalog.portuguese'))
+    search_vector = db.Column(TSVectorType('_text', 'title', regconfig='public.pt'))
     # __ts_vector__ = create_tsvector(
     #     cast(func.coalesce(_text, ''), postgresql.TEXT))
 
@@ -253,6 +254,26 @@ class Topic(db.Model):
     def __repr__(self):
         return f'<Topic {self.name}>'
 
+class SubTopic(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    _name = db.Column(db.String(32), index=True, nullable=False, unique=True)
+    format_name = db.Column(db.String(32), index=True,
+                            nullable=True, unique=True)
+    create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    # articles = db.relationship('Article', backref='topic', lazy='dynamic')
+    questions = db.relationship('Question', backref='sub_topic', lazy='dynamic', foreign_keys='[Question.sub_topic_id]')
+
+    @hybrid_property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, text):
+        self._name = text
+        self.format_name = only_letters(text)
+
+    def __repr__(self):
+        return f'<Topic {self.name}>'
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -303,14 +324,16 @@ class Question(db.Model):
     answer_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_at = db.Column(db.DateTime)
     # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
-    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
-
+    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
+    sub_topic_id = db.Column(db.Integer, db.ForeignKey('sub_topic.id'), nullable=False)
+    question_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
+    answer_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
     tags = db.relationship('Tag',
                            secondary=question_tag,
                            backref=db.backref('questions',
                                               lazy='dynamic'),
                            lazy='dynamic')
-    search_vector = db.Column(TSVectorType('question', 'answer', regconfig='pg_catalog.portuguese'))#regconfig='public.pt'))
+    search_vector = db.Column(TSVectorType('question', 'answer', regconfig='public.pt', cache_ok=False))#regconfig='public.pt'))
 
     view = db.relationship('QuestionView', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
     save = db.relationship('QuestionSave', cascade='all, delete-orphan', single_parent=True, backref='question', lazy='dynamic')
@@ -339,7 +362,7 @@ class Question(db.Model):
         return format_elapsed_time(self.answer_at)
     
     @property
-    def get_anser_datetime(self):
+    def get_answer_datetime(self):
         return format_datetime_local(self.answer_at)
 
     # @property
@@ -364,12 +387,14 @@ class Question(db.Model):
             raise Exception('´answer_user_id´ deve ser informado para responder uma questão')
 
     @staticmethod
-    def search(expression, pagination = False, per_page = 1, page = 1, resume=False):
+    def search(expression, pagination = False, per_page = 1, page = 1, resume=False, sub_topics  : list=[], topics:list=[]):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
+        if not sub_topics:
+            raise Exception('Topics não pode ser vazio')
         if resume:
             result = (db.session.query(Question.question, (
                 func.ts_rank_cd(
-                    Question.search_vector, 
+                    Question.search_vector(cache_ok=True), 
                     func.plainto_tsquery(
                         'public.pt',
                         expression))).label(
@@ -393,6 +418,7 @@ class Question(db.Model):
                     Question.search_vector, func.plainto_tsquery('public.pt',expression))) > 0)#.order_by(
                         #desc('similarity'))
                         )
+        result = result.filter(Question.sub_topic_id.in_([_.id for _ in sub_topics]), Question.topic_id.in_([_.id for _ in topics]))
         if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
@@ -407,7 +433,7 @@ class Question(db.Model):
             return False
         return True
 
-    def add_view(self, user_id):
+    def add_view(self, user_id, network_id):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
             raise Exception('Usuário informado não existe')
@@ -416,6 +442,7 @@ class Question(db.Model):
 
         qv.question_id = self.id
         qv.user_id = user_id
+        qv.network_id = network_id
         db.session.add(qv)
 
         # if qv == None:
@@ -434,7 +461,7 @@ class Question(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização')
+            flash('Não foi possível atualizar a visualização', category='alert')
         return qv
     
     def add_like(self, user_id):
@@ -458,7 +485,7 @@ class Question(db.Model):
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                flash('Não foi possível atualizar a visualização')
+                flash('Não foi possível atualizar a visualização', category='alert')
                 return False
         return ql
     def remove_like(self, user_id):
@@ -475,7 +502,7 @@ class Question(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização')
+            flash('Não foi possível atualizar a visualização', category='alert')
             return false
         return True
     def is_liked(self, user_id):
@@ -509,7 +536,7 @@ class Question(db.Model):
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                flash('Não foi possível atualizar a visualização')
+                flash('Não foi possível atualizar a visualização', category='alert')
                 return False
         return qs
     def remove_save(self, user_id):
@@ -526,7 +553,7 @@ class Question(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização')
+            flash('Não foi possível atualizar a visualização', category='alert')
             return false
         return True
     def is_saved(self, user_id):
@@ -554,12 +581,16 @@ class Question(db.Model):
             return True
         return False
 
-
+    @property
+    def was_answered_to(self):
+        if self.answer != None:
+            return 'Sim'
+        return 'Não'
     @staticmethod
     def most_viewed(limit=5):
         try:
             rs = db.session.query(Question, func.count(QuestionView.id).label('views')).join(
-                Question.view).group_by(Question).order_by(text('views DESC')).limit(limit).all()
+                Question.view).group_by(Question).order_by(text('views DESC')).filter(Question.answer_approved==True).limit(limit).all()
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
@@ -571,7 +602,7 @@ class Question(db.Model):
     def most_liked(limit=5, classification=True):
         try:
             rs = db.session.query(Question, func.count(QuestionLike.id).label('likes')).join(
-                Question.like).group_by(Question).order_by(text('likes DESC')).limit(limit).all()
+                Question.like).group_by(Question).order_by(text('likes DESC')).filter(Question.answer_approved==True).limit(limit).all()
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
@@ -642,7 +673,8 @@ class QuestionView(db.Model):
     user_id = db.Column(db.Integer,  db.ForeignKey('user.id'))
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     datetime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-
+    network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
+    
     # last_view = db.Column(db.DateTime, index=True, nullable=False)
     # count_view = db.Column(db.Integer, default=1)
 

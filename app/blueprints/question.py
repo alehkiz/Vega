@@ -1,11 +1,13 @@
+from app.blueprints.admin import sub_topic
 from datetime import datetime
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify, session
 from flask.globals import current_app
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
 from app.core.db import db
-from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag, Topic
+from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, SubTopic, Tag, Topic
 from app.models.security import User
+from app.models.app import Network
 from app.models.search import Search
 from app.utils.sql import unaccent
 from app.utils.kernel import strip_accents
@@ -29,8 +31,11 @@ bp = Blueprint('question', __name__, url_prefix='/duvidas/')
 @counter
 def index():
     page = request.args.get('page', 1, type=int)
+    if not session.get('AccessType', False):
+        return redirect(url_for('main.index'))
+    topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
     search_form = QuestionSearchForm()
-    paginate = Question.query.filter(Question.answer_approved==True).order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    paginate = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
@@ -42,8 +47,17 @@ def index():
 def search():
     page = request.args.get('page', 1, type=int)
     search_query = False
+    
     if g.question_search_form.validate():
-        q = Question.search(g.question_search_form.q.data, pagination=False).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
+        if not session.get('AccessType', False):
+            return redirect(url_for('main.index'))
+        topic = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).first_or_404()
+        sub_topics = g.question_search_form.filter.data
+        if not sub_topics:
+            sub_topics = SubTopic.query.all()
+        q = Question.search(g.question_search_form.q.data, pagination=False, sub_topics=sub_topics, topics=[topic]).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
+        print(g.question_search_form.filter.data)
+        
         paginate = q.paginate(per_page = app.config.get('QUESTIONS_PER_PAGE', 1), page = page)
         search_query = strip_accents(g.question_search_form.q.data)
         search = Search.query.filter(unaccent(Search.text).ilike(search_query)).first()
@@ -70,82 +84,96 @@ def search():
         iter_pages = list(paginate.iter_pages())
         first_page =  iter_pages[0] if len(iter_pages) >= 1 else None#url_for('.search',page=iter_pages[0], q= g.question_search_form.q.data)
         last_page = paginate.pages if paginate.pages > 0 else None#url_for('.search',page=iter_pages[-1] if iter_pages[-1] != first_page else None, q= g.question_search_form.q.data)
-    if paginate.total == 0:
-        form = CreateQuestion()
-        if form.validate_on_submit():
-            question = Question.query.filter(Question.question.ilike(form.question.data)).first()
-            if not question is None:
-                form.question.errors.append('Dúvida já cadastrada')
-            if not form.errors:
-                print(current_user)
-                if current_user.is_authenticated:
-                    user = current_user
-                else:
-                    user = User.query.filter(User.id == app.config.get('USER_ANON_ID', False))
+        if paginate.total == 0:
+            form = CreateQuestion()
+            if form.validate_on_submit():
+                question = Question.query.filter(Question.question.ilike(form.question.data)).first()
+                if not question is None:
+                    form.question.errors.append('Dúvida já cadastrada')
+                if not form.errors:
+                    # print(current_user)
+                    if current_user.is_authenticated:
+                        user = current_user
+                    else:
+                        user = User.query.filter(User.id == app.config.get('USER_ANON_ID', False)).first()
 
-                question = Question()
+                    question = Question()
 
-                question.question = form.question.data
-                question.topic = form.topic.data
-                question.create_user_id = user.id
-                db.session.add(question)
-                try:
-                    db.session.commit()
-                    flash('Dúvida cadastrada com sucesso!', category='success')
-                    return redirect(url_for('question.index'))
-                except Exception as e:
-                    db.session.rollback()
-                    app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-                    app.logger.error(e)
-                    return abort(500)
-        if search_query is not False:
-            form.question.data = strip_accents(g.question_search_form.q.data)
-    else:
-        form = False
-    # if paginate.total == 0:
-    #     search = Search.query.filter(Search.text.ilike(g.question_search_form.q.data)).first()
-    #     if not search is None:
-    #         search.add_count()
-    #     else:
-    #         search = Search()
-    #         search.text = g.question_search_form.q.data
-    #         db.session.add(search)
-    #         try:
-    #             db.session.commit()
-    #         except Exception as e:
-    #             db.session.rollback()
-    #             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-    #             app.logger.error(e)
-    #             return abort(500)
-        # form = QuestionForm()
-        # if form.validate_on_submit():
-        #     try:
-        #         question = Question()
-        #         question.question = form.question.data
-        #         if current_user.is_anonymous:
-        #             question.create_user_id = 2
-        #         else:
-        #             question.create_user_id = current_user.id
-        #         db.session.add(question)
-        #         db.session.commit()
-        #     except Exception as e:
-        #         app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-        #         app.logger.error(e)
-        #         db.session.rollback()
-        #         return render_template('question.html', form=form, question=True, mode='search',cls_question=Question, 
-        #                         pagination=paginate, first_page=first_page, last_page=last_page)
-        # form.question.data = g.question_search_form.q.data
-        # return render_template('question.html', form=form, question=True, mode='search',cls_question=Question, 
-        #                         pagination=paginate, first_page=first_page, last_page=last_page)
-                
+                    question.question = form.question.data
+                    question.topic = form.topic.data
+                    question.create_user_id = user.id
+                    db.session.add(question)
+                    try:
+                        db.session.commit()
+                        flash('Dúvida cadastrada com sucesso!', category='success')
+                        return redirect(url_for('question.index'))
+                    except Exception as e:
+                        db.session.rollback()
+                        app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                        app.logger.error(e)
+                        return abort(500)
+            if search_query is not False:
+                form.question.data = strip_accents(g.question_search_form.q.data)
+        else:
+            form = False
+        # if paginate.total == 0:
+        #     search = Search.query.filter(Search.text.ilike(g.question_search_form.q.data)).first()
+        #     if not search is None:
+        #         search.add_count()
+        #     else:
+        #         search = Search()
+        #         search.text = g.question_search_form.q.data
+        #         db.session.add(search)
+        #         try:
+        #             db.session.commit()
+        #         except Exception as e:
+        #             db.session.rollback()
+        #             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+        #             app.logger.error(e)
+        #             return abort(500)
+            # form = QuestionForm()
+            # if form.validate_on_submit():
+            #     try:
+            #         question = Question()
+            #         question.question = form.question.data
+            #         if current_user.is_anonymous:
+            #             question.create_user_id = 2
+            #         else:
+            #             question.create_user_id = current_user.id
+            #         db.session.add(question)
+            #         db.session.commit()
+            #     except Exception as e:
+            #         app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            #         app.logger.error(e)
+            #         db.session.rollback()
+            #         return render_template('question.html', form=form, question=True, mode='search',cls_question=Question, 
+            #                         pagination=paginate, first_page=first_page, last_page=last_page)
+            # form.question.data = g.question_search_form.q.data
+            # return render_template('question.html', form=form, question=True, mode='search',cls_question=Question, 
+            #                         pagination=paginate, first_page=first_page, last_page=last_page)
+                    
+        return render_template('question.html', mode='search',cls_question=Question, 
+                        pagination=paginate, first_page=first_page, last_page=last_page, form=form,
+                        url_arguments={'q':g.question_search_form.q.data})
     return render_template('question.html', mode='search',cls_question=Question, 
-                    pagination=paginate, first_page=first_page, last_page=last_page, form=form,
-                    url_arguments={'q':g.question_search_form.q.data})
-
+                        form=False,
+                        url_arguments={'q':g.question_search_form.q.data})
 @bp.route('/view/<int:id>')
 @counter
 def view(id=None):
     question = Question.query.filter(Question.id == id).first_or_404()
+    # ip = Network.query.filter(Network.ip == request.remote_addr).first()
+    # if ip is None:
+    #     ip = Network()
+    #     ip.ip = request.remote_addr
+    #     db.session.add(ip)
+    #     try:
+    #         db.session.commit()
+    #     except Exception as e:
+    #         app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+    #         app.logger.error(e)
+    #         db.session.rollback()
+    #         return abort(500)
     # dict_view = {}
     # dict_view['id'] = question.id
     # dict_view['values'] = {
@@ -161,7 +189,7 @@ def view(id=None):
         if user is None:
             raise Exception('Usuário anônimo não criado')
         user_id = user.id
-    question.add_view(user_id)
+    question.add_view(user_id, g.ip_id)
     return render_template('question.html', mode='view', question=question, cls_question=Question)
 
 @bp.route('edit/<int:id>', methods=['GET', 'POST'])
@@ -173,7 +201,8 @@ def edit(id):
         try:
             question.question = process_html(form.question.data).text
             question.tags = form.tag.data
-            question.topic = form.topic.data
+            question.topic_id = form.topic.data.id
+            question.sub_topic = form.sub_topic.data
             question.updater = current_user
             question.update_at = datetime.utcnow()
             
@@ -186,10 +215,13 @@ def edit(id):
             db.session.commit()
             return redirect(url_for('question.view', id=question.id))
         except Exception as e:
+            print('aqio')
+            form.question.errors.append('Não foi possível atualizar')
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
             return render_template('edit.html', form=form, title='Editar', question=True)
+
     form.question.data = question.question
     form.tag.data = question.tags
     form.topic.data = question.topic
@@ -252,21 +284,45 @@ def add():
                 return render_template('add.html', form=form, title='Incluir dúvida', question=True)
     return render_template('add.html', form=form, title='Incluir dúvida', question=True)
 
-@bp.route('/responder/<int:id>')
+@bp.route('/responder/<int:id>', methods=['POST', 'GET'])
 @login_required
-@roles_accepted(['admin', 'editor', 'aux_editor'])
+@roles_accepted('admin', 'editor', 'aux_editor')
 @counter
 def answer(id: int):
     q = Question.query.filter(Question.id == id).first_or_404()
-    if q.was_answered():
-        flash('Questão não pode ser respondida')
+    if q.was_answered:
+        flash('Questão já foi respondida', category='danger')
         return redirect(url_for('question.index'))
     form = QuestionAnswerForm()
     if form.validate_on_submit():
+        q = Question.query.filter(Question.question.ilike(form.question.data.lower())).first()
+        # print(q)
+        if not q is None:
+            if q.id != id:
+                form.question.errors.append('Você alterou a pergunta para uma já cadastrada')
+                return render_template('answer.html', form=form)
         q.answer_user_id = current_user.id
+        q.answer_network_id = g.ip_id
         q.answer = form.answer.data
+        q.answer_at = datetime.now()
         q.tag = form.tag.data
-        q.topic = form.topic.data
+        q.topic_id = form.topic.data.id
+        q.sub_topic_id = form.sub_topic.data.id
+        try:
+            db.session.commit()
+            return redirect(url_for('question.view', id=q.id))
+        except Exception as e:
+            form.question.errors.append('Não foi possível atualizar')
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            db.session.rollback()
+            return render_template('answer.html', form=form)
+        return 'ok'
+    
+    form.question.data = q.question
+
+
+    return render_template('answer.html', form=form)
         # TODO terminar
 
     
@@ -434,4 +490,49 @@ def saves():
 @counter
 def saved():
     ...
+@bp.route('/perguntar   ', methods=['GET', 'POST'])
+@counter
+def make_question():   
+    form = CreateQuestion()
+    if form.validate_on_submit():
+        question = Question.query.filter(Question.question.ilike(form.question.data)).first()
+        if not question is None:
+            form.question.errors.append('Dúvida já cadastrada')
+        if not form.errors:
+            if current_user.is_authenticated:
+                user = current_user
+            else:
+                user = User.query.filter(User.id == app.config.get('USER_ANON_ID', False)).first()
+            # print(user.id)
+            ip = Network.query.filter(Network.ip == request.remote_addr).first()
+            if ip is None:
+                ip = Network()
+                ip.ip = request.remote_addr
+                db.session.add(ip)
+                try:
+                    db.session.commit()
+                    flash('Erro ao cadastrar o seu IP', category='success')
+                    return redirect(url_for('question.index'))
+                except Exception as e:
+                    db.session.rollback()
+                    app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                    app.logger.error(e)
+                    return abort(500)
+            
 
+            question = Question()
+            question.question = form.question.data
+            question.topic = form.topic.data
+            question.create_user_id = user.id
+            question.question_network_id = ip.id
+            db.session.add(question)
+            try:
+                db.session.commit()
+                flash('Dúvida cadastrada com sucesso!', category='success')
+                return redirect(url_for('question.index'))
+            except Exception as e:
+                db.session.rollback()
+                app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(e)
+                return abort(500)
+    return render_template('question.html', mode='make_question', form=form)

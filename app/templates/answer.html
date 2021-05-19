@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% import "macros/form.html" as macros %}
+{% block styles %}
+{{ super()}}
+<link href="{{url_for('static', filename='css/simplemde/simplemde.min.css')}}" rel="stylesheet">
+{% if article %}
+<!-- <link href="{{url_for('static', filename='css/editormd/editormd.css')}}" rel="stylesheet" /> -->
+
+{% endif %}
+{% endblock %}
+{% block app_content %}
+{% if form %}
+<div class="col-md-8">
+<form action="" method="POST">
+{{ form.csrf_token }}
+{{ macros.render_field(form.question, size=256, class='form-control')}}
+{{ macros.render_field(form.answer, size=256, class='form-control', placeholder='Reposta')}}
+{{ macros.render_field(form.tag, class='form-select', class='selectpicker', nolabel=true, multiple=true, **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
+<br>
+{{ macros.render_field(form.topic, class='form-select', nosize=true)}}
+{{ macros.render_field(form.sub_topic, class='form-select', nosize=true)}}
+<br>
+{{ form.submit }}
+</form>
+</div>
+{% endif %}
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+
+<script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}" {#nonce="{{ csp_nonce() }}"#}></script>
+
+<script type="text/javascript" {#nonce="{{ csp_nonce() }}#}">
+
+
+    element = document.getElementById("text");
+    if (element == null) {
+        element = document.getElementById("answer");
+    }
+    var simplemde = new SimpleMDE({
+        element: element,
+        autosave: true,
+        forceSync: true,
+        renderingConfig: {
+            singleLineBreaks: true,
+            codeSyntaxHighlighting: true,
+        },
+        shortcuts: {
+            drawTable: "Cmd-Alt-T"
+        },
+        showIcons: ["code", "table"]
+    });
+</script>
+{% endblock %}
