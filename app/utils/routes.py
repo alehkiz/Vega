@@ -15,7 +15,7 @@ def counter(f):
             user = User.query.filter(User.id == app.config.get('USER_ANON_ID')).first()
             if user is None:
                 app.logger.error('Usuário anonimo não encontrado')
-                app.logger.error()
+                
                 return abort(500)
         page = Page.query.filter(Page.endpoint == request.endpoint).first()
         if not hasattr(g, 'ip_id'):
