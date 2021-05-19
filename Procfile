@@ -1,1 +1,1 @@
-web: app:create_app()
+web: flask 'app:create_app()'
