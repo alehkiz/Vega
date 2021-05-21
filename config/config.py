@@ -12,7 +12,9 @@ class BaseConfig(object):
         'SERVER_KEY') or 'ZdsQPA7z8fyFHV_aqB8ZrY-yTvAODWKV4qKOp-vzkcFZUsWVvuwd4GpdjfoV2uITNj8B6S_3bMyc68ciolUxOCFKN2tCJ5RhDJcI_Xm0I0b1xyCzoS7Kc03YURCYaoSQ2xZKxDMrYl1OvGREYjaUGRx4aJ6lNUH1qZm4mONjAHE'
     APP_DIR = abspath(dirname(app.__file__))
     BASE_DIR = abspath(join(APP_DIR, '..'))
-
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECURITY_LOGIN_WITHOUT_CONFIRMATION = True
+    SECURITY_CHANGEABLE = True
     BLUEPRINTS_DIR = join(APP_DIR, 'blueprints')
     LOG_DIR = join(BASE_DIR, r'logs')
     DEV_DB = join(APP_DIR, r'db//db.db')
@@ -184,10 +186,8 @@ class BaseConfig(object):
 class DevelopmentConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{BaseConfig.DEV_DB}'
     SQLALCHEMY_DATABASE_URI = f'postgresql://{BaseConfig._SQLALCHEMY_DATABASE_USERNAME}:{BaseConfig._SQLALCHEMY_DATABASE_PASSWORD}@{BaseConfig._SQLALCHEMY_DATABASE_HOST}/{BaseConfig._SQLALCHEMY_DATABASE_NAME}'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
     ENV = 'dev'
-    SECURITY_LOGIN_WITHOUT_CONFIRMATION = True
-    SECURITY_CHANGEABLE = True
 
 
 class TestConfig(BaseConfig):
@@ -195,7 +195,7 @@ class TestConfig(BaseConfig):
 
 
 class ProductionConfig(BaseConfig):
-
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     # SQLALCHEMY_DATABASE_URI = f'postgresql://{BaseConfig._SQLALCHEMY_DATABASE_USERNAME}:{BaseConfig._SQLALCHEMY_DATABASE_PASSWORD}@{BaseConfig._SQLALCHEMY_DATABASE_HOST}/{BaseConfig._SQLALCHEMY_DATABASE_NAME}'
     SQLALCHEMY_DATABASE_URI = f'postgresql://khtknuvbaeavvq:98b557036b61944f2912ccc6aa07b0c907352da55603ce611bb9b744da9398fa@ec2-23-23-128-222.compute-1.amazonaws.com:5432/dtf9faocttt57'
 # 
