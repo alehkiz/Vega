@@ -24,6 +24,7 @@ def login():
     login = LoginForm()
     if login.validate_on_submit():
         user = User.query.filter_by(username=login.username.data).first()
+        print(app.config['SECRET_KEY'])
         print(user.username)
         print(login.password.data)
         print(user.check_password(login.password.data))

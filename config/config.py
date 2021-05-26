@@ -9,7 +9,7 @@ import app
 class BaseConfig(object):
     PROJECT_NAME = 'Vega'
     SECRET_KEY = environ.get(
-        'SERVER_KEY') or 'ZdsQPA7z8fyFHV_aqB8ZrY-yTvAODWKV4qKOp-vzkcFZUsWVvuwd4GpdjfoV2uITNj8B6S_3bMyc68ciolUxOCFKN2tCJ5RhDJcI_Xm0I0b1xyCzoS7Kc03YURCYaoSQ2xZKxDMrYl1OvGREYjaUGRx4aJ6lNUH1qZm4mONjAHE'
+        'SERVER_KEY')# or b'Y\xde\xba\xd7q\xa1\x87#\xb9\x10\xddA\xe4x\xb1\xadg\xc3\x16\xa15\xa1T\x9b\xff\xd5\x851`\xf5\xd7['
     APP_DIR = abspath(dirname(app.__file__))
     BASE_DIR = abspath(join(APP_DIR, '..'))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
