@@ -198,29 +198,37 @@ def edit(id):
     question = Question.query.filter(Question.id == id).first_or_404()
     form = QuestionEditForm()
     if form.validate_on_submit():
-        try:
-            question.question = process_html(form.question.data).text
-            question.tags = form.tag.data
-            question.topic_id = form.topic.data.id
-            question.sub_topic = form.sub_topic.data
-            question.updater = current_user
-            question.update_at = datetime.utcnow()
-            
-            if form.approved.data == True:
-                question.answer_user_id = current_user.id
-                question.answer = process_html(form.answer.data).text
-                question.answer_approved = form.approved.data
-                print(question.answer_approved)
-            
-            db.session.commit()
-            return redirect(url_for('question.view', id=question.id))
-        except Exception as e:
-            print('aqio')
-            form.question.errors.append('Não foi possível atualizar')
-            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-            app.logger.error(e)
-            db.session.rollback()
-            return render_template('edit.html', form=form, title='Editar', question=True)
+        # try:
+        question.question = process_html(form.question.data).text
+        question.tags = form.tag.data
+        question.topic_id = form.topic.data.id
+        question.sub_topic = form.sub_topic.data
+        question.update_user_id = current_user.id
+        question.update_at = datetime.utcnow()
+        
+        if form.approved.data == True:
+            question.answer_user_id = current_user.id
+            question.answer = process_html(form.answer.data).text
+            question.answer_approved = form.approved.data
+            if not g.ip_id:
+                app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
+                flash('Não foi possível concluir o pedido')
+            question.answer_network_id = g.ip_id
+            print(question.answer_approved)
+        if not g.ip_id:
+            app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
+            flash('Não foi possível concluir o pedido')
+        print('IP: ' , g.ip_id)
+        question.question_network_id = g.ip_id
+        db.session.commit()
+        return redirect(url_for('question.view', id=question.id))
+        # except Exception as e:
+        #     print('aqio')
+        #     form.question.errors.append('Não foi possível atualizar')
+        #     app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+        #     app.logger.error(e)
+        #     db.session.rollback()
+        #     return render_template('edit.html', form=form, title='Editar', question=True)
 
     form.question.data = question.question
     form.tag.data = question.tags
@@ -272,7 +280,19 @@ def add():
                 # remove tag html
                 question.answer = process_html(form.answer.data).text
                 question.answer_approved = form.approved.data
+                if not g.ip_id:
+                    app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
+                    flash('Não foi possível concluir o pedido')
+                question.answer_network_id = g.ip_id
+            if not g.ip_id:
+                app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
+                flash('Não foi possível concluir o pedido')
+            print('IP: ' , g.ip_id)
+            question.question_network_id = g.ip_id
             question.create_user_id = current_user.id
+            question.topic_id = form.topic.data.id
+            question.sub_topic_id = form.sub_topic.data.id
+            question.tags = form.tag.data
             try:
                 db.session.add(question)
                 db.session.commit()
@@ -281,7 +301,12 @@ def add():
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
+                print('error')
                 return render_template('add.html', form=form, title='Incluir dúvida', question=True)
+        else:
+            print('Aqui')
+    else:
+        print('form error ')
     return render_template('add.html', form=form, title='Incluir dúvida', question=True)
 
 @bp.route('/responder/<int:id>', methods=['POST', 'GET'])
