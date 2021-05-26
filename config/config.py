@@ -20,7 +20,7 @@ class BaseConfig(object):
     DEV_DB = join(APP_DIR, r'db//db.db')
     SESSION_COOKIE_SECURE = True
     SECURITY_PASSWORD_HASH = 'pbkdf2_sha512'
-    SECURITY_PASSWORD_SALT = SECRET_KEY
+    SECURITY_PASSWORD_SALT = environ.get('PASSWORD_SALT')
     SECURITY_LOGIN_URL = 'auth.login'
     SECURITY_TRACKABLE = True
     SECURITY_POST_LOGIN_VIEW = 'auth.login'
