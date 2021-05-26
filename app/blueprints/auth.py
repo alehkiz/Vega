@@ -24,6 +24,9 @@ def login():
     login = LoginForm()
     if login.validate_on_submit():
         user = User.query.filter_by(username=login.username.data).first()
+        print(user.username)
+        print(login.password.data)
+        print(user.check_password(login.password.data))
         if user is None or not user.check_password(login.password.data):
             flash('Senha ou usuário inválido', category='danger')
             return render_template('login.html', form=login, title='Login')#redirect(url_for('auth.login'))
