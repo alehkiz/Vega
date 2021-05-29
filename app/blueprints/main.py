@@ -37,7 +37,7 @@ def before_request():
         # g.question_search_form = QuestionSearchForm()
     
     g.tags = Tag.query.all()
-    g.topics = Topic.query.all()
+    g.topics = Topic.query.filter(Topic.selectable == True).all()
     
     if not session.get('AccessType', False):
         current_rule = request.url_rule
@@ -72,35 +72,29 @@ def before_request():
             return abort(500)
     else:
         g.ip_id = ip.id
-    # if request.endpoint != 'static' and not request.endpoint is None:
-    #     print(request.url_rule.rule)
-    #     page = Page.query.filter(Page.endpoint == request.endpoint).first()
-    #     if page is None:
-    #         page = Page()
-    #         page.endpoint = request.endpoint
-    #         page.route = request.url_rule.rule.split('<')[0]
-    #         db.session.add(page)
-    #         try:
-    #             db.session.commit()
-    #             page.add_view(user.id)
-    #         except Exception as e:
-    #             db.session.rollback()
-    #             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-    #             app.logger.error(e)
-    #             return abort(500)
-    #     else:
-    #         page.add_view(user.id)
-        # print(request.endpoint)
 
-@bp.before_request
-@counter
-def before_request():
-    pass
+
+# @bp.before_request
+# @counter
+# def before_request():
+#     pass
 
 @bp.route('/')
 @bp.route('/index')
+@counter
 def index():
-    return render_template('base.html')
+    page = request.args.get('page', 1, type=int)
+    if not session.get('AccessType', False):
+        return redirect(url_for('main.index'))
+    questions = Question.query.filter(Question.answer_approved==True)
+    #TODO completar
+    paginate = questions.order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTION_PER_PAGE'), page=page)
+    iter_pages = list(paginate.iter_pages())
+    first_page = iter_pages[0] if len(iter_pages) >= 1 else None
+    last_page = paginate.pages if paginate.pages > 0 else None
+    
+    return render_template('base.html', paginate=paginate, cls_question=Question, mode='views', first_page=first_page, last_page=last_page)
+
 
 @bp.route('/select_access/')
 @bp.route('/select_access/<string:topic>')

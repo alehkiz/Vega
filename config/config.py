@@ -94,6 +94,10 @@ class BaseConfig(object):
                 'name' : 'Dúvida',
                 'atrr' : None
             },
+            'topic' : {
+                'name' : 'Tópico',
+                'attr' : 'topic_name'
+            },
             'answer' : {
                 'name' : 'Resposta',
                 'attr' : None

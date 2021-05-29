@@ -1,4 +1,4 @@
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, request, g
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, request, g, abort, jsonify
 from flask_security import current_user, login_required
 from flask_security.decorators import roles_accepted
 from datetime import datetime 
@@ -46,7 +46,7 @@ def add():
         if IPAddress.check_ipv4(_ip):
             user.created_ip = _ip
         else:
-            form.submit.errors.append('Erro interno')
+            form.submit.errors.append('Erro interno, não foi possível identificar seu IP')
         user.password = app.config['DEFAULT_PASS']
         if not form.errors:
             try:
@@ -57,6 +57,7 @@ def add():
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
+                form.errors.add('Não foi possível concluir')
                 return render_template('add.html', form=form, title='Adicionar', user=True)
 
     return render_template('add.html', form=form, title='Adicionar', user=True)
@@ -97,8 +98,25 @@ def edit(id):
     form.active.data = user.active
     return render_template('edit.html', form=form, title='Editar', user=True)
 
-@bp.route('/remove/<int:id>')
+@bp.route('/remove/<int:id>', methods=['POST'])
 def remove(id):
+    confirm = request.form.get('confirm', False)
+    if confirm != 'true':
+        abort(404)
+    u = User.query.filter(User.id == id).first_or_404()
+    id = u.id
+    try:
+        db.session.delete(u)
+        db.session.commit()
+        return jsonify({'id':id,
+                    'status': 'success'})
+    except Exception as e:
+        app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+        app.logger.error(e)
+        db.session.rollback()
+        return abort(404)
+
+
     user = User.query.filter_by(id=id).first_or_404()
     db.session.delete(user)
     db.session.commit()

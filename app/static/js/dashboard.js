@@ -303,7 +303,7 @@ $(document).ready(function () {
 
     // like and unlike click
     start_visit = moment().subtract(7, 'days').format('DD-MM-YYYY')
-    end_visit = moment().format('DD-MM-YYYY')
+    end_visit = moment().add(1, 'days').format('DD-MM-YYYY')
     config();
     visit_chart(start_visit, end_visit);
     // init_charts();
