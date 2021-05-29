@@ -239,9 +239,9 @@ class Topic(db.Model):
     format_name = db.Column(db.String(32), index=True,
                             nullable=True, unique=True)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    selectable = db.Column(db.Boolean, default=False, nullable=False)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
     questions = db.relationship('Question', backref='topic', lazy='dynamic', foreign_keys='[Question.topic_id]')
-
     @hybrid_property
     def name(self):
         return self._name
@@ -374,6 +374,10 @@ class Question(db.Model):
     # @property
     # def format_answer_date(self):
     #     return self.answer_at.strftime("%d/%m/%Y")
+
+    @property
+    def topic_name(self):
+        return self.topic.name
 
     @hybrid_property
     def answer(self):

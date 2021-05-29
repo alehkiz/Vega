@@ -1,5 +1,6 @@
 from flask_security import UserMixin, RoleMixin
 from flask_security.utils import hash_password, verify_password
+import flask_sqlalchemy
 from sqlalchemy import func, text, Index, cast, desc, extract, Date
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import date, datetime
@@ -80,6 +81,11 @@ class User(UserMixin, db.Model):
         if any([role.can_edit for role in self.roles.all()]):
             return True
         return False
+    @property
+    def is_support(self):
+        if any([role.is_support for role in self.roles.all()]):
+            return True
+        return flask_sqlalchemy
     @property
     def is_viewer(self):
         if any([role.is_viewer for role in self.roles.all()]):
@@ -167,8 +173,14 @@ class Role(RoleMixin, db.Model):
         return False
     
     @property
-    def is_viewer(self):
+    def is_support(self):
         if self.level == 4:
+            return True
+        return False
+
+    @property
+    def is_viewer(self):
+        if self.level == 5:
             return True
         return False
 
