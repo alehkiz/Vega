@@ -93,7 +93,37 @@ def index():
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
     
-    return render_template('base.html', paginate=paginate, cls_question=Question, mode='views', first_page=first_page, last_page=last_page)
+    # topics = {'id' : _.id, 
+    #         _.name: [{'title' : 'Perguntas pendentes', 
+    #             'count': _.questions.filter(Question.answer==None, Question.answer_approved == True).count()},
+    #     'to_approve' : {'name' : 'Para aprovação', 
+    #         'count': _.questions.filter(Question.answer_approved == False).count()},
+    #     'puplished' : {'name' : 'Aprovadas', 
+    #         'count': _.questions.filter(Question.answer_approved == True).count()},
+    #     } for _ in Topic.query.all()}
+    
+    topics = [{'id' : _.id,
+                'name' : _.name,
+                'values' : [
+                    {'title': 'Perguntas pendentes',
+                    'count':  _.questions.filter(Question.answer==None, Question.answer_approved == True).count(),
+                    'bt_name' : 'Responder', 
+                    'bt_route' : url_for('admin.questions', type='to_answer')
+                    },
+                    {'title': 'Para aprovação',
+                    'count': _.questions.filter(Question.answer_approved == False).count(),
+                    'bt_name' : 'Aprovar', 
+                    'bt_route' : url_for('admin.questions', type='to_approve')},
+                    {'title': 'Aprovadas',
+                    'count': _.questions.filter(Question.answer_approved == True).count(),
+                    'bt_name' : 'Visualisar', 
+                    'bt_route' : url_for('admin.questions', type='view')}
+                ]
+        
+    }
+        
+        for _ in Topic.query.all()]
+    return render_template('index.html', topics=topics)
 
 
 @bp.route('/select_access/')

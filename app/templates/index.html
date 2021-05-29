@@ -1,3 +1,43 @@
 {% extends 'base_question.html' %}
+
+
+
 {% from "macros/form.html" import render_field %}
 {% from "macros/main.html" import render_pagination %}
+
+{% block app_content %}
+
+<div class="container">
+    {% if topics is defined %}
+    {% for topic in topics %}
+    <div class="row border border-primary pb-3 rounded my-3">
+        <div class="row">
+            <div class="col ">
+                <h2 class="text-muted fw-normal">{{topic['name']}}</h2>
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            {% for item in topic['values'] %}
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="text-muted fw-normal mt-0" title="Perguntas pendentes">{{ item['title']}} </h6>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="pt-3 pb-3"> {{ item['count']}}
+                            <a class="btn btn-success float-end" href="{{ item['bt_route']}}">{{ item['bt_name']}}</a>
+                        </h3>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+
+{% endblock %}
