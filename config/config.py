@@ -98,6 +98,10 @@ class BaseConfig(object):
                 'name' : 'Tópico',
                 'attr' : 'topic_name'
             },
+            'sub_topic' :{
+                'name' : 'Sub Tópico',
+                'attr' : 'sub_topic_name'
+            },
             'answer' : {
                 'name' : 'Resposta',
                 'attr' : None
