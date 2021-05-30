@@ -57,7 +57,7 @@
             <h4 class="font-italic">Tópicos</h4>
             {% for tag in g.topics %}
             <p class="mb-0">
-                <a href="{{url_for('question.topic', name=tag.name)}}" class="text-decoration-none">{{tag.name}}</a>
+                <a href="{{url_for('question.topic', name=tag.name, type='aprovada')}}" class="text-decoration-none">{{tag.name}}</a>
                 <span class="badge bg-secondary">{{tag.questions.count()}}</span>
             </p>
             {% endfor %}

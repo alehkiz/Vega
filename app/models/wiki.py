@@ -378,7 +378,12 @@ class Question(db.Model):
     @property
     def topic_name(self):
         return self.topic.name
-
+    @property
+    def sub_topic_name(self):
+        return self.sub_topic.name
+    @property
+    def is_support(self):
+        return self.topic.name == 'Suporte'
     @hybrid_property
     def answer(self):
         return self._answer
@@ -394,7 +399,9 @@ class Question(db.Model):
     def search(expression, pagination = False, per_page = 1, page = 1, resume=False, sub_topics  : list=[], topics:list=[]):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         if not sub_topics:
-            raise Exception('Topics não pode ser vazio')
+            raise Exception('sub_topics não pode ser vazio')
+        if not topics:
+            raise Exception('topics não pode ser vazio')
         if resume:
             result = (db.session.query(Question.question, (
                 func.ts_rank_cd(
