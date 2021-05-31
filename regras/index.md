@@ -15,7 +15,7 @@ Os níveis de acesso são númerados e ficam entre 0 e 4 sendo que cada um deles
 
 >admin.name = 'admin'
 
->admin.description = 'Adminitrador'
+>admin.description = 'Administrator'
 
 >man_user = Role()
 
