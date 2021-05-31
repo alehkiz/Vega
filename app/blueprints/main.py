@@ -126,7 +126,7 @@ def index():
                         ).count(),
                         "bt_name": "Responder",
                         "bt_route": url_for(
-                            "admin.questions"
+                            "admin.questions", topic=_.name
                         ),
                         "card_style": "bg-danger bg-gradient text-dark",
                     },
@@ -136,7 +136,7 @@ def index():
                             Question.answer != None, Question.answer_approved == False
                         ).count(),
                         "bt_name": "Aprovar",
-                        "bt_route": url_for("question.topic", name=_.name, type="pendente"),
+                        "bt_route": url_for("admin.to_approve", topic=_.name),
                         "card_style": "bg-warning bg-gradient text-dark",
                     },
                     {
@@ -153,6 +153,12 @@ def index():
             for _ in Topic.query.all()
         ]
         return render_template("index.html", topics=topics)
+    else:
+        topic = Topic.query.filter(Topic.name.ilike(session.get("AccessType", False))).first_or_404()
+
+        tags = Tag.query.filter(Question.topic_id == topic.id).all()
+
+        return render_template('index.html')
     page = request.args.get("page", 1, type=int)
     if not session.get("AccessType", False):
         return redirect(url_for("main.index"))

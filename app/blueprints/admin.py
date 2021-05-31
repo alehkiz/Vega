@@ -137,11 +137,14 @@ def answers():
 
 @bp.route("/perguntas")
 @login_required
-@roles_accepted("admin")
+@roles_accepted("admin", 'editor', 'support')
 def questions():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
+    topic = request.args.get("topic", None)
+    if topic != None:
+        topic = Topic.query.filter(Topic.name.ilike(topic)).first()
     if not order is False or not order_type is False:
         try:
             column = getattr(Question, order)
@@ -152,14 +155,43 @@ def questions():
     else:
         column = Question.id
         column_type = column.desc
-    if order in Question.__table__.columns:
-        q = Question.query.filter(Question.answer == None).order_by(column_type())
+    if order:
+        if order in Question.__table__.columns:
+            if topic != None:
+                q = Question.query.filter(
+                    Question.answer == None, Question.topic_id == topic.id
+                ).order_by(column_type())
+            else:
+                q = Question.query.filter(Question.answer == None).order_by(
+                    column_type()
+                )
+        else:
+            relationship_class = getattr(Question, order).property.mapper.class_
+            relationship_type = getattr(Question, order)
+            relationship_type_order = getattr(relationship_class.name, order_type)
+            if topic != None:
+                q = (
+                    db.session.query(Question)
+                    .filter(Question.answer == None, Question.topic_id == topic.id)
+                    .join(relationship_class, relationship_type)
+                    .order_by(relationship_type_order())
+                )
+            else:
+                q = (
+                    db.session.query(Question)
+                    .filter(Question.answer == None)
+                    .join(relationship_class, relationship_type)
+                    .order_by(relationship_type_order())
+                )
     else:
-        relationship_class = getattr(Question, order).property.mapper.class_
-        relationship_type = getattr(Question, order)
-        relationship_type_order = getattr(relationship_class.name, order_type)
-        q = db.session.query(Question).filter(Question.answer == None).join(relationship_class, relationship_type).order_by(relationship_type_order())
-        
+        if topic != None:
+            q = Question.query.filter(
+                Question.answer == None, Question.topic_id == topic.id
+            ).order_by(Question.create_at.asc())
+        else:
+            q = Question.query.filter(Question.answer == None).order_by(
+                Question.create_at.asc()
+            )
     paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
@@ -179,6 +211,95 @@ def questions():
         page_name="Dúvidas",
         order_type=order_type,
         mode="question",
+    )
+
+
+@bp.route("/aprovar")
+@login_required
+@roles_accepted("admin", "suporte", "editor")
+def to_approve():
+    page = request.args.get("page", 1, type=int)
+    order = request.args.get("order", False)
+    order_type = request.args.get("order_type", "desc")
+    topic = request.args.get("topic", None)
+    if topic != None:
+        topic = Topic.query.filter(Topic.name.ilike(topic)).first()
+
+    if not order is False or not order_type is False:
+        try:
+            column = getattr(Question, order)
+            column_type = getattr(column, order_type)
+        except Exception as e:
+            column = Question.id
+            column_type = Question.id.desc
+    else:
+        column = Question.id
+        column_type = column.desc
+    if order:
+        if order in Question.__table__.columns:
+            if topic:
+                q = Question.query.filter(
+                    Question.answer != None,
+                    Question.answer_approved == False,
+                    Question.topic_id == topic.id,
+                ).order_by(column_type())
+            else:
+                q = Question.query.filter(
+                    Question.answer != None, Question.answer_approved == False
+                ).order_by(column_type())
+        else:
+            relationship_class = getattr(Question, order).property.mapper.class_
+            relationship_type = getattr(Question, order)
+            relationship_type_order = getattr(relationship_class.name, order_type)
+            if topic != None:
+                q = (
+                    db.session.query(Question)
+                    .filter(
+                        Question.answer != None,
+                        Question.answer_approved == False,
+                        Question.topic_id == topic.id,
+                    )
+                    .join(relationship_class, relationship_type)
+                    .order_by(relationship_type_order())
+                )
+            else:
+                q = (
+                    db.session.query(Question)
+                    .filter(Question.answer != None, Question.answer_approved == False)
+                    .join(relationship_class, relationship_type)
+                    .order_by(relationship_type_order())
+                )
+    else:
+        if topic != None:
+            q = Question.query.filter(
+                Question.answer != None,
+                Question.answer_approved == False,
+                Question.topic_id == topic.id,
+            ).order_by(Question.create_at.asc())
+        else:
+            q = Question.query.filter(
+                Question.answer != None, Question.answer_approved == False
+            ).order_by(Question.create_at.asc())
+    paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
+    first_page = (
+        list(paginate.iter_pages())[0]
+        if len(list(paginate.iter_pages())) >= 1
+        else None
+    )
+    last_page = paginate.pages
+    order_type = "asc" if order_type == "desc" else "desc"
+    return render_template(
+        "admin.html",
+        pagination=paginate,
+        first_page=first_page,
+        last_page=last_page,
+        endpoint=request.url_rule.endpoint,
+        cls_table=Question,
+        list=True,
+        page_name="Dúvidas",
+        order_type=order_type,
+        mode="question",
+        type="aprovar",
     )
 
 
