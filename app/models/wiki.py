@@ -387,6 +387,12 @@ class Question(db.Model):
     @hybrid_property
     def answer(self):
         return self._answer
+
+    @property
+    def is_approved_to(self):
+        if self.answer_approved == True:
+            return "Sim"
+        return 'Não'
     
     @answer.setter
     def answer(self, answer):
@@ -587,10 +593,12 @@ class Question(db.Model):
         return 0 if count_likes is None else count_likes
 
     @property
+    def was_approved(self):
+        return self.answer_approved == True
+
+    @property
     def was_answered(self):
-        if self.answer != None:
-            return True
-        return False
+        return self.answer != None
 
     @property
     def was_answered_to(self):

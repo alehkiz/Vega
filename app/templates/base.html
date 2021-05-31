@@ -126,9 +126,10 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
                             <li><a class="dropdown-item" href="{{url_for('admin.questions')}}">Perguntas</a></li>
+                            <li><a class="dropdown-item" href="{{url_for('admin.to_approve')}}">Pendentes</a></li>
+                            <li><a class="dropdown-item" href="{{url_for('admin.answers')}}">Respondidas</a></li>
                             <li><a class="dropdown-item" href="{{url_for('admin.users')}}">Usuários</a></li>
                             {#<li><a class="dropdown-item" href="{{url_for('admin.articles')}}">Artigos</a></li>#}
-                            <li><a class="dropdown-item" href="{{url_for('admin.answers')}}">Respondidas</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>

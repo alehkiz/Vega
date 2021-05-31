@@ -102,10 +102,10 @@ class BaseConfig(object):
                 'name' : 'Sub Tópico',
                 'attr' : 'sub_topic_name'
             },
-            'answer' : {
-                'name' : 'Resposta',
-                'attr' : None
-            },
+            # 'answer' : {
+            #     'name' : 'Resposta',
+            #     'attr' : None
+            # },
             "create_at": {
                 'name' : 'criado em',
                 'attr' : 'get_create_datetime'
@@ -113,6 +113,10 @@ class BaseConfig(object):
             'answer':{
                 'name' : 'Respondida?',
                 'attr' : 'was_answered_to'
+            },
+            'approved':{
+                'name' : 'Aprovada?',
+                'attr' : 'is_approved_to'
             }
 
         },
