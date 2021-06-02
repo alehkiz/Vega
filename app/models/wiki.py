@@ -239,9 +239,9 @@ class Topic(db.Model):
     format_name = db.Column(db.String(32), index=True,
                             nullable=True, unique=True)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    selectable = db.Column(db.Boolean, default=False, nullable=False)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
     questions = db.relationship('Question', backref='topic', lazy='dynamic', foreign_keys='[Question.topic_id]')
-
     @hybrid_property
     def name(self):
         return self._name
@@ -375,9 +375,24 @@ class Question(db.Model):
     # def format_answer_date(self):
     #     return self.answer_at.strftime("%d/%m/%Y")
 
+    @property
+    def topic_name(self):
+        return self.topic.name
+    @property
+    def sub_topic_name(self):
+        return self.sub_topic.name
+    @property
+    def is_support(self):
+        return self.topic.name == 'Suporte'
     @hybrid_property
     def answer(self):
         return self._answer
+
+    @property
+    def is_approved_to(self):
+        if self.answer_approved == True:
+            return "Sim"
+        return 'Não'
     
     @answer.setter
     def answer(self, answer):
@@ -390,7 +405,9 @@ class Question(db.Model):
     def search(expression, pagination = False, per_page = 1, page = 1, resume=False, sub_topics  : list=[], topics:list=[]):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         if not sub_topics:
-            raise Exception('Topics não pode ser vazio')
+            raise Exception('sub_topics não pode ser vazio')
+        if not topics:
+            raise Exception('topics não pode ser vazio')
         if resume:
             result = (db.session.query(Question.question, (
                 func.ts_rank_cd(
@@ -576,10 +593,12 @@ class Question(db.Model):
         return 0 if count_likes is None else count_likes
 
     @property
+    def was_approved(self):
+        return self.answer_approved == True
+
+    @property
     def was_answered(self):
-        if self.answer != None:
-            return True
-        return False
+        return self.answer != None
 
     @property
     def was_answered_to(self):

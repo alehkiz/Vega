@@ -18,7 +18,6 @@ class BaseConfig(object):
     BLUEPRINTS_DIR = join(APP_DIR, 'blueprints')
     LOG_DIR = join(BASE_DIR, r'logs')
     DEV_DB = join(APP_DIR, r'db//db.db')
-    SESSION_COOKIE_SECURE = True
     SECURITY_PASSWORD_HASH = 'pbkdf2_sha512'
     SECURITY_PASSWORD_SALT = environ.get('PASSWORD_SALT')
     SECURITY_LOGIN_URL = 'auth.login'
@@ -94,10 +93,18 @@ class BaseConfig(object):
                 'name' : 'Dúvida',
                 'atrr' : None
             },
-            'answer' : {
-                'name' : 'Resposta',
-                'attr' : None
+            'topic' : {
+                'name' : 'Tópico',
+                'attr' : 'topic_name'
             },
+            'sub_topic' :{
+                'name' : 'Sub Tópico',
+                'attr' : 'sub_topic_name'
+            },
+            # 'answer' : {
+            #     'name' : 'Resposta',
+            #     'attr' : None
+            # },
             "create_at": {
                 'name' : 'criado em',
                 'attr' : 'get_create_datetime'
@@ -105,6 +112,10 @@ class BaseConfig(object):
             'answer':{
                 'name' : 'Respondida?',
                 'attr' : 'was_answered_to'
+            },
+            'approved':{
+                'name' : 'Aprovada?',
+                'attr' : 'is_approved_to'
             }
 
         },
@@ -198,6 +209,7 @@ class ProductionConfig(BaseConfig):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # SQLALCHEMY_DATABASE_URI = f'postgresql://{BaseConfig._SQLALCHEMY_DATABASE_USERNAME}:{BaseConfig._SQLALCHEMY_DATABASE_PASSWORD}@{BaseConfig._SQLALCHEMY_DATABASE_HOST}/{BaseConfig._SQLALCHEMY_DATABASE_NAME}'
     SQLALCHEMY_DATABASE_URI = f'postgresql://khtknuvbaeavvq:98b557036b61944f2912ccc6aa07b0c907352da55603ce611bb9b744da9398fa@ec2-23-23-128-222.compute-1.amazonaws.com:5432/dtf9faocttt57'
+    SESSION_COOKIE_SECURE = True
 # 
 config = {'development': DevelopmentConfig,
           'production': ProductionConfig}

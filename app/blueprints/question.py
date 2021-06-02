@@ -1,3 +1,4 @@
+from flask_migrate import current
 from app.blueprints.admin import sub_topic
 from datetime import datetime
 from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify, session
@@ -12,7 +13,7 @@ from app.models.search import Search
 from app.utils.sql import unaccent
 from app.utils.kernel import strip_accents
 from app.utils.html import process_html
-from app.forms.question import QuestionAnswerForm, CreateQuestion
+from app.forms.question import QuestionAnswerForm, CreateQuestion, QuestionApproveForm
 from app.utils.routes import counter
 from sqlalchemy import desc, nullslast
 
@@ -51,11 +52,14 @@ def search():
     if g.question_search_form.validate():
         if not session.get('AccessType', False):
             return redirect(url_for('main.index'))
-        topic = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).first_or_404()
+        if current_user.is_authenticated and current_user.is_support:
+            topics = Topic.query.filter((Topic.name.ilike(session.get('AccessType'))) | Topic.name.ilike('suporte')).all()
+        else:
+            topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
         sub_topics = g.question_search_form.filter.data
         if not sub_topics:
             sub_topics = SubTopic.query.all()
-        q = Question.search(g.question_search_form.q.data, pagination=False, sub_topics=sub_topics, topics=[topic]).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
+        q = Question.search(g.question_search_form.q.data, pagination=False, sub_topics=sub_topics, topics=topics).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
         print(g.question_search_form.filter.data)
         
         paginate = q.paginate(per_page = app.config.get('QUESTIONS_PER_PAGE', 1), page = page)
@@ -350,7 +354,50 @@ def answer(id: int):
     return render_template('answer.html', form=form)
         # TODO terminar
 
+@bp.route('/aprovar/<int:id>', methods=['POST', 'GET'])
+@login_required
+@roles_accepted('admin', 'editor', 'aux_editor')
+@counter
+def approve(id: int):
+    q = Question.query.filter(Question.id == id).first_or_404()
+    if q.was_approved:
+        flash('Questão já foi aprovada', category='danger')
+        return redirect(url_for('question.index'))
+    form = QuestionApproveForm()
+    if form.validate_on_submit():
+        q = Question.query.filter(Question.question.ilike(form.question.data.lower())).first()
+        if not q is None:
+            if q.id != id:
+                form.question.errors.append('Você alterou a pergunta para uma já cadastrada')
+                return render_template('answer.html', form=form, approve=True)
+        q.answer_user_id = current_user.id
+        q.answer_network_id = g.ip_id
+        q.answer = form.answer.data
+        q.answer_at = datetime.now()
+        q.tag = form.tag.data
+        q.topic_id = form.topic.data.id
+        q.sub_topic_id = form.sub_topic.data.id
+        q.answer_approved = form.approve.data
+        try:
+            db.session.commit()
+            return redirect(url_for('question.view', id=q.id))
+        except Exception as e:
+            form.question.errors.append('Não foi possível atualizar')
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            db.session.rollback()
+            return render_template('answer.html', form=form, approve=True)
+        return 'ok'
     
+    form.question.data = q.question
+    form.answer.data = q.answer
+    form.tag.data = q.tags
+    form.topic.data = q.topic
+    form.sub_topic.data = q.sub_topic
+    form.approve.data = q.answer_approved
+
+
+    return render_template('answer.html', form=form, approve=True)
 
 @bp.route('/tag/<string:name>')
 @counter
@@ -373,14 +420,21 @@ def tag(name):
                                 url_arguments=pagination_args)
 
 
-@bp.route('/topic/<string:name>')
+@bp.route('/topic/<string:name>/<string:type>/')
 @counter
-def topic(name):
+def topic(name, type):
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
-    pagination_args = {'name':name}
+    pagination_args = {'name':name, 'type': type}
     topic = Topic.query.filter_by(name=name).first_or_404()
-    paginate = topic.questions.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    if type in ['pendente', 'aprovada']:
+        if type == 'pendente':
+            paginate = topic.questions.filter(Question.answer != None, Question.answer_approved == False)
+        if type == 'aprovada':
+            paginate = topic.questions.filter(Question.answer_approved == True)
+        paginate =  paginate.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    else:
+        return abort(404)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None

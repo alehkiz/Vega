@@ -16,7 +16,7 @@ from os import mkdir
 from app.blueprints import register_blueprints
 from app.core.db import db, user_datastore
 from app.models.security import User, Role
-from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView
+from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView, SubTopic
 from app.models.search import Search, SearchDateTime
 from app.models.app import Visit, Page
 
@@ -101,7 +101,8 @@ def init(app):
             Search=Search,
             SearchDateTime=SearchDateTime,
             Visit=Visit,
-            Page=Page
+            Page=Page,
+            SubTopic=SubTopic
             )
     with app.app_context():
         register_blueprints(app)
