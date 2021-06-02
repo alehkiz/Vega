@@ -111,11 +111,17 @@
                 {% endfor %}
                 <td class="actions">
                     {% if kwargs['mode'] is defined %}
-                    
                     {% if kwargs['mode'] == 'question' %}
+                    {% if kwargs.get('type', false) is defined %}
+                    <a class="btn btn-outline-primary btn-sm"
+                    href="{{ url_for(cls_table.__tablename__+'.approve', id=item.id)}}">
+                    <i class="fas fa-clipboard-check"></i></a>
+                    {% else %}
                     <a class="btn btn-outline-primary btn-sm"
                         href="{{ url_for(cls_table.__tablename__+'.answer', id=item.id)}}">
                     <i class="fas fa-question"></i></a>
+                    {% endif %}
+                    
                     <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}"
                         href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}">
                         <i class="fas fa-trash-alt"></i>
