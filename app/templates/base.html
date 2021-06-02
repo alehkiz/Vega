@@ -1,12 +1,12 @@
 {% from "macros/form.html" import render_field %}
 <!doctype html>
-<html lang="en">
+<html lang="pr-br">
 
 <head>
     {% block head %}
     <!-- Required meta tags -->
     <meta charset="utf-8" />
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">-->
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
     {% block styles %}
     <!-- Bootstrap CSS -->
     <link href="{{url_for('static', filename='css/main.css')}}" rel="stylesheet">
@@ -18,7 +18,7 @@
 
     <title>
         {% block title %}
-        {% if title %}{{ title }} - {{config['PROJECT_NAME']}}{% else %}Welcome to {{config['PROJECT_NAME']}}{% endif %}
+        {% if title %}{{ title }} - {{config['PROJECT_NAME']}}{% else %}{{config['PROJECT_NAME']}} - Tire suas dúvidas{% endif %}
         {% endblock %}
     </title>
     {% endblock %}
@@ -35,12 +35,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                    {#<li class="nav-item">
-                        <a href="{{ url_for('main.index') }}" class="nav-link">Home</a>
-                    </li>#}
-                    {#<li class="nav-item">
-                        <a href="{{ url_for('wiki.index') }}" class="nav-link">Wiki</a>
-                    </li>#}
                     <li class="nav-item">
                         <a class="btn btn-sm btn-outline-secondary me-2" type="button"
                             href="{{ url_for('question.index')}}" class='nav-link'>Dúvidas</a>
@@ -50,7 +44,6 @@
                     <li class="nav-item">
                         <a class="btn btn-sm btn-outline-success me-2" type="button"
                             href="{{ url_for('support.index')}}">Suporte</a>
-                        <!-- <a  class='nav-link'>Suporte</a> -->
                     </li>
                     {% endif %}
                     {% if current_user.is_authenticated %}
@@ -60,28 +53,11 @@
                     </li>
                     {% endif %}
                 </ul>
-                <!-- {% if g.search_form %}
-            <form class="form-inline my-2 my-lg-0" method="get" action="{{ url_for('main.search') }}">
-                {{ g.search_form.q(size=20, class='form-control', placeholder=g.search_form.q.label.text) }}
-            </form>
-            {% endif %} -->
-
 
 
                 <div class="navbar-nav col-6 w-50 justify-content-center">
 
-
-                    <!-- <div class="row"> -->
                     <form class="row row-cols-lg-auto g-3" method="GET" action="{{ url_for('question.search') }}">
-                        <!-- <div class="d-inline-flex"> -->
-                        <!-- <div class="nav-select-search"> -->
-                        <!-- <select class="form-select" id="filterSelector" name='filter'>
-                                    <option>Todos</option>
-                                    <option>Retaguarda</option>
-                                    <option>Cidadão</option>
-                                    <option>Habilitação</option>
-                                    <option>Veículos</option>
-                                </select> -->
                         <div class="col">
                             {{ render_field(g.question_search_form.filter, class='selectpicker mt-4', nolabel=true,
                             multiple=true, **{'data-actions-box':"true", 'data-style':"btn-primary",
@@ -102,16 +78,6 @@
                     <!-- </div> -->
                 </div>
 
-
-
-                <!-- <ul class="navbar-nav w-100 justify-content-center">-->
-                <!-- <form class="d-flex al" method="GET" action="{{ url_for('question.search') }}">
-                {{ render_field(g.question_search_form.q, size=20, class='form-control me-2', placeholder='Buscar', nolabel=true, type='search')}}
-                {{ render_field(g.question_search_form.submit, class='btn btn-outline-success', nolabel=true)}} -->
-                <!-- <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"> -->
-                <!-- <button class="btn btn-outline-success" type="submit">Search</button> -->
-                <!-- </form> -->
-                <!-- </ul>  -->
                 <ul class="navbar-nav w-100 justify-content-center">
                     {% if current_user.is_anonymous %}
                     <li class="nav-item">
@@ -136,23 +102,11 @@
                             <li><a class="dropdown-item" href="{{url_for('admin.tag')}}">Marcação</a></li>
                             <li><a class="dropdown-item" href="{{url_for('admin.topic')}}">Tópico</a></li>
                             <li><a class="dropdown-item" href="{{url_for('admin.sub_topic')}}">Sub Tópico</a></li>
-                            <!-- <li class="dropdown dropend"><a class="dropdown-item" href="#">Gerenciar &raquo; </a>
-                        <ul class="submenu dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Tópicos</a></li>
-                            <li><a class="dropdown-item" href="#">Tags</a></li>
-                          </ul>
-                    </li> -->
 
                         </ul>
 
                     </li>
-                    <!-- <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Gerenciar</a>
-                    <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                      
-                    </ul>
-                    
-                </li> -->
+
                     {% endif %}
 
 
@@ -183,10 +137,6 @@
                         </ul>
 
                     </li>
-
-                    <!-- <li class="nav-item">
-                    <a href="{{ url_for('user.view', id=current_user.id) }}" class="nav-link">{{ _('Profile') }}</a>
-                </li> -->
 
                     {% endif %}
 
