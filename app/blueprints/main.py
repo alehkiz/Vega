@@ -40,19 +40,16 @@ def before_first_request():
 
 @bp.before_app_request
 def before_request():
-    print(request.is_secure)
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
     if current_user.is_authenticated:
         current_user.last_seen = datetime.utcnow()
-        # user = current_user
         try:
             db.session.commit()
         except Exception as e:
             app.logger.error("Não foi possível salvar ultima visualização do usuário")
             app.logger.error(e)
             return abort(500)
-        # g.question_search_form = QuestionSearchForm()
 
     g.tags = Tag.query.all()
     g.topics = Topic.query.filter(Topic.selectable == True).all()
@@ -179,7 +176,7 @@ def index():
 
         tags = Tag.query.filter(Question.topic_id == topic.id).all()
 
-        tags_question = [{"id": '1', "name": 'Tags', "values": [{
+        tags_question = [{"name": 'Marcações', "values": [{
             'title': _.name,
             'count': _.questions.filter(Question.answer_approved == True).count(),
             'bt_name': 'Visualizar',
@@ -207,7 +204,7 @@ def select_access(topic=None):
     if topic is None:
         return render_template("select_access.html")
     obj_topic = Topic.query.filter(Topic.name.ilike(topic.lower())).first_or_404()
-    response = make_response(redirect(url_for("question.index")))
+    response = make_response(redirect(url_for("main.index")))
     response.set_cookie(key="AccessType", value=obj_topic.name)
     session["AccessType"] = obj_topic.name
     return response
