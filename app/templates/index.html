@@ -38,6 +38,38 @@
     </div>
     {% endfor %}
     {% endif %}
+
+    {% if tags is defined %}
+    {% for tag in tags %}
+    <div class="row border border-primary pb-3 rounded my-3">
+        <div class="row">
+            <div class="col ">
+                <h2 class="text-muted fw-normal text-uppercase">{{tag['name']}}</h2>
+                <hr>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for item in tag['values'] %}
+            <div class="col">
+                <div class="card border-dark {{item['card_style']}}">
+                    <div class="card-header">
+                        <h6 class="text-dark fw-normal mt-0 fs-4">{{ item['title']}} </h6>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="pt-3 pb-3"> {{ item['count']}} 
+                            <a class="btn btn-info float-end" href="{{ item['bt_route']}}">{{ item['bt_name']}}</a>
+                        </h3>
+                        <h6>Aprovadas</h6>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
 </div>
 
 {% endblock %}

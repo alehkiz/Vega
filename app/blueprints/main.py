@@ -40,6 +40,7 @@ def before_first_request():
 
 @bp.before_app_request
 def before_request():
+    print(request.is_secure)
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
     if current_user.is_authenticated:
@@ -121,13 +122,9 @@ def index():
                 "values": [
                     {
                         "title": "Perguntas pendentes",
-                        "count": _.questions.filter(
-                            Question.answer == None
-                        ).count(),
+                        "count": _.questions.filter(Question.answer == None).count(),
                         "bt_name": "Responder",
-                        "bt_route": url_for(
-                            "admin.questions", topic=_.name
-                        ),
+                        "bt_route": url_for("admin.questions", topic=_.name),
                         "card_style": "bg-danger bg-gradient text-dark",
                     },
                     {
@@ -145,7 +142,9 @@ def index():
                             Question.answer_approved == True
                         ).count(),
                         "bt_name": "Visualisar",
-                        "bt_route": url_for("question.topic", name=_.name, type="aprovada"),
+                        "bt_route": url_for(
+                            "question.topic", name=_.name, type="aprovada"
+                        ),
                         "card_style": "bg-primary bg-gradient text-dark",
                     },
                 ],
@@ -154,11 +153,41 @@ def index():
         ]
         return render_template("index.html", topics=topics)
     else:
-        topic = Topic.query.filter(Topic.name.ilike(session.get("AccessType", False))).first_or_404()
+        topic = Topic.query.filter(
+            Topic.name.ilike(session.get("AccessType", False))
+        ).first_or_404()
+
+        topic_question = [
+            {
+                "id": topic.id,
+                "name": topic.name,
+                "values": [
+                    {
+                        "title": "Aprovadas",
+                        "count": topic.questions.filter(
+                            Question.answer_approved == True
+                        ).count(),
+                        "bt_name": "Visualizar",
+                        "bt_route": url_for(
+                            "question.topic", name=topic.name, type="aprovada"
+                        ),
+                        "card_style": "bg-primary bg-gradient text-dark",
+                    }
+                ],
+            }
+        ]
 
         tags = Tag.query.filter(Question.topic_id == topic.id).all()
 
-        return render_template('index.html')
+        tags_question = [{"id": '1', "name": 'Tags', "values": [{
+            'title': _.name,
+            'count': _.questions.filter(Question.answer_approved == True).count(),
+            'bt_name': 'Visualizar',
+            'bt_route': url_for('question.tag', name=_.name, type='aprovada'),
+            'card_style': 'bg-success br.gradient text-dark'
+        } for _ in tags]}]
+
+        return render_template("index.html", topics=topic_question, tags=tags_question)
     page = request.args.get("page", 1, type=int)
     if not session.get("AccessType", False):
         return redirect(url_for("main.index"))
