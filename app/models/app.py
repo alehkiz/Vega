@@ -43,6 +43,7 @@ class Visit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     page_id = db.Column(db.Integer, db.ForeignKey('page.id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
 
