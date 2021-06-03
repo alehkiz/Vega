@@ -5,15 +5,24 @@
     {% set question, pos = question %}
     {% endif %}
 
+    {% if question.topic.name == 'Retaguarda' %}
+        {% set bg_color = 'bg-info bg-gradient' %}
+    {% elif question.topic.name == 'Atendimento' %}
+        {% set bg_color = 'bg-success bg-gradient' %}
+    {% endif %}
     <div class="accordion-item">
         <h2 class="accordion-header" id="flush-heading_{{question.id}}">
-            <button id='button-accordion-{{question.id}}' class="accordion-button collapsed{{ ' bg-info' if question.is_support else '' }}" type="button" data-bs-toggle="collapse"
-                data-bs-target="#flush-collapse_{{question.id}}" aria-expanded="false"
+            <button id='button-accordion-{{question.id}}' class="accordion-button collapsed {{ 'bg-secondary' if question.is_support else bg_color }} rounded-2" type="button" data-bs-toggle="collapse"
+                data-bs-target="#flush-collapse_{{question.id}}" aria-expanded="false" aria-labelledby="flush-heading_{{question.id}}"
                 aria-controls="flush-collapse_{{question.id}}" href="{{url_for('api.question', id=question.id)}}">
-                {% if question.is_support %}
-                <span class="badge bg-success float-end">Suporte</span>
-                {% endif %}
                 {{question.question}}
+                {% if question.is_support %}
+                <span class="badge bg-success mx-3 float-end">Suporte</span>
+                {% elif question.topic.name %}
+                <span class="badge bg-secondary mx-3 float-end">{{question.topic.name}}</span>
+                {% endif %}
+                
+
             </button>
         </h2>
         {#a

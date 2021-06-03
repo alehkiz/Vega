@@ -321,7 +321,7 @@ $(document).ready(function () {
                 // console.log(data)
                 // console.log(id)
                 accordion_link = false;
-                h2_obj.parent().append('<div id="flush-collapse_' + question_id + '" class="accordion-collapse collapse accordion-border"' +
+                h2_obj.parent().append('<div id="flush-collapse_' + question_id + '" class="accordion-collapse collapse border border-1 rounded mb-3"' +
                     'aria-labelledby="flush-heading_' + question_id + '" data-bs-parent="#accordionFlushQuestion">')
                 $('#flush-collapse_' + question_id).append('<div class="accordion-head">' +
                     '<div class="accordion-head-info">' +
@@ -373,13 +373,28 @@ $(document).ready(function () {
                 );
                 
                 // $('.accordion-footer').append('<span class="badge bg-secondary">' +item+'</span>')
-                data.tags.forEach(item => $('.accordion-footer').append('<span class="badge bg-secondary">' +item+'</span>\n'))
+                data.tags.forEach(item => accordion_collapse.find('.accordion-footer').append('<span class="badge bg-secondary">' +item+'</span>\n'))
 
                 $(target).collapse();
                 
             },
             error: function(data){
+                if (data.status == 404){
+                    if (!button_accordion.hasClass('bg-danger')){
+                        button_accordion.addClass('bg-danger')
+                        button_accordion.append('<span class="badge bg-secondary mx-3">Não encontrado</span>\n')
+
+                    }
+                }
+                if (data.status == 500){
+                    if (!button_accordion.hasClass('bg-danger')){
+                        button_accordion.addClass('bg-danger')
+                        button_accordion.append('<span class="badge bg-secondary mx-3">Erro no servidor</span>\n')
+
+                    }
+                }
                 accordion_link = false;
+
             }
         });
         return false;

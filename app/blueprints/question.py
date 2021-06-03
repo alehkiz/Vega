@@ -22,11 +22,6 @@ from sqlalchemy import desc, nullslast
 from app.forms.question import QuestionEditForm, QuestionSearchForm, QuestionForm
 bp = Blueprint('question', __name__, url_prefix='/duvidas/')
 
-# @bp.before_request
-# @counter
-# def before_request():
-#     pass
-
 @bp.route('/')
 @bp.route('/index')
 @counter
@@ -53,10 +48,11 @@ def search():
         if not session.get('AccessType', False):
             return redirect(url_for('main.index'))
         if current_user.is_authenticated and current_user.is_support:
-            topics = Topic.query.filter((Topic.name.ilike(session.get('AccessType'))) | Topic.name.ilike('suporte')).all()
+            topics = Topic.query.all()
         else:
             topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
         sub_topics = g.question_search_form.filter.data
+        print(topics)
         if not sub_topics:
             sub_topics = SubTopic.query.all()
         q = Question.search(g.question_search_form.q.data, pagination=False, sub_topics=sub_topics, topics=topics).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
@@ -120,41 +116,7 @@ def search():
                 form.question.data = strip_accents(g.question_search_form.q.data)
         else:
             form = False
-        # if paginate.total == 0:
-        #     search = Search.query.filter(Search.text.ilike(g.question_search_form.q.data)).first()
-        #     if not search is None:
-        #         search.add_count()
-        #     else:
-        #         search = Search()
-        #         search.text = g.question_search_form.q.data
-        #         db.session.add(search)
-        #         try:
-        #             db.session.commit()
-        #         except Exception as e:
-        #             db.session.rollback()
-        #             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-        #             app.logger.error(e)
-        #             return abort(500)
-            # form = QuestionForm()
-            # if form.validate_on_submit():
-            #     try:
-            #         question = Question()
-            #         question.question = form.question.data
-            #         if current_user.is_anonymous:
-            #             question.create_user_id = 2
-            #         else:
-            #             question.create_user_id = current_user.id
-            #         db.session.add(question)
-            #         db.session.commit()
-            #     except Exception as e:
-            #         app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-            #         app.logger.error(e)
-            #         db.session.rollback()
-            #         return render_template('question.html', form=form, question=True, mode='search',cls_question=Question, 
-            #                         pagination=paginate, first_page=first_page, last_page=last_page)
-            # form.question.data = g.question_search_form.q.data
-            # return render_template('question.html', form=form, question=True, mode='search',cls_question=Question, 
-            #                         pagination=paginate, first_page=first_page, last_page=last_page)
+
                     
         return render_template('question.html', mode='search',cls_question=Question, 
                         pagination=paginate, first_page=first_page, last_page=last_page, form=form,
@@ -165,25 +127,10 @@ def search():
 @bp.route('/view/<int:id>')
 @counter
 def view(id=None):
-    question = Question.query.filter(Question.id == id).first_or_404()
-    # ip = Network.query.filter(Network.ip == request.remote_addr).first()
-    # if ip is None:
-    #     ip = Network()
-    #     ip.ip = request.remote_addr
-    #     db.session.add(ip)
-    #     try:
-    #         db.session.commit()
-    #     except Exception as e:
-    #         app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-    #         app.logger.error(e)
-    #         db.session.rollback()
-    #         return abort(500)
-    # dict_view = {}
-    # dict_view['id'] = question.id
-    # dict_view['values'] = {
-    # 'Duvida':question.question,
-    # 'Criado em' : question.get_create_datetime,
-    # 'answer' : question.answer}
+    if current_user.is_anonymous:
+        question = Question.query.filter(Question.id == id, Question.topic_id == g.topic.id).first_or_404()
+    else:
+        question = Question.query.filter(Question.id == id).first_or_404()
     if not question.was_answered:
         return redirect(url_for('question.index'))
     if current_user.is_authenticated:
@@ -423,10 +370,12 @@ def tag(name):
 @bp.route('/topic/<string:name>/<string:type>/')
 @counter
 def topic(name, type):
+    if name != g.selected_access:
+        abort(404)
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
     pagination_args = {'name':name, 'type': type}
-    topic = Topic.query.filter_by(name=name).first_or_404()
+    topic = Topic.query.filter(Topic.name==name).first_or_404()
     if type in ['pendente', 'aprovada']:
         if type == 'pendente':
             paginate = topic.questions.filter(Question.answer != None, Question.answer_approved == False)
@@ -542,20 +491,25 @@ def save_action(question_id):
 @counter
 def likes():
     page = request.args.get('page', 1, type=int)
-    paginate = Question.likes_by_user(current_user.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    questions = Question.likes_by_user(current_user.id, topic=g.topic)
+    if questions is None:
+        abort(404)
+    paginate = questions.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
 
     # paginate = Question.query.order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
     return render_template('question.html', pagination=paginate, cls_question=Question, mode='views', first_page=first_page, last_page=last_page)
-
 @bp.route('/saves')
 @login_required
 @counter
 def saves():
     page = request.args.get('page', 1, type=int)
-    paginate = Question.saves_by_user(current_user.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    questions = Question.saves_by_user(current_user.id, topic=g.topic)
+    if questions is None:
+        abort(404)
+    paginate = questions.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
 
     # paginate = Question.query.order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())

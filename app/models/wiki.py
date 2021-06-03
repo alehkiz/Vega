@@ -478,7 +478,7 @@ class Question(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização', category='alert')
+            flash('Não foi possível atualizar a visualização', category='warning')
         return qv
     
     def add_like(self, user_id):
@@ -502,7 +502,7 @@ class Question(db.Model):
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                flash('Não foi possível atualizar a visualização', category='alert')
+                flash('Não foi possível atualizar a visualização', category='warning')
                 return False
         return ql
     def remove_like(self, user_id):
@@ -519,7 +519,7 @@ class Question(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização', category='alert')
+            flash('Não foi possível atualizar a visualização', category='warning')
             return false
         return True
     def is_liked(self, user_id):
@@ -553,7 +553,7 @@ class Question(db.Model):
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                flash('Não foi possível atualizar a visualização', category='alert')
+                flash('Não foi possível atualizar a visualização', category='warning')
                 return False
         return qs
     def remove_save(self, user_id):
@@ -570,7 +570,7 @@ class Question(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização', category='alert')
+            flash('Não foi possível atualizar a visualização', category='warning')
             return false
         return True
     def is_saved(self, user_id):
@@ -606,42 +606,51 @@ class Question(db.Model):
             return 'Sim'
         return 'Não'
     @staticmethod
-    def most_viewed(limit=5):
+    def most_viewed(limit=5, topic:Topic=None):
         try:
+            if topic is None:
+                return []
             rs = db.session.query(Question, func.count(QuestionView.id).label('views')).join(
-                Question.view).group_by(Question).order_by(text('views DESC')).filter(Question.answer_approved==True).limit(limit).all()
+                Question.view).group_by(Question).order_by(text('views DESC')).filter(Question.answer_approved==True, Question.topic_id==topic.id).limit(limit).all()
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
-            return abort(500)
+            return []
         return [x[0] for x in rs if x != None]
 
     @staticmethod
-    def most_liked(limit=5, classification=True):
+    def most_liked(limit=5, classification=True, topic:Topic=None):
         try:
+            if topic is None:
+                return []
             rs = db.session.query(Question, func.count(QuestionLike.id).label('likes')).join(
-                Question.like).group_by(Question).order_by(text('likes DESC')).filter(Question.answer_approved==True).limit(limit).all()
+                Question.like).group_by(Question).order_by(text('likes DESC')).filter(Question.answer_approved==True, Question.topic_id == topic.id).limit(limit).all()
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
-            return abort(500)
+            return []
         if classification:
             return [x for x in rs if x != None]
         return [x[0] for x in rs if x != None]
 
     @staticmethod
-    def likes_by_user(user_id):
+    def likes_by_user(user_id, topic:Topic=None):
+        if topic is None:
+            return None
         user = User.query.filter(User.id==user_id).first_or_404()
         rs = db.session.query(Question).join(
             QuestionLike.question).filter(
-                QuestionLike.user_id==user.id).order_by(Question.create_at.desc())
+                QuestionLike.user_id==user.id, Question.topic_id==topic.id).order_by(Question.create_at.desc())
         return rs
     @staticmethod
-    def saves_by_user(user_id):
+    def saves_by_user(user_id, topic:Topic=None):
+        if topic is None:
+            return None
+        print(topic.id)
         user = User.query.filter(User.id==user_id).first_or_404()
-        rs = db.session.query(Question).join(
+        rs = db.session.query(Question).filter(Question.topic_id==topic.id).join(
             QuestionSave.question).filter(
                 QuestionSave.user_id==user.id).order_by(Question.create_at.desc())
         return rs
@@ -693,6 +702,8 @@ class QuestionView(db.Model):
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     datetime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
+
+
     
     # last_view = db.Column(db.DateTime, index=True, nullable=False)
     # count_view = db.Column(db.Integer, default=1)
