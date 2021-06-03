@@ -51,35 +51,36 @@ def before_request():
             app.logger.error(e)
             return abort(500)
 
-    g.tags = Tag.query.all()
-    g.topics = Topic.query.filter(Topic.selectable == True).all()
-
     if not session.get("AccessType", False):
+
         current_rule = request.url_rule
-        print(current_rule)
         if not current_rule is None and current_rule.endpoint not in [
             "main.select_access",
             "static",
         ]:
+            
             return redirect(url_for("main.select_access"))
-    else:
-        if session.get("AccessType", False) in [_.name for _ in g.topics]:
+    else:          
+        if not Topic.query.filter(Topic.name == session.get("AccessType", False)).first() is None:
             g.selected_access = session.get("AccessType", False)
         else:
+            session.pop('AccessType')
             resp = make_response(redirect(url_for("question.index")))
             resp.set_cookie(key="AccessType", value="", expires=0)
             flash("Ocorreu um erro", category="danger")
             return resp
+    g.tags = Tag.query.all()
 
-    g.questions_most_viewed = Question.most_viewed(app.config.get("ITEMS_PER_PAGE", 5))
+    g.topic = Topic.query.filter(Topic.selectable == True, Topic.name == g.selected_access).first()
+    g.questions_most_viewed = Question.most_viewed(app.config.get("ITEMS_PER_PAGE", 5), g.topic)
     g.questions_most_recent = (
         Question.query.order_by(Question.create_at.desc())
-        .filter(Question.answer_approved == True)
+        .filter(Question.answer_approved == True, Question.topic_id==g.topic.id)
         .limit(app.config.get("ITEMS_PER_PAGE", 5))
         .all()
     )
     g.questions_most_liked = Question.most_liked(
-        app.config.get("ITEMS_PER_PAGE", 5), classification=False
+        app.config.get("ITEMS_PER_PAGE", 5), topic=g.topic, classification=False
     )
     ip = Network.query.filter(Network.ip == request.remote_addr).first()
     if ip is None:
@@ -202,7 +203,8 @@ def index():
 @bp.route("/select_access/<string:topic>")
 def select_access(topic=None):
     if topic is None:
-        return render_template("select_access.html")
+        topics = Topic.query.filter(Topic.selectable == True).all()
+        return render_template("select_access.html", topics=topics)
     obj_topic = Topic.query.filter(Topic.name.ilike(topic.lower())).first_or_404()
     response = make_response(redirect(url_for("main.index")))
     response.set_cookie(key="AccessType", value=obj_topic.name)
