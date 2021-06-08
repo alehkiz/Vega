@@ -523,7 +523,7 @@ def saves():
 @counter
 def saved():
     ...
-@bp.route('/perguntar   ', methods=['GET', 'POST'])
+@bp.route('/perguntar', methods=['GET', 'POST'])
 @counter
 def make_question():   
     form = CreateQuestion()

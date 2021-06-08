@@ -12,6 +12,7 @@ import logging
 from os.path import exists
 from os import mkdir
 
+from app.dashboard.index import dash_app
 
 from app.blueprints import register_blueprints
 from app.core.db import db, user_datastore
@@ -68,6 +69,8 @@ def init(app):
     csrf.init_app(app)
     login.init_app(app)
     login.session_protection = 'strong'
+
+
     # babel.init_app(app)
 
     # talisman.init_app(app,
@@ -105,6 +108,7 @@ def init(app):
             SubTopic=SubTopic
             )
     with app.app_context():
+        app = dash_app(app)
         register_blueprints(app)
 
     
