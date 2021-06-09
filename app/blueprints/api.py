@@ -1,11 +1,11 @@
 from app.models.app import Visit
 import re
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify, session
 from flask.globals import current_app
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
 from app.core.db import db
-from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag
+from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag, Topic
 from app.models.security import User
 from app.models.app import Network
 from app.models.search import Search
@@ -16,23 +16,30 @@ from datetime import datetime
 
 bp = Blueprint('api', __name__, url_prefix='/api/')
 
+@bp.errorhandler(404)
+def resource_not_found(e):
+    return {'error_cod': 404, 'error': 'Não encontrado'}, 404
+@bp.errorhandler(500)
+def server_error(e):
+    return {'error_cod': 500, 'error': 'Erro interno'}, 500
 
 @bp.route('question/<int:id>', methods=['GET', 'POST'])
 @counter
 def question(id):
-    question = Question.query.filter(Question.id == id).first_or_404()
-    # ip = Network.query.filter(Network.ip == request.remote_addr).first()
-    # if ip is None:
-    #     ip = Network()
-    #     ip.ip = request.remote_addr
-    #     db.session.add(ip)
-    #     try:
-    #         db.session.commit()
-    #     except Exception as e:
-    #         db.session.rollback()
-    #         app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-    #         app.logger.error(e)
-    #         return abort(500)
+    if session.get("AccessType", False) is False:
+        abort(500)
+    access_type = session.get("AccessType", False)
+    if current_user.is_anonymous:
+        topic = Topic.query.filter(Topic.name == access_type).first()
+        if topic is None:
+            abort(404)
+        question = Question.query.filter(Question.id == id, Question.topic_id == topic.id).first()
+    else:
+        question = Question.query.filter(Question.id == id).first()
+        
+
+    if question is None:
+        return abort(404)
     if question.answer_approved == False:
         abort(404)
     to_dict = question.to_dict()
