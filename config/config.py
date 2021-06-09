@@ -8,7 +8,6 @@ import app
 
 class BaseConfig(object):
     PROJECT_NAME = 'Vega'
-    SERVER_NAME = '127.0.0.1'
     SECRET_KEY = environ.get(
         'SERVER_KEY')# or b'Y\xde\xba\xd7q\xa1\x87#\xb9\x10\xddA\xe4x\xb1\xadg\xc3\x16\xa15\xa1T\x9b\xff\xd5\x851`\xf5\xd7['
     APP_DIR = abspath(dirname(app.__file__))
