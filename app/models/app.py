@@ -35,7 +35,7 @@ class Page(db.Model):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização', category='alert')
+            flash('Não foi possível atualizar a visualização', category='warning')
         return visit
 
 
@@ -43,7 +43,7 @@ class Visit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     page_id = db.Column(db.Integer, db.ForeignKey('page.id'), nullable=False)
-    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=True)
     datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
 
@@ -107,3 +107,4 @@ class Network(db.Model):
     # first_access = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     question_created_ip = db.relationship('Question', backref='question_created_network', lazy='dynamic', foreign_keys='[Question.question_network_id]')
     answer_created_ip = db.relationship('Question', backref='answer_created_network', lazy='dynamic', foreign_keys='[Question.answer_network_id]')
+    questions_views = db.relationship('QuestionView', cascade='all, delete-orphan', single_parent=True, backref='network', lazy='dynamic')
