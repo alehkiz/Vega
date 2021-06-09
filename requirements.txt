@@ -50,3 +50,5 @@ WTForms==2.3.3
 gunicorn
 dash
 dash-bootstrap-components
+pandas
+plotly-express
