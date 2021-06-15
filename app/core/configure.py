@@ -1,6 +1,6 @@
 from flask_security import Security
 from flask_migrate import Migrate
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, CsrfProtect
 from flask.cli import with_appcontext
 from flask_login import LoginManager
 # from flask_babel import Babel
@@ -67,6 +67,7 @@ def init(app):
     db.configure_mappers()
     migrate.init_app(app, db, render_as_batch=True)
     csrf.init_app(app)
+    csrf._exempt_views.add('dash.dash.dispatch')
     login.init_app(app)
     login.session_protection = 'strong'
 
@@ -108,7 +109,7 @@ def init(app):
             SubTopic=SubTopic
             )
     with app.app_context():
-        app = dash_app(app)
+        app = dash_app(app)        
         register_blueprints(app)
 
     
