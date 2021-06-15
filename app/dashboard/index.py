@@ -33,7 +33,6 @@ def get_graph_questions_by_month(names=None):
     if names == None:
         return px.line(df, x = 'Mês', y = 'Total', title='Dúvidas por dia e assunto', color='Assunto', hover_data={'Mês': "|%m/%Y"})
     mask = df.Assunto.isin(names)
-    print(df[mask])
     graph = px.line(df[mask], x = 'Mês', y = 'Total', title='Dúvidas por dia e assunto', color='Assunto', hover_data={'Mês': "|%m/%Y"})
     return graph
 
@@ -77,7 +76,6 @@ def dash_app(app=False):
         Input('checklist', 'value')
     ])
     def update_questions_month(names):
-        print('aqui')
         return get_graph_questions_by_month(names)
 
     return dash_app.server
