@@ -107,3 +107,7 @@ def order_dict(dictionary: dict, size:int =5, summarize=False,other_key:str='Out
         if i >= size:
             _nd.pop(_d[0], None)
     return _nd
+
+
+def format_number_as_thousand(number: int):
+    return f'{number:,d}'.replace(',','.')
