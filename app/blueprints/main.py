@@ -69,19 +69,21 @@ def before_request():
             resp.set_cookie(key="AccessType", value="", expires=0)
             flash("Ocorreu um erro", category="danger")
             return resp
-    g.tags = Tag.query.all()
+    
+    if session.get("AccessType", False):
+        g.tags = Tag.query.all()
 
-    g.topic = Topic.query.filter(Topic.selectable == True, Topic.name == g.selected_access).first()
-    g.questions_most_viewed = Question.most_viewed(app.config.get("ITEMS_PER_PAGE", 5), g.topic)
-    g.questions_most_recent = (
-        Question.query.order_by(Question.create_at.desc())
-        .filter(Question.answer_approved == True, Question.topic_id==g.topic.id)
-        .limit(app.config.get("ITEMS_PER_PAGE", 5))
-        .all()
-    )
-    g.questions_most_liked = Question.most_liked(
-        app.config.get("ITEMS_PER_PAGE", 5), topic=g.topic, classification=False
-    )
+        g.topic = Topic.query.filter(Topic.selectable == True, Topic.name == g.selected_access).first()
+        g.questions_most_viewed = Question.most_viewed(app.config.get("ITEMS_PER_PAGE", 5), g.topic)
+        g.questions_most_recent = (
+            Question.query.order_by(Question.create_at.desc())
+            .filter(Question.answer_approved == True, Question.topic_id==g.topic.id)
+            .limit(app.config.get("ITEMS_PER_PAGE", 5))
+            .all()
+        )
+        g.questions_most_liked = Question.most_liked(
+            app.config.get("ITEMS_PER_PAGE", 5), topic=g.topic, classification=False
+        )
     ip = Network.query.filter(Network.ip == request.remote_addr).first()
     if ip is None:
         ip = Network()
