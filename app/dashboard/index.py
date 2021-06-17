@@ -1,3 +1,4 @@
+from app.models.app import Visit
 from re import template
 from dash_core_components.Checklist import Checklist
 from flask import config, url_for
@@ -31,9 +32,14 @@ def get_graph_questions_by_month(names=None):
         ).join(Topic.questions).group_by('Mês', 'Assunto').order_by(asc('Mês')
         ).statement, db.session.bind)
     if names == None:
-        return px.line(df, x = 'Mês', y = 'Total', title='Dúvidas por dia e assunto', color='Assunto', hover_data={'Mês': "|%m/%Y"})
+        return px.line(df, x = 'Mês', y = 'Total', title='Dúvidas cadastradas por dia e assunto', color='Assunto', hover_data={'Mês': "|%m/%Y"})
     mask = df.Assunto.isin(names)
-    graph = px.line(df[mask], x = 'Mês', y = 'Total', title='Dúvidas por dia e assunto', color='Assunto', hover_data={'Mês': "|%m/%Y"})
+    graph = px.line(df[mask], x = 'Mês', y = 'Total', title='Dúvidas cadastradaspor dia e assunto', color='Assunto', hover_data={'Mês': "|%m/%Y"})
+    return graph
+
+def get_graph_access_by_date():
+    df = pd.read_sql(db.session.query(func.count(Visit.id).label('Total'), func.date_trunc('day', Visit.datetime).label('Data')).group_by('Data').order_by(asc('Data')).statement, con=db.session.bind)
+    graph = px.line(df, x = 'Data', y= 'Total', title='Acessos por dia')
     return graph
 
 def dash_app(app=False):
@@ -41,8 +47,17 @@ def dash_app(app=False):
     topics = [x.name for x in Topic.query]
     dash_app.layout = html.Div(children=[
     html.H1(children='Dashboard'),
+    html.Div([
+        html.H4(children='Acessos'),
+        html.Div([
+            dcc.Graph(id='access', figure=get_graph_access_by_date(), config={
+        'displayModeBar': False
+    })], className='col-sm'),
+        
+    ]),
 
     html.Div([
+        html.H4(children='Questões cadastradas'),
         html.Div([dcc.Graph(id='topics', figure=get_graph_topics(), config={
         'displayModeBar': False
     })], className='col-sm'),
