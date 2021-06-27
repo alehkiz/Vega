@@ -2,7 +2,7 @@
 
 FROM python:3.9.5-slim-buster
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -11,9 +11,12 @@ ENV PYTHONUNBUFFERED 1
 # install system dependencies
 RUN apt-get update && apt-get install -y netcat
 
-COPY requirements.txt requirements.txt
+# install dependencies
+RUN pip install --upgrade pip
+COPY ./requirements.txt /usr/src/app/requirements.txt
 RUN pip3 install -r requirements.txt
-COPY . .
+COPY . /usr/src/app/
 # CMD [ "flask", "run", "--host=0.0.0.0"]
 # run entrypoint.sh
+
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
