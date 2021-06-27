@@ -1,6 +1,6 @@
 #!/bin/sh
-
-if [ "$DATABASE" = "postgres" ]
+echo $SQL_HOST
+if [ "$DATABASE" = "vega" ]
 then
     echo "Waiting for postgres..."
 
@@ -10,7 +10,17 @@ then
 
     echo "PostgreSQL started"
 fi
-
-python server.py create_db
-
+echo "$DATABASE"
+echo "aqui"
+# while true; do
+#     flask db upgrade
+#     if [[ "$?" == "0" ]]; then
+#         break
+#     fi
+#     echo Upgrade command failed, retrying in 5 secs...
+#     sleep 5
+# done
+flask init-db
+echo 'Iniciando servidor...'
+# exec gunicorn -b :5000 --access-logfile - --error-logfile - app:app
 exec "$@"

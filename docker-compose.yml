@@ -18,6 +18,30 @@ services:
       - POSTGRES_USER=alexandre
       - POSTGRES_PASSWORD=Abc123
       - POSTGRES_DB=vega
-
+    ports:
+      - 6543:5432
+  adminer:
+    image: adminer
+    depends_on:
+      - pdb
+    restart: always
+    ports:
+      - 8080:8080
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - pdb
+    ports:
+      - 7070:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: unless-stopped
+networks:
+  my_docker_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
 volumes:
   postgres_data:

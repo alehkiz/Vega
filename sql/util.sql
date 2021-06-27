@@ -1,4 +1,4 @@
-CREATE EXTENSION unaccent
+CREATE EXTENSION unaccent;
 
 
 -- Cria uma nova configuração para o FTS
