@@ -3,11 +3,11 @@ version: '3.8'
 services:
   web:
     build: ./
-    command: flask run -h 0.0.0.0 -p 5000
+    command: gunicorn -b :8080 --access-logfile - --error-logfile - server:app
     volumes:
       - ./:/usr/src/app/
     ports:
-      - 5000:5000
+      - 8080:8080
     env_file:
       - ./.env.dev
   db:
@@ -20,23 +20,6 @@ services:
       - POSTGRES_DB=vega
     ports:
       - 6543:5432
-  adminer:
-    image: adminer
-    depends_on:
-      - pdb
-    restart: always
-    ports:
-      - 8080:8080
-  pgadmin:
-    image: dpage/pgadmin4
-    depends_on:
-      - pdb
-    ports:
-      - 7070:80
-    environment:
-      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
-      PGADMIN_DEFAULT_PASSWORD: admin
-    restart: unless-stopped
 networks:
   my_docker_network:
     driver: bridge
