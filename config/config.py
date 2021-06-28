@@ -209,7 +209,7 @@ class ProductionConfig(BaseConfig):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # SQLALCHEMY_DATABASE_URI = f'postgresql://{BaseConfig._SQLALCHEMY_DATABASE_USERNAME}:{BaseConfig._SQLALCHEMY_DATABASE_PASSWORD}@{BaseConfig._SQLALCHEMY_DATABASE_HOST}/{BaseConfig._SQLALCHEMY_DATABASE_NAME}'
     SQLALCHEMY_DATABASE_URI = environ.get('DATABASE_URL') or f'postgresql://khtknuvbaeavvq:98b557036b61944f2912ccc6aa07b0c907352da55603ce611bb9b744da9398fa@ec2-23-23-128-222.compute-1.amazonaws.com:5432/dtf9faocttt57'
-    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = False
 # 
 config = {'development': DevelopmentConfig,
           'production': ProductionConfig}
