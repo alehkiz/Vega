@@ -36,12 +36,19 @@ def init_db_command():
     
     db.session.commit()
 
-    click.echo('Topicos iniciados')
+    click.echo('Topicos iniciados.')
 
-    anon = User()
-    anon.username = 'ANON'
-    anon.name = 'ANON'
-    anon.email = 'anon@localhost'
-    anon.created_ip = '0.0.0.0'
-    anon._password = '123'
-    anon.temp_password = True
+    anon = User.query.filter(User.username == 'ANON').first()
+    
+    if anon is None:
+        anon = User()
+        anon.id = 4
+        anon.username = 'ANON'
+        anon.name = 'ANON'
+        anon.email = 'anon@localhost'
+        anon.created_ip = '0.0.0.0'
+        anon._password = '123'
+        anon.temp_password = True
+        db.session.add(anon)
+        db.session.commit()
+        click.echo('Usuário anonimo adicionado')
