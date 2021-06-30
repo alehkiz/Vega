@@ -33,7 +33,13 @@ def init_db_command():
         retaguarda.format_name = 'Retaguarda'
         retaguarda.selectable = True
         db.session.add(retaguarda)
-    
+    suporte = Topic.query.filter(Topic.name == 'Suporte').first()
+    if suporte is None:
+        suporte = Topic()
+        suporte.name = 'Suporte'
+        suporte.format_name = 'Suporte'
+        suporte.selectable = False
+        db.session.add(suporte)    
     db.session.commit()
 
     click.echo('Topicos iniciados.')
@@ -52,3 +58,58 @@ def init_db_command():
         db.session.add(anon)
         db.session.commit()
         click.echo('Usuário anonimo adicionado')
+
+    admin = User.query.filter(User.username == 'admin').first()
+    if admin is None:
+        admin = User()
+        admin.username = 'admin'
+        admin.name = 'admin'
+        admin.email = 'admin@localhost'
+        admin.created_ip = '0.0.0.0'
+        admin.password = 'Abc123'
+        admin.active = True
+        admin.temp_password = False
+        db.session.add(admin)
+        db.session.commit()
+        click.echo('Administrador criado...')
+
+    if Role.query.count() > 0:
+        admin = Role()
+        admin.level = 0
+        admin.name = 'admin'
+        admin.description = 'Administrator'
+
+        man_user = Role()
+        man_user.level = 1
+        man_user.name = 'manager_user'
+        man_user.description = 'Gerenciador de Usuários'
+
+        man_cont = Role()
+        man_cont.level = 2
+        man_cont.name = 'manager_content'
+        man_cont.description = 'Gerenciador de Conteúdo'
+
+        aux_cont = Role()
+        aux_cont.level = 3
+        aux_cont.name = 'aux_content'
+        aux_cont.description = 'Colaborador de Conteúdo'
+
+        support_cont = Role()
+        support_cont.level = 5
+        support_cont.name = 'support'
+        support_cont.description = 'Suporte'
+
+        view_cont = Role()
+        view_cont.level = 5
+        view_cont.name = 'viewer_content'
+        view_cont.description = 'Visualizador de Conteúdo'
+
+        db.session.add(admin)
+        db.session.add(man_user)
+        db.session.add(man_cont)
+        db.session.add(view_cont)
+        db.session.add(support_cont)
+
+        db.session.commit()
+
+        click.echo('Perfis criados.')

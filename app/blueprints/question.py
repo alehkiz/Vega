@@ -558,6 +558,7 @@ def make_question():
             question.topic = form.topic.data
             question.create_user_id = user.id
             question.question_network_id = ip.id
+            print('ip: ', ip.id)
             db.session.add(question)
             try:
                 db.session.commit()

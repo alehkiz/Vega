@@ -25,7 +25,7 @@ def login():
     if login.validate_on_submit():
         user = User.query.filter_by(username=login.username.data).first()
         print(app.config['SECURITY_PASSWORD_SALT'])
-        print(user.username)
+        print(user)
         print(login.password.data)
         print(user.check_password(login.password.data))
         if user is None or not user.check_password(login.password.data):
