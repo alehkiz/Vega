@@ -91,6 +91,9 @@ class User(UserMixin, db.Model):
         if any([role.is_viewer for role in self.roles.all()]):
             return True
         return False
+    @property
+    def is_temp_password(self):
+        return self.temp_password is True
     
     @hybrid_property
     def password(self):

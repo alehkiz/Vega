@@ -108,6 +108,7 @@ def init(app):
             Page=Page,
             SubTopic=SubTopic
             )
+    
     with app.app_context():
         app = dash_app(app)
         register_blueprints(app)
