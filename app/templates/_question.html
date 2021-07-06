@@ -6,13 +6,13 @@
     {% endif %}
 
     {% if question.topic.name == 'Retaguarda' %}
-        {% set bg_color = 'bg-info bg-gradient' %}
+        {% set bg_color = 'text-info fw-bold' %}
     {% elif question.topic.name == 'Atendimento' %}
-        {% set bg_color = 'bg-success bg-gradient' %}
+        {% set bg_color = 'text-success fw-bold' %}
     {% endif %}
     <div class="accordion-item">
         <h2 class="accordion-header" id="flush-heading_{{question.id}}">
-            <button id='button-accordion-{{question.id}}' class="accordion-button collapsed {{ 'bg-secondary' if question.is_support else bg_color }} rounded-2" type="button" data-bs-toggle="collapse"
+            <button id='button-accordion-{{question.id}}' class="accordion-button collapsed {{ 'text-secondary fw-bold' if question.is_support else bg_color }} rounded-2" type="button" data-bs-toggle="collapse"
                 data-bs-target="#flush-collapse_{{question.id}}" aria-expanded="false" aria-labelledby="flush-heading_{{question.id}}"
                 aria-controls="flush-collapse_{{question.id}}" href="{{url_for('api.question', id=question.id)}}">
                 {{question.question}}

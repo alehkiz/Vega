@@ -7,6 +7,7 @@ from datetime import datetime
 
 from app.models.security import User
 from app.forms.login import LoginForm
+from app.forms.reset_password import ResetPassword
 from app.utils.routes import counter
 from app.core.db import db
 
@@ -37,7 +38,7 @@ def login():
             flash('Usuário inativo', category='danger'),
             return redirect(url_for('auth.login'))
         if user.is_temp_password:
-            flash('É necessário alterar sua senha.', category='message')
+            flash('É necessário alterar sua senha.', category='info')
             
             fsession['temp_user'] = user.username
             return redirect(url_for('auth.change_password'))
@@ -60,7 +61,7 @@ def login():
         return redirect(next_page)
     return render_template('login.html', form=login, title='Login')
 
-@bp.route('/temp_password/')
+@bp.route('/temp_password/', methods=['GET', 'POST'])
 def change_password():
     username = fsession.get('temp_user', False)
     if username is False:
@@ -77,10 +78,28 @@ def change_password():
         message = 'Usuário não tem senha provisória'
         flash(message=message, category='danger')
         return redirect(url_for('auth.login'))
+    
+    form = ResetPassword()
+    form.username.data = user.username
+    if form.validate_on_submit():
+        
+        if form.new_password.data == form.confirm_new_password.data:
+            user.password = form.new_password.data
+            user.temp_password = False
+            try:
+                db.session.commit()
+                return redirect(url_for('auth.login'))
+            except Exception as e:
+                app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(e)
+                return redirect(url_for('auth.login'))
+        else:
+            form.confirm_new_password.errors.append('Senha não confere com a senha informada.')
+            return render_template('reset_password.html', form=form)
     print(fsession['temp_user'])
     
 
-    return 'True'
+    return render_template('reset_password.html', form=form)
 
 @bp.route('/logout/')
 def logout():
