@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block styles %}
+{{ super()}}
+<!-- <link href="{{url_for('static', filename='css/login.css')}}" rel="stylesheet"> -->
+{% endblock %}
+{% block app_content %}
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-column align-items-center text-center">
+                    <!-- <img src="teste"> -->
+                    <div class="mt-3">
+                        <h2>{{current_user.name}}</h2>
+                        <p class="text-secondary mb-1">Suporte</p>
+                        <p class="text-muted font-size-sm"><i class="fas fa-map-marker-alt"></i> Diretoria de Atendimento</p>
+                        <a class="btn btn-primary" href='{{url_for("auth.change_password")}}'>Altera senha</a>
+                        <a class="btn btn-danger" href='{{url_for("auth.logout")}}'>Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="card mt-3">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">teste</li>
+            </ul>
+        </div> -->
+    </div>
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <h6 class="my-0">Perguntas respondidas:</h6>
+                    </div>
+                    <div class="col-sm-6 text-secondary">{{ '{0:,}'.format(current_user.answers.count()).replace(',', '.') }}</div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <h6 class="my-0">Quantidade de logins:</h6>
+                    </div>
+                    <div class="col-sm-6 text-secondary">{{ '{0:,}'.format(current_user.login_count).replace(',', '.') }}</div>
+                </div>
+                <hr>
+                <!-- <div class="progress mb-3" style="height: 5px"><div class="progress-bar bg-primary" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div></div> -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
