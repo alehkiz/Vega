@@ -28,7 +28,7 @@ security = Security()
 migrate = Migrate()
 login = LoginManager()
 login.login_view = 'auth.login'
-login.login_message = 'Please login to access this page'
+login.login_message = 'Faça login para acessar a página'
 login.login_message_category = 'danger'
 csrf = CSRFProtect()
 # babel = Babel()
@@ -108,13 +108,15 @@ def init(app):
             Page=Page,
             SubTopic=SubTopic
             )
+    
     with app.app_context():
-        app = dash_app(app)        
+        app = dash_app(app)
         register_blueprints(app)
 
     
-    
+    print('Debug: ', app.debug)
     if app.debug is not True:
+        print('Debugger')
         # logger
         if not exists('logs'):
             mkdir('logs')

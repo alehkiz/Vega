@@ -122,6 +122,10 @@ def remove(id):
     db.session.commit()
     return render_template('base.html'  )
 
+@bp.route('/profile/')
+@login_required
+def profile():
+    return render_template('profile.html')
 
 @bp.route('/user/settings')
 @login_required
