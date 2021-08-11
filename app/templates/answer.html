@@ -20,11 +20,12 @@
 {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
 {{ macros.render_field(form.sub_topic, class='form-select', nosize=true)}}
 <br>
-{% if approve is defined %}
+{#{% if approve is defined %}
 {{ macros.render_field(form.approve, class='form-check-input')}}
 <br>
-{% endif %}
-{{ form.submit }}
+{% endif %}#}
+{{ form.approve(class='btn btn-success') }}
+{{ form.repprove(class='btn btn-danger') }}
 </form>
 </div>
 {% endif %}
