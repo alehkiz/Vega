@@ -312,11 +312,16 @@ def approve(id: int):
         return redirect(url_for('question.index'))
     form = QuestionApproveForm()
     if form.validate_on_submit():
+        
         q = Question.query.filter(Question.question.ilike(form.question.data.lower())).first()
         if not q is None:
             if q.id != id:
                 form.question.errors.append('Você alterou a pergunta para uma já cadastrada')
                 return render_template('answer.html', form=form, approve=True)
+        if form.repprove.data is True:
+            q.answer_approved = False
+            flash('Questão reprovada com sucesso', category='success')
+            return redirect(url_for('question.index'))
         q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
         q.answer = form.answer.data
@@ -325,6 +330,9 @@ def approve(id: int):
         q.topic_id = form.topic.data.id
         q.sub_topic_id = form.sub_topic.data.id
         q.answer_approved = form.approve.data
+        print(form.approve.data)
+        print(form.repprove.data)
+
         try:
             db.session.commit()
             return redirect(url_for('question.view', id=q.id))
@@ -334,6 +342,8 @@ def approve(id: int):
             app.logger.error(e)
             db.session.rollback()
             return render_template('answer.html', form=form, approve=True)
+        
+        
         return 'ok'
     
     form.question.data = q.question
