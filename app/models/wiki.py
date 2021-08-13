@@ -767,7 +767,10 @@ class QuestionSave(db.Model):
         return self.query.filter(self.question_id == user_id).count()
 
     
-
+class Transaction(db.Model):
+    __searchable__ = ['question', 'answer']
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text)
 
 
 
