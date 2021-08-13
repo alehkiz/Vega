@@ -31,6 +31,10 @@ def get_graph_questions_by_month(names=None):
         func.date_trunc('month', Question.create_at).label('Mês'), Topic.name.label('Assunto')
         ).join(Topic.questions).group_by('Mês', 'Assunto').order_by(asc('Mês')
         ).statement, db.session.bind)
+    if df.empty is True:
+        df.Total = pd.Series([0])
+        df.at[0, 'Mês'] = None
+        df.at[0, 'Assunto'] = ' '
     if names == None:
         return px.line(df, x = 'Mês', y = 'Total', title='Dúvidas cadastradas por dia e assunto', color='Assunto', hover_data={'Mês': "|%m/%Y"})
     mask = df.Assunto.isin(names)
@@ -38,7 +42,9 @@ def get_graph_questions_by_month(names=None):
     return graph
 
 def get_graph_access_by_date():
-    df = pd.read_sql(db.session.query(func.count(Visit.id).label('Total'), func.date_trunc('day', Visit.datetime).label('Data')).group_by('Data').order_by(asc('Data')).statement, con=db.session.bind)
+    df = pd.read_sql(db.session.query(func.count(Visit.id).label('Total'), 
+                func.date_trunc('day', Visit.datetime).label('Data')).group_by('Data').order_by(
+                    asc('Data')).statement, con=db.session.bind)
     graph = px.line(df, x = 'Data', y= 'Total', title='Acessos por dia')
     return graph
 
