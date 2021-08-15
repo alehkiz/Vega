@@ -62,6 +62,7 @@ def init_db_command():
         anon.email = 'anon@localhost'
         anon.created_network_id = network.id
         anon._password = '123'
+        anon.current_login_network_id = network.id
         anon.temp_password = True
         db.session.add(anon)
         db.session.commit()
@@ -74,6 +75,7 @@ def init_db_command():
         admin.name = 'admin'
         admin.email = 'admin@localhost'
         admin.created_network_id = network.id
+        admin.current_login_network_id = network.id
         admin.password = 'Abc123'
         admin.active = True
         admin.temp_password = False

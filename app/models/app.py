@@ -10,7 +10,7 @@ from sqlalchemy.dialects.postgresql import INET
 
 
 from app.core.db import db
-from app.models.security import User
+
 
 
 class Page(db.Model):
@@ -21,6 +21,8 @@ class Page(db.Model):
                             single_parent=True, backref='page', lazy='dynamic')
 
     def add_view(self, user_id, network_id):
+        from app.models.security import User
+        
         user = User.query.filter(User.id == user_id).first()
         if user is None:
             raise Exception('Usuário informado não existe')
