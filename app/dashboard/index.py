@@ -1,7 +1,7 @@
 from app.models.app import Visit
 from re import template
 from dash_core_components.Checklist import Checklist
-from flask import config, url_for
+# from flask import config, url_for, app as current_app
 from dash import Dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -13,7 +13,7 @@ import plotly.express as px
 import pandas as pd
 from app.models.wiki import Question, Topic, Tag
 from app.core.db import db
-from sqlalchemy import func, asc
+from sqlalchemy import func, asc, inspect
 
 def get_graph_tags():
     df = pd.read_sql(db.session.query(Tag.name.label('Marcação'), func.count(Question.id).label('Total')).outerjoin(Question.tags).group_by(Tag).statement, con=db.session.bind)
@@ -50,41 +50,47 @@ def get_graph_access_by_date():
 
 def dash_app(app=False):
     dash_app = Dash(__name__, server=app, url_base_pathname='/dashapp/', external_stylesheets=[dbc.themes.BOOTSTRAP], update_title='Atualizando...')
-    topics = [x.name for x in Topic.query]
-    dash_app.layout = html.Div(children=[
-    html.H1(children='Dashboard'),
-    html.Div([
-        html.H4(children='Acessos'),
-        html.Div([
-            dcc.Graph(id='access', figure=get_graph_access_by_date(), config={
-        'displayModeBar': False
-    })], className='col-sm'),
-        
-    ]),
+    
+    engine = db.get_engine(app)
+    if not inspect(engine).dialect.has_table(engine.connect(), table_name = 'topic'):
+        dash_app.layout = html.Div()
+    else:
+        topics = [x.name for x in Topic.query]
 
-    html.Div([
-        html.H4(children='Questões cadastradas'),
-        html.Div([dcc.Graph(id='topics', figure=get_graph_topics(), config={
-        'displayModeBar': False
-    })], className='col-sm'),
-        html.Div([dcc.Graph(id='tags', figure=get_graph_tags(), config={
+        dash_app.layout = html.Div(children=[
+        html.H1(children='Dashboard'),
+        html.Div([
+            html.H4(children='Acessos'),
+            html.Div([
+                dcc.Graph(id='access', figure=get_graph_access_by_date(), config={
             'displayModeBar': False
-        }    
-    )
-        ], className='col-sm'),
-        dcc.Checklist(
-            id='checklist', 
-            options=[{'label': x, 'value': x} for x in topics],
-            value=topics,
-            labelStyle={'display': 'inline-block'}
-        ),
-        
-        html.Div([dcc.Graph(id='questions-month', figure=get_graph_questions_by_month(), config={
+        })], className='col-sm'),
+            
+        ]),
+
+        html.Div([
+            html.H4(children='Questões cadastradas'),
+            html.Div([dcc.Graph(id='topics', figure=get_graph_topics(), config={
+            'displayModeBar': False
+        })], className='col-sm'),
+            html.Div([dcc.Graph(id='tags', figure=get_graph_tags(), config={
                 'displayModeBar': False
-            })
+            }    
+        )
+            ], className='col-sm'),
+            dcc.Checklist(
+                id='checklist', 
+                options=[{'label': x, 'value': x} for x in topics],
+                value=topics,
+                labelStyle={'display': 'inline-block'}
+            ),
+            
+            html.Div([dcc.Graph(id='questions-month', figure=get_graph_questions_by_month(), config={
+                    'displayModeBar': False
+                })
+            ])
+        ], className='row')
         ])
-    ], className='row')
-    ])
 
     @dash_app.server.route('/dashboard/')
     def dashboard():
