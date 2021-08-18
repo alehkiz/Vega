@@ -767,16 +767,20 @@ class QuestionSave(db.Model):
         return self.query.filter(self.question_id == user_id).count()
 
     
+
+
+
+
 class Transaction(db.Model):
-    __searchable__ = ['question', 'answer']
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text)
+    transaction = db.Column(db.String, unique=True, nullable=False)
+    parameter = db.Column(db.String, nullable=True)
+    option = db.Column(db.String)
+    description = db.Column(db.String)
+    datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-
-
-
-
-
+    
 
 
 
