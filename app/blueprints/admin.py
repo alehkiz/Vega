@@ -113,7 +113,8 @@ def answers():
     else:
         column = Question.id
         column_type = column.desc
-    q = Question.query.order_by(column_type())
+    # TODO Incluir a odernação por relacionamento de acordo com a seleção do usuário
+    q = Question.query.filter(Question.answer != None).order_by(column_type())
     paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
