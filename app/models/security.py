@@ -1,3 +1,5 @@
+from operator import ne
+from flask import current_app as app
 from flask_security import UserMixin, RoleMixin
 from flask_security.utils import hash_password, verify_password
 import flask_sqlalchemy
@@ -7,6 +9,8 @@ from datetime import date, datetime
 from sqlalchemy.orm import backref
 from sqlalchemy.dialects.postgresql import INET
 # from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView
+
+
 
 from app.core.db import db
 from app.utils.kernel import validate_password, format_elapsed_time
@@ -30,12 +34,12 @@ class User(UserMixin, db.Model):
     location = db.Column(db.String(128), nullable=True)
     active = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    created_ip = db.Column(INET, nullable=False)
+    created_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
     last_login_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_login_ip = db.Column(INET, nullable=True)
+    last_login_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=True)
     current_login_at = db.Column(db.DateTime, nullable=True)
-    current_login_ip = db.Column(INET, nullable=True)
-    confirmed_ip = db.Column(INET, nullable=True)
+    current_login_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
+    confirmed_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=True)
     confirmed_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=True)
     login_count = db.Column(db.Integer, nullable=True, default=0)
@@ -94,7 +98,33 @@ class User(UserMixin, db.Model):
     @property
     def is_temp_password(self):
         return self.temp_password is True
-    
+    @hybrid_property
+    def current_login_ip(self):
+        return self.current_login_network.ip
+
+
+    @current_login_ip.setter
+    def current_login_ip(self, ip):
+        from app.models.app import Network
+        network = Network.query.filter(Network.ip == ip).first()
+        if network is None:
+            network = Network()
+            network.ip = ip
+            try:
+                db.session.add(network)
+                db.session.commit()
+            except Exception as e:
+                app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(e)
+                raise Exception('Não foi possível salvar o IP')
+        self.current_login_network_id = network.id
+        # try:
+        #     db.session.commit()
+        # except Exception as e:
+        #     app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+        #     app.logger.error(e)
+        #     raise Exception('Não foi possível salvar o IP')
+
     @hybrid_property
     def password(self):
         return self._password

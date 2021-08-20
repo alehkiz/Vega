@@ -2,6 +2,7 @@ from flask.cli import FlaskGroup
 
 from server import app
 from app.core.db import db
+from dev.db import create
 
 
 cli = FlaskGroup(app)
@@ -12,7 +13,7 @@ def create_db():
     db.drop_all()
     db.create_all()
     db.session.commit()
-
+    
 
 if __name__ == "__main__":
     cli()
