@@ -20,6 +20,7 @@ from app.models.security import User, Role
 from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView, SubTopic, Transaction
 from app.models.search import Search, SearchDateTime
 from app.models.app import Visit, Page
+from app.models.notifier import Notifier, NotifierStatus
 
 # from app.dashboard import dash
 
@@ -107,7 +108,9 @@ def init(app):
             Visit=Visit,
             Page=Page,
             SubTopic=SubTopic,
-            Transaction=Transaction
+            Transaction=Transaction,
+            Notifier=Notifier,
+            NotifierStatus=NotifierStatus
             )
     
     with app.app_context():
