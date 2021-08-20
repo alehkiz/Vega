@@ -17,7 +17,7 @@ from app.dashboard.index import dash_app
 from app.blueprints import register_blueprints
 from app.core.db import db, user_datastore
 from app.models.security import User, Role
-from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView, SubTopic
+from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView, SubTopic, Transaction
 from app.models.search import Search, SearchDateTime
 from app.models.app import Visit, Page
 
@@ -106,13 +106,13 @@ def init(app):
             SearchDateTime=SearchDateTime,
             Visit=Visit,
             Page=Page,
-            SubTopic=SubTopic
+            SubTopic=SubTopic,
+            Transaction=Transaction
             )
     
     with app.app_context():
         app = dash_app(app)
         register_blueprints(app)
-
     
     print('Debug: ', app.debug)
     if app.debug is not True:

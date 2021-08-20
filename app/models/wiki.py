@@ -771,9 +771,16 @@ class QuestionSave(db.Model):
 
 
 
+class Transaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    transaction = db.Column(db.String, unique=True, nullable=False)
+    parameter = db.Column(db.String, nullable=True)
+    option = db.Column(db.String)
+    description = db.Column(db.String)
+    datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-
-
+    
 
 
 

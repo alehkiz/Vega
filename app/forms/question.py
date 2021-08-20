@@ -43,7 +43,9 @@ class QuestionAnswerForm(FlaskForm):
     # text = TextAreaField('Text', validators=[DataRequired('Item obrigatório'), Length(min=32, message='O campo texto deve conter pelo menos 32 caracteres')])
     # topic = QuerySelectField('Topico', validators=[DataRequired('Item obrigatório')], query_factory=lambda: Topic.query, get_label='name', allow_blank=False)
     # approved = BooleanField('Aprovada')
-    submit = SubmitField('Enviar')
+    approve = SubmitField('Aprovar')
+    repprove = SubmitField('Reprovar')
+    # submit = SubmitField('Enviar')
 
 class QuestionApproveForm(FlaskForm):
     question = StringField('Dúvida', validators=[DataRequired('Item obrigatório'), Length(min=5, max=256, message='A duvida deve conter um texto entre 5 e 256 caracteres')])

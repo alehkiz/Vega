@@ -15,10 +15,18 @@ user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 @with_appcontext
 def init_db_command():
     """Clear the existing data and create new tables."""
+    db.drop_all()
     db.create_all()
     click.echo('Banco de dados inicializado...')
     from app.models.wiki import Topic
     from app.models.security import User
+    from app.models.app import Network
+    network = Network.query.filter(Network.ip == '0.0.0.0').first()
+    if network is None:
+        network = Network()
+        network.ip = '0.0.0.0'
+        db.session.add(network)
+        db.session.commit()
     atendimento = Topic.query.filter(Topic.name == 'Atendimento').first()
     if atendimento is None:
         atendimento = Topic()
@@ -52,8 +60,9 @@ def init_db_command():
         anon.username = 'ANON'
         anon.name = 'ANON'
         anon.email = 'anon@localhost'
-        anon.created_ip = '0.0.0.0'
+        anon.created_network_id = network.id
         anon._password = '123'
+        anon.current_login_network_id = network.id
         anon.temp_password = True
         db.session.add(anon)
         db.session.commit()
@@ -65,7 +74,8 @@ def init_db_command():
         admin.username = 'admin'
         admin.name = 'admin'
         admin.email = 'admin@localhost'
-        admin.created_ip = '0.0.0.0'
+        admin.created_network_id = network.id
+        admin.current_login_network_id = network.id
         admin.password = 'Abc123'
         admin.active = True
         admin.temp_password = False
@@ -73,43 +83,44 @@ def init_db_command():
         db.session.commit()
         click.echo('Administrador criado...')
 
-    if Role.query.count() > 0:
-        admin = Role()
-        admin.level = 0
-        admin.name = 'admin'
-        admin.description = 'Administrator'
 
-        man_user = Role()
-        man_user.level = 1
-        man_user.name = 'manager_user'
-        man_user.description = 'Gerenciador de Usuários'
+    admin_role = Role()
+    admin_role.level = 0
+    admin_role.name = 'admin'
+    admin_role.description = 'Administrator'
 
-        man_cont = Role()
-        man_cont.level = 2
-        man_cont.name = 'manager_content'
-        man_cont.description = 'Gerenciador de Conteúdo'
+    man_user = Role()
+    man_user.level = 1
+    man_user.name = 'manager_user'
+    man_user.description = 'Gerenciador de Usuários'
 
-        aux_cont = Role()
-        aux_cont.level = 3
-        aux_cont.name = 'aux_content'
-        aux_cont.description = 'Colaborador de Conteúdo'
+    man_cont = Role()
+    man_cont.level = 2
+    man_cont.name = 'manager_content'
+    man_cont.description = 'Gerenciador de Conteúdo'
 
-        support_cont = Role()
-        support_cont.level = 5
-        support_cont.name = 'support'
-        support_cont.description = 'Suporte'
+    aux_cont = Role()
+    aux_cont.level = 3
+    aux_cont.name = 'aux_content'
+    aux_cont.description = 'Colaborador de Conteúdo'
 
-        view_cont = Role()
-        view_cont.level = 5
-        view_cont.name = 'viewer_content'
-        view_cont.description = 'Visualizador de Conteúdo'
+    support_cont = Role()
+    support_cont.level = 5
+    support_cont.name = 'support'
+    support_cont.description = 'Suporte'
 
-        db.session.add(admin)
-        db.session.add(man_user)
-        db.session.add(man_cont)
-        db.session.add(view_cont)
-        db.session.add(support_cont)
+    view_cont = Role()
+    view_cont.level = 5
+    view_cont.name = 'viewer_content'
+    view_cont.description = 'Visualizador de Conteúdo'
 
-        db.session.commit()
+    db.session.add(admin)
+    db.session.add(man_user)
+    db.session.add(man_cont)
+    db.session.add(view_cont)
+    db.session.add(support_cont)
+    admin.roles.append(admin_role)
 
-        click.echo('Perfis criados.')
+    db.session.commit()
+
+    click.echo('Perfis criados.')

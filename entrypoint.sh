@@ -1,6 +1,6 @@
 #!/bin/sh
 echo $SQL_HOST
-if [ "$DATABASE" = "vega" ]
+if [ "$DATABASE" = "vega_dev" ]
 then
     echo "Waiting for postgres..."
 
