@@ -15,7 +15,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import relationship
 
-from sqlalchemy import inspect, desc
+from sqlalchemy import inspect, desc, asc
 
 from app.models.wiki import Article, Topic, User, Question, Tag, SubTopic
 from app.forms.wiki import ArticleForm
@@ -105,6 +105,9 @@ def answers():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
+    order_dict = {'desc':desc, 'asc': asc}
+    if not order_type in order_dict.keys():
+        order_type = 'desc'
     if not order is False or not order_type is False:
         try:
             column = getattr(Question, order)
@@ -117,13 +120,15 @@ def answers():
         column_type = column.desc
     # TODO Incluir a odernação por relacionamento de acordo com a seleção do usuário
     relations = inspect(Question).relationships
-    print(column.property.target.name)
-    print(type(str(column.property.target.name)))
-    if column.property.target.name in relations:
-        relationship = getattr(relations, str(column.property.target.name), False)
-        if relationship is False:
-            raise Exception(f'{column.property.target.name} não é um relacionamento em Question')
-        q = db.session.query(Question).filter(Question.answer != None).join(relationship.mapper.class_, getattr(Question, str(column.property.target.name))).order_by(desc(getattr(relationship.mapper.class_, 'id')))
+    print(column)
+    # print(column.property.target.name)
+    # print(type(str(column.property.target.name)))
+    if hasattr(column.property, 'target'):
+        if column.property.target.name in relations:
+            relationship = getattr(relations, str(column.property.target.name), False)
+            if relationship is False:
+                raise Exception(f'{column.property.target.name} não é um relacionamento em Question')
+            q = db.session.query(Question).filter(Question.answer != None).join(relationship.mapper.class_, getattr(Question, str(column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
     else:
         q = Question.query.filter(Question.answer != None).order_by(column_type())
     paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)

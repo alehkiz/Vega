@@ -271,7 +271,7 @@ def answer(id: int):
         return redirect(url_for('question.index'))
     form = QuestionAnswerForm()
     if form.validate_on_submit():
-        q = Question.query.filter(Question.question.ilike(form.question.data.lower())).first()
+        # q = Question.query.filter(Question.question.ilike(form.question.data.lower())).first()
         # print(q)
         if not q is None:
             if q.id != id:

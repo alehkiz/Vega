@@ -3,17 +3,18 @@
 {% block app_content %}
 <div class="container-sm col-10">
     <ul class="nav nav-tabs" id='notifierTab' role='notifierList'>
-        <li class="nav-item">
-            <a class="nav-link active" id='active-tab' data-toggle='tab' href="#active" role='tab'
-                aria-controls="active" aria-selected="true">Ativos</a>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id='active-tab' data-bs-toggle='tab' data-bs-target="#active" type="button"
+                role='tab' aria-controls="active" aria-selected="true">Ativos</button>
         </li>
-        <li class="nav-item">
-            <a class="nav-link active" id='history-tab' data-toggle='tab' href="#history" role='tab'
-                aria-controls="history" aria-selected="true">Home</a>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id='history-tab' data-bs-toggle='tab' data-bs-target="#history" type="button"
+                role='tab' aria-controls="history" aria-selected="false">Histórico</button>
         </li>
     </ul>
-    <div class="row border border-primary pb-3 rounded my-3">
+    <div class="row border border-primary pb-3 rounded my-3 tab-content">
         <div class="tab-pane fade show active" id='active' role='tabpanel' aria-labelledby="active-tab">
+            <span class="badge bg-secondary mt-3 float-end">Atendimento</span>
             <div class="row m-3">
                 <div class="row">
                     <h5 class="text-muted fw-normal">teste</h5>
@@ -35,27 +36,30 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane fade show active" id='history' role='tabpanel' aria-labelledby="history-tab">
+        <div class="tab-pane fade" id='history' role='tabpanel' aria-labelledby="history-tab">
             teste
         </div>
     </div>
     <ul class="nav nav-tabs" id="myTab" role="tablist">
         <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Home</button>
+            <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button"
+                role="tab" aria-controls="home" aria-selected="true">Home</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Profile</button>
+            <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button"
+                role="tab" aria-controls="profile" aria-selected="false">Profile</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Contact</button>
+            <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button"
+                role="tab" aria-controls="contact" aria-selected="false">Contact</button>
         </li>
-      </ul>
-      <div class="tab-content" id="myTabContent">
+    </ul>
+    <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">...</div>
         <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">...</div>
         <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
-      </div>
-      
+    </div>
+
 </div>
 
 {% endblock %}

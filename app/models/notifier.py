@@ -13,10 +13,11 @@ class Notifier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128), index=True, nullable=False, unique=False)
     content = db.Column(db.String, index=True, nullable=False)
-    status = db.Column(db.Integer, db.ForeignKey('notifier_status.id'), nullable=False)
+    status_id = db.Column(db.Integer, db.ForeignKey('notifier_status.id'), nullable=False)
     create_at = db.Column(db.DateTime, index=False, default=datetime.utcnow)
     created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
+    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
+    # status = db.relationship('NotifierStatus', single_parent=True, backref='notices', lazy='dynamic')
     
 
     def __repr__(self) -> str:
@@ -25,3 +26,4 @@ class Notifier(db.Model):
 class NotifierStatus(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(32), nullable=False)
+    notices = db.relationship('Notifier', backref='status', lazy='dynamic')
