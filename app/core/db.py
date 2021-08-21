@@ -17,6 +17,22 @@ def init_db_command():
     """Clear the existing data and create new tables."""
     db.drop_all()
     db.create_all()
+    statement = '''CREATE TRIGGER question_search_vector_trigger
+    BEFORE INSERT OR UPDATE 
+    ON public.question
+    FOR EACH ROW
+    EXECUTE PROCEDURE tsvector_update_trigger('search_vector', 'public.pt', 'question', 'answer');
+
+    CREATE TRIGGER notifier_search_vector_trigger
+    BEFORE INSERT OR UPDATE 
+    ON public.notifier
+    FOR EACH ROW
+    EXECUTE PROCEDURE tsvector_update_trigger('search_vector', 'public.pt', 'title', 'content');
+    '''
+    try:
+        db.engine.execute(statement)
+    except Exception:
+        ...
     click.echo('Banco de dados inicializado...')
     from app.models.wiki import Topic
     from app.models.security import User
