@@ -9,7 +9,7 @@ import app
 class BaseConfig(object):
     PROJECT_NAME = 'Vega'
     SECRET_KEY = environ.get(
-        'SERVER_KEY')# or b'Y\xde\xba\xd7q\xa1\x87#\xb9\x10\xddA\xe4x\xb1\xadg\xc3\x16\xa15\xa1T\x9b\xff\xd5\x851`\xf5\xd7['
+        'SERVER_KEY')
     APP_DIR = abspath(dirname(app.__file__))
     BASE_DIR = abspath(join(APP_DIR, '..'))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -17,7 +17,7 @@ class BaseConfig(object):
     SECURITY_CHANGEABLE = True
     BLUEPRINTS_DIR = join(APP_DIR, 'blueprints')
     LOG_DIR = join(BASE_DIR, r'logs')
-    DEV_DB = join(APP_DIR, r'db//db.db')
+    # DEV_DB = join(APP_DIR, r'db//db.db')
     SECURITY_PASSWORD_HASH = 'pbkdf2_sha512'
     SECURITY_PASSWORD_SALT = environ.get('PASSWORD_SALT')
     SECURITY_LOGIN_URL = 'auth.login'
@@ -33,8 +33,8 @@ class BaseConfig(object):
     BABEL_DEFAULT_LOCALE = 'pt_BR'
 
     _SQLALCHEMY_DATABASE_NAME = PROJECT_NAME.lower()
-    _SQLALCHEMY_DATABASE_HOST = environ.get('DB_USER') or 'localhost'
-    _SQLALCHEMY_DATABASE_USERNAME = environ.get('DB_USER') or 'alexandre'
+    _SQLALCHEMY_DATABASE_HOST = environ.get('DB_HOST') or 'localhost'
+    _SQLALCHEMY_DATABASE_USERNAME = environ.get('DB_USER')
     _SQLALCHEMY_DATABASE_PASSWORD = environ.get('DB_PASS')
 
     _ERRORS = {'DB_COMMIT_ERROR': 'Não foi possível atualizar o banco de dados'}
@@ -101,10 +101,6 @@ class BaseConfig(object):
                 'name' : 'Sub Tópico',
                 'attr' : 'sub_topic_name'
             },
-            # 'answer' : {
-            #     'name' : 'Resposta',
-            #     'attr' : None
-            # },
             "create_at": {
                 'name' : 'criado em',
                 'attr' : 'get_create_datetime'
@@ -131,7 +127,6 @@ class BaseConfig(object):
             'user': {
                 'name' : 'criado por',
                 'attr': 'username'
-
             }
         },
         'topic' :{
@@ -171,31 +166,11 @@ class BaseConfig(object):
             'edit': 'user.edit',
             'remove': 'user.remove'
         },
-        # 'article':{
-        #     'add': 'article.view',
-        #     'edit': '.edit',
-        #     'remove': '.remove'
-        # }   
-        # ,
-        # 'article':{
-        #     'add': '.add',
-        #     'edit': '.edit',
-        #     'remove': '.remove'
-        # }
     }
     USER_ANON_ID = 4
 
-    # ACCESS_TYPE = {
-    #     'citizen' : 'Cidadão',
-    #     'backoffice' : 'Retaguarda'
-    # }
-
-    # ELASTICSEARCH_URL = 'http://localhost:9200'
-
-
-
 class DevelopmentConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = f'sqlite:///{BaseConfig.DEV_DB}'
+    # SQLALCHEMY_DATABASE_URI = f'sqlite:///{BaseConfig.DEV_DB}'
     SQLALCHEMY_DATABASE_URI = f'postgresql://{BaseConfig._SQLALCHEMY_DATABASE_USERNAME}:{BaseConfig._SQLALCHEMY_DATABASE_PASSWORD}@{BaseConfig._SQLALCHEMY_DATABASE_HOST}/{BaseConfig._SQLALCHEMY_DATABASE_NAME}'
     MODE = 'dev'
     ENV = 'dev'
@@ -208,8 +183,8 @@ class TestConfig(BaseConfig):
 
 class ProductionConfig(BaseConfig):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    # SQLALCHEMY_DATABASE_URI = f'postgresql://{BaseConfig._SQLALCHEMY_DATABASE_USERNAME}:{BaseConfig._SQLALCHEMY_DATABASE_PASSWORD}@{BaseConfig._SQLALCHEMY_DATABASE_HOST}/{BaseConfig._SQLALCHEMY_DATABASE_NAME}'
-    SQLALCHEMY_DATABASE_URI = environ.get('DATABASE_URL') or f'postgresql://khtknuvbaeavvq:98b557036b61944f2912ccc6aa07b0c907352da55603ce611bb9b744da9398fa@ec2-23-23-128-222.compute-1.amazonaws.com:5432/dtf9faocttt57'
+    SQLALCHEMY_DATABASE_URI = f'postgresql://{BaseConfig._SQLALCHEMY_DATABASE_USERNAME}:{BaseConfig._SQLALCHEMY_DATABASE_PASSWORD}@{BaseConfig._SQLALCHEMY_DATABASE_HOST}/{BaseConfig._SQLALCHEMY_DATABASE_NAME}'
+    # SQLALCHEMY_DATABASE_URI = environ.get('DATABASE_URL') or f'postgresql://khtknuvbaeavvq:98b557036b61944f2912ccc6aa07b0c907352da55603ce611bb9b744da9398fa@ec2-23-23-128-222.compute-1.amazonaws.com:5432/dtf9faocttt57'
     SESSION_COOKIE_SECURE = False
     MODE = 'prod'
 # 
