@@ -33,7 +33,7 @@
                         class='nav-link'>Dashboard</a>
                 </li>
                 {% endif %}
-                {% if config.get('MODE', False) == 'DEV' %}#TODO apenas em DEV
+                {% if config.get('MODE', False) == 'dev' %}<!-- #TODO apenas em DEV -->
                 <li class="nav-item">
                     <a class='btn btn-sm btn-outline-primary me-2' type='button' href="{{ url_for('notifier.index')}}" class='nav-link'>Notificações</a>
                 </li>
