@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block app_content %}
+
 <div class="container-sm col-10">
     <ul class="nav nav-tabs" id='notifierTab' role='notifierList'>
         <li class="nav-item" role="presentation">
@@ -13,32 +14,63 @@
         </li>
     </ul>
     <div class="row my-3 tab-content">
-        <div class="tab-pane fade show active border border-primary pb-3 rounded" id='active' role='tabpanel' aria-labelledby="active-tab">
-            <span class="badge bg-secondary mt-3 float-end">Atendimento</span>
+        <div class="tab-pane fade show active border border-primary pb-3 rounded mb-2" id='active' role='tabpanel'
+            aria-labelledby="active-tab">
+            {% if notices_active is defined %}
+            {% for notice in notices_active %}
+            <span class="badge bg-secondary mt-3 float-end">{{notice.topic.name}}</span>
             <div class="row m-3">
                 <div class="row">
-                    <h5 class="text-muted fw-normal">teste</h5>
+                    <h5 class="text-muted fw-normal">{{notice.title}}</h5>
                 </div>
                 <div class="row ms-4">
-                    <span class="fw-normal">Teste sobre como incluir notificações</span>
-
+                    <span class="fw-normal">{{notice.content}}</span>
                 </div>
             </div>
             <div class="row d-flex justify-content-around">
                 <div class="col d-flex justify-content-around">
-                    1
+                    {{notice.get_create_time_elapsed}}
                 </div>
                 <div class="col d-flex justify-content-around">
-                    2
+                    Prioridade: {{notice.priority.priority}}
                 </div>
                 <div class="col d-flex justify-content-around">
                     3
                 </div>
             </div>
+            <hr>            
         </div>
-        <div class="tab-pane fade border border-secondary pb-3 rounded" id='history' role='tabpanel' aria-labelledby="history-tab">
-            teste
+        {% endfor %}
+        {% endif %}
+        
+        <div class="tab-pane fade border border-secondary pb-3 rounded mb-3" id='history' role='tabpanel'
+            aria-labelledby="history-tab">
+            {% if notices_history is defined %}
+            {% for notice in notices_history %}
+            <span class="badge bg-secondary mt-3 float-end">{{notice.topic.name}}</span>
+            <div class="row m-3">
+                <div class="row">
+                    <h5 class="text-muted fw-normal">{{notice.title}}</h5>
+                </div>
+                <div class="row ms-4">
+                    <span class="fw-normal">{{notice.content}}</span>
+
+                </div>
+            </div>
+            <div class="row d-flex justify-content-around">
+                <div class="col d-flex justify-content-around">
+                    {{notice.get_create_time_elapsed}}
+                </div>
+                <div class="col d-flex justify-content-around">
+                    Prioridade: {{notice.priority.priority}}
+                </div>
+                <div class="col d-flex justify-content-around">
+                    3
+                </div>
         </div>
+        <hr>
+        {% endfor %}
+        {% endif %}
     </div>
 </div>
 
