@@ -242,6 +242,8 @@ class Topic(db.Model):
     selectable = db.Column(db.Boolean, default=False, nullable=False)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
     questions = db.relationship('Question', backref='topic', lazy='dynamic', foreign_keys='[Question.topic_id]')
+    notices = db.relationship('Notifier', backref='topic', lazy='dynamic')
+
     @hybrid_property
     def name(self):
         return self._name
@@ -695,6 +697,11 @@ class Question(db.Model):
     def query_by_interval(start : date, end: date):
         return Question.query.filter(cast(Question.create_at, Date) == start, cast(Question.create_at, Date) == end)
 
+    @staticmethod
+    def count_by_topic(topic: str = ''):
+        if topic == '':
+            raise ValueError('topic não pode ser vazio')
+        return Question.query.filter(Topic.name == topic).count()
 class QuestionView(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
