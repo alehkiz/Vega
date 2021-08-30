@@ -3,3 +3,6 @@ docker-compose -f docker-compose.prod.yml up -d --build
 
 docker-compose -f docker-compose.yml down -v
 docker-compose -f docker-compose.yml up -d --build
+
+copy to server:
+scp -rp */ user@10.138.10.202:/srv/vega

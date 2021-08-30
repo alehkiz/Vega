@@ -106,6 +106,7 @@ class Network(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ip = db.Column(INET, nullable=False)
     create_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     # first_access = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     question_created_ip = db.relationship('Question', backref='question_created_network', lazy='dynamic', foreign_keys='[Question.question_network_id]')
     answer_created_ip = db.relationship('Question', backref='answer_created_network', lazy='dynamic', foreign_keys='[Question.answer_network_id]')

@@ -6,22 +6,28 @@ from wtforms.validators import IPAddress
 
 from app.core.db import db
 from app.models.security import User
+from app.models.app import Network
 from app.forms.user import UserForm, CreateUserForm
 from app.utils.routes import counter
 
 bp = Blueprint('user', __name__, url_prefix='/user/')
+
 
 @bp.before_request
 @counter
 def before_request():
     pass
 
+@login_required
+@roles_accepted('admin')
 @bp.route('/')
 @bp.route('/index/')
 def index():
     # TODO: create route
     return render_template('base.html')
 
+@login_required
+@roles_accepted('admin')
 @bp.route('/add/', methods=['GET', 'POST'])
 def add():
     form = CreateUserForm()
@@ -44,10 +50,25 @@ def add():
         user.roles.append(form.role.data)
         _ip = request.access_route[0] or request.remote_addr
         if IPAddress.check_ipv4(_ip):
-            user.created_ip = _ip
+            network = Network.query.filter(Network.ip == _ip).first()
+            if network is None:
+                network = Network()
+                network.ip = _ip
+                network.created_user_id = current_user.id
+                db.session.add(network)
+                try:
+                    db.session.commit()
+                except Exception as e:
+                    app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+                    app.logger.error(e)
+                    db.session.rollback()
+                    form.errors.add('Não foi possível concluir, a rede não foi adicionada')
+            print(network.id)
+            user.created_network_id = network.id
         else:
             form.submit.errors.append('Erro interno, não foi possível identificar seu IP')
         user.password = app.config['DEFAULT_PASS']
+        
         if not form.errors:
             try:
                 db.session.commit()
@@ -61,6 +82,9 @@ def add():
                 return render_template('add.html', form=form, title='Adicionar', user=True)
 
     return render_template('add.html', form=form, title='Adicionar', user=True)
+
+@login_required
+@roles_accepted('admin')
 @bp.route('/view/<int:id>/')
 def view(id):
     # TODO: create route
@@ -68,6 +92,8 @@ def view(id):
 
     return render_template('view.html', item=user, user=True)
 
+@login_required
+@roles_accepted('admin')
 @bp.route('/edit/<int:id>/', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'editor', 'aux_editor')
@@ -98,6 +124,8 @@ def edit(id):
     form.active.data = user.active
     return render_template('edit.html', form=form, title='Editar', user=True)
 
+@login_required
+@roles_accepted('admin')
 @bp.route('/remove/<int:id>', methods=['POST'])
 def remove(id):
     confirm = request.form.get('confirm', False)
@@ -121,6 +149,7 @@ def remove(id):
     db.session.delete(user)
     db.session.commit()
     return render_template('base.html'  )
+
 
 @bp.route('/profile/')
 @login_required
