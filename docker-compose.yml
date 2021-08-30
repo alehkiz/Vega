@@ -20,7 +20,7 @@ services:
       - LANG=pt_BR.UTF-8
       - POSTGRES_USER=alexandre
       - POSTGRES_PASSWORD=Abc123
-      - POSTGRES_DB=vega_dev
+      - POSTGRES_DB=vega
     ports:
       - 6543:5432
 networks:
