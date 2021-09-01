@@ -33,8 +33,8 @@ class BaseConfig(object):
     BABEL_DEFAULT_LOCALE = 'pt_BR'
 
     _SQLALCHEMY_DATABASE_NAME = PROJECT_NAME.lower()
-    _SQLALCHEMY_DATABASE_HOST = environ.get('DB_HOST') or 'localhost'
-    _SQLALCHEMY_DATABASE_USERNAME = environ.get('DB_USER') or 'postgres'
+    _SQLALCHEMY_DATABASE_HOST = environ.get('DB_HOST')
+    _SQLALCHEMY_DATABASE_USERNAME = environ.get('DB_USER')
     _SQLALCHEMY_DATABASE_PASSWORD = environ.get('DB_PASS')
     _SQLALCHEMY_DATABASE_PORT = environ.get('DB_PORT')
 
