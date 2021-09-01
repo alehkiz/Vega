@@ -101,6 +101,8 @@ class User(UserMixin, db.Model):
         return self.temp_password is True
     @hybrid_property
     def current_login_ip(self):
+        if self.current_login_network is None:
+            return None
         return self.current_login_network.ip
 
 
