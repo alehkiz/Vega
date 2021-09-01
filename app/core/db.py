@@ -15,7 +15,7 @@ user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 @with_appcontext
 def init_db_command():
     """Clear the existing data and create new tables."""
-    # db.drop_all()
+    db.drop_all()
     db.create_all()
     statement = '''CREATE TRIGGER question_search_vector_trigger
     BEFORE INSERT OR UPDATE 
@@ -37,6 +37,7 @@ def init_db_command():
     from app.models.wiki import Topic
     from app.models.security import User
     from app.models.app import Network
+    from app.models.notifier import NotifierStatus
     network = Network.query.filter(Network.ip == '0.0.0.0').first()
     if network is None:
         network = Network()
@@ -138,5 +139,18 @@ def init_db_command():
     admin.roles.append(admin_role)
 
     db.session.commit()
+
+    click.echo('Criando notificações')
+
+    ns = NotifierStatus()
+    ns.status = 'Ativo'
+    db.session.add(ns)
+    db.session.commit()
+    ns = NotifierStatus()
+    ns.status = 'Histórico'
+    db.session.add(ns)
+    db.session.commit()
+
+
 
     click.echo('Perfis criados.')
