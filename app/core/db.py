@@ -15,7 +15,7 @@ user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 @with_appcontext
 def init_db_command():
     """Clear the existing data and create new tables."""
-    db.drop_all()
+    # db.drop_all()
     db.create_all()
     statement = '''CREATE TRIGGER question_search_vector_trigger
     BEFORE INSERT OR UPDATE 
