@@ -60,30 +60,38 @@ def before_request():
         ]:
             
             return redirect(url_for("main.select_access"))
-    else:          
-        if not Topic.query.filter(Topic.name == session.get("AccessType", False)).first() is None:
-            g.selected_access = session.get("AccessType", False)
+    else:
+        selected_topic = Topic.query.filter(Topic.name == session.get("AccessType", False)).first()
+        if not selected_topic is None:
+            if not selected_topic.active:
+                session.pop('AccessType')
+                resp = make_response(redirect(url_for("question.index")))
+                resp.set_cookie(key="AccessType", value="", expires=0)
+                flash("Ocorreu um erro", category="danger")
+                return resp
+            else:
+                g.selected_access = session.get("AccessType", False)
         else:
             session.pop('AccessType')
             resp = make_response(redirect(url_for("question.index")))
             resp.set_cookie(key="AccessType", value="", expires=0)
             flash("Ocorreu um erro", category="danger")
             return resp
-    
     if session.get("AccessType", False):
         g.tags = Tag.query.all()
-
         g.topic = Topic.query.filter(Topic.selectable == True, Topic.name == g.selected_access).first()
-        g.questions_most_viewed = Question.most_viewed(app.config.get("ITEMS_PER_PAGE", 5), g.topic)
-        g.questions_most_recent = (
-            Question.query.order_by(Question.create_at.desc())
-            .filter(Question.answer_approved == True, Question.topic_id==g.topic.id)
-            .limit(app.config.get("ITEMS_PER_PAGE", 5))
-            .all()
-        )
-        g.questions_most_liked = Question.most_liked(
-            app.config.get("ITEMS_PER_PAGE", 5), topic=g.topic, classification=False
-        )
+        if not g.topic is None:
+
+            g.questions_most_viewed = Question.most_viewed(app.config.get("ITEMS_PER_PAGE", 5), g.topic)
+            g.questions_most_recent = (
+                Question.query.order_by(Question.create_at.desc())
+                .filter(Question.answer_approved == True, Question.topic_id==g.topic.id)
+                .limit(app.config.get("ITEMS_PER_PAGE", 5))
+                .all()
+            )
+            g.questions_most_liked = Question.most_liked(
+                app.config.get("ITEMS_PER_PAGE", 5), topic=g.topic, classification=False
+            )
     ip = Network.query.filter(Network.ip == request.remote_addr).first()
     if ip is None:
         ip = Network()
