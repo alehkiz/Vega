@@ -238,12 +238,13 @@ class Topic(db.Model):
     _name = db.Column(db.String(32), index=True, nullable=False, unique=True)
     format_name = db.Column(db.String(32), index=True,
                             nullable=True, unique=True)
+    active = db.Column(db.Boolean, default=True)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     selectable = db.Column(db.Boolean, default=False, nullable=False)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
     questions = db.relationship('Question', backref='topic', lazy='dynamic', foreign_keys='[Question.topic_id]')
     notices = db.relationship('Notifier', backref='topic', lazy='dynamic')
-
+    
     @hybrid_property
     def name(self):
         return self._name
@@ -705,7 +706,7 @@ class Question(db.Model):
 class QuestionView(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer,  db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer,  db.ForeignKey('user.id', onupdate="CASCADE", ondelete="CASCADE"))
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     datetime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)

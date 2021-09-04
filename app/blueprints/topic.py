@@ -34,21 +34,25 @@ def edit(id):
             # question.topic = form.topic.data
             # question.updater = current_user
             # question.update_at = datetime.utcnow()
+            topic.active = form.active.data
+            topic.selectable = form.selectable.data
             db.session.commit()
             return redirect(url_for('admin.topic'))
         except Exception as e:
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            return render_template('edit.html', form=form, title='Editar', edit=True)
+            return render_template('edit.html', form=form, title='Editar', topic=True)
     
     form.name.data = topic.name
+    form.active.data = topic.active
+    form.selectable.data = topic.selectable
     # form.topic.data = question.topics
     # form.topic.data = question.topic
     # form.answer.data = question.answer
 
 
-    return render_template('edit.html',form=form, title='Editar', edit=True)
+    return render_template('edit.html',form=form, title='Editar', topic=True)
 
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
@@ -63,6 +67,8 @@ def add():
             topic = Topic()
             topic.name = form.name.data
             topic.user_id = current_user.id
+            topic.active = form.active.data
+            topic.selectable = form.selectable.data
             try:
                 db.session.add(topic)
                 db.session.commit()
