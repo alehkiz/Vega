@@ -49,7 +49,8 @@ def init_db_command():
         atendimento = Topic()
         atendimento.name = 'Atendimento'
         atendimento.format_name = 'Atendimento'
-        atendimento.selectable = True
+        atendimento.selectable = False
+        atendimento.active = False
         db.session.add(atendimento)
     retaguarda = Topic.query.filter(Topic.name == 'Retaguarda').first()
     if retaguarda is None:
@@ -57,6 +58,7 @@ def init_db_command():
         retaguarda.name = 'Retaguarda'
         retaguarda.format_name = 'Retaguarda'
         retaguarda.selectable = True
+        retaguarda.active = True
         db.session.add(retaguarda)
     suporte = Topic.query.filter(Topic.name == 'Suporte').first()
     if suporte is None:
@@ -64,6 +66,7 @@ def init_db_command():
         suporte.name = 'Suporte'
         suporte.format_name = 'Suporte'
         suporte.selectable = False
+        suporte.active = True
         db.session.add(suporte)    
     db.session.commit()
 

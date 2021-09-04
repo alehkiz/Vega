@@ -28,7 +28,7 @@
             {{ macros.render_field(form.text, rows=30, placeholder='Texto')}}
         </div>
         {{ form.submit }}
-        {% elif user %}
+        {% elif user is defined%}
         {{ form.csrf_token}}
         {{ macros.render_field(form.username, size=32, class='form-control', placeholder='Username')}}
         {{ macros.render_field(form.name, size=128, class='form-control', placeholder='Nome')}}
@@ -38,7 +38,7 @@
         <br>
         {{ form.submit }}
 
-        {% elif question %}
+        {% elif question  is defined%}
         {{ form.csrf_token}}
         {{ macros.render_field(form.question, size=256, class='form-control', placeholder='Pergunta')}}
         {{ macros.render_field(form.answer, size=256, class='form-control', placeholder='Reposta')}}
@@ -51,8 +51,15 @@
         {{ macros.render_field(form.approved)}}
         <br>
         {{ form.submit }}
+        {% elif topic is defined %}
+        {{ form.csrf_token}}
+        {{ macros.render_field(form.name, size=256, class='form-control', placeholder='Tag')}}
+        {{ macros.render_field(form.active)}}
+        {{ macros.render_field(form.selectable)}}
+        <br><br>
+        {{ form.submit }}
 
-        {% elif edit %}
+        {% elif edit is defined %}
         {{ form.csrf_token}}
         {{ macros.render_field(form.name, size=256, class='form-control', placeholder='Tag')}}
         <br>

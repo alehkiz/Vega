@@ -71,8 +71,8 @@ def add():
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                return render_template('add.html', form=form, title='Incluir Sub-Tópico', topic=True)
-    return render_template('add.html', form=form, title='Incluir Sub-Tópico', topic=True)
+                return render_template('add.html', form=form, title='Incluir Sub-Tópico', sub_topic=True)
+    return render_template('add.html', form=form, title='Incluir Sub-Tópico', sub_topic=True)
 
 @bp.route('/view/<int:id>')
 def view(id):

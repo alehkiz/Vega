@@ -62,7 +62,7 @@ def add():
                     app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                     app.logger.error(e)
                     db.session.rollback()
-                    form.errors.add('Não foi possível concluir, a rede não foi adicionada')
+                    form.submit.errors.append('Não foi possível concluir, a rede não foi adicionada')
             print(network.id)
             user.created_network_id = network.id
         else:
@@ -79,6 +79,7 @@ def add():
                 app.logger.error(e)
                 db.session.rollback()
                 form.errors.add('Não foi possível concluir')
+                form.err
                 return render_template('add.html', form=form, title='Adicionar', user=True)
 
     return render_template('add.html', form=form, title='Adicionar', user=True)

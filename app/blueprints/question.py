@@ -283,7 +283,7 @@ def answer(id: int):
         q.answer_at = datetime.now()
         q.tag = form.tag.data
         q.topic_id = form.topic.data.id
-        q.sub_topic_id = form.sub_topic.data.id
+        q.sub_topic = form.sub_topic.data
         try:
             db.session.commit()
             return redirect(url_for('question.view', id=q.id))
@@ -328,7 +328,7 @@ def approve(id: int):
         q.answer_at = datetime.now()
         q.tag = form.tag.data
         q.topic_id = form.topic.data.id
-        q.sub_topic_id = form.sub_topic.data.id
+        q.sub_topic = form.sub_topic.data
         q.answer_approved = form.approve.data
         print(form.approve.data)
         print(form.repprove.data)
