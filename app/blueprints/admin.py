@@ -128,9 +128,9 @@ def answers():
             relationship = getattr(relations, str(column.property.target.name), False)
             if relationship is False:
                 raise Exception(f'{column.property.target.name} não é um relacionamento em Question')
-            q = db.session.query(Question).filter(Question.answer != None).join(relationship.mapper.class_, getattr(Question, str(column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
+            q = db.session.query(Question).filter(Question.answer != None, Question.answer_approved == True).join(relationship.mapper.class_, getattr(Question, str(column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
     else:
-        q = Question.query.filter(Question.answer != None).order_by(column_type())
+        q = Question.query.filter(Question.answer != None, Question.answer_approved == True).order_by(column_type())
     paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]

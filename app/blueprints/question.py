@@ -165,11 +165,13 @@ def edit(id):
                 app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
                 flash('Não foi possível concluir o pedido')
             question.answer_network_id = g.ip_id
-            print(question.answer_approved)
+            # print(question.answer_approved)
+        else:
+            question.answer_approved = form.approved.data
         if not g.ip_id:
             app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
             flash('Não foi possível concluir o pedido')
-        print('IP: ' , g.ip_id)
+        # print('IP: ' , g.ip_id)
         question.question_network_id = g.ip_id
         db.session.commit()
         return redirect(url_for('question.view', id=question.id))
@@ -276,12 +278,12 @@ def answer(id: int):
         if not q is None:
             if q.id != id:
                 form.question.errors.append('Você alterou a pergunta para uma já cadastrada')
-                return render_template('answer.html', form=form)
+                return render_template('answer.html', form=form, answer=True)
         q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
         q.answer = form.answer.data
         q.answer_at = datetime.now()
-        q.tag = form.tag.data
+        q.tags = form.tag.data
         q.topic_id = form.topic.data.id
         q.sub_topic = form.sub_topic.data
         try:
@@ -292,13 +294,13 @@ def answer(id: int):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            return render_template('answer.html', form=form)
+            return render_template('answer.html', form=form, answer=True)
         return 'ok'
     
     form.question.data = q.question
 
 
-    return render_template('answer.html', form=form)
+    return render_template('answer.html', form=form, answer=True)
         # TODO terminar
 
 @bp.route('/aprovar/<int:id>', methods=['POST', 'GET'])
@@ -307,6 +309,9 @@ def answer(id: int):
 @counter
 def approve(id: int):
     q = Question.query.filter(Question.id == id).first_or_404()
+    if not q.was_answered:
+        flash('Questão ainda não respondida, responda primeiro para aprovar', category='danger')
+        return redirect(url_for('question.answer', id=q.id))
     if q.was_approved:
         flash('Questão já foi aprovada', category='danger')
         return redirect(url_for('question.index'))
@@ -320,19 +325,16 @@ def approve(id: int):
                 return render_template('answer.html', form=form, approve=True)
         if form.repprove.data is True:
             q.answer_approved = False
-            flash('Questão reprovada com sucesso', category='success')
-            return redirect(url_for('question.index'))
+            flash('Questão reprovada.', category='success')
+            return redirect(url_for('admin.to_approve'))
         q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
         q.answer = form.answer.data
         q.answer_at = datetime.now()
-        q.tag = form.tag.data
+        q.tags = form.tag.data
         q.topic_id = form.topic.data.id
         q.sub_topic = form.sub_topic.data
         q.answer_approved = form.approve.data
-        print(form.approve.data)
-        print(form.repprove.data)
-
         try:
             db.session.commit()
             return redirect(url_for('question.view', id=q.id))

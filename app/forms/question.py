@@ -38,14 +38,14 @@ class QuestionAnswerForm(FlaskForm):
     question = StringField('Dúvida', validators=[DataRequired('Item obrigatório'), Length(min=5, max=256, message='A duvida deve conter um texto entre 5 e 256 caracteres')])
     answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=4000, message='A descrição deve conter um texto entre 10 e 3000 caracteres')])
     tag = QuerySelectMultipleField('Tag', allow_blank=False, query_factory= lambda : Tag.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
-    topic = QuerySelectField('Topico', allow_blank=False, query_factory= lambda : Topic.query, get_label = 'name', validators = [DataRequired('Item Obrigatório')])
+    topic = QuerySelectField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.active == True), get_label = 'name', validators = [DataRequired('Item Obrigatório')])
     sub_topic = QuerySelectField('Sub-Tópico', allow_blank=False, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
     # text = TextAreaField('Text', validators=[DataRequired('Item obrigatório'), Length(min=32, message='O campo texto deve conter pelo menos 32 caracteres')])
     # topic = QuerySelectField('Topico', validators=[DataRequired('Item obrigatório')], query_factory=lambda: Topic.query, get_label='name', allow_blank=False)
     # approved = BooleanField('Aprovada')
-    approve = SubmitField('Aprovar')
-    repprove = SubmitField('Reprovar')
-    # submit = SubmitField('Enviar')
+    # approve = SubmitField('Aprovar')
+    # repprove = SubmitField('Reprovar')
+    submit = SubmitField('Responder')
 
 class QuestionApproveForm(FlaskForm):
     question = StringField('Dúvida', validators=[DataRequired('Item obrigatório'), Length(min=5, max=256, message='A duvida deve conter um texto entre 5 e 256 caracteres')])

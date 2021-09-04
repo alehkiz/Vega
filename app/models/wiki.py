@@ -295,6 +295,9 @@ class Tag(db.Model):
     def _dict_count_questions():
         return {_.name:_.questions.count() for _ in Tag.query.all()}
     
+    def questions_approved(self):
+        return self.questions.filter(Question.answer != None, Question.answer_approved == True)
+
 class Question(db.Model):
     '''
     Classe responsável pelas perguntas da wiki, com indexação para ``full text search``
@@ -449,7 +452,7 @@ class Question(db.Model):
         return self.question
 
     def was_updated(self):
-        if self.update_at is None and self.update_user_id is None:
+        if self.update_at is None or self.update_user_id is None:
             return False
         return True
 
@@ -614,7 +617,7 @@ class Question(db.Model):
             if topic is None:
                 return []
             rs = db.session.query(Question, func.count(QuestionView.id).label('views')).join(
-                Question.view).group_by(Question).order_by(text('views DESC')).filter(Question.answer_approved==True, Question.topic_id==topic.id).limit(limit).all()
+                Question.view).group_by(Question).order_by(text('views DESC')).filter(Question.answer != None, Question.answer_approved==True, Question.topic_id==topic.id).limit(limit).all()
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
@@ -628,7 +631,7 @@ class Question(db.Model):
             if topic is None:
                 return []
             rs = db.session.query(Question, func.count(QuestionLike.id).label('likes')).join(
-                Question.like).group_by(Question).order_by(text('likes DESC')).filter(Question.answer_approved==True, Question.topic_id == topic.id).limit(limit).all()
+                Question.like).group_by(Question).order_by(text('likes DESC')).filter(Question.answer != None, Question.answer_approved==True, Question.topic_id == topic.id).limit(limit).all()
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
