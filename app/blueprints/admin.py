@@ -1,3 +1,4 @@
+from app.models.notifier import Notifier
 from flask import (
     current_app as app,
     Blueprint,
@@ -26,10 +27,11 @@ bp = Blueprint("admin", __name__, url_prefix="/admin/")
 
 
 @bp.before_request
+@login_required
+@roles_accepted('admin')
 @counter
 def before_request():
     pass
-
 
 @bp.route("/")
 @login_required
@@ -422,4 +424,30 @@ def tag():
         cls_table=Tag,
         list=True,
         page_name="Tags",
+    )
+
+@bp.route('/notifier')
+@login_required
+@roles_accepted('admin')
+def notifier():
+    page = request.args.get("page", 1, type=int)
+    paginate = Notifier.query.paginate(
+        page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False
+    )
+    first_page = (
+        list(paginate.iter_pages())[0]
+        if len(list(paginate.iter_pages())) >= 1
+        else None
+    )
+    last_page = paginate.pages
+    # print(paginate.items)
+    return render_template(
+        "admin.html",
+        pagination=paginate,
+        first_page=first_page,
+        last_page=last_page,
+        endpoint=request.url_rule.endpoint,
+        cls_table=Notifier,
+        list=True,
+        page_name="Notificações",
     )

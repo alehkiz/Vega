@@ -89,6 +89,17 @@
         <br>
         {{ form.submit }}
 
+        {% elif notifier is defined %}
+
+        {{ form.csrf_token }}
+        {{ macros.render_field(form.title, size=32, class='form-control', placeholder='Titulo') }}
+        {{ macros.render_field(form.content, size=32, class='form-control', placeholder='Titulo', maxlength=499) }}
+        {{ macros.render_field(form.status, nosize=true, class='form-select') }}
+        {{ macros.render_field(form.priority, nosize=true, class='form-select') }}
+        {{ macros.render_field(form.topic, nosize=true, class='form-select') }}
+        <br>
+        {{ form.submit }}
+
         {% endif %}
         <br />
 

@@ -18,17 +18,19 @@ bp = Blueprint('user', __name__, url_prefix='/user/')
 def before_request():
     pass
 
-@login_required
-@roles_accepted('admin')
+
 @bp.route('/')
 @bp.route('/index/')
+@login_required
+@roles_accepted('admin')
 def index():
     # TODO: create route
     return render_template('base.html')
 
+
+@bp.route('/add/', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin')
-@bp.route('/add/', methods=['GET', 'POST'])
 def add():
     form = CreateUserForm()
     error = False
@@ -63,7 +65,6 @@ def add():
                     app.logger.error(e)
                     db.session.rollback()
                     form.submit.errors.append('Não foi possível concluir, a rede não foi adicionada')
-            print(network.id)
             user.created_network_id = network.id
         else:
             form.submit.errors.append('Erro interno, não foi possível identificar seu IP')
@@ -79,25 +80,24 @@ def add():
                 app.logger.error(e)
                 db.session.rollback()
                 form.errors.add('Não foi possível concluir')
-                form.err
                 return render_template('add.html', form=form, title='Adicionar', user=True)
 
     return render_template('add.html', form=form, title='Adicionar', user=True)
 
+
+@bp.route('/view/<int:id>/')
 @login_required
 @roles_accepted('admin')
-@bp.route('/view/<int:id>/')
 def view(id):
     # TODO: create route
     user = User.query.filter_by(id=id).first_or_404()
 
     return render_template('view.html', item=user, user=True)
 
-@login_required
-@roles_accepted('admin')
+
 @bp.route('/edit/<int:id>/', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('admin', 'editor', 'aux_editor')
+@roles_accepted('admin')
 def edit(id):
     user = User.query.filter_by(id=id).first_or_404()
     form = UserForm()
@@ -110,6 +110,7 @@ def edit(id):
             user.updated_at = datetime.utcnow()
             user.active = form.active.data
             user.created_ip = request.remote_addr
+            user.roles = form.role.data
             db.session.commit()
             flash('Usuário atualizado com sucesso', category='success')
             return redirect(url_for('user.view', id=user.id))
@@ -123,11 +124,13 @@ def edit(id):
     form.email.data = user.email
     form.about_me.data = user.about_me
     form.active.data = user.active
+    form.role.data = user.roles
     return render_template('edit.html', form=form, title='Editar', user=True)
 
+
+@bp.route('/remove/<int:id>', methods=['POST'])
 @login_required
 @roles_accepted('admin')
-@bp.route('/remove/<int:id>', methods=['POST'])
 def remove(id):
     confirm = request.form.get('confirm', False)
     if confirm != 'true':
@@ -143,6 +146,9 @@ def remove(id):
         app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
         app.logger.error(e)
         db.session.rollback()
+        return jsonify({
+            'message': 'Não foi possível atualizar'
+        }), 404
         return abort(404)
 
 

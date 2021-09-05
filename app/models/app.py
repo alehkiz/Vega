@@ -115,4 +115,5 @@ class Network(db.Model):
     last_login_user = db.relationship('User', backref='last_login_network', lazy='dynamic', foreign_keys='[User.last_login_network_id]')
     current_login_user = db.relationship('User', backref='current_login_network', lazy='dynamic', foreign_keys='[User.current_login_network_id]')
     confirmed_user = db.relationship('User', backref='confirmed_network', lazy='dynamic', foreign_keys='[User.confirmed_network_id]')
+    notifiers = db.relationship('Notifier', backref='network', lazy='dynamic', single_parent=True)
     # created_citizen = db.relationship('Citizen', backref='created_network', lazy='dynamic', foreign_keys='[Citizen.created_network_id]')

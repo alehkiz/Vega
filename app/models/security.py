@@ -52,8 +52,8 @@ class User(UserMixin, db.Model):
     question_like = db.relationship('QuestionLike', backref='users_liked', lazy='dynamic', foreign_keys='[QuestionLike.user_id]')
     question_save = db.relationship('QuestionSave', backref='users_saved', lazy='dynamic', foreign_keys='[QuestionSave.user_id]')
     visits = db.relationship('Visit', backref='visitor', lazy='dynamic', foreign_keys='[Visit.user_id]')
-
-    notification_created= db.relationship('Notifier', single_parent=True, backref='created_user', lazy='dynamic')
+    notification_updated = db.relationship('Notifier', backref='update_user', lazy='dynamic', foreign_keys='[Notifier.update_user_id]')
+    notification_created= db.relationship('Notifier', backref='created_user', lazy='dynamic', foreign_keys='[Notifier.created_user_id]')
     roles = db.relationship('Role', 
                 secondary=roles_users, 
                 backref=db.backref('users', lazy='dynamic'), 

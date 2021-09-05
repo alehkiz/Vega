@@ -159,6 +159,29 @@ class BaseConfig(object):
                 'attr': 'username'
 
             }
+        },
+        'notifier':{
+            'id': {
+                'name': 'id',
+                'attr': None
+            },
+            'title': {
+                'name': 'Titulo',
+                'attr': None
+            },
+            'priority': {
+                'name': 'Prioridade',
+                'attr': 'priority_name'
+            },
+            'topic': {
+                'name': 'Topico',
+                'attr': 'topic_name'
+            },
+            'created_at':{
+                'name': 'Criado em',
+                'attr': 'get_formated_date'
+            }
+
         }
     }
     ROUTES_NAMES = {
