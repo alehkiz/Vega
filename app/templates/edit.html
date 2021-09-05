@@ -34,6 +34,11 @@
         {{ macros.render_field(form.name, size=128, class='form-control', placeholder='Nome')}}
         {{ macros.render_field(form.email, size=128, class='form-control', placeholder='Email')}}
         {{ macros.render_field(form.about_me, size=512, class='form-control', placeholder='Sobre mim')}}
+        <br>
+        <div class="col-md-6">
+            {{ macros.render_field(form.role, class='form-select', nosize=true)}}
+        </div>
+        <br>
         {{ macros.render_field(form.active)}}
         <br>
         {{ form.submit }}
@@ -64,6 +69,18 @@
         {{ macros.render_field(form.name, size=256, class='form-control', placeholder='Tag')}}
         <br>
         {{ form.submit }}
+
+        {% elif notifier is defined %}
+
+        {{ form.csrf_token }}
+        {{ macros.render_field(form.title, size=32, class='form-control', placeholder='Titulo') }}
+        {{ macros.render_field(form.content, size=60, class='form-control', placeholder='Titulo', maxlength=490) }}
+        {{ macros.render_field(form.status, nosize=true, class='form-select') }}
+        {{ macros.render_field(form.priority, nosize=true, class='form-select') }}
+        {{ macros.render_field(form.topic, nosize=true, class='form-select') }}
+        <br>
+        {{ macros.render_field(form.submit) }}
+
 
         {% endif %}
         {#

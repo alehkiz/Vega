@@ -136,7 +136,7 @@ def view(id=None):
     if current_user.is_authenticated:
         user_id = current_user.id
     else:
-        user = User.query.filter(User.name == 'anon').first()
+        user = User.query.filter(User.name == 'ANON').first()
         if user is None:
             raise Exception('Usuário anônimo não criado')
         user_id = user.id

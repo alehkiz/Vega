@@ -92,10 +92,11 @@ def before_request():
             g.questions_most_liked = Question.most_liked(
                 app.config.get("ITEMS_PER_PAGE", 5), topic=g.topic, classification=False
             )
-    ip = Network.query.filter(Network.ip == request.remote_addr).first()
+    _ip = request.access_route[0] or request.remote_addr
+    ip = Network.query.filter(Network.ip == _ip).first()
     if ip is None:
         ip = Network()
-        ip.ip = request.remote_addr
+        ip.ip = _ip
         db.session.add(ip)
 
         try:

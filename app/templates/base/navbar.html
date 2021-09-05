@@ -95,6 +95,15 @@
                         <li><a class="dropdown-item" href="{{url_for('admin.topic')}}">Tópico</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.sub_topic')}}">Sub Tópico</a></li>
 
+                        {% if config.get('MODE', False) == 'dev' %}<!-- #TODO apenas em DEV -->
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" type='button' href="{{ url_for('admin.notifier')}}" >Notificações</a></li>
+                        <li><a class="dropdown-item" type='button' href="{{ url_for('notifier.index')}}" >Notificações - Prioridades</a></li>
+                        <li><a class="dropdown-item" type='button' href="{{ url_for('notifier.index')}}" >Notificações - Status</a></li>
+                        {% endif %}
+
                     </ul>
 
                 </li>
