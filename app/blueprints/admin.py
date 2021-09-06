@@ -405,16 +405,39 @@ def sub_topic():
 @roles_accepted("admin")
 def tag():
     page = request.args.get("page", 1, type=int)
-    paginate = Tag.query.paginate(
-        page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False
-    )
+    order = request.args.get("order", False)
+    order_type = request.args.get("order_type", "desc")
+    order_dict = {'desc':desc, 'asc': asc}
+    if not order_type in order_dict.keys():
+        order_type = 'desc'
+    if not order is False or not order_type is False:
+        try:
+            column = getattr(Tag, order)
+            column_type = getattr(column, order_type)
+        except Exception as e:
+            column = Tag.id
+            column_type = Tag.id.desc
+    else:
+        column = Tag.id
+        column_type = column.desc
+    # TODO Incluir a odernação por relacionamento de acordo com a seleção do usuário
+    relations = inspect(Tag).relationships
+    if hasattr(column.property, 'target'):
+        if column.property.target.name in relations:
+            relationship = getattr(relations, str(column.property.target.name), False)
+            if relationship is False:
+                raise Exception(f'{column.property.target.name} não é um relacionamento em Tag')
+            q = db.session.query(Tag).join(relationship.mapper.class_, getattr(Tag, str(column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
+    else:
+        q = Tag.query.order_by(column_type())
+    paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
         if len(list(paginate.iter_pages())) >= 1
         else None
     )
     last_page = paginate.pages
-    # print(paginate.items)
+    order_type = "asc" if order_type == "desc" else "desc"
     return render_template(
         "admin.html",
         pagination=paginate,
@@ -423,7 +446,8 @@ def tag():
         endpoint=request.url_rule.endpoint,
         cls_table=Tag,
         list=True,
-        page_name="Tags",
+        page_name="Notificações",
+        order_type=order_type,
     )
 
 @bp.route('/notifier')
@@ -431,16 +455,39 @@ def tag():
 @roles_accepted('admin')
 def notifier():
     page = request.args.get("page", 1, type=int)
-    paginate = Notifier.query.paginate(
-        page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False
-    )
+    order = request.args.get("order", False)
+    order_type = request.args.get("order_type", "desc")
+    order_dict = {'desc':desc, 'asc': asc}
+    if not order_type in order_dict.keys():
+        order_type = 'desc'
+    if not order is False or not order_type is False:
+        try:
+            column = getattr(Notifier, order)
+            column_type = getattr(column, order_type)
+        except Exception as e:
+            column = Notifier.id
+            column_type = Notifier.id.desc
+    else:
+        column = Notifier.id
+        column_type = column.desc
+    # TODO Incluir a odernação por relacionamento de acordo com a seleção do usuário
+    relations = inspect(Notifier).relationships
+    if hasattr(column.property, 'target'):
+        if column.property.target.name in relations:
+            relationship = getattr(relations, str(column.property.target.name), False)
+            if relationship is False:
+                raise Exception(f'{column.property.target.name} não é um relacionamento em Notifier')
+            q = db.session.query(Notifier).join(relationship.mapper.class_, getattr(Notifier, str(column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
+    else:
+        q = Notifier.query.order_by(column_type())
+    paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
         if len(list(paginate.iter_pages())) >= 1
         else None
     )
     last_page = paginate.pages
-    # print(paginate.items)
+    order_type = "asc" if order_type == "desc" else "desc"
     return render_template(
         "admin.html",
         pagination=paginate,
@@ -450,4 +497,5 @@ def notifier():
         cls_table=Notifier,
         list=True,
         page_name="Notificações",
+        order_type=order_type,
     )

@@ -1,4 +1,5 @@
 # from sqlalchemy import func
+from enum import unique
 from os import stat
 from flask import Markup, escape, current_app as app, abort, flash
 from sqlalchemy import func, text, Index, cast, desc, extract, Date
@@ -280,7 +281,7 @@ class SubTopic(db.Model):
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(48), index=True, nullable=False)
+    name = db.Column(db.String(48), index=True, nullable=False, unique=True)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref='tag')
@@ -321,7 +322,7 @@ class Question(db.Model):
     question = db.Column(db.String(256), index=True,
                          nullable=False, unique=True)
     _answer = db.Column('answer', db.Text, index=True, nullable=True, unique=False)
-    answer_approved = db.Column(db.Boolean, nullable=True)
+    answer_approved = db.Column(db.Boolean, nullable=True, default=False)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     create_user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -337,7 +338,7 @@ class Question(db.Model):
     tags = db.relationship('Tag',
                            secondary=question_tag,
                            backref=db.backref('questions',
-                                              lazy='dynamic'),
+                                              lazy='dynamic', cascade='all, delete-orphan', single_parent=True,), 
                            lazy='dynamic')
     search_vector = db.Column(TSVectorType('question', 'answer', regconfig='public.pt', cache_ok=False))#regconfig='public.pt'))
 
