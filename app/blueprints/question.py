@@ -195,8 +195,10 @@ def edit(id):
 def remove(id):
     confirm = request.form.get('confirm', False)
     if confirm != 'true':
-        
-        abort(404)
+        return jsonify({
+            'status': 'error',
+            'message': 'not confirmed'
+        }), 404
     q = Question.query.filter(Question.id == id).first_or_404()
     id = q.id 
     try:

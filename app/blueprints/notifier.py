@@ -1,3 +1,5 @@
+from app.blueprints.admin import notifier
+from flask.json import jsonify
 from app.utils.routes import counter
 from flask.helpers import flash, url_for
 from werkzeug.utils import redirect
@@ -108,7 +110,33 @@ def edit(id: int):
     form.topic.data = nf.topic
     return render_template('edit.html', form=form, title='Editar', notifier=True)
 
-@bp.route('/remove/<int:id>')
+@bp.route('/remove/<int:id>', methods=['GET', 'POST'])
 @counter
 def remove(id: int):
-    return ''
+    confirm = request.form.get('confirm', False)
+    if confirm != 'true':
+        return jsonify({
+            'status': 'error',
+            'message': 'not confirmed'
+        }), 404
+    notifier = Notifier.query.filter(Notifier.id == id).first()
+    if notifier is None:
+        return jsonify({
+            'status': 'error',
+            'message': 'notification not found'
+        }), 404
+    try:
+        db.session.delete(notifier)
+        db.session.commit()
+        return jsonify({
+            'id': id,
+            'status': 'success'
+        }),200
+    except Exception as e:
+        app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+        app.logger.error(e)
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': 'database error'
+        }), 404

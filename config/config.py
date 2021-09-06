@@ -139,11 +139,11 @@ class BaseConfig(object):
                 'name' : 'Nome',
                 'attr' : None
             },
-            'user': {
-                'name' : 'criado por',
-                'attr': 'username'
+            # 'user': {
+            #     'name' : 'criado por',
+            #     'attr': 'username'
 
-            }
+            # }
         },
         'sub_topic' :{
             'id' :{
@@ -169,11 +169,15 @@ class BaseConfig(object):
                 'name': 'Titulo',
                 'attr': None
             },
-            'priority': {
+            'status_id': {
+                'name': 'Status',
+                'attr': 'status_name'
+            },
+            'priority_id': {
                 'name': 'Prioridade',
                 'attr': 'priority_name'
             },
-            'topic': {
+            'topic_id': {
                 'name': 'Topico',
                 'attr': 'topic_name'
             },

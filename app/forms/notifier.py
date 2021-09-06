@@ -12,5 +12,5 @@ class NotifierForm(FlaskForm):
     content = TextAreaField('Conteúdo', validators=[DataRequired('Item obrigatório'), Length(min=5, max=500, message='O titulo deve conster entre 5 e 500 caracteres')])
     status = QuerySelectField('Status', allow_blank=False, query_factory=lambda: NotifierStatus.query, get_label='status',validators=[DataRequired('Item obrigatório')])
     priority = QuerySelectField('Prioridade', allow_blank=False, query_factory=lambda: NotifierPriority.query, get_label='priority', validators=[DataRequired('Item obrigatório')])
-    topic = QuerySelectField('Topico', allow_blank=False, query_factory=lambda: Topic.query, get_label='name', validators=[DataRequired('Item obrigarório')])
+    topic = QuerySelectField('Topico', allow_blank=False, query_factory=lambda: Topic.query.filter(Topic.active == True), get_label='name', validators=[DataRequired('Item obrigarório')])
     submit = SubmitField('Enviar')
