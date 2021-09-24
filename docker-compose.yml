@@ -10,7 +10,7 @@ services:
     ports:
       - 80:80
     env_file:
-      - ./.env.dev
+      - ./.env.docker
   db:
     image: postgres:13-alpine
     volumes:
