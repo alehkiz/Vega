@@ -90,7 +90,13 @@ class User(UserMixin, db.Model):
     def is_support(self):
         if any([role.is_support for role in self.roles.all()]):
             return True
-        return flask_sqlalchemy
+        return False
+    @property
+    def has_support(self):
+        if any([role.has_support() for role in self.roles.all()]):
+            return True
+        return False
+    
     @property
     def is_viewer(self):
         if any([role.is_viewer for role in self.roles.all()]):
@@ -211,6 +217,11 @@ class Role(RoleMixin, db.Model):
     @property
     def is_support(self):
         if self.level == 4:
+            return True
+        return False
+    @property
+    def has_support(self):
+        if self.level in [0,2,3,4]:
             return True
         return False
 
