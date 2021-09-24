@@ -28,21 +28,21 @@ bp = Blueprint("admin", __name__, url_prefix="/admin/")
 
 @bp.before_request
 @login_required
-@roles_accepted('admin')
+@roles_accepted("admin", 'support', 'manager_user', 'manager_content')
 @counter
 def before_request():
     pass
 
 @bp.route("/")
 @login_required
-@roles_accepted("admin")
+@roles_accepted("admin", 'support', 'manager_user', 'manager_content')
 def index():
     return render_template("base.html")
 
 
 @bp.route("/users/")
 @login_required
-@roles_accepted("admin")
+@roles_accepted("admin", 'manager_user')
 def users():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
@@ -102,7 +102,7 @@ def articles():
 
 @bp.route("/respostas")
 @login_required
-@roles_accepted("admin")
+@roles_accepted("admin", 'support', 'manager_user', 'manager_content')
 def answers():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
@@ -155,8 +155,8 @@ def answers():
 
 
 @bp.route("/perguntas")
-@login_required
-@roles_accepted("admin", 'editor', 'support')
+# @login_required
+@roles_accepted("admin", 'support', 'manager_user', 'manager_content')
 def questions():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
@@ -235,7 +235,7 @@ def questions():
 
 @bp.route("/aprovar")
 @login_required
-@roles_accepted("admin", "suporte", "editor")
+@roles_accepted("admin", "support", "manager_content")
 def to_approve():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)

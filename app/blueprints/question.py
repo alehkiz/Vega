@@ -144,6 +144,8 @@ def view(id=None):
     return render_template('question.html', mode='view', question=question, cls_question=Question)
 
 @bp.route('edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@roles_accepted("admin", "support", "manager_content")
 @counter
 def edit(id):
     question = Question.query.filter(Question.id == id).first_or_404()
@@ -191,6 +193,8 @@ def edit(id):
     return render_template('edit.html',form=form, title='Editar', question=True)
 
 @bp.route('remove/<int:id>', methods=['POST'])
+@login_required
+@roles_accepted("admin", "manager_content")
 @counter
 def remove(id):
     confirm = request.form.get('confirm', False)
@@ -216,7 +220,7 @@ def remove(id):
     
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('admin', 'editor', 'aux_editor')
+@roles_accepted("admin", "support", "manager_content")
 @counter
 def add():
     form = QuestionEditForm()
@@ -267,7 +271,7 @@ def add():
 
 @bp.route('/responder/<int:id>', methods=['POST', 'GET'])
 @login_required
-@roles_accepted('admin', 'editor', 'aux_editor')
+@roles_accepted("admin", "support", "manager_content")
 @counter
 def answer(id: int):
     q = Question.query.filter(Question.id == id).first_or_404()
@@ -308,7 +312,7 @@ def answer(id: int):
 
 @bp.route('/aprovar/<int:id>', methods=['POST', 'GET'])
 @login_required
-@roles_accepted('admin', 'editor', 'aux_editor')
+@roles_accepted("admin", "manager_content")
 @counter
 def approve(id: int):
     q = Question.query.filter(Question.id == id).first_or_404()
