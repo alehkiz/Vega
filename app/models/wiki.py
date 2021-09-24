@@ -335,6 +335,7 @@ class Question(db.Model):
     sub_topic_id = db.Column(db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
     question_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
     answer_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=True)
+    active = db.Column(db.Boolean, nullable=False)
     tags = db.relationship('Tag',
                            secondary=question_tag,
                            backref=db.backref('questions',
@@ -399,6 +400,12 @@ class Question(db.Model):
     def is_approved_to(self):
         if self.answer_approved == True:
             return "Sim"
+        return 'Não'
+    
+    @property
+    def is_active(self):
+        if self.active == True:
+            return 'Sim'
         return 'Não'
     
     @answer.setter

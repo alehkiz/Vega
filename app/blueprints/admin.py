@@ -57,7 +57,7 @@ def users():
     else:
         column = User.id
         column_type = column.desc
-    u = User.query.order_by(column_type())
+    u = User.query.filter(User.active == True).order_by(column_type())
     paginate = u.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     # paginate = User.query.paginate(page, app.config.get('TABLE_ITEMS_PER_PAGE', 10), False)
     first_page = list(paginate.iter_pages())[0]

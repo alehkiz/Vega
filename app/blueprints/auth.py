@@ -87,6 +87,11 @@ def temp_password():
                 message = 'Senha atual incorreta'
                 flash(message=message, category='danger')
                 return redirect(url_for('auth.login'))
+            if form.new_password.data == form.old_password.data:
+                # senha nova é igual a senha antiga.
+                message = "A nova senha deve ser diferente da senha anterior"
+                flash(message=message, category='danger')
+                return redirect(url_for('auth.login'))
             user.password = form.new_password.data
             user.temp_password = False
             try:
@@ -117,6 +122,11 @@ def change_password():
             if not current_user.check_password(form.old_password.data):
                 # senha antiga não é igual a senha do usuário
                 message = 'Senha atual incorreta'
+                flash(message=message, category='danger')
+                return redirect(url_for('auth.login'))
+            if form.new_password.data == form.old_password.data:
+                # senha nova é igual a senha antiga.
+                message = "A nova senha deve ser diferente da senha anterior"
                 flash(message=message, category='danger')
                 return redirect(url_for('auth.login'))
             current_user.password = form.new_password.data
