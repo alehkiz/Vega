@@ -202,7 +202,7 @@ def remove(id):
     q = Question.query.filter(Question.id == id).first_or_404()
     id = q.id 
     try:
-        db.session.delete(q)
+        q.active = False
         db.session.commit()
         return jsonify({'id':id,
                     'status': 'success'})
@@ -248,6 +248,7 @@ def add():
             question.topic_id = form.topic.data.id
             question.sub_topic_id = form.sub_topic.data.id
             question.tags = form.tag.data
+            question.active = True
             try:
                 db.session.add(question)
                 db.session.commit()
@@ -572,7 +573,7 @@ def make_question():
             question.topic = form.topic.data
             question.create_user_id = user.id
             question.question_network_id = ip.id
-            print('ip: ', ip.id)
+            question.active = True
             db.session.add(question)
             try:
                 db.session.commit()

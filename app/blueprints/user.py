@@ -138,7 +138,7 @@ def remove(id):
     u = User.query.filter(User.id == id).first_or_404()
     id = u.id
     try:
-        db.session.delete(u)
+        u.active = False
         db.session.commit()
         return jsonify({'id':id,
                     'status': 'success'})

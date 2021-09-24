@@ -2,6 +2,7 @@ from os.path import abspath, dirname, join
 from os import environ
 
 import logging
+from re import M
 
 import app
 
@@ -113,6 +114,10 @@ class BaseConfig(object):
             'approved':{
                 'name' : 'Aprovada?',
                 'attr' : 'is_approved_to'
+            },
+            'active':{
+                'name': 'ativa',
+                'attr' : 'is_active'
             }
 
         },
