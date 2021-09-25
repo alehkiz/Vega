@@ -6,6 +6,7 @@
     {{ form.csrf_token }}
     {{ macros.render_field(form.question, size=64, class='form-control', placeholder='Dúvida', maxlength=256)}}
     {{ macros.render_field(form.topic, class='form-select', nosize=True)}}
+    <br>
     {{ form.submit }}
 </form>
 

@@ -35,7 +35,6 @@ def login():
             return redirect(url_for('auth.login'))
         if user.is_temp_password:
             flash('É necessário alterar sua senha.', category='info')
-            
             fsession['temp_user'] = user.username
             return redirect(url_for('auth.temp_password'))
         login_user(user, remember=login.remember_me.data)
@@ -43,7 +42,7 @@ def login():
         user.last_login_at = datetime.utcnow()
         user.current_login_at = datetime.utcnow()
         user.current_login_ip = request.remote_addr
-        user.login_count += 1
+        # user.login_count += 1
         try:
             db.session.commit()
         except Exception as e:

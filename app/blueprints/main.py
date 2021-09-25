@@ -52,14 +52,21 @@ def before_request():
             return abort(500)
 
     if not session.get("AccessType", False):
-
         current_rule = request.url_rule
-        if not current_rule is None and current_rule.endpoint not in [
-            "main.select_access",
-            "static",
-        ]:
-            
-            return redirect(url_for("main.select_access"))
+        if Topic.query.filter(Topic.selectable == True).count() > 1:
+            if not current_rule is None and current_rule.endpoint not in [
+                "main.select_access",
+                "static",
+            ]:
+                return redirect(url_for("main.select_access"))
+        else:
+            topic = Topic.query.filter(Topic.selectable == True).first()
+            response = make_response(redirect(url_for(current_rule.endpoint)))
+            response.set_cookie(key="AccessType", value=topic.name)
+            session["AccessType"] = topic.name
+            g.selected_access = topic.name
+            return response
+
     else:
         selected_topic = Topic.query.filter(Topic.name == session.get("AccessType", False)).first()
         if not selected_topic is None:
