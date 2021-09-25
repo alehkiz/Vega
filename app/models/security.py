@@ -134,6 +134,7 @@ class User(UserMixin, db.Model):
         #     app.logger.error(e)
         #     raise Exception('Não foi possível salvar o IP')
 
+    
     @hybrid_property
     def password(self):
         return self._password
@@ -166,10 +167,14 @@ class User(UserMixin, db.Model):
     @property
     def questions_saved_count(self):
         return self.question_save.count()
+    
+    @property
+    def first_name(self):
+        return self.name.split()[0]
 
     def __repr__(self):
         return f'<User {self.username}>'
-
+    
     @staticmethod
     def query_by_month_year(year : int, month : int):
         return User.query.filter(extract('year', User.created_at) == year, extract('month', User.created_at) == month)
