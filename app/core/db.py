@@ -17,10 +17,27 @@ def init_db_command():
     """Clear the existing data and create new tables."""
     db.drop_all()
     db.create_all()
+    statement = '''CREATE TRIGGER question_search_vector_trigger
+    BEFORE INSERT OR UPDATE 
+    ON public.question
+    FOR EACH ROW
+    EXECUTE PROCEDURE tsvector_update_trigger('search_vector', 'public.pt', 'question', 'answer');
+
+    CREATE TRIGGER notifier_search_vector_trigger
+    BEFORE INSERT OR UPDATE 
+    ON public.notifier
+    FOR EACH ROW
+    EXECUTE PROCEDURE tsvector_update_trigger('search_vector', 'public.pt', 'title', 'content');
+    '''
+    try:
+        db.engine.execute(statement)
+    except Exception:
+        ...
     click.echo('Banco de dados inicializado...')
     from app.models.wiki import Topic
     from app.models.security import User
     from app.models.app import Network
+    from app.models.notifier import NotifierStatus
     network = Network.query.filter(Network.ip == '0.0.0.0').first()
     if network is None:
         network = Network()
@@ -32,7 +49,8 @@ def init_db_command():
         atendimento = Topic()
         atendimento.name = 'Atendimento'
         atendimento.format_name = 'Atendimento'
-        atendimento.selectable = True
+        atendimento.selectable = False
+        atendimento.active = False
         db.session.add(atendimento)
     retaguarda = Topic.query.filter(Topic.name == 'Retaguarda').first()
     if retaguarda is None:
@@ -40,6 +58,7 @@ def init_db_command():
         retaguarda.name = 'Retaguarda'
         retaguarda.format_name = 'Retaguarda'
         retaguarda.selectable = True
+        retaguarda.active = True
         db.session.add(retaguarda)
     suporte = Topic.query.filter(Topic.name == 'Suporte').first()
     if suporte is None:
@@ -47,6 +66,7 @@ def init_db_command():
         suporte.name = 'Suporte'
         suporte.format_name = 'Suporte'
         suporte.selectable = False
+        suporte.active = True
         db.session.add(suporte)    
     db.session.commit()
 
@@ -122,5 +142,18 @@ def init_db_command():
     admin.roles.append(admin_role)
 
     db.session.commit()
+
+    click.echo('Criando notificações')
+
+    ns = NotifierStatus()
+    ns.status = 'Ativo'
+    db.session.add(ns)
+    db.session.commit()
+    ns = NotifierStatus()
+    ns.status = 'Histórico'
+    db.session.add(ns)
+    db.session.commit()
+
+
 
     click.echo('Perfis criados.')

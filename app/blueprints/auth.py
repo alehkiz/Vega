@@ -35,7 +35,6 @@ def login():
             return redirect(url_for('auth.login'))
         if user.is_temp_password:
             flash('É necessário alterar sua senha.', category='info')
-            
             fsession['temp_user'] = user.username
             return redirect(url_for('auth.temp_password'))
         login_user(user, remember=login.remember_me.data)
@@ -43,7 +42,7 @@ def login():
         user.last_login_at = datetime.utcnow()
         user.current_login_at = datetime.utcnow()
         user.current_login_ip = request.remote_addr
-        user.login_count += 1
+        # user.login_count += 1
         try:
             db.session.commit()
         except Exception as e:
@@ -87,6 +86,11 @@ def temp_password():
                 message = 'Senha atual incorreta'
                 flash(message=message, category='danger')
                 return redirect(url_for('auth.login'))
+            if form.new_password.data == form.old_password.data:
+                # senha nova é igual a senha antiga.
+                message = "A nova senha deve ser diferente da senha anterior"
+                flash(message=message, category='danger')
+                return redirect(url_for('auth.login'))
             user.password = form.new_password.data
             user.temp_password = False
             try:
@@ -117,6 +121,11 @@ def change_password():
             if not current_user.check_password(form.old_password.data):
                 # senha antiga não é igual a senha do usuário
                 message = 'Senha atual incorreta'
+                flash(message=message, category='danger')
+                return redirect(url_for('auth.login'))
+            if form.new_password.data == form.old_password.data:
+                # senha nova é igual a senha antiga.
+                message = "A nova senha deve ser diferente da senha anterior"
                 flash(message=message, category='danger')
                 return redirect(url_for('auth.login'))
             current_user.password = form.new_password.data

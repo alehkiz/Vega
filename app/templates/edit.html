@@ -28,17 +28,22 @@
             {{ macros.render_field(form.text, rows=30, placeholder='Texto')}}
         </div>
         {{ form.submit }}
-        {% elif user %}
+        {% elif user is defined%}
         {{ form.csrf_token}}
         {{ macros.render_field(form.username, size=32, class='form-control', placeholder='Username')}}
         {{ macros.render_field(form.name, size=128, class='form-control', placeholder='Nome')}}
         {{ macros.render_field(form.email, size=128, class='form-control', placeholder='Email')}}
         {{ macros.render_field(form.about_me, size=512, class='form-control', placeholder='Sobre mim')}}
+        <br>
+        <div class="col-md-6">
+            {{ macros.render_field(form.role, class='form-select', nosize=true)}}
+        </div>
+        <br>
         {{ macros.render_field(form.active)}}
         <br>
         {{ form.submit }}
 
-        {% elif question %}
+        {% elif question  is defined%}
         {{ form.csrf_token}}
         {{ macros.render_field(form.question, size=256, class='form-control', placeholder='Pergunta')}}
         {{ macros.render_field(form.answer, size=256, class='form-control', placeholder='Reposta')}}
@@ -51,12 +56,31 @@
         {{ macros.render_field(form.approved)}}
         <br>
         {{ form.submit }}
+        {% elif topic is defined %}
+        {{ form.csrf_token}}
+        {{ macros.render_field(form.name, size=256, class='form-control', placeholder='Tag')}}
+        {{ macros.render_field(form.active)}}
+        {{ macros.render_field(form.selectable)}}
+        <br><br>
+        {{ form.submit }}
 
-        {% elif edit %}
+        {% elif edit is defined %}
         {{ form.csrf_token}}
         {{ macros.render_field(form.name, size=256, class='form-control', placeholder='Tag')}}
         <br>
         {{ form.submit }}
+
+        {% elif notifier is defined %}
+
+        {{ form.csrf_token }}
+        {{ macros.render_field(form.title, size=32, class='form-control', placeholder='Titulo') }}
+        {{ macros.render_field(form.content, size=60, class='form-control', placeholder='Titulo', maxlength=490) }}
+        {{ macros.render_field(form.status, nosize=true, class='form-select') }}
+        {{ macros.render_field(form.priority, nosize=true, class='form-select') }}
+        {{ macros.render_field(form.topic, nosize=true, class='form-select') }}
+        <br>
+        {{ form.submit }}
+
 
         {% endif %}
         {#

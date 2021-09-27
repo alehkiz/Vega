@@ -36,10 +36,10 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     created_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
     last_login_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_login_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=True)
+    last_login_network_id = db.Column(db.Integer, db.ForeignKey('network.id'))
     current_login_at = db.Column(db.DateTime, nullable=True)
-    current_login_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
-    confirmed_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=True)
+    current_login_network_id = db.Column(db.Integer, db.ForeignKey('network.id'))
+    confirmed_network_id = db.Column(db.Integer, db.ForeignKey('network.id'))
     confirmed_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=True)
     login_count = db.Column(db.Integer, nullable=True, default=0)
@@ -52,7 +52,8 @@ class User(UserMixin, db.Model):
     question_like = db.relationship('QuestionLike', backref='users_liked', lazy='dynamic', foreign_keys='[QuestionLike.user_id]')
     question_save = db.relationship('QuestionSave', backref='users_saved', lazy='dynamic', foreign_keys='[QuestionSave.user_id]')
     visits = db.relationship('Visit', backref='visitor', lazy='dynamic', foreign_keys='[Visit.user_id]')
-
+    notification_updated = db.relationship('Notifier', backref='update_user', lazy='dynamic', foreign_keys='[Notifier.update_user_id]')
+    notification_created= db.relationship('Notifier', backref='created_user', lazy='dynamic', foreign_keys='[Notifier.created_user_id]')
     roles = db.relationship('Role', 
                 secondary=roles_users, 
                 backref=db.backref('users', lazy='dynamic'), 
@@ -89,7 +90,13 @@ class User(UserMixin, db.Model):
     def is_support(self):
         if any([role.is_support for role in self.roles.all()]):
             return True
-        return flask_sqlalchemy
+        return False
+    @property
+    def has_support(self):
+        if any([role.has_support for role in self.roles.all()]):
+            return True
+        return False
+    
     @property
     def is_viewer(self):
         if any([role.is_viewer for role in self.roles.all()]):
@@ -100,6 +107,8 @@ class User(UserMixin, db.Model):
         return self.temp_password is True
     @hybrid_property
     def current_login_ip(self):
+        if self.current_login_network is None:
+            return None
         return self.current_login_network.ip
 
 
@@ -125,6 +134,7 @@ class User(UserMixin, db.Model):
         #     app.logger.error(e)
         #     raise Exception('Não foi possível salvar o IP')
 
+    
     @hybrid_property
     def password(self):
         return self._password
@@ -157,10 +167,14 @@ class User(UserMixin, db.Model):
     @property
     def questions_saved_count(self):
         return self.question_save.count()
+    
+    @property
+    def first_name(self):
+        return self.name.split()[0]
 
     def __repr__(self):
         return f'<User {self.username}>'
-
+    
     @staticmethod
     def query_by_month_year(year : int, month : int):
         return User.query.filter(extract('year', User.created_at) == year, extract('month', User.created_at) == month)
@@ -208,6 +222,11 @@ class Role(RoleMixin, db.Model):
     @property
     def is_support(self):
         if self.level == 4:
+            return True
+        return False
+    @property
+    def has_support(self):
+        if self.level in [0,2,3,4,5]:
             return True
         return False
 
