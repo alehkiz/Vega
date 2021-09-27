@@ -78,12 +78,25 @@
         {% elif topic is defined %}
         {{ form.csrf_token}}
         {{ macros.render_field(form.name, size=512, class='form-control', placeholder='Topico Nome')}}
+        {{ macros.render_field(form.active)}}
+        {{ macros.render_field(form.selectable)}}
         <br>
         {{ form.submit }}
 
         {% elif sub_topic is defined %}
         {{ form.csrf_token}}
         {{ macros.render_field(form.name, size=512, class='form-control', placeholder='Sub-Tópico Nome')}}
+        <br>
+        {{ form.submit }}
+
+        {% elif notifier is defined %}
+
+        {{ form.csrf_token }}
+        {{ macros.render_field(form.title, size=32, class='form-control', placeholder='Titulo') }}
+        {{ macros.render_field(form.content, size=32, class='form-control', placeholder='Titulo', maxlength=498) }}
+        {{ macros.render_field(form.status, nosize=true, class='form-select') }}
+        {{ macros.render_field(form.priority, nosize=true, class='form-select') }}
+        {{ macros.render_field(form.topic, nosize=true, class='form-select') }}
         <br>
         {{ form.submit }}
 

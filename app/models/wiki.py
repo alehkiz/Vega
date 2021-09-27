@@ -1,4 +1,5 @@
 # from sqlalchemy import func
+from enum import unique
 from os import stat
 from flask import Markup, escape, current_app as app, abort, flash
 from sqlalchemy import func, text, Index, cast, desc, extract, Date
@@ -238,10 +239,13 @@ class Topic(db.Model):
     _name = db.Column(db.String(32), index=True, nullable=False, unique=True)
     format_name = db.Column(db.String(32), index=True,
                             nullable=True, unique=True)
+    active = db.Column(db.Boolean, default=True)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     selectable = db.Column(db.Boolean, default=False, nullable=False)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
     questions = db.relationship('Question', backref='topic', lazy='dynamic', foreign_keys='[Question.topic_id]')
+    notices = db.relationship('Notifier', backref='topic', lazy='dynamic')
+    
     @hybrid_property
     def name(self):
         return self._name
@@ -277,7 +281,7 @@ class SubTopic(db.Model):
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(48), index=True, nullable=False)
+    name = db.Column(db.String(48), index=True, nullable=False, unique=True)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref='tag')
@@ -292,6 +296,9 @@ class Tag(db.Model):
     def _dict_count_questions():
         return {_.name:_.questions.count() for _ in Tag.query.all()}
     
+    def questions_approved(self):
+        return self.questions.filter(Question.answer != None, Question.answer_approved == True)
+
 class Question(db.Model):
     '''
     Classe responsável pelas perguntas da wiki, com indexação para ``full text search``
@@ -315,7 +322,7 @@ class Question(db.Model):
     question = db.Column(db.String(256), index=True,
                          nullable=False, unique=True)
     _answer = db.Column('answer', db.Text, index=True, nullable=True, unique=False)
-    answer_approved = db.Column(db.Boolean, nullable=True)
+    answer_approved = db.Column(db.Boolean, nullable=True, default=False)
     create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     create_user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -328,10 +335,11 @@ class Question(db.Model):
     sub_topic_id = db.Column(db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
     question_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
     answer_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=True)
+    active = db.Column(db.Boolean, nullable=False)
     tags = db.relationship('Tag',
                            secondary=question_tag,
                            backref=db.backref('questions',
-                                              lazy='dynamic'),
+                                              lazy='dynamic', cascade='all, delete-orphan', single_parent=True,), 
                            lazy='dynamic')
     search_vector = db.Column(TSVectorType('question', 'answer', regconfig='public.pt', cache_ok=False))#regconfig='public.pt'))
 
@@ -394,6 +402,12 @@ class Question(db.Model):
             return "Sim"
         return 'Não'
     
+    @property
+    def is_active(self):
+        if self.active == True:
+            return 'Sim'
+        return 'Não'
+    
     @answer.setter
     def answer(self, answer):
         self._answer = answer
@@ -446,7 +460,7 @@ class Question(db.Model):
         return self.question
 
     def was_updated(self):
-        if self.update_at is None and self.update_user_id is None:
+        if self.update_at is None or self.update_user_id is None:
             return False
         return True
 
@@ -611,7 +625,7 @@ class Question(db.Model):
             if topic is None:
                 return []
             rs = db.session.query(Question, func.count(QuestionView.id).label('views')).join(
-                Question.view).group_by(Question).order_by(text('views DESC')).filter(Question.answer_approved==True, Question.topic_id==topic.id).limit(limit).all()
+                Question.view).group_by(Question).order_by(text('views DESC')).filter(Question.answer != None, Question.answer_approved==True, Question.topic_id==topic.id).limit(limit).all()
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
@@ -625,7 +639,7 @@ class Question(db.Model):
             if topic is None:
                 return []
             rs = db.session.query(Question, func.count(QuestionLike.id).label('likes')).join(
-                Question.like).group_by(Question).order_by(text('likes DESC')).filter(Question.answer_approved==True, Question.topic_id == topic.id).limit(limit).all()
+                Question.like).group_by(Question).order_by(text('likes DESC')).filter(Question.answer != None, Question.answer_approved==True, Question.topic_id == topic.id).limit(limit).all()
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
@@ -695,10 +709,15 @@ class Question(db.Model):
     def query_by_interval(start : date, end: date):
         return Question.query.filter(cast(Question.create_at, Date) == start, cast(Question.create_at, Date) == end)
 
+    @staticmethod
+    def count_by_topic(topic: str = ''):
+        if topic == '':
+            raise ValueError('topic não pode ser vazio')
+        return Question.query.filter(Topic.name == topic).count()
 class QuestionView(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer,  db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer,  db.ForeignKey('user.id', onupdate="CASCADE", ondelete="CASCADE"))
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     datetime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)

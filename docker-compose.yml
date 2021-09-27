@@ -3,22 +3,24 @@ version: '3.8'
 services:
   web:
     build: ./
-    # command: gunicorn -b :80 --access-logfile - --error-logfile - server:app
-    command: python manage.py run -h 0.0.0.0
+    command: gunicorn -b :80 --access-logfile - --error-logfile - server:app
+    # command: python manage.py run -h 0.0.0.0
     volumes:
       - ./:/usr/src/app/
     ports:
-      - 5000:5000
+      - 80:80
     env_file:
-      - ./.env.dev
+      - ./.env.docker
   db:
     image: postgres:13-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
+      - LANG=pt_BR.UTF-8
       - POSTGRES_USER=alexandre
       - POSTGRES_PASSWORD=Abc123
-      - POSTGRES_DB=vega_dev
+      - POSTGRES_DB=vega
     ports:
       - 6543:5432
 networks:

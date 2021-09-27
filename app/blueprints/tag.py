@@ -55,7 +55,7 @@ def edit(id):
 def add():
     form = TagEditForm()
     if form.validate_on_submit():
-        tag = Question.query.filter(Tag.name.ilike(form.name.data)).first()
+        tag = Tag.query.filter(Tag.name.ilike(form.name.data)).first()
         if not tag is None:
             form.name.errors.append('Marcação já existte')
         if not form.errors:
@@ -92,6 +92,32 @@ def view(id):
                                 last_page=last_page, 
                                 url_arguments=pagination_args)
 
-@bp.route('/remove/<int:id>')
+@bp.route('/remove/<int:id>', methods=['GET', 'POST'])
 def remove(id):
-    return ''
+    confirm = request.form.get('confirm', False)
+    if confirm != 'true':
+        return jsonify({
+            'status': 'error',
+            'message': 'not confirmed'
+        }), 404
+    tag = Tag.query.filter(Tag.id == id).first()
+    if tag is None:
+        return jsonify({
+            'status': 'error',
+            'message': 'tag not found'
+        }), 404
+    try:
+        db.session.delete(tag)
+        db.session.commit()
+        return jsonify({
+            'id': id,
+            'status': 'success'
+        }),200
+    except Exception as e:
+        app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+        app.logger.error(e)
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': 'database error'
+        }), 404

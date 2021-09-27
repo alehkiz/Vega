@@ -72,7 +72,7 @@
             {% for tag in g.tags %}
             <p class="mb-0">
                 <a href="{{url_for('question.tag', name=tag.name)}}" class="text-decoration-none">{{tag.name}}</a>
-                <span class="badge bg-secondary">{{tag.questions.count()}}</span>
+                <span class="badge bg-secondary">{{tag.questions_approved().count()}}</span>
             </p>
             {% endfor %}
         </div>

@@ -136,7 +136,7 @@ def view(id=None):
     if current_user.is_authenticated:
         user_id = current_user.id
     else:
-        user = User.query.filter(User.name == 'anon').first()
+        user = User.query.filter(User.name == 'ANON').first()
         if user is None:
             raise Exception('Usuário anônimo não criado')
         user_id = user.id
@@ -144,6 +144,8 @@ def view(id=None):
     return render_template('question.html', mode='view', question=question, cls_question=Question)
 
 @bp.route('edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@roles_accepted("admin", "support", "manager_content")
 @counter
 def edit(id):
     question = Question.query.filter(Question.id == id).first_or_404()
@@ -165,11 +167,13 @@ def edit(id):
                 app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
                 flash('Não foi possível concluir o pedido')
             question.answer_network_id = g.ip_id
-            print(question.answer_approved)
+            # print(question.answer_approved)
+        else:
+            question.answer_approved = form.approved.data
         if not g.ip_id:
             app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
             flash('Não foi possível concluir o pedido')
-        print('IP: ' , g.ip_id)
+        # print('IP: ' , g.ip_id)
         question.question_network_id = g.ip_id
         db.session.commit()
         return redirect(url_for('question.view', id=question.id))
@@ -189,16 +193,20 @@ def edit(id):
     return render_template('edit.html',form=form, title='Editar', question=True)
 
 @bp.route('remove/<int:id>', methods=['POST'])
+@login_required
+@roles_accepted("admin", "manager_content")
 @counter
 def remove(id):
     confirm = request.form.get('confirm', False)
     if confirm != 'true':
-        
-        abort(404)
+        return jsonify({
+            'status': 'error',
+            'message': 'not confirmed'
+        }), 404
     q = Question.query.filter(Question.id == id).first_or_404()
     id = q.id 
     try:
-        db.session.delete(q)
+        q.active = False
         db.session.commit()
         return jsonify({'id':id,
                     'status': 'success'})
@@ -212,7 +220,7 @@ def remove(id):
     
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('admin', 'editor', 'aux_editor')
+@roles_accepted("admin", "support", "manager_content")
 @counter
 def add():
     form = QuestionEditForm()
@@ -244,6 +252,7 @@ def add():
             question.topic_id = form.topic.data.id
             question.sub_topic_id = form.sub_topic.data.id
             question.tags = form.tag.data
+            question.active = True
             try:
                 db.session.add(question)
                 db.session.commit()
@@ -262,7 +271,7 @@ def add():
 
 @bp.route('/responder/<int:id>', methods=['POST', 'GET'])
 @login_required
-@roles_accepted('admin', 'editor', 'aux_editor')
+@roles_accepted("admin", "support", "manager_content")
 @counter
 def answer(id: int):
     q = Question.query.filter(Question.id == id).first_or_404()
@@ -271,19 +280,19 @@ def answer(id: int):
         return redirect(url_for('question.index'))
     form = QuestionAnswerForm()
     if form.validate_on_submit():
-        q = Question.query.filter(Question.question.ilike(form.question.data.lower())).first()
+        # q = Question.query.filter(Question.question.ilike(form.question.data.lower())).first()
         # print(q)
         if not q is None:
             if q.id != id:
                 form.question.errors.append('Você alterou a pergunta para uma já cadastrada')
-                return render_template('answer.html', form=form)
+                return render_template('answer.html', form=form, answer=True)
         q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
         q.answer = form.answer.data
         q.answer_at = datetime.now()
-        q.tag = form.tag.data
+        q.tags = form.tag.data
         q.topic_id = form.topic.data.id
-        q.sub_topic_id = form.sub_topic.data.id
+        q.sub_topic = form.sub_topic.data
         try:
             db.session.commit()
             return redirect(url_for('question.view', id=q.id))
@@ -292,21 +301,24 @@ def answer(id: int):
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
             db.session.rollback()
-            return render_template('answer.html', form=form)
+            return render_template('answer.html', form=form, answer=True)
         return 'ok'
     
     form.question.data = q.question
 
 
-    return render_template('answer.html', form=form)
+    return render_template('answer.html', form=form, answer=True)
         # TODO terminar
 
 @bp.route('/aprovar/<int:id>', methods=['POST', 'GET'])
 @login_required
-@roles_accepted('admin', 'editor', 'aux_editor')
+@roles_accepted("admin", "manager_content")
 @counter
 def approve(id: int):
     q = Question.query.filter(Question.id == id).first_or_404()
+    if not q.was_answered:
+        flash('Questão ainda não respondida, responda primeiro para aprovar', category='danger')
+        return redirect(url_for('question.answer', id=q.id))
     if q.was_approved:
         flash('Questão já foi aprovada', category='danger')
         return redirect(url_for('question.index'))
@@ -320,19 +332,16 @@ def approve(id: int):
                 return render_template('answer.html', form=form, approve=True)
         if form.repprove.data is True:
             q.answer_approved = False
-            flash('Questão reprovada com sucesso', category='success')
-            return redirect(url_for('question.index'))
+            flash('Questão reprovada.', category='success')
+            return redirect(url_for('admin.to_approve'))
         q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
         q.answer = form.answer.data
         q.answer_at = datetime.now()
-        q.tag = form.tag.data
+        q.tags = form.tag.data
         q.topic_id = form.topic.data.id
-        q.sub_topic_id = form.sub_topic.data.id
+        q.sub_topic = form.sub_topic.data
         q.answer_approved = form.approve.data
-        print(form.approve.data)
-        print(form.repprove.data)
-
         try:
             db.session.commit()
             return redirect(url_for('question.view', id=q.id))
@@ -568,7 +577,7 @@ def make_question():
             question.topic = form.topic.data
             question.create_user_id = user.id
             question.question_network_id = ip.id
-            print('ip: ', ip.id)
+            question.active = True
             db.session.add(question)
             try:
                 db.session.commit()

@@ -38,7 +38,7 @@ def get_graph_questions_by_month(names=None):
     if names == None:
         return px.line(df, x = 'Mês', y = 'Total', title='Dúvidas cadastradas por dia e assunto', color='Assunto', hover_data={'Mês': "|%m/%Y"})
     mask = df.Assunto.isin(names)
-    graph = px.line(df[mask], x = 'Mês', y = 'Total', title='Dúvidas cadastradaspor dia e assunto', color='Assunto', hover_data={'Mês': "|%m/%Y"})
+    graph = px.line(df[mask], x = 'Mês', y = 'Total', title='Dúvidas cadastradas por dia e assunto', color='Assunto', hover_data={'Mês': "|%m/%Y"})
     return graph
 
 def get_graph_access_by_date():
