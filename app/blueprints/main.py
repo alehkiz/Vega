@@ -197,7 +197,7 @@ def index():
 
         tags_question = [{"name": 'Marcações', "values": [{
             'title': _.name,
-            'count': _.questions.filter(Question.answer_approved == True).count(),
+            'count': _.questions_approved(g.topic).count(),
             'bt_name': 'Visualizar',
             'bt_route': url_for('question.tag', name=_.name, type='aprovada'),
             'card_style': 'bg-success br.gradient text-dark'
