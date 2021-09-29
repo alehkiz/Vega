@@ -368,15 +368,18 @@ def approve(id: int):
 @bp.route('/tag/<string:name>')
 @counter
 def tag(name):
+    topic = Topic.query.filter(Topic.name == g.selected_access).first()
+    if topic is None:
+        return redirect(url_for('main.select_access'))
+    
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
     pagination_args = {'name':name}
     tag = Tag.query.filter_by(name=name).first_or_404()
-    paginate = tag.questions.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    paginate = Question.query.filter(Question.tags.contains(tag), Question.answer_approved == True, Question.topic_id == topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
-    print(pagination_args)
     return render_template('question.html', 
                                 pagination=paginate, 
                                 cls_question=Question, 

@@ -296,9 +296,10 @@ class Tag(db.Model):
     def _dict_count_questions():
         return {_.name:_.questions.count() for _ in Tag.query.all()}
     
-    def questions_approved(self):
+    def questions_approved(self, topic=None):
+        if topic != None:
+            return self.questions.filter(Question.answer != None, Question.answer_approved == True, Question.topic_id == topic.id)
         return self.questions.filter(Question.answer != None, Question.answer_approved == True)
-
 class Question(db.Model):
     '''
     Classe responsável pelas perguntas da wiki, com indexação para ``full text search``
@@ -319,11 +320,11 @@ class Question(db.Model):
     '''
     __searchable__ = ['question', 'answer']
     id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(256), index=True,
+    question = db.Column(db.String(256), index=False,
                          nullable=False, unique=True)
-    _answer = db.Column('answer', db.Text, index=True, nullable=True, unique=False)
+    _answer = db.Column('answer', db.Text, index=False, nullable=True, unique=False)
     answer_approved = db.Column(db.Boolean, nullable=True, default=False)
-    create_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    create_at = db.Column(db.DateTime, index=False, default=datetime.utcnow)
     create_user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
     update_at = db.Column(db.DateTime)
