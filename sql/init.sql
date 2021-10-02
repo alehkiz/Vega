@@ -15,4 +15,4 @@ FOR hword, hword_part, word with unaccent, portuguese_stem;
 --     FOR EACH ROW
 --     EXECUTE PROCEDURE tsvector_update_trigger('search_vector', 'public.pt', 'question', 'answer');
 
-CREATE UNIQUE INDEX ix_question_answer ON public.question USING btree (md5(answer), id)
+CREATE UNIQUE INDEX ix_question_answer ON public.question USING btree (md5(answer), id);
