@@ -14,7 +14,7 @@
             <span class="navbar-toggler-icon"></span>
         </button> -->
         <div class="collapse navbar-collapse" id="navbarCollapse">
-            <a class="navbar-brand" href="{{url_for('main.index')}}">{{config['PROJECT_NAME']}}</a>
+            <a class="navbar-brand" href="{{url_for('main.index')}}">{{config['SITE_TITLE']}}</a>
             <ul class="navbar-nav me-auto mb-md-0  navbar-nav-scroll">
                 <li class="nav-item">
                     <a class="btn btn-sm btn-outline-secondary me-2" type="button" href="{{ url_for('question.index')}}"
@@ -74,18 +74,16 @@
                     <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
                 </li>
                 {% else %}
-                {% if current_user.has_support %}
+                {% if current_user.is_admin %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         <i class="fas fa-tools circle"></i>
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                        <li><a class="dropdown-item" href="{{url_for('admin.questions')}}">Perguntas
-                            <!-- <span class="badge bg-info text-dark">1</span> -->
-                        </a></li>
-                        <li><a class="dropdown-item" href="{{url_for('admin.to_approve')}}">Respondidas</a></li>
-                        <li><a class="dropdown-item" href="{{url_for('admin.answers')}}">Aprovadas</a></li>
+                        <li><a class="dropdown-item" href="{{url_for('admin.questions')}}">Perguntas</a></li>
+                        <li><a class="dropdown-item" href="{{url_for('admin.to_approve')}}">Pendentes</a></li>
+                        <li><a class="dropdown-item" href="{{url_for('admin.answers')}}">Respondidas</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.users')}}">Usuários</a></li>
 
                         <li>
@@ -94,15 +92,6 @@
                         <li><a class="dropdown-item" href="{{url_for('admin.tag')}}">Marcação</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.topic')}}">Tópico</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.sub_topic')}}">Sub Tópico</a></li>
-
-                        {% if config.get('MODE', False) == 'dev' %}<!-- #TODO apenas em DEV -->
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" type='button' href="{{ url_for('admin.notifier')}}" >Notificações</a></li>
-                        <li><a class="dropdown-item" type='button' href="{{ url_for('notifier.index')}}" >Notificações - Prioridades</a></li>
-                        <li><a class="dropdown-item" type='button' href="{{ url_for('notifier.index')}}" >Notificações - Status</a></li>
-                        {% endif %}
 
                     </ul>
 
@@ -127,7 +116,7 @@
                                 <span class="badge bg-info text-dark">{{current_user.questions_saved_count}}</span>
                             </a>
                         </li>
-                        <li><a class="dropdown-item" href="{{url_for('question.likes')}}">{{_('Curtidos') }}
+                        <li><a class="dropdown-item" href="{{url_for('question.likes')}}">{{_('Curtidas') }}
                                 <span class="badge bg-info  text-dark">{{current_user.questions_liked_count}}</span>
 
                             </a></li>

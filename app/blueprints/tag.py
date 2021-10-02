@@ -79,7 +79,7 @@ def view(id):
     search_form = QuestionSearchForm()
     pagination_args = {'id':id}
     tag = Tag.query.filter_by(id=id).first_or_404()
-    paginate = tag.questions.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    paginate = Question.query.filter(Question.tags.contains(tag), Question.answer_approved == True).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
