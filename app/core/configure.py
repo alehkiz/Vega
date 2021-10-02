@@ -116,7 +116,7 @@ def init(app):
             )
     
     with app.app_context():
-        app = dash_app(app)
+        # app = dash_app(app)
         register_blueprints(app)
     
     print('Debug: ', app.debug)
