@@ -320,7 +320,7 @@ class Question(db.Model):
     '''
     __searchable__ = ['question', 'answer']
     id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(256), index=False,
+    question = db.Column(db.String(800), index=False,
                          nullable=False, unique=True)
     _answer = db.Column('answer', db.Text, index=False, nullable=True, unique=False)
     answer_approved = db.Column(db.Boolean, nullable=True, default=False)

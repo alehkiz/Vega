@@ -53,7 +53,9 @@
         <br>
         {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
         <br>
+        {% if current_user.is_admin %}
         {{ macros.render_field(form.approved)}}
+        {% endif %}
         <br>
         {{ form.submit }}
         {% elif topic is defined %}

@@ -1,3 +1,4 @@
+from logging import disable
 from flask_migrate import current
 from app.blueprints.admin import sub_topic
 from datetime import datetime
@@ -13,7 +14,7 @@ from app.models.search import Search
 from app.utils.sql import unaccent
 from app.utils.kernel import strip_accents
 from app.utils.html import process_html
-from app.forms.question import QuestionAnswerForm, CreateQuestion, QuestionApproveForm
+from app.forms.question import QuestionAnswerForm, CreateQuestion, QuestionApproveForm, QuestionEditAndApproveForm
 from app.utils.routes import counter
 from sqlalchemy import desc, nullslast
 
@@ -149,7 +150,10 @@ def view(id=None):
 @counter
 def edit(id):
     question = Question.query.filter(Question.id == id).first_or_404()
-    form = QuestionEditForm()
+    if current_user.is_admin:
+        form = QuestionEditAndApproveForm()
+    else:
+        form = QuestionEditForm()
     if form.validate_on_submit():
         # try:
         question.question = process_html(form.question.data).text
@@ -189,7 +193,8 @@ def edit(id):
     form.tag.data = question.tags
     form.topic.data = question.topic
     form.answer.data = question.answer
-    form.approved.data = question.answer_approved
+    if current_user.is_admin:
+        form.approved.data = question.answer_approved
     return render_template('edit.html',form=form, title='Editar', question=True)
 
 @bp.route('remove/<int:id>', methods=['POST'])
