@@ -74,7 +74,7 @@
                     <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
                 </li>
                 {% else %}
-                {% if current_user.is_admin %}
+                {% if current_user.has_support %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
                         aria-expanded="false">
