@@ -228,7 +228,10 @@ def remove(id):
 @roles_accepted("admin", "support", "manager_content")
 @counter
 def add():
-    form = QuestionEditForm()
+    if current_user.is_admin:
+        form = QuestionEditAndApproveForm()
+    else:
+        form = QuestionEditForm()
 
     if form.validate_on_submit():
         question = Question.query.filter(Question.question.ilike(form.question.data)).first()
@@ -238,16 +241,16 @@ def add():
             question = Question()
             # remove tags html
             question.question = process_html(form.question.data).text
-            if form.approved.data == True:
-                question.answer_user_id = current_user.id
-                
-                # remove tag html
-                question.answer = process_html(form.answer.data).text
+            if current_user.is_admin:
                 question.answer_approved = form.approved.data
-                if not g.ip_id:
-                    app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
-                    flash('Não foi possível concluir o pedido')
-                question.answer_network_id = g.ip_id
+            question.answer_user_id = current_user.id
+            
+            # remove tag html
+            question.answer = process_html(form.answer.data).text
+            if not g.ip_id:
+                app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
+                flash('Não foi possível concluir o pedido')
+            question.answer_network_id = g.ip_id
             if not g.ip_id:
                 app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
                 flash('Não foi possível concluir o pedido')
