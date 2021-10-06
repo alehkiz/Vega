@@ -1,8 +1,40 @@
 {% import "macros/main.html" as macros %}
+{% import "macros/form.html" as forms %}
 {% extends 'base.html' %}
 {% block app_content %}
 <div id="list" class="row">
-{{ macros.render_table(cls_table, pagination, page_name, order_type=order_type, mode=mode, type=type) }}
-{{ macros.render_pagination(pagination, first_page, last_page, endpoint)}}
+    {% if form is defined %}
+    {#
+    <form action="" method="GET">
+        {{ forms.render_field(form.topic, class='form-select', class='selectpicker', nolabel=true, multiple=true,
+        title='Selecionar Tópico', **{'data-actions-box':"true", 'data-style':"btn-primary",
+        'data-selected-text-format':"count"})}}
+        {{ forms.render_field(form.sub_topic, class='form-select', class='selectpicker', nolabel=true, multiple=true,
+        title='Selecionar Sub-Tópico', **{'data-actions-box':"true", 'data-style':"btn-primary",
+        'data-selected-text-format':"count"})}}
+        {{ forms.render_field(form.tag, class='form-select', class='selectpicker', nolabel=true, multiple=true,
+        title='Selecionar Marcação', **{'data-actions-box':"true", 'data-style':"btn-primary",
+        'data-selected-text-format':"count"})}}
+        <br>
+        {{ forms.render_field(form.active)}}
+        <br>
+        {{ form.submit(class='btn btn-success') }}
+    </form>#}
+    {% endif %}
+    <div class="container">
+        <div class="row">
+            <h6 class="text-muted fw-normal text-uppercase">Tópico</h6>
+            <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+                {% if 'topic' in  request_args.keys() %}
+                {% set _rqa_topic = request_args %}
+                {% endif %}
+                {% for tp in _topic %}
+                <a href="{{ url_for(endpoint, topic=tp.name)}}" class='btn btn-primary border'>{{tp.name}}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {{ macros.render_table(cls_table, pagination, page_name, order_type=order_type, mode=mode, type=type) }}
+    {{ macros.render_pagination(pagination, first_page, last_page, endpoint)}}
 </div>
 {% endblock %}

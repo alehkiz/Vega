@@ -90,9 +90,10 @@
         <thead class="table-dark">
             <tr>
                 {% for key, value in config['TABULATE'].get(cls_table.__tablename__).items() %}
+                {% if request_args is defined %}
+                <th><a href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type'], ** request_args)}}">{{value['name'].capitalize()}}</a></th>
+                {% endif %}
                 <th><a href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type'])}}">{{value['name'].capitalize()}}</a></th>
-
-
                 {% endfor %}
                 <th class="actions">Ações</th>
             </tr>
