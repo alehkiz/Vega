@@ -20,6 +20,7 @@ from sqlalchemy import inspect, desc, asc
 
 from app.models.wiki import Article, Topic, User, Question, Tag, SubTopic
 from app.forms.wiki import ArticleForm
+from app.forms.question import QuestionFilter
 from app.core.db import db
 from app.utils.routes import counter
 
@@ -108,6 +109,10 @@ def answers():
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
     order_dict = {'desc':desc, 'asc': asc}
+    topic = request.args.get('topic', False)
+    request_args = request.args
+    if topic != None:
+        topic = Topic.query.filter(Topic.name.ilike(topic)).first()
     if not order_type in order_dict.keys():
         order_type = 'desc'
     if not order is False or not order_type is False:
@@ -151,6 +156,9 @@ def answers():
         list=True,
         page_name="Respostas",
         order_type=order_type,
+        request_args=request_args,
+        _topic = Topic.query.filter(Topic.selectable==True),
+        _sub_topic = SubTopic.query,
     )
 
 
@@ -162,6 +170,16 @@ def questions():
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
     topic = request.args.get("topic", None)
+    # form = QuestionFilter(request.args, meta={'csrf': False})
+    # print(form.validate())
+    # print(request.endpoint)
+    # print({**request.args})
+    # print(url_for('admin.questions', ** request.args))
+    # if form.validate():
+    #     print(form.topic.data)
+    #     print(form.sub_topic.data)
+    #     print('Formulário validado')
+    request_args = request.args
     if topic != None:
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
     if not order is False or not order_type is False:
@@ -227,9 +245,12 @@ def questions():
         endpoint=request.url_rule.endpoint,
         cls_table=Question,
         list=True,
-        page_name="Dúvidas",
+        page_name="Dúvidas pendentes de respostas",
         order_type=order_type,
         mode="question",
+        _topic = Topic.query.filter(Topic.selectable==True),
+        _sub_topic = SubTopic.query,
+        request_args=request_args
     )
 
 
