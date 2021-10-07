@@ -73,7 +73,7 @@ class CreateQuestion(FlaskForm):
 
 
 class QuestionFilter(FlaskForm):
-    topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query, get_label='name')
+    topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.active==True, Topic.selectable==True), get_label='name')
     sub_topic = QuerySelectMultipleField('Sub-tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name')
     tag = QuerySelectMultipleField('Marcações', allow_blank=True, query_factory= lambda : Tag.query, get_label= 'name')
     active = BooleanField('Ativa')

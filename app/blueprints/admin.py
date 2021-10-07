@@ -110,6 +110,7 @@ def answers():
     order_type = request.args.get("order_type", "desc")
     order_dict = {'desc':desc, 'asc': asc}
     topic = request.args.get('topic', False)
+    form = QuestionFilter(request.args, meta={'csrf': False})
     request_args = request.args
     if topic != False:
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
@@ -125,6 +126,8 @@ def answers():
     else:
         column = Question.id
         column_type = column.desc
+    
+
     # TODO Incluir a odernação por relacionamento de acordo com a seleção do usuário
     relations = inspect(Question).relationships
     print(column)
@@ -138,12 +141,22 @@ def answers():
             q = db.session.query(Question).filter(Question.answer != None, Question.answer_approved == True).join(relationship.mapper.class_, getattr(Question, str(column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
     else:
         q = Question.query.filter(Question.answer != None, Question.answer_approved == True).order_by(column_type())
+
+    if form.validate():
+        if len(form.topic.data) > 0:
+            print(len(form.topic.data))
+            q = q.filter(Question.topic_id.in_([_.id for _ in form.topic.data]))
+        if len(form.sub_topic.data) > 0:
+            q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
+        if len(form.tag.data) > 0:
+            q = q.filter(Question.tags.any(Tag.id.in_(form.tag.data)))
     paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
         if len(list(paginate.iter_pages())) >= 1
         else None
     )
+
     last_page = paginate.pages
     order_type = "asc" if order_type == "desc" else "desc"
     return render_template(
@@ -159,6 +172,7 @@ def answers():
         request_args=request_args,
         _topic = Topic.query.filter(Topic.selectable==True),
         _sub_topic = SubTopic.query,
+        form=form
     )
 
 
@@ -170,15 +184,11 @@ def questions():
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
     topic = request.args.get("topic", None)
-    # form = QuestionFilter(request.args, meta={'csrf': False})
-    # print(form.validate())
-    # print(request.endpoint)
-    # print({**request.args})
-    # print(url_for('admin.questions', ** request.args))
-    # if form.validate():
-    #     print(form.topic.data)
-    #     print(form.sub_topic.data)
-    #     print('Formulário validado')
+    form = QuestionFilter(request.args, meta={'csrf': False})
+    print(form.validate())
+    print(request.endpoint)
+    print({**request.args})
+    print(url_for('admin.questions', ** request.args))
     request_args = request.args
     if topic != None:
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
@@ -195,13 +205,15 @@ def questions():
     if order:
         if order in Question.__table__.columns:
             if topic != None:
-                q = Question.query.filter(
-                    Question.answer == None, Question.topic_id == topic.id
-                ).order_by(column_type())
+                q = db.session.query(Question).filter(Question.answer == None, Question.topic_id == topic.id).order_by(column_type())
+                # q = Question.query.filter(
+                #     Question.answer == None, Question.topic_id == topic.id
+                # ).order_by(column_type())
             else:
-                q = Question.query.filter(Question.answer == None).order_by(
-                    column_type()
-                )
+                q = db.session.query(Question).filter(Question.answer == None).order_by(column_type())
+                # Question.query.filter(Question.answer == None).order_by(
+                #     column_type()
+                # )
         else:
             relationship_class = getattr(Question, order).property.mapper.class_
             relationship_type = getattr(Question, order)
@@ -221,14 +233,32 @@ def questions():
                     .order_by(relationship_type_order())
                 )
     else:
+        # if topic != None:
+        #     q = Question.query.filter(
+        #         Question.answer == None, Question.topic_id == topic.id
+        #     ).order_by(Question.create_at.asc())
+        # else:
+        #     q = Question.query.filter(Question.answer == None).order_by(
+        #         Question.create_at.asc()
+        #     )
         if topic != None:
-            q = Question.query.filter(
-                Question.answer == None, Question.topic_id == topic.id
-            ).order_by(Question.create_at.asc())
+            q = db.session.query(Question).filter(Question.answer == None, Question.topic_id == topic.id).order_by(column_type())
+            # q = Question.query.filter(
+            #     Question.answer == None, Question.topic_id == topic.id
+            # ).order_by(column_type())
         else:
-            q = Question.query.filter(Question.answer == None).order_by(
-                Question.create_at.asc()
-            )
+            q = db.session.query(Question).filter(Question.answer == None).order_by(column_type())
+            # Question.query.filter(Question.answer == None).order_by(
+            #     column_type()
+            # )
+    if form.validate():
+        if len(form.topic.data) > 0:
+            print(len(form.topic.data))
+            q = q.filter(Question.topic_id.in_([_.id for _ in form.topic.data]))
+        if len(form.sub_topic.data) > 0:
+            q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
+        if len(form.tag.data) > 0:
+            q = q.filter(Question.tags.any(Tag.id.in_(form.tag.data)))
     paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
@@ -250,7 +280,8 @@ def questions():
         mode="question",
         _topic = Topic.query.filter(Topic.selectable==True),
         _sub_topic = SubTopic.query,
-        request_args=request_args
+        request_args=request_args, 
+        form=form
     )
 
 
@@ -262,6 +293,12 @@ def to_approve():
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
     topic = request.args.get("topic", None)
+    form = QuestionFilter(request.args, meta={'csrf': False})
+    print(form.validate())
+    print(request.endpoint)
+    print({**request.args})
+    print(url_for('admin.questions', ** request.args))
+    request_args = request.args
     if topic != None:
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
 
@@ -340,6 +377,7 @@ def to_approve():
         order_type=order_type,
         mode="question",
         type="aprovar",
+        form=form,
     )
 
 

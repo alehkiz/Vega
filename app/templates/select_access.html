@@ -6,7 +6,7 @@
     <br><br>
 <div class="btn-group pt-5" role="group" aria-label="Basic example">
   {% for topic in topics %}
-    <a type="button" class="btn btn-{{ 'primary' if topic.id % 2 == 0 else 'success' }} btn-lg" href="{{url_for('main.select_access', topic=topic.name)}}">{{topic.name}}</a>
+    <a type="button" class="btn btn-{{ 'primary' if loop.index % 2 == 0 else 'success' }} btn-lg" href="{{url_for('main.select_access', topic=topic.name)}}">{{topic.name}}</a>
   {% endfor  %}
   </div>
 </div>

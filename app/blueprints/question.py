@@ -162,17 +162,10 @@ def edit(id):
         question.sub_topic = form.sub_topic.data
         question.update_user_id = current_user.id
         question.update_at = datetime.utcnow()
-        
-        if form.approved.data == True:
-            question.answer_user_id = current_user.id
-            question.answer = process_html(form.answer.data).text
-            question.answer_approved = form.approved.data
-            if not g.ip_id:
-                app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
-                flash('Não foi possível concluir o pedido')
-            question.answer_network_id = g.ip_id
-            # print(question.answer_approved)
-        else:
+        question.answer_user_id = current_user.id
+        question.answer = process_html(form.answer.data).text
+
+        if current_user.is_admin:
             question.answer_approved = form.approved.data
         if not g.ip_id:
             app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
