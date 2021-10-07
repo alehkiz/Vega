@@ -36,19 +36,16 @@
     {% if mode == 'view' %}
     <article class="article-post">
         <div class="article-header">
-            <h1 class="article-title">
+            <h6 class="article-title">
                 {{question.question}}
-            </h1>
+            </h6>
             <!-- <p class="lead article-description">
                 
             </p> -->
             <p class="article-meta">
-                Criado {{question.get_create_time_elapsed}} por {{question.author.name}}
-                <!-- TODO: Finalizar -->
+                Criado {{question.get_create_time_elapsed}} 
                 {% if question.was_updated() %}
-                <br>
-                {{'Atualizado '+ question.get_update_time_elapsed if question.get_update_time_elapsed else ''}} por <a
-                    href='#'>{{question.updater.name}}</a>
+                {{'Atualizado '+ question.get_update_time_elapsed}}
                 {% endif %}
             </p>
         </div>

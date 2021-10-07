@@ -4,7 +4,6 @@
 {% block app_content %}
 <div id="list" class="row">
     {% if form is defined %}
-    {#
     <form action="" method="GET">
         {{ forms.render_field(form.topic, class='form-select', class='selectpicker', nolabel=true, multiple=true,
         title='Selecionar Tópico', **{'data-actions-box':"true", 'data-style':"btn-primary",
@@ -16,10 +15,10 @@
         title='Selecionar Marcação', **{'data-actions-box':"true", 'data-style':"btn-primary",
         'data-selected-text-format':"count"})}}
         <br>
-        {{ forms.render_field(form.active)}}
+        <!-- {{ forms.render_field(form.active)}} -->
         <br>
         {{ form.submit(class='btn btn-success') }}
-    </form>#}
+    </form>
     {% endif %}
     {#<div class="container">
         <div class="row">
