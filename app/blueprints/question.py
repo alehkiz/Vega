@@ -584,8 +584,13 @@ def make_question():
             
 
             question = Question()
+            topic = Topic.query.filter(Topic.name == g.selected_access).first()
+            if topic is None:
+                app.logger.error(f"Tópico {g.selected_access} não existe")
+                return abort(500)
+
             question.question = form.question.data
-            question.topic = form.topic.data
+            question.topic = topic
             question.create_user_id = user.id
             question.question_network_id = ip.id
             question.active = True
