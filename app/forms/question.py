@@ -68,7 +68,7 @@ class QuestionApproveForm(FlaskForm):
 
 class CreateQuestion(FlaskForm):
     question = TextAreaField('Dúvida?', validators=[DataRequired('Item Obrigatório'), Length(min=5, max=800, message='A dúvida deve conter entre 5 e 8000 caracteres')])
-    topic = QuerySelectField('Topico', allow_blank=False, query_factory= lambda: Topic.query.filter(Topic.selectable == True), get_label='name', validators=[DataRequired('Item Obrigatório')])
+    # topic = QuerySelectField('Topico', allow_blank=False, query_factory= lambda: Topic.query.filter(Topic.selectable == True), get_label='name', validators=[DataRequired('Item Obrigatório')])
     submit = SubmitField('Enviar')
 
 

@@ -111,7 +111,7 @@ def answers():
     order_dict = {'desc':desc, 'asc': asc}
     topic = request.args.get('topic', False)
     request_args = request.args
-    if topic != None:
+    if topic != False:
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
     if not order_type in order_dict.keys():
         order_type = 'desc'
