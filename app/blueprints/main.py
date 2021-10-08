@@ -141,7 +141,7 @@ def index():
                         "count": _.questions.filter(Question.answer == None).count(),
                         "bt_name": "Responder",
                         "bt_route": url_for("admin.questions", topic=_.name),
-                        "card_style": "bg-danger bg-gradient text-dark",
+                        "card_style": "bg-danger bg-gradient text-white",
                     },
                     {
                         "title": "Para aprovação",
@@ -161,11 +161,11 @@ def index():
                         "bt_route": url_for(
                             "question.topic", name=_.name, type="aprovada"
                         ),
-                        "card_style": "bg-primary bg-gradient text-dark",
+                        "card_style": "bg-primary bg-gradient text-white",
                     },
                 ],
             }
-            for _ in Topic.query.all()
+            for _ in Topic.query.filter(Topic.selectable == True).all()
         ]
         return render_template("index.html", topics=topics)
     else:
