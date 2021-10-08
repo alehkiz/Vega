@@ -329,13 +329,13 @@ $(document).ready(function () {
                     '</div>'
                 )
                 accordion_collapse = $('#flush-collapse_' + question_id);
+                $('#flush-collapse_' + question_id).find('.accordion-head').append('<div class="float-end text-muted">ID:'+question_id + '</div> ')
                 head_info = $('#flush-collapse_' + question_id).find(".accordion-head-info")
-                head_info.append(question_id + ' ')
-                if (!data.update_at || !data.updater) {
-                    head_info.append('Criado ' + data.create_time_elapsed + ' por ' + data.author)
+                if (!data.update_at) {
+                    head_info.append('Respondido ' + data.answered_at)
                 }
                 else {
-                    head_info.append('Atualizado ' + data.update_at + ' por ' + data.updater)
+                    head_info.append('Atualizado ' + data.update_at)
                 }
 
                 accordion_collapse.append('<div class="accordion-head-buttons"></div>\n')
@@ -583,7 +583,7 @@ $(document).on('click', "#confirm-delete", function(e){
             // var teste = new bootstrap.Modal(document.getElementById("delete-modal"), {});
             removeModal.toggle();
             if (data.status === 'success'){
-                $('.table').find("#"+data.id).remove()
+                // $('.table').find("#"+data.id).remove()
             }
             // console.log(data)
         }

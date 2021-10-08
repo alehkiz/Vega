@@ -190,9 +190,33 @@ def edit(id):
         form.approved.data = question.answer_approved
     return render_template('edit.html',form=form, title='Editar', question=True)
 
+@bp.route('activate/<int:id>', methods=['POST'])
+@login_required
+@roles_accepted('admin', 'support')
+@counter
+def activate(id):
+    confirm = request.form.get('confirm', False)
+    if confirm != 'true':
+        return jsonify({
+            'status': 'error',
+            'message': 'not confirmed'
+        }), 404
+    q = Question.query.filter(Question.id == id).first_or_404()
+    id = q.id 
+    try:
+        q.active = True
+        db.session.commit()
+        return jsonify({'id': id,
+                        'status': 'success'})
+    except Exception as e:
+        app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+        app.logger.error(e)
+        db.session.rollback()
+        return abort(404)
+
 @bp.route('remove/<int:id>', methods=['POST'])
 @login_required
-@roles_accepted("admin", "manager_content")
+@roles_accepted("admin", "manager_content", 'support')
 @counter
 def remove(id):
     confirm = request.form.get('confirm', False)
@@ -215,7 +239,8 @@ def remove(id):
         return abort(404)
     # return jsonify(q.to_dict())
     return jsonify({'status': 'error'})
-    
+
+
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
 @roles_accepted("admin", "support", "manager_content")
