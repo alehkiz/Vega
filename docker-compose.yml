@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: ./
-    command: gunicorn -b :80 --access-logfile - --error-logfile - server:app
+    command: gunicorn -b :80 --access-logfile - --error-logfile - server:app --workers 4
     # command: python manage.py run -h 0.0.0.0
     volumes:
       - ./:/usr/src/app/

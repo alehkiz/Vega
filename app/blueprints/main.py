@@ -128,9 +128,7 @@ def before_request():
 @bp.route("/index")
 @counter
 def index():
-    if current_user.is_authenticated and (
-        current_user.is_admin or current_user.is_editor or current_user.is_support
-    ):
+    if current_user.is_authenticated and current_user.has_support:
         topics = [
             {
                 "id": _.id,
