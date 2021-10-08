@@ -609,6 +609,7 @@ def make_question():
 
             question.question = form.question.data
             question.topic = topic
+            question.sub_topic = form.sub_topic.data
             question.create_user_id = user.id
             question.question_network_id = ip.id
             question.active = True
