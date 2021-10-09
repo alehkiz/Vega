@@ -123,6 +123,10 @@ def before_request():
 # def before_request():
 #     pass
 
+@bp.teardown_request
+def teardow_request_test(exception):
+    print('Fechando a requisição')
+    db.session.remove()
 
 @bp.route("/")
 @bp.route("/index")
