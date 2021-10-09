@@ -1,6 +1,7 @@
 html {
-    overflow-y:scroll;
-}   
+    overflow-y: scroll;
+}
+
 html,
 body {
     height: 100%;
@@ -19,18 +20,18 @@ a {
     text-decoration: none !important;
 }
 
+
 /* Article */
 
-
 .article-header {
-  /* padding-top: 20px;
+    /* padding-top: 20px;
   padding-bottom: 20px; */
 }
 
 .article-title {
     margin-top: 30px;
     margin-bottom: 0;
-    font-size:30px;
+    font-size: 30px;
     font-weight: 400;
 }
 
@@ -85,13 +86,14 @@ blockquote {
     font-size: 80% !important;
 }
 
-form > input[type=text],
+form>input[type=text],
 textarea {
     border: 1px solid #ccc;
     margin: 10px 0;
     padding: 10px 0 10px 5px;
     width: 100%;
 }
+
 
 /* form > input[type="submit"] {
     background: #39506e none repeat scroll 0 0;
@@ -107,18 +109,20 @@ textarea {
     width: 30%; 
 }*/
 
-form > div > input:hover,
-form > textarea:hover {
+form>div>input:hover,
+form>textarea:hover {
     background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
     color: #5793ef;
     transition: all 0.5s ease 0s;
 }
+
 
 /* form > input[type="submit"]:hover {
     background: rgba(0, 0, 0, 50) none repeat scroll 0 0;
     color: #5793ef;
     transition: all 0.5s ease 0s;
 } */
+
 .search {
     width: 100%;
     margin-bottom: auto;
@@ -139,7 +143,7 @@ form > textarea:hover {
     caret-color: transparent;
     line-height: 20px;
     transition: width 0.4s linear;
-    width:350px !important;
+    width: 350px !important;
 }
 
 .search .search-input {
@@ -170,8 +174,8 @@ form > textarea:hover {
 
 .accordion-body {
     padding-top: 2rem !important;
-
 }
+
 .accordion-footer {
     padding: 1rem 1.25rem;
     color: #999;
@@ -179,7 +183,6 @@ form > textarea:hover {
 
 .accordion-head {
     padding: 0.5rem 0.25rem;
-
     /* border: solid #dee2e6;
     border-radius: .25rem;
     border-width: 1px; */
@@ -209,7 +212,8 @@ form > textarea:hover {
     border-width: 1px !important;
 }
 
-.like-button, .save-button {
+.like-button,
+.save-button {
     /* color: currentColor !important; */
     text-decoration: none !important;
     /* text-decoration-color: transparent; */
@@ -218,9 +222,11 @@ form > textarea:hover {
 .unlike {
     color: red !important;
 }
+
 .unsave {
     color: blue !important;
 }
+
 .save {
     color: black !important;
 }
@@ -229,43 +235,69 @@ form > textarea:hover {
     color: blue;
 }
 
-
 @media all and (min-width: 992px) {
-	.dropdown-menu li{ position: relative; 	}
-	.nav-item .submenu{ 
-		display: none;
-		position: absolute;
-		left:100%; top:-7px;
-	}
-	.nav-item .submenu-left{ 
-		right:100%; left:auto;
-	}
-	.dropdown-menu > li:hover{ background-color: #f1f1f1 }
-	.dropdown-menu > li:hover > .submenu{ display: block; }
-}	
+    .dropdown-menu li {
+        position: relative;
+    }
+    .nav-item .submenu {
+        display: none;
+        position: absolute;
+        left: 100%;
+        top: -7px;
+    }
+    .nav-item .submenu-left {
+        right: 100%;
+        left: auto;
+    }
+    .dropdown-menu>li:hover {
+        background-color: #f1f1f1
+    }
+    .dropdown-menu>li:hover>.submenu {
+        display: block;
+    }
+}
+
+
 /* ============ desktop view .end// ============ */
 
+
 /* ============ small devices ============ */
+
 @media (max-width: 991px) {
-  .dropdown-menu .dropdown-menu{
-      margin-left:0.7rem; margin-right:0.7rem; margin-bottom: .5rem;
-  }
-}	
+    .dropdown-menu .dropdown-menu {
+        margin-left: 0.7rem;
+        margin-right: 0.7rem;
+        margin-bottom: .5rem;
+    }
+}
 
 #nav_bar {
     height: 4.2em;
 }
-
 
 i.fas.circle {
     display: inline-block;
     border-radius: 60px;
     box-shadow: 0px 0px 2px #888;
     padding: 0.5em 0.6em;
-    background-color:#5793ef;
-  }
+    background-color: #5793ef;
+}
 
-  i.fas.circle:hover {
+i.fas.circle:hover {
     box-shadow: 0px 0px 2px #5793ef;
-    background-color:#287eff
-  }
+    background-color: #287eff
+}
+
+.error-template {
+    padding: 40px 15px;
+    text-align: center;
+}
+
+.error-actions {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.error-actions .btn {
+    margin-right: 10px;
+}

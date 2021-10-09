@@ -59,7 +59,7 @@ class Article(db.Model):
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     # updater = db.relationship('User', foreign_keys = [update_user_id], backref='articles_updated')
     # author = db.relationship('User', foreign_keys = [user_id], backref='articles', lazy='dynamic')
-    search_vector = db.Column(TSVectorType('_text', 'title', regconfig='public.pt'))
+    search_vector = db.Column(TSVectorType('_text', 'title', regconfig='public.pt', cache_ok=False))
     # __ts_vector__ = create_tsvector(
     #     cast(func.coalesce(_text, ''), postgresql.TEXT))
 

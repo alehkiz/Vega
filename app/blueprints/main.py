@@ -125,8 +125,13 @@ def before_request():
 
 @bp.teardown_request
 def teardow_request_test(exception):
-    print('Fechando a requisição')
-    db.session.remove()
+    try:
+        db.session.close()
+    except Exception as e:
+        app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
+        app.logger.error(e)
+        # return abort(500)
+
 
 @bp.route("/")
 @bp.route("/index")
@@ -195,7 +200,7 @@ def index():
             }
         ]
 
-        tags = Tag.query.filter(Question.topic_id == topic.id).all()
+        tags = Tag.query.all()
 
         tags_question = [{"name": 'Marcações', "values": [{
             'title': _.name,
