@@ -96,7 +96,6 @@ def dash_app(app=False):
     def dashboard():
         
         return render_template('dashboard.html', dash=dash_app.index())
-    # print(dash_app.index())
     
 
     @dash_app.callback(Output('questions-month', 'figure'), [

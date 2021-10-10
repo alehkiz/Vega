@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: ./
-    command: gunicorn -b :80 --error-logfile /usr/src/app/errors.log --log-file /usr/src/app/logs/logs.log --log-level DEBUG server:app --workers=8 --worker-class "gthread" --threads 8 --max-requests 99999999
+    command: gunicorn -b :80 --error-logfile /usr/src/app/errors.log --log-file /usr/src/app/logs/logs.log --log-level DEBUG server:app --workers=8 --worker-class gthread --threads 8
     # command: python manage.py run -h 0.0.0.0
     volumes:
       - ./:/usr/src/app/

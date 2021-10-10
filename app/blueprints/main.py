@@ -26,6 +26,7 @@ from app.models.security import User
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
 from app.utils.routes import counter
+from app.core.extensions import cache
 
 # from app.dashboard import dash
 from app.utils.dashboard import Dashboard
@@ -135,6 +136,7 @@ def teardow_request_test(exception):
 
 @bp.route("/")
 @bp.route("/index")
+# @cache.cached(timeout=50)
 @counter
 def index():
     if current_user.is_authenticated and current_user.has_support:
@@ -235,13 +237,6 @@ def select_access(topic=None):
     response.set_cookie(key="AccessType", value=obj_topic.name)
     session["AccessType"] = obj_topic.name
     return response
-    # print(obj_topic)
-    # return topic
-    # if request.cookies.get('AccessType', False):
-    #     flash('Módulo selecionado')
-    #     return redirect(url_for('question.index'))
-    # response = Response()
-    # response.set_cookie(key='AccessType', value='ValuePage')
 
 
 @bp.route("/access/<string:topic>")
@@ -257,7 +252,6 @@ def selected_access(topic=None):
 
 @bp.route("/search")
 def search():
-    # print(g.tags)
     page = request.args.get("page", 1, type=int)
     if g.search_form.validate():
         search = Search.query.filter(Search.text.ilike(g.search_form.q.data)).first()
