@@ -61,7 +61,6 @@ def question(id):
         
     else:
         # anon_user = User.query.filter_by(id=app.config.get('USER_ANON_ID')).first_or_404()
-        print(g.ip_id)
         question.add_view(app.config.get('USER_ANON_ID'), g.ip_id)
     return jsonify(to_dict)
 
@@ -114,24 +113,11 @@ def visits_by_interval():
     if request.method == 'POST':
         start = request.form.get('start', False)
         end = request.form.get('end', False)
-        # print(type(start))
-        # print(start)
-        # print(end)
         if start is False or end is False:
             return jsonify({
                 'error': True,
                 'mensage': 'Data inicial ou final inválida;'
             })
-        # try:
-        #     # start = datetime.strptime(start, '%d-%m-%Y')
-        #     # end = datetime.strptime(end, '%d-%m-%Y')
-            
-        # except Exception as e:
-        #     return jsonify({
-        #         'error': True,
-        #         'message': 'Não foi possível converter inicio e fim para uma data valida'
-        #     })
-        # print('final')
         return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),
                         _[0]] for _ in Visit.total_by_date(start, end).all()])
 
@@ -149,7 +135,6 @@ def visits_data():
                 'message': 'Ano inválido'
             })
         year = int(year)
-        print(year)
         if year is False:
             return jsonify({
                 'error': True,
@@ -170,14 +155,7 @@ def visits_data():
                 'message': 'Mês inválido'}
             )
         try:
-            print(month)
             month = int(month)
-        #     _dict = {_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'):_[0] for _ in Visit.total_by_date(year=year, month=month).all()}
-        #     return jsonify({
-        # 'labels': list(_dict.keys()),
-        # 'datasets': [{
-        #     'labels': list(_dict.keys()),
-        #     'data': list(_dict.values())}]})
             return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),_[0]] for _ in Visit.total_by_year_month(year=year, month=month).all()])
         except Exception as e:
             return jsonify({

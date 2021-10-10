@@ -46,7 +46,6 @@ def add():
         article = Article.query.filter(Article.title.ilike(form.title.data)).first()
         if not article is None:
             form.title.errors.append('Título inválido ou já existente')
-        print(form.topic.data)
         if not form.errors:
             article = Article()
             article.title = form.title.data

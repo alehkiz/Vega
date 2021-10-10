@@ -503,7 +503,7 @@ class Question(db.Model):
         ql = QuestionLike.query.filter(QuestionLike.question_id==self.id)
         like_user = ql.filter(QuestionLike.user_id==user_id).first()
         if not like_user is None:
-            print('Questão já curtida')
+            flash('Questão já curtida', category='info')
         ql = ql.first()
         if ql is None or like_user is None:
             ql = QuestionLike()
@@ -553,7 +553,7 @@ class Question(db.Model):
         qs = QuestionSave.query.filter(QuestionSave.question_id==self.id)
         save_user = qs.filter(QuestionSave.user_id==user_id).first()
         if not save_user is None:
-            print('Questão já curtida')
+            flash('Questão já salva', category='info')
         qs = qs.first()
         if qs is None or save_user is None:
             qs = QuestionSave()
@@ -663,7 +663,6 @@ class Question(db.Model):
     def saves_by_user(user_id, topic:Topic=None):
         if topic is None:
             return None
-        print(topic.id)
         user = User.query.filter(User.id==user_id).first_or_404()
         rs = db.session.query(Question).filter(Question.topic_id==topic.id).join(
             QuestionSave.question).filter(

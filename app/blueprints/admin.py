@@ -130,9 +130,6 @@ def answers():
 
     # TODO Incluir a odernação por relacionamento de acordo com a seleção do usuário
     relations = inspect(Question).relationships
-    print(column)
-    # print(column.property.target.name)
-    # print(type(str(column.property.target.name)))
     if hasattr(column.property, 'target'):
         if column.property.target.name in relations:
             relationship = getattr(relations, str(column.property.target.name), False)
@@ -144,7 +141,6 @@ def answers():
 
     if form.validate():
         if len(form.topic.data) > 0:
-            print(len(form.topic.data))
             q = q.filter(Question.topic_id.in_([_.id for _ in form.topic.data]))
         if len(form.sub_topic.data) > 0:
             q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
@@ -249,7 +245,6 @@ def questions():
             # )
     if form.validate():
         if len(form.topic.data) > 0:
-            print(len(form.topic.data))
             q = q.filter(Question.topic_id.in_([_.id for _ in form.topic.data]))
         if len(form.sub_topic.data) > 0:
             q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
@@ -290,10 +285,6 @@ def to_approve():
     order_type = request.args.get("order_type", "desc")
     topic = request.args.get("topic", None)
     form = QuestionFilter(request.args, meta={'csrf': False})
-    print(form.validate())
-    print(request.endpoint)
-    print({**request.args})
-    print(url_for('admin.questions', ** request.args))
     request_args = request.args
     if topic != None:
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()

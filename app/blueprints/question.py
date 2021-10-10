@@ -53,11 +53,9 @@ def search():
         else:
             topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
         sub_topics = g.question_search_form.filter.data
-        print(topics)
         if not sub_topics:
             sub_topics = SubTopic.query.all()
         q = Question.search(g.question_search_form.q.data, pagination=False, sub_topics=sub_topics, topics=topics).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
-        print(g.question_search_form.filter.data)
         
         paginate = q.paginate(per_page = app.config.get('QUESTIONS_PER_PAGE', 1), page = page)
         search_query = strip_accents(g.question_search_form.q.data)
@@ -92,7 +90,6 @@ def search():
                 if not question is None:
                     form.question.errors.append('Dúvida já cadastrada')
                 if not form.errors:
-                    # print(current_user)
                     if current_user.is_authenticated:
                         user = current_user
                     else:
@@ -170,17 +167,9 @@ def edit(id):
         if not g.ip_id:
             app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
             flash('Não foi possível concluir o pedido')
-        # print('IP: ' , g.ip_id)
         question.question_network_id = g.ip_id
         db.session.commit()
         return redirect(url_for('question.view', id=question.id))
-        # except Exception as e:
-        #     print('aqio')
-        #     form.question.errors.append('Não foi possível atualizar')
-        #     app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
-        #     app.logger.error(e)
-        #     db.session.rollback()
-        #     return render_template('edit.html', form=form, title='Editar', question=True)
 
     form.question.data = question.question
     form.tag.data = question.tags
@@ -272,7 +261,6 @@ def add():
             if not g.ip_id:
                 app.logger('Erro ao salvar o ip ´g.ip_id´ não está definido')
                 flash('Não foi possível concluir o pedido')
-            print('IP: ' , g.ip_id)
             question.question_network_id = g.ip_id
             question.create_user_id = current_user.id
             question.topic_id = form.topic.data.id
@@ -287,12 +275,11 @@ def add():
                 app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                 app.logger.error(e)
                 db.session.rollback()
-                print('error')
                 return render_template('add.html', form=form, title='Incluir dúvida', question=True)
         else:
-            print('Aqui')
+            app.logger.error('Form error')
     else:
-        print('form error ')
+        app.logger.error('Form not validated.')
     return render_template('add.html', form=form, title='Incluir dúvida', question=True)
 
 @bp.route('/responder/<int:id>', methods=['POST', 'GET'])
@@ -306,8 +293,6 @@ def answer(id: int):
         return redirect(url_for('question.index'))
     form = QuestionAnswerForm()
     if form.validate_on_submit():
-        # q = Question.query.filter(Question.question.ilike(form.question.data.lower())).first()
-        # print(q)
         if not q is None:
             if q.id != id:
                 form.question.errors.append('Você alterou a pergunta para uma já cadastrada')
@@ -328,7 +313,6 @@ def answer(id: int):
             app.logger.error(e)
             db.session.rollback()
             return render_template('answer.html', form=form, answer=True)
-        return 'ok'
     
     form.question.data = q.question
 
@@ -435,7 +419,6 @@ def topic(name, type):
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
-    print(pagination_args)
     return render_template('question.html', 
                                 pagination=paginate, 
                                 cls_question=Question, 
@@ -498,7 +481,6 @@ def like_action(question_id):
 def save_action(question_id):
     question = Question.query.filter(Question.id==question_id).first_or_404()
     action = request.form.get('action', False)
-    print(action)
     if action is False or action not in ['save', 'unsave']:
         return jsonify({
             'status':'error',
@@ -584,7 +566,6 @@ def make_question():
                 user = current_user
             else:
                 user = User.query.filter(User.id == app.config.get('USER_ANON_ID', False)).first()
-            # print(user.id)
             ip = Network.query.filter(Network.ip == request.remote_addr).first()
             if ip is None:
                 ip = Network()

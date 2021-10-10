@@ -48,7 +48,8 @@ Werkzeug==2.0.1
 wrapt==1.12.1
 WTForms==2.3.3
 gunicorn
-dash
-dash-bootstrap-components
-pandas
+dash==1.20.0
+dash-bootstrap-components==0.12.2
+pandas==1.2.4
 plotly-express
+Flask-Caching

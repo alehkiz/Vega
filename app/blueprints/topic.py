@@ -90,7 +90,6 @@ def view(id):
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
-    print(pagination_args)
     return render_template('question.html', 
                                 pagination=paginate, 
                                 cls_question=Topic, 
