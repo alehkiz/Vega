@@ -20,22 +20,23 @@ def thread_(url : str = '', number_exec : int = 100, cookie = ''):
     with ThreadPoolExecutor(max_workers=200) as pool:
         return list(pool.map(get_url, urls, cookies))
 
-def run_test(url : str = '', number_exec : int = 100):
-    parsed_url = url_parse(url)
-    scheme = parsed_url.scheme
-    host = parsed_url.netloc
+def run_test(url : str = '', number_exec : int = 100, cookie = ''):
+    if cookie == '':
+        parsed_url = url_parse(url)
+        scheme = parsed_url.scheme
+        host = parsed_url.netloc
 
-    cookie_url = f'{scheme}://{host}/select_access/Retaguarda'
-    try:
-        cookie = requests.get(cookie_url).cookies
-    except Exception as e:
-        print(e)
-        time.sleep(2)
+        cookie_url = f'{scheme}://{host}/select_access/Retaguarda'
         try:
             cookie = requests.get(cookie_url).cookies
         except Exception as e:
-            print('Erro')
-            return 0
+            print(e)
+            time.sleep(2)
+            try:
+                cookie = requests.get(cookie_url).cookies
+            except Exception as e:
+                print('Erro')
+                return 0
     if url == '':
         raise Exception('URL deve ser um texto')
     init_time = datetime.now()
