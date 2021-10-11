@@ -15,12 +15,14 @@ from flask import (
     Response,
     make_response,
     session,
+    jsonify,
 )
 from flask_security import login_required, current_user
 from datetime import datetime
+from sqlalchemy import func
 
 from app.core.db import db
-from app.models.wiki import Article, Question, Tag, Topic
+from app.models.wiki import Article, Question, QuestionView, Tag, Topic
 from app.models.app import Network, Page, Visit
 from app.models.security import User
 from app.forms.question import QuestionSearchForm
@@ -48,7 +50,8 @@ def before_request():
         try:
             db.session.commit()
         except Exception as e:
-            app.logger.error("Não foi possível salvar ultima visualização do usuário")
+            app.logger.error(
+                "Não foi possível salvar ultima visualização do usuário")
             app.logger.error(e)
             return abort(500)
 
@@ -69,7 +72,8 @@ def before_request():
             return response
 
     else:
-        selected_topic = Topic.query.filter(Topic.name == session.get("AccessType", False)).first()
+        selected_topic = Topic.query.filter(
+            Topic.name == session.get("AccessType", False)).first()
         if not selected_topic is None:
             if not selected_topic.active:
                 session.pop('AccessType')
@@ -87,13 +91,15 @@ def before_request():
             return resp
     if session.get("AccessType", False):
         g.tags = Tag.query.all()
-        g.topic = Topic.query.filter(Topic.selectable == True, Topic.name == g.selected_access).first()
+        g.topic = Topic.query.filter(
+            Topic.selectable == True, Topic.name == g.selected_access).first()
         if not g.topic is None:
 
-            g.questions_most_viewed = Question.most_viewed(app.config.get("ITEMS_PER_PAGE", 5), g.topic)
+            g.questions_most_viewed = Question.most_viewed(
+                app.config.get("ITEMS_PER_PAGE", 5), g.topic)
             g.questions_most_recent = (
                 Question.query.order_by(Question.create_at.desc())
-                .filter(Question.answer_approved == True, Question.topic_id==g.topic.id)
+                .filter(Question.answer_approved == True, Question.topic_id == g.topic.id)
                 .limit(app.config.get("ITEMS_PER_PAGE", 5))
                 .all()
             )
@@ -232,7 +238,8 @@ def select_access(topic=None):
     if topic is None:
         topics = Topic.query.filter(Topic.selectable == True).all()
         return render_template("select_access.html", topics=topics)
-    obj_topic = Topic.query.filter(Topic.name.ilike(topic.lower())).first_or_404()
+    obj_topic = Topic.query.filter(
+        Topic.name.ilike(topic.lower())).first_or_404()
     response = make_response(redirect(url_for("main.index")))
     response.set_cookie(key="AccessType", value=obj_topic.name)
     session["AccessType"] = obj_topic.name
@@ -244,7 +251,8 @@ def selected_access(topic=None):
     if topic is None:
         return redirect(url_for("main.select_access"))
 
-    obj_topic = Topic.query.filter(Topic.name.ilike(topic.lower())).first_or_404()
+    obj_topic = Topic.query.filter(
+        Topic.name.ilike(topic.lower())).first_or_404()
     response = make_response(redirect(url_for("main.index")))
     response.set_cookie(key="AccessType", value=obj_topic.name)
     return response
@@ -254,7 +262,8 @@ def selected_access(topic=None):
 def search():
     page = request.args.get("page", 1, type=int)
     if g.search_form.validate():
-        search = Search.query.filter(Search.text.ilike(g.search_form.q.data)).first()
+        search = Search.query.filter(
+            Search.text.ilike(g.search_form.q.data)).first()
         if search is None:
             search = Search()
             search.text = g.search_form.q.data
@@ -268,7 +277,8 @@ def search():
                     search.add_search()
             except Exception as e:
                 db.session.rollback()
-                app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
+                app.logger.error(app.config.get(
+                    "_ERRORS").get("DB_COMMIT_ERROR"))
                 app.logger.error(e)
                 return abort(500)
         else:
@@ -277,7 +287,8 @@ def search():
             else:
                 search.add_search()
         paginate = Question.search(
-            g.search_form.q.data, page=page, per_page=app.config.get("ITEMS_PER_PAGE")
+            g.search_form.q.data, page=page, per_page=app.config.get(
+                "ITEMS_PER_PAGE")
         )
     # article = Article.search(g.search_form.q.data, False, resume=True)
     # result = question.union_all(article).paginate(page=page, per_page=app.config.get('ITEMS_PER_PAGE'))
@@ -293,3 +304,25 @@ def search():
         last_page=last_page,
         url_arguments={"q": g.search_form.q.data},
     )
+
+
+@bp.route('/autocomplete/', methods=['GET'])
+def autocomplete():
+    search = request.args.get("q", '', type=str)
+    if search == '':
+        jsonify(result=[])
+
+    # return a query orded by most viewed question, where question has search and question is approved, active and answered
+    result = db.session.query(Question, func.count(QuestionView.id).label('views')).outerjoin(QuestionView).filter(
+        Question.answer != '', Question.answer_approved == True, Question.active == True, Question.topic_id == g.topic.id).filter(func.to_tsvector('public.pt', Question.question).op(
+        '@@')(func.plainto_tsquery('public.pt', search))).group_by(Question).order_by(func.count(QuestionView.id).desc())
+    # result = result.filter(func.to_tsvector('public.pt', Question.question).op(
+        # '@@')(func.plainto_tsquery('public.pt', search)))
+    # result = [_[0] for _ in result.limit(10).all()]
+    result = [{'link': url_for('question.view', id=_[0].id),
+               'label': _[0].question}
+              for _ in result.limit(10).all()]
+    return jsonify(result=result)
+
+
+# db.session.query(Question).filter(func.to_tsvector('public.pt', Question.question).op('@@')(func.plainto_tsquery('public.pt', search))).join(QuestionView).filter(func.count(QuestionView.id).label('total')).all()
