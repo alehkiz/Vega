@@ -72,15 +72,13 @@
                     $.getJSON("{{url_for('main.autocomplete')}}", {
                         q: request.term,
                     }, function(data) {
-                        console.log(data)
                         response(data.result);
                     });
                 },
                 minLength: 3,
-                delay: 500,
+                delay: 1000,
                 select: function(event, ui) {
                     window.location.href = ui.item.link
-                    console.log(ui.item.link);
                 }
             })
         })
