@@ -10,7 +10,7 @@ from datetime import datetime
 from os.path import exists
 from os import mkdir
 
-from app.core.extensions import cache, security, migrate, login, csrf
+from app.core.extensions import security, migrate, login, csrf
 
 from app.dashboard.index import dash_app
 
@@ -70,7 +70,6 @@ def init(app):
     csrf._exempt_views.add('dash.dash.dispatch')
     login.init_app(app)
     login.session_protection = 'strong'
-    cache.init_app(app, config={'CACHE_TYPE': 'SimpleCache'})
 
 
     # babel.init_app(app)
