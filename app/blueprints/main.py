@@ -28,7 +28,7 @@ from app.models.security import User
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
 from app.utils.routes import counter
-from app.core.extensions import cache
+# from app.core.extensions import cache
 
 # from app.dashboard import dash
 from app.utils.dashboard import Dashboard
@@ -142,7 +142,6 @@ def teardow_request_test(exception):
 
 @bp.route("/")
 @bp.route("/index")
-# @cache.cached(timeout=50)
 @counter
 def index():
     if current_user.is_authenticated and current_user.has_support:

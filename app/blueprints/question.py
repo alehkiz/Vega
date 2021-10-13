@@ -334,9 +334,7 @@ def approve(id: int):
         return redirect(url_for('question.index'))
     form = QuestionApproveForm()
     if form.validate_on_submit():
-        
-        q = Question.query.filter(Question.question.ilike(form.question.data.lower())).first()
-        if not q is None:
+        if not Question.query.filter(Question.question.ilike(form.question.data.lower())).first() is None:
             if q.id != id:
                 form.question.errors.append('Você alterou a pergunta para uma já cadastrada')
                 return render_template('answer.html', form=form, approve=True)
