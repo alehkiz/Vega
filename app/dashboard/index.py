@@ -97,7 +97,8 @@ def dash_app(app=False):
 ),
             dbc.Tabs([
                 dbc.Tab(label='Acessos por dia', tab_id='access_day'),
-                dbc.Tab(label='Questões vistas por dia', tab_id='views_day')
+                dbc.Tab(label='Questões vistas por dia', tab_id='views_day'),
+                dbc.Tab(label='Perguntas por tópicos e tags', tab_id='tags_topics')
             ], id='tabs',
             active_tab='access_day'),
             html.Div(id='tab_content', className='p-4')
@@ -176,6 +177,11 @@ def dash_app(app=False):
                 return dcc.Graph(figure=get_graph_access_by_date(), config={'displayModeBar': False})
             elif active_tab == 'views_day':
                 return dcc.Graph(figure=get_questions_views_by_date(), config={'displayModeBar': False})
+            elif active_tab == 'tags_topics':
+                return dbc.Row([
+                    dbc.Col(dcc.Graph(figure=get_graph_tags(), config={'displayModeBar': False})),
+                    dbc.Col(dcc.Graph(figure=get_graph_topics(), config={'displayModeBar': False})),
+                ])
         return "No tab selected"
 
     @dash_app.callback(Output('questions-month', 'figure'), [
