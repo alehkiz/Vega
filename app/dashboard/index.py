@@ -1,3 +1,8 @@
+from unicodedata import category
+from dash_bootstrap_components._components.Alert import Alert
+from dash_html_components.B import B
+from dash_html_components.Br import Br
+from sqlalchemy.sql.expression import label
 from app.models.app import Visit
 from re import template
 from dash_core_components.Checklist import Checklist
@@ -11,7 +16,7 @@ import dash_bootstrap_components as dbc
 from flask.templating import render_template
 import plotly.express as px
 import pandas as pd
-from app.models.wiki import Question, Topic, Tag
+from app.models.wiki import Question, Topic, Tag, QuestionView
 from app.core.db import db
 from sqlalchemy import func, asc, inspect
 
@@ -41,12 +46,26 @@ def get_graph_questions_by_month(names=None):
     graph = px.line(df[mask], x = 'Mês', y = 'Total', title='Dúvidas cadastradas por dia e assunto', color='Assunto', hover_data={'Mês': "|%m/%Y"})
     return graph
 
+def get_questions_views_by_date():
+    df = pd.read_sql(
+        db.session.query(func.count(QuestionView.id).label('Total'), func.date_trunc('day', QuestionView.datetime).label('Data')).group_by('Data').order_by(asc('Data')).statement, con=db.session.bind)
+    graph = px.line(df, x = 'Data', y= 'Total', title='Perguntas visualizadas por dia')
+    return graph
+
 def get_graph_access_by_date():
     df = pd.read_sql(db.session.query(func.count(Visit.id).label('Total'), 
                 func.date_trunc('day', Visit.datetime).label('Data')).group_by('Data').order_by(
                     asc('Data')).statement, con=db.session.bind)
     graph = px.line(df, x = 'Data', y= 'Total', title='Acessos por dia')
     return graph
+
+def get_total_access():
+    return Visit.query.count()
+
+def get_total_questions_views():
+    return QuestionView.query.count()
+def get_questions_answered():
+    return Question.query.filter(Question.active == True, Question.answer != '', Question.answer_approved==True).count()
 
 def dash_app(app=False):
     dash_app = Dash(__name__, server=app, url_base_pathname='/dashapp/', external_stylesheets=[dbc.themes.BOOTSTRAP], update_title='Atualizando...')
@@ -56,47 +75,108 @@ def dash_app(app=False):
         dash_app.layout = html.Div()
     else:
         topics = [x.name for x in Topic.query]
-
-        dash_app.layout = html.Div(children=[
-        html.H1(children='Dashboard'),
-        html.Div([
-            html.H4(children='Acessos'),
-            html.Div([
-                dcc.Graph(id='access', figure=get_graph_access_by_date(), config={
-            'displayModeBar': False
-        })], className='col-sm'),
-            
-        ]),
-
-        html.Div([
-            html.H4(children='Questões cadastradas'),
-            html.Div([dcc.Graph(id='topics', figure=get_graph_topics(), config={
-            'displayModeBar': False
-        })], className='col-sm'),
-            html.Div([dcc.Graph(id='tags', figure=get_graph_tags(), config={
-                'displayModeBar': False
-            }    
-        )
-            ], className='col-sm'),
-            dcc.Checklist(
-                id='checklist', 
-                options=[{'label': x, 'value': x} for x in topics],
-                value=topics,
-                labelStyle={'display': 'inline-block'}
-            ),
-            
-            html.Div([dcc.Graph(id='questions-month', figure=get_graph_questions_by_month(), config={
-                    'displayModeBar': False
-                })
-            ])
-        ], className='row')
+        dash_app.layout = dbc.Container([
+            dcc.Store(id='store'),
+            dbc.Jumbotron(
+    [
+        html.H1("Dashboard AtenDetran", className="display-5"),
+        html.P([
+            f"Já tivemos ", 
+            html.B(get_total_access()),
+            " acessos!",
+            html.Br(),
+            ],
+            className="lead",
+        ),
+        html.Hr(className="my-2"),
+        html.P(
+            f"Foram {get_total_questions_views()} perguntas visualizadas. De um total de {get_questions_answered()} perguntas respondidas."
+        ),
+        # html.P(dbc.Button("Learn more", color="primary"), className="lead"),
+    ], className='p-3'
+),
+            dbc.Tabs([
+                dbc.Tab(label='Acessos por dia', tab_id='access_day'),
+                dbc.Tab(label='Questões vistas por dia', tab_id='views_day')
+            ], id='tabs',
+            active_tab='access_day'),
+            html.Div(id='tab_content', className='p-4')
         ])
+        
+        # html.Div([
+        #     dcc.Tabs([
+        #         dcc.Tab(label='Acessos por dia', children=[
+        #             dcc.Graph(id='access', figure=get_graph_access_by_date(), config={
+        #     'displayModeBar': False
+        # })], className='col-sm'),
+        #         dcc.Tab(label='Questões visualizadas por dia', children=[
+        #             dcc.Graph(id='questions_views', figure=get_questions_views_by_date(), config={
+        #                 'displayModeBar': False
+        #             })
+        #         ], className='col-sm')
+        # ])])
+
+
+
+
+
+
+
+
+
+
+        # dash_app.layout = html.Div(children=[
+        # html.H1(children='Dashboard'),
+        # html.Div([
+        #     # html.H4(children='Acessos'),
+        #     html.Div([
+        #         dcc.Graph(id='access', figure=get_graph_access_by_date(), config={
+        #     'displayModeBar': False
+        # })], className='col-sm'),
+            
+        # ]),
+
+        # html.Div([
+        #     html.H4(children='Questões cadastradas'),
+        #     html.Div([dcc.Graph(id='topics', figure=get_graph_topics(), config={
+        #     'displayModeBar': False
+        # })], className='col-sm'),
+        #     html.Div([dcc.Graph(id='tags', figure=get_graph_tags(), config={
+        #         'displayModeBar': False
+        #     }    
+        # )
+        #     ], className='col-sm'),
+        #     dcc.Checklist(
+        #         id='checklist', 
+        #         options=[{'label': x, 'value': x} for x in topics],
+        #         value=topics,
+        #         labelStyle={'display': 'inline-block'}
+        #     ),
+            
+        #     html.Div([dcc.Graph(id='questions-month', figure=get_graph_questions_by_month(), config={
+        #             'displayModeBar': False
+        #         })
+        #     ])
+        # ], className='row')
+        # ])
 
     @dash_app.server.route('/dashboard/')
     def dashboard():
         
         return render_template('dashboard.html', dash=dash_app.index())
     
+    @dash_app.callback(
+        Output('tab_content', 'children'),
+        [Input('tabs', 'active_tab'), Input('store', 'data')],
+
+    )
+    def render_tab_content(active_tab, data):
+        if active_tab and data is None:
+            if active_tab == 'access_day':
+                return dcc.Graph(figure=get_graph_access_by_date(), config={'displayModeBar': False})
+            elif active_tab == 'views_day':
+                return dcc.Graph(figure=get_questions_views_by_date(), config={'displayModeBar': False})
+        return "No tab selected"
 
     @dash_app.callback(Output('questions-month', 'figure'), [
         Input('checklist', 'value')
