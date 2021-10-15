@@ -18,10 +18,10 @@ first_page, last_page, request.endpoint, url_arguments=url_arguments)}} {% endif
         <!-- <p class="lead article-description">
                 
             </p> -->
-        <p class="article-meta">
+        <div class="article-meta">
             Criado {{question.get_create_time_elapsed}} {% if question.was_updated() %} {{'Atualizado '+ question.get_update_time_elapsed}} {% endif %}
-            <p class="article-meta float-end">Visualizações {{question.views}}</p>
-        </p>
+            <div class="float-end">Visualizações {{question.views}}</div>
+        </div>
     </div>
     <div class="article-text">
         {{question.get_body_html()}}

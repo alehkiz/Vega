@@ -89,9 +89,13 @@ def dash_app(app=False):
             className="lead",
         ),
         html.Hr(className="my-2"),
-        html.P(
-            f"Foram {get_total_questions_views()} perguntas visualizadas. De um total de {get_questions_answered()} perguntas respondidas."
-        ),
+        html.P([
+            f"Foram ",
+            html.B(get_total_questions_views()),
+            f" perguntas visualizadas, de ",
+            html.B(get_questions_answered()),
+            " perguntas respondidas."
+        ]),
         # html.P(dbc.Button("Learn more", color="primary"), className="lead"),
     ], className='p-3'
 ),
@@ -101,75 +105,48 @@ def dash_app(app=False):
                 dbc.Tab(label='Perguntas por tópicos e tags', tab_id='tags_topics')
             ], id='tabs',
             active_tab='access_day'),
-            html.Div(id='tab_content', className='p-4')
-        ])
+            html.Div(id='tab_content', className='p-4'),
+
+        #     dbc.Tabs([
+        #         dbc.Tab(label='Teste', tab_id='outro_teste',
+        #         children=[]),
+        #         dbc.Tab(label='Teste1', tab_id='outro_teste1'),
+        #         dbc.Tab(label='Teste2', tab_id='outro_teste2'),], 
+        #         id='tabs1',
+        #         active_tab='outro_teste'),
         
-        # html.Div([
-        #     dcc.Tabs([
-        #         dcc.Tab(label='Acessos por dia', children=[
-        #             dcc.Graph(id='access', figure=get_graph_access_by_date(), config={
-        #     'displayModeBar': False
-        # })], className='col-sm'),
-        #         dcc.Tab(label='Questões visualizadas por dia', children=[
-        #             dcc.Graph(id='questions_views', figure=get_questions_views_by_date(), config={
-        #                 'displayModeBar': False
-        #             })
-        #         ], className='col-sm')
-        # ])])
-
-
-
-
-
-
-
-
-
-
-        # dash_app.layout = html.Div(children=[
-        # html.H1(children='Dashboard'),
-        # html.Div([
-        #     # html.H4(children='Acessos'),
-        #     html.Div([
-        #         dcc.Graph(id='access', figure=get_graph_access_by_date(), config={
-        #     'displayModeBar': False
-        # })], className='col-sm'),
-            
+        #     dcc.Tabs(id="tabs2", value='tab1', children=[
+        #     dcc.Tab(label='Tab One', value='tab13', id='teste',
+        #             children=[dcc.Tabs(id="subtabs", value="subtab1",
+        #                 children = [dcc.Tab(label='Sub Tab1', value="subtabs1", children=[]),
+        #                 dcc.Tab(label='Sub Tab2', value="subtab2", children=[])])]),
+        #     dcc.Tab(label='Tab Two', value='tab2', children=[]),
+        #     dcc.Tab(label='Tab Three', value='tab3', children=[]),
         # ]),
+        # html.Div(id='tabs-content'),
+        # html.Br(),
+        # html.Br(),
+        # html.Br(),
+        # html.Br(),
+        # html.Br(),
 
-        # html.Div([
-        #     html.H4(children='Questões cadastradas'),
-        #     html.Div([dcc.Graph(id='topics', figure=get_graph_topics(), config={
-        #     'displayModeBar': False
-        # })], className='col-sm'),
-        #     html.Div([dcc.Graph(id='tags', figure=get_graph_tags(), config={
-        #         'displayModeBar': False
-        #     }    
-        # )
-        #     ], className='col-sm'),
-        #     dcc.Checklist(
-        #         id='checklist', 
-        #         options=[{'label': x, 'value': x} for x in topics],
-        #         value=topics,
-        #         labelStyle={'display': 'inline-block'}
-        #     ),
-            
-        #     html.Div([dcc.Graph(id='questions-month', figure=get_graph_questions_by_month(), config={
-        #             'displayModeBar': False
-        #         })
-        #     ])
-        # ], className='row')
-        # ])
+        ])
+    # @dash_app.callback(
+    #     Output('tabs-content', 'chil'),
+    #     Input('subtabs', 'value')
+    # )
+    # def teste_render2(value):
+    #     print(value)
+    # @dash_app.callback(
+    #     Output('tabs-content', 'chil'),
+    #     [Input('tabs2', 'value')]
+    # )
+    # def teste_render(value):
+    #     print(value)
 
-    @dash_app.server.route('/dashboard/')
-    def dashboard():
-        
-        return render_template('dashboard.html', dash=dash_app.index())
-    
     @dash_app.callback(
         Output('tab_content', 'children'),
-        [Input('tabs', 'active_tab'), Input('store', 'data')],
-
+        Input('tabs', 'active_tab'), Input('store', 'data'),
     )
     def render_tab_content(active_tab, data):
         if active_tab and data is None:
@@ -190,4 +167,7 @@ def dash_app(app=False):
     def update_questions_month(names):
         return get_graph_questions_by_month(names)
 
+    @dash_app.server.route('/dashboard/')
+    def dashboard():
+        return render_template('dashboard.html', dash=dash_app.index())
     return dash_app.server

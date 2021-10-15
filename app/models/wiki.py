@@ -693,7 +693,8 @@ class Question(db.Model):
                 'answered_by' : self.answered_by.name if self.was_answered else None,
                 'answered_at' : self.get_answer_time_elapsed if self.was_answered else None,
                 'topic' : self.topic.name if not self.topic is None else None,
-                'tags' : [x.name for x in self.tags]
+                'tags' : [x.name for x in self.tags],
+                'views' : self.views
                 }
     @staticmethod
     def query_by_month_year(year : int, month : int):

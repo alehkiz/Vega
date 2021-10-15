@@ -43,7 +43,7 @@
 
         {% elif question is defined %}
         {{ form.csrf_token }}
-        {{ macros.render_field(form.question, size=32, class='form-control', placeholder='Titulo') }}
+        {{ macros.render_field(form.question, style="height: 120px;", class='form-control', placeholder='Titulo') }}
         {{ macros.render_field(form.answer, size=128, class='form-control', placeholder='Descrição')}}
         {{ macros.render_field(form.tag, class='form-select', nosize=true)}}
         {{ macros.render_field(form.topic, class='form-select', nosize=true)}}
