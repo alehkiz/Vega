@@ -106,6 +106,7 @@ def dash_app(app=False):
             ], id='tabs',
             active_tab='access_day'),
             html.Div(id='tab_content', className='p-4'),
+            
 
         #     dbc.Tabs([
         #         dbc.Tab(label='Teste', tab_id='outro_teste',
