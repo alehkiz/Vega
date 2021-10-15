@@ -28,22 +28,16 @@ def server_error(e):
 def question(id):
     if session.get("AccessType", False) is False:
         abort(500)
-    access_type = session.get("AccessType", False)
-    if current_user.is_anonymous:
-        topic = Topic.query.filter(Topic.name == access_type).first()
-        if topic is None:
-            abort(404)
-        question = Question.query.filter(Question.id == id, Question.topic_id == topic.id).first()
-    else:
-        question = Question.query.filter(Question.id == id).first()
-        
+    # access_type = session.get("AccessType", False)
+    question = Question.query.filter(Question.id == id).first()
 
     if question is None:
         return abort(404)
-    if question.answer_approved == False:
+    if question.answer_approved == False or question.active != True or question.was_answered != True:
         abort(404)
-    to_dict = question.to_dict()
     if current_user.is_authenticated:
+        to_dict = question.to_dict()
+        question.add_view(current_user.id, g.ip_id)
         if question.is_liked(current_user.id):
             to_dict['like_action'] = 'unlike'
         else:
@@ -56,12 +50,9 @@ def question(id):
         to_dict['url_save'] = url_for('question.save_action', question_id=id)
         if current_user.can_edit:
             to_dict['url_edit'] = url_for('question.edit', id=id)
-        # if hasattr(g, 'ip_id'):
-        question.add_view(current_user.id, g.ip_id)
-        
     else:
-        # anon_user = User.query.filter_by(id=app.config.get('USER_ANON_ID')).first_or_404()
         question.add_view(app.config.get('USER_ANON_ID'), g.ip_id)
+        to_dict = question.to_dict()
     return jsonify(to_dict)
 
 
@@ -70,96 +61,96 @@ def question_access():
     return ''
 
 
-# api dashboard
-@bp.route('dashboard/tags_data', methods=['GET', 'POST'])
-def tags_data():
-    '''
-    Gera dados das 10 maiores categorias, caso tenham mais de 10 categorias a 10ª será Outros
-    '''
-    questions = Tag._dict_count_questions()
-    questions = order_dict(Tag._dict_count_questions(), 5)
-    return jsonify({
-        'labels': list(questions.keys()),
-        'datasets': [{
-            'data': list(questions.values()),
-            'backgroundColor': [
-                "blue",
-                "purple",
-                "pink",
-                "red",
-                "orange",
-                "yellow",
-                "green",
-                "cyan",
-                "gray",
-                "black"
-            ]  # ,
-            # 'hoverBackgroundColor': [
-            #     "#CFD4D8",
-            #     "#B370CF",
-            #     "#E95E4F",
-            #     "#36CAAB",
-            #     "#49A9EA"
-            # ]
-        }],
-        'totalQuestions': Question.query.count()
-    })
+# # api dashboard
+# @bp.route('dashboard/tags_data', methods=['GET', 'POST'])
+# def tags_data():
+#     '''
+#     Gera dados das 10 maiores categorias, caso tenham mais de 10 categorias a 10ª será Outros
+#     '''
+#     questions = Tag._dict_count_questions()
+#     questions = order_dict(Tag._dict_count_questions(), 5)
+#     return jsonify({
+#         'labels': list(questions.keys()),
+#         'datasets': [{
+#             'data': list(questions.values()),
+#             'backgroundColor': [
+#                 "blue",
+#                 "purple",
+#                 "pink",
+#                 "red",
+#                 "orange",
+#                 "yellow",
+#                 "green",
+#                 "cyan",
+#                 "gray",
+#                 "black"
+#             ]  # ,
+#             # 'hoverBackgroundColor': [
+#             #     "#CFD4D8",
+#             #     "#B370CF",
+#             #     "#E95E4F",
+#             #     "#36CAAB",
+#             #     "#49A9EA"
+#             # ]
+#         }],
+#         'totalQuestions': Question.query.count()
+#     })
 
 
 
 
-@bp.route('dashboard/visit', methods=['GET', 'POST'])
-def visits_by_interval():
-    if request.method == 'POST':
-        start = request.form.get('start', False)
-        end = request.form.get('end', False)
-        if start is False or end is False:
-            return jsonify({
-                'error': True,
-                'mensage': 'Data inicial ou final inválida;'
-            })
-        return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),
-                        _[0]] for _ in Visit.total_by_date(start, end).all()])
+# @bp.route('dashboard/visit', methods=['GET', 'POST'])
+# def visits_by_interval():
+#     if request.method == 'POST':
+#         start = request.form.get('start', False)
+#         end = request.form.get('end', False)
+#         if start is False or end is False:
+#             return jsonify({
+#                 'error': True,
+#                 'mensage': 'Data inicial ou final inválida;'
+#             })
+#         return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),
+#                         _[0]] for _ in Visit.total_by_date(start, end).all()])
 
 
-@bp.route('dashboard/visits', methods=['GET', 'POST'])
-def visits_data():
-    if request.method == 'POST':
-        year = request.form.get('year', False)
-        month = request.form.get('month', None)
-        start = request.form.get('start', False)
-        end = request.form.get('end', False)
-        if not year.isnumeric():
-            return jsonify({
-                'error': True,
-                'message': 'Ano inválido'
-            })
-        year = int(year)
-        if year is False:
-            return jsonify({
-                'error': True,
-                'message': 'Ano inválido'
-            })
-        if month is None:
-            return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),_[0]] for _ in Visit.total_by_year_month(year=year).all()])
-            try:
-                return jsonify({_[1]:_[0] for _ in Visit.total_by_year_month(year=year).all()})
-            except Exception as e:
-                return jsonify({
-                    'error': True,
-                    'message': 'Valor inválido Mês'
-                })
-        if not month.isnumeric():
-            return jsonify(
-                {'error':True, 
-                'message': 'Mês inválido'}
-            )
-        try:
-            month = int(month)
-            return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),_[0]] for _ in Visit.total_by_year_month(year=year, month=month).all()])
-        except Exception as e:
-            return jsonify({
-                'error': True,
-                'message': 'Valor inválido'
-            })
-    return ''
+# @bp.route('dashboard/visits', methods=['GET', 'POST'])
+# def visits_data():
+#     if request.method == 'POST':
+#         year = request.form.get('year', False)
+#         month = request.form.get('month', None)
+#         start = request.form.get('start', False)
+#         end = request.form.get('end', False)
+#         if not year.isnumeric():
+#             return jsonify({
+#                 'error': True,
+#                 'message': 'Ano inválido'
+#             })
+#         year = int(year)
+#         if year is False:
+#             return jsonify({
+#                 'error': True,
+#                 'message': 'Ano inválido'
+#             })
+#         if month is None:
+#             return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),_[0]] for _ in Visit.total_by_year_month(year=year).all()])
+#             try:
+#                 return jsonify({_[1]:_[0] for _ in Visit.total_by_year_month(year=year).all()})
+#             except Exception as e:
+#                 return jsonify({
+#                     'error': True,
+#                     'message': 'Valor inválido Mês'
+#                 })
+#         if not month.isnumeric():
+#             return jsonify(
+#                 {'error':True, 
+#                 'message': 'Mês inválido'}
+#             )
+#         try:
+#             month = int(month)
+#             return jsonify([[_[1].strftime('%Y-%m-%dT%H:%M:%S.%f'),_[0]] for _ in Visit.total_by_year_month(year=year, month=month).all()])
+#         except Exception as e:
+#             return jsonify({
+#                 'error': True,
+#                 'message': 'Valor inválido'
+#             })
+#     return ''

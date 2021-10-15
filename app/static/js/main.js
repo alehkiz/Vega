@@ -55,9 +55,9 @@ $(document).ready(function() {
                 $('#flush-collapse_' + question_id).find('.accordion-head').append('<div class="float-end text-muted">ID:' + question_id + '</div> ')
                 head_info = $('#flush-collapse_' + question_id).find(".accordion-head-info")
                 if (!data.update_at) {
-                    head_info.append('Respondido ' + data.answered_at)
+                    head_info.append('Respondido ' + data.answered_at + ' visualizado ' + data.views + ' vezes')
                 } else {
-                    head_info.append('Atualizado ' + data.update_at)
+                    head_info.append('Atualizado ' + data.update_at + ', visualizado ' + data.views + ' vezes')
                 }
 
                 accordion_collapse.append('<div class="accordion-head-buttons"></div>\n')
