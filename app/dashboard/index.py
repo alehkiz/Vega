@@ -92,7 +92,7 @@ def dash_app(app=False):
         html.P([
             f"Foram ",
             html.B(get_total_questions_views()),
-            f" perguntas visualizadas, de ",
+            f" visualizações de  ",
             html.B(get_questions_answered()),
             " perguntas respondidas."
         ]),

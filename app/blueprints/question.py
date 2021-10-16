@@ -85,6 +85,9 @@ def search():
         last_page = paginate.pages if paginate.pages > 0 else None#url_for('.search',page=iter_pages[-1] if iter_pages[-1] != first_page else None, q= g.question_search_form.q.data)
         if paginate.total == 0:
             form = CreateQuestion()
+            topic = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).first()
+            if topic is None:
+                return abort(505)
             if form.validate_on_submit():
                 question = Question.query.filter(Question.question.ilike(form.question.data)).first()
                 if not question is None:
@@ -96,10 +99,12 @@ def search():
                         user = User.query.filter(User.id == app.config.get('USER_ANON_ID', False)).first()
 
                     question = Question()
-
                     question.question = form.question.data
-                    question.topic = form.topic.data
+                    question.topic = topic
+                    question.sub_topic = form.sub_topic.data
                     question.create_user_id = user.id
+                    question.question_network_id = g.ip_id
+                    question.active = False
                     db.session.add(question)
                     try:
                         db.session.commit()
