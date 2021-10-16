@@ -11,10 +11,7 @@ from app.utils.routes import counter
 
 bp = Blueprint('tag', __name__, url_prefix='/tag/')
 
-@bp.before_request
-@counter
-def before_request():
-    pass
+
 
 @bp.route('/')
 @bp.route('/index')
