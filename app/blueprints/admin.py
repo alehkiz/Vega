@@ -30,7 +30,6 @@ bp = Blueprint("admin", __name__, url_prefix="/admin/")
 @bp.before_request
 @login_required
 @roles_accepted("admin", 'support', 'manager_user', 'manager_content')
-@counter
 def before_request():
     pass
 

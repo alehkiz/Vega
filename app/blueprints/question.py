@@ -149,7 +149,6 @@ def view(id=None):
 @bp.route('edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @roles_accepted("admin", "support", "manager_content")
-@counter
 def edit(id):
     question = Question.query.filter(Question.id == id).first_or_404()
     if current_user.is_admin:
@@ -187,7 +186,6 @@ def edit(id):
 @bp.route('activate/<int:id>', methods=['POST'])
 @login_required
 @roles_accepted('admin', 'support')
-@counter
 def activate(id):
     confirm = request.form.get('confirm', False)
     if confirm != 'true':
@@ -238,7 +236,6 @@ def remove(id):
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
 @roles_accepted("admin", "support", "manager_content")
-@counter
 def add():
     if current_user.is_admin:
         form = QuestionEditAndApproveForm()
@@ -290,7 +287,6 @@ def add():
 @bp.route('/responder/<int:id>', methods=['POST', 'GET'])
 @login_required
 @roles_accepted("admin", "support", "manager_content")
-@counter
 def answer(id: int):
     q = Question.query.filter(Question.id == id).first_or_404()
     if q.was_answered:
@@ -328,7 +324,6 @@ def answer(id: int):
 @bp.route('/aprovar/<int:id>', methods=['POST', 'GET'])
 @login_required
 @roles_accepted("admin", "manager_content")
-@counter
 def approve(id: int):
     q = Question.query.filter(Question.id == id).first_or_404()
     if not q.was_answered:
@@ -336,7 +331,7 @@ def approve(id: int):
         return redirect(url_for('question.answer', id=q.id))
     if q.was_approved:
         flash('Questão já foi aprovada', category='danger')
-        return redirect(url_for('question.index'))
+        return redirect(url_for('admin.to_approve'))
     form = QuestionApproveForm()
     if form.validate_on_submit():
         if not Question.query.filter(Question.question.ilike(form.question.data.lower())).first() is None:
@@ -357,7 +352,8 @@ def approve(id: int):
         q.answer_approved = form.approve.data
         try:
             db.session.commit()
-            return redirect(url_for('question.view', id=q.id))
+            flash('Pergunta aprovada com sucesso', category='success')
+            return redirect(url_for('admin.to_approve'))
         except Exception as e:
             form.question.errors.append('Não foi possível atualizar')
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
@@ -521,7 +517,6 @@ def save_action(question_id):
 
 @bp.route('/likes')
 @login_required
-@counter
 def likes():
     page = request.args.get('page', 1, type=int)
     questions = Question.likes_by_user(current_user.id, topic=g.topic)
@@ -536,7 +531,6 @@ def likes():
     return render_template('question.html', pagination=paginate, cls_question=Question, mode='views', first_page=first_page, last_page=last_page)
 @bp.route('/saves')
 @login_required
-@counter
 def saves():
     page = request.args.get('page', 1, type=int)
     questions = Question.saves_by_user(current_user.id, topic=g.topic)
@@ -553,7 +547,6 @@ def saves():
     
 @bp.route('/saved')
 @login_required
-@counter
 def saved():
     ...
 @bp.route('/perguntar', methods=['GET', 'POST'])

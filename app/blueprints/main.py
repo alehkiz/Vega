@@ -258,6 +258,7 @@ def selected_access(topic=None):
 
 
 @bp.route("/search")
+@counter
 def search():
     page = request.args.get("page", 1, type=int)
     if g.search_form.validate():

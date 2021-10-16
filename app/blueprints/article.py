@@ -12,10 +12,6 @@ bp = Blueprint('article', __name__, url_prefix='/article/')
 
 
 
-@bp.before_request
-@counter
-def before_request():
-    pass
 
 
 @bp.route('/view/<int:id>')

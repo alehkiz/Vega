@@ -36,8 +36,8 @@ def question(id):
     if question.answer_approved == False or question.active != True or question.was_answered != True:
         abort(404)
     if current_user.is_authenticated:
-        to_dict = question.to_dict()
         question.add_view(current_user.id, g.ip_id)
+        to_dict = question.to_dict()
         if question.is_liked(current_user.id):
             to_dict['like_action'] = 'unlike'
         else:
