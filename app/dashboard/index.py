@@ -71,6 +71,11 @@ def get_graph_access_by_date():
     graph = px.line(df, x = 'Data', y= 'Total', title='Acessos por dia')
     return graph
 
+def get_user_answers():
+    df = pd.read_sql(
+        db.session.query(func.count(Question.id).label('Total'), )
+    )
+
 def get_total_access():
     return Visit.query.count()
 
@@ -78,6 +83,8 @@ def get_total_questions_views():
     return QuestionView.query.count()
 def get_questions_answered():
     return Question.query.filter(Question.active == True, Question.answer != '', Question.answer_approved==True).count()
+
+
 
 def dash_app(app=False):
     dash_app = Dash(__name__, server=app, url_base_pathname='/dashapp/', external_stylesheets=[dbc.themes.BOOTSTRAP], update_title='Atualizando...')
