@@ -330,6 +330,7 @@ class Question(db.Model):
     update_at = db.Column(db.DateTime)
     update_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    answer_approve_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_at = db.Column(db.DateTime)
     # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)

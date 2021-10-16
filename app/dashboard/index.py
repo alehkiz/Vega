@@ -2,8 +2,11 @@ from unicodedata import category
 from dash_bootstrap_components._components.Alert import Alert
 from dash_html_components.B import B
 from dash_html_components.Br import Br
-from sqlalchemy.sql.expression import label
+import dash_table
+from sqlalchemy.sql.expression import column, label
 from app.models.app import Visit
+from app.utils.kernel import format_number_as_thousand
+
 from re import template
 from dash_core_components.Checklist import Checklist
 # from flask import config, url_for, app as current_app
@@ -18,8 +21,9 @@ from flask.templating import render_template
 import plotly.express as px
 import pandas as pd
 from app.models.wiki import Question, SubTopic, Topic, Tag, QuestionView
+from app.models.security import User
 from app.core.db import db
-from sqlalchemy import func, asc, inspect
+from sqlalchemy import func, asc, inspect, text
 
 def get_graph_tags():
     df = pd.read_sql(db.session.query(Tag.name.label('Marcação'), func.count(Question.id).label('Total')).outerjoin(Question.tags).group_by(Tag).statement, con=db.session.bind)
@@ -65,15 +69,67 @@ def get_graph_questions_answers_by_date():
     return graph
 
 def get_graph_access_by_date():
-    df = pd.read_sql(db.session.query(func.count(Visit.id).label('Total'), 
+    df = pd.read_sql(
+        db.session.query(func.count(Visit.id).label('Total'), 
                 func.date_trunc('day', Visit.datetime).label('Data')).group_by('Data').order_by(
                     asc('Data')).statement, con=db.session.bind)
     graph = px.line(df, x = 'Data', y= 'Total', title='Acessos por dia')
     return graph
 
+
+
 def get_user_answers():
     df = pd.read_sql(
-        db.session.query(func.count(Question.id).label('Total'), )
+        db.session.query(
+            User.name.label('Nome'),
+            func.count(Question.id).label('Total')).outerjoin(Question.answered_by).group_by(User).order_by(func.count(Question.id).desc()).statement, con=db.session.bind
+    )
+    df['%'] = df.Total.apply(lambda x : float((x / df.Total.sum()) * 100))
+    df['%'] = df['%'].round(decimals=2)
+
+    return dash_table.DataTable(
+        id='table',
+        columns=[{'name': i, 'id': i} for i in df.columns],
+        data= df.to_dict('records'),
+        editable=False, 
+        sort_action='native',
+        style_as_list_view=True,
+        style_cell={'padding': '5px'},
+        style_header={
+            'backgroundColor': 'gray',
+            'fontWeight': 'bold'
+        },
+        style_data={
+            'backgroundColor': 'rgb(50, 50, 50)',
+            'color': 'white'
+        },
+    )
+
+def get_user_approve():
+    df = pd.read_sql(
+        db.session.query(
+            User.name.label('Nome'),
+            func.count(Question.id).label('Total')).outerjoin(Question.approved_by).group_by(User).filter(Question.answer_approved == True).order_by(func.count(Question.id).desc()).statement, con=db.session.bind
+    )
+    df['%'] = df.Total.apply(lambda x : float((x / df.Total.sum()) * 100))
+    df['%'] = df['%'].round(decimals=2)
+
+    return dash_table.DataTable(
+        id='table',
+        columns=[{'name': i, 'id': i} for i in df.columns],
+        data= df.to_dict('records'),
+        editable=False, 
+        sort_action='native',
+        style_as_list_view=True,
+        style_cell={'padding': '5px'},
+        style_header={
+            'backgroundColor': 'gray',
+            'fontWeight': 'bold'
+        },
+        style_data={
+            'backgroundColor': 'rgb(50, 50, 50)',
+            'color': 'white'
+        },
     )
 
 def get_total_access():
@@ -101,7 +157,7 @@ def dash_app(app=False):
         html.H1("Dashboard AtenDetran", className="display-5"),
         html.P([
             f"Já tivemos ", 
-            html.B(get_total_access()),
+            html.B(format_number_as_thousand(get_total_access())),
             " acessos!",
             html.Br(),
             ],
@@ -110,9 +166,9 @@ def dash_app(app=False):
         html.Hr(className="my-2"),
         html.P([
             f"Foram ",
-            html.B(get_total_questions_views()),
+            html.B(format_number_as_thousand(get_total_questions_views())),
             f" visualizações de  ",
-            html.B(get_questions_answered()),
+            html.B(format_number_as_thousand(get_questions_answered())),
             " perguntas respondidas."
         ]),
         # html.P(dbc.Button("Learn more", color="primary"), className="lead"),
@@ -174,9 +230,9 @@ def dash_app(app=False):
             elif active_subtab == 'percent-sub-topics':
                 return dcc.Graph(figure=get_graph_sub_topics(), config={'displayModeBar': False})
             elif active_subtab == 'user-answers':
-                return 'answers'
+                return get_user_answers()
             elif active_subtab == 'user-approve':
-                return 'approve'
+                return get_user_approve()
         else:
             return 'Nenhuma seleção'
 
