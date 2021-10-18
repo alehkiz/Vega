@@ -213,10 +213,8 @@ def dash_app(app=False):
     def render_tabs(tab, *params):
         tab_name = tab.split('-')[0]
         active_subtab = [_ for _ in params if tab_name in _]
-        print(tab, params)
         if len(active_subtab) == 1:
             active_subtab = active_subtab[0]
-            print(active_subtab)
             if active_subtab == 'diary-access':
                 return dcc.Graph(figure=get_graph_access_by_date(), config={'displayModeBar': False})
             elif active_subtab == 'diary-questions-views':

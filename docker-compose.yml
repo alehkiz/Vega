@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: ./
-    command: gunicorn -b :80 --error-logfile ./logs/errors.log --log-file ./logs/logs.log --log-level INFO server:app --workers=8 --worker-class gthread --threads 8
+    command: gunicorn -b :80 --access-logfile ./logs/access.log  --error-logfile ./logs/errors.log --log-file ./logs/logs.log --log-level INFO server:app --workers=8 --worker-class gthread --threads 8
     # command: python manage.py run -h 0.0.0.0
     volumes:
       - ./:/usr/src/app/

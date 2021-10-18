@@ -171,7 +171,7 @@ def index():
                         "count": _.questions.filter(
                             Question.answer_approved == True
                         ).count(),
-                        "bt_name": "Visualisar",
+                        "bt_name": "Acessar",
                         "bt_route": url_for(
                             "question.topic", name=_.name, type="aprovada"
                         ),
