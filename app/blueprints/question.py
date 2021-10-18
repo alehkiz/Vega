@@ -163,7 +163,7 @@ def edit(id):
         question.sub_topic = form.sub_topic.data
         question.update_user_id = current_user.id
         question.update_at = datetime.utcnow()
-        question.answer_user_id = current_user.id
+        # question.answer_user_id = current_user.id
         question.answer = process_html(form.answer.data).text
 
         if current_user.is_admin:
@@ -342,7 +342,7 @@ def approve(id: int):
             q.answer_approved = False
             flash('Questão reprovada.', category='success')
             return redirect(url_for('admin.to_approve'))
-        q.answer_user_id = current_user.id
+        # q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
         q.answer = form.answer.data
         q.answer_at = datetime.now()
@@ -350,6 +350,8 @@ def approve(id: int):
         q.topic_id = form.topic.data.id
         q.sub_topic = form.sub_topic.data
         q.answer_approved = form.approve.data
+        q.answer_approve_user_id = current_user.id
+        q.active = True
         try:
             db.session.commit()
             flash('Pergunta aprovada com sucesso', category='success')
