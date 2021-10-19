@@ -105,12 +105,13 @@
             <tr id='{{item.id}}'>
                 {% for tabulate_item in config['TABULATE'].get(cls_table.__tablename__).items() %}
                 {% if not tabulate_item[1].get('attr') is none %}
-                <td>{{item | attr(tabulate_item[1].get('attr')) | string | truncate(40, True)}}</td>
+                <td>{{item | attr(tabulate_item[1].get('attr')) | string | truncate(250, True)}}</td>
                 {% else %}
-                <td>{{item | attr(tabulate_item[0]) | string | truncate(40, True)}}</td>
+                <td>{{item | attr(tabulate_item[0]) | string | truncate(250, True)}}</td>
                 {% endif %}
                 {% endfor %}
                 <td class="actions">
+                    <div class="btn-group" role="group">
                     {% if kwargs['mode'] is defined %}
                     {% if kwargs['mode'] == 'question' %}
                     {% if kwargs.get('type', false) is defined %}
@@ -148,6 +149,7 @@
                     </button>
                     
                     {% endif %}
+                </div>
                 </td>
 
             </tr>
