@@ -284,6 +284,8 @@ def to_approve():
     order_type = request.args.get("order_type", "desc")
     topic = request.args.get("topic", None)
     form = QuestionFilter(request.args, meta={'csrf': False})
+    
+    print(form.topic.data)
     request_args = request.args
     if topic != None:
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()

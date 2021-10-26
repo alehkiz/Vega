@@ -155,24 +155,10 @@ def dash_app(app=False):
             dbc.Jumbotron(
     [
         html.H1("Dashboard AtenDetran", className="display-5"),
-        html.P([
-            f"Já tivemos ", 
-            html.B(format_number_as_thousand(get_total_access())),
-            " acessos!",
-            html.Br(),
-            ],
-            className="lead",
-        ),
-        html.Hr(className="my-2"),
-        html.P([
-            f"Foram ",
-            html.B(format_number_as_thousand(get_total_questions_views())),
-            f" visualizações de  ",
-            html.B(format_number_as_thousand(get_questions_answered())),
-            " perguntas respondidas."
-        ]),
+        html.Div(id='updater_values')
+        
         # html.P(dbc.Button("Learn more", color="primary"), className="lead"),
-    ], className='p-3'
+    ], className='p-3', id='jumbo'
 ),
             # dbc.Tabs([
             #     dbc.Tab(label='Acessos por dia', tab_id='access_day'),
@@ -202,7 +188,10 @@ def dash_app(app=False):
                     ], id='user-tab', active_tab='user-answers')]),
                 ], id='tabs', active_tab='diary'),
                 html.Div(id='tab_content', className='p-4'),
-            ])
+           dcc.Interval(id='interval-component',
+            interval=5000, # 5 segundos
+            n_intervals=0) # contador para atualização
+])
 
     @dash_app.callback(
         Output('tab_content', 'children'),
@@ -234,6 +223,31 @@ def dash_app(app=False):
         else:
             return 'Nenhuma seleção'
 
+
+    @dash_app.callback(
+        Output('updater_values', 'children'),
+        Input('interval-component', 'n_intervals'))
+    def updater(n):
+        # print(n)
+        return [html.P([
+            f"Já tivemos ", 
+            html.B(format_number_as_thousand(get_total_access())),
+            " acessos!",
+            html.Br(),
+            ],className="lead", id='test'
+        ),
+        html.Hr(className="my-2"),
+        html.P([
+            f"Foram ",
+            html.B(format_number_as_thousand(get_total_questions_views())),
+            f" visualizações de  ",
+            html.B(format_number_as_thousand(get_questions_answered())),
+            " perguntas respondidas."
+        ], id='questions-anwsered'),]
+        
+        
+         
+        
     # @dash_app.callback(
     #     Output('tab_content', 'children'),
     #     [Input('tabs', 'active_tab'),
