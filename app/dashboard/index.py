@@ -23,7 +23,7 @@ import pandas as pd
 from app.models.wiki import Question, SubTopic, Topic, Tag, QuestionView
 from app.models.security import User
 from app.core.db import db
-from sqlalchemy import func, asc, inspect, text
+from sqlalchemy import func, asc, inspect, text, or_
 
 def get_graph_tags():
     df = pd.read_sql(db.session.query(Tag.name.label('Marcação'), func.count(Question.id).label('Total')).outerjoin(Question.tags).group_by(Tag).statement, con=db.session.bind)
@@ -133,10 +133,10 @@ def get_user_approve():
     )
 
 def get_total_access():
-    return Visit.query.count()
+    return Visit.query.filter(or_(Visit.user_id == 4, Visit.user_id == None)).count()
 
 def get_total_questions_views():
-    return QuestionView.query.count()
+    return QuestionView.query.filter(or_(QuestionView.user_id == 4, QuestionView.user_id == None)).count()
 def get_questions_answered():
     return Question.query.filter(Question.active == True, Question.answer != '', Question.answer_approved==True).count()
 

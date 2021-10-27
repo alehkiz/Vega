@@ -144,7 +144,7 @@ def answers():
         if len(form.sub_topic.data) > 0:
             q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
         if len(form.tag.data) > 0:
-            q = q.filter(Question.tags.any(Tag.id.in_(form.tag.data)))
+            q = q.filter(Question.tags.any(Tag.id.in_([_.id for _ in form.tag.data])))
     paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
@@ -248,7 +248,7 @@ def questions():
         if len(form.sub_topic.data) > 0:
             q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
         if len(form.tag.data) > 0:
-            q = q.filter(Question.tags.any(Tag.id.in_(form.tag.data)))
+            q = q.filter(Question.tags.any(Tag.id.in_([_.id for _ in form.tag.data])))
     paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
@@ -284,6 +284,11 @@ def to_approve():
     order_type = request.args.get("order_type", "desc")
     topic = request.args.get("topic", None)
     form = QuestionFilter(request.args, meta={'csrf': False})
+    topics = form.topic.data
+    subtopics = form.sub_topic.data
+    tags = form.tag.data
+
+    query = db.session.query(Question).outerjoin(Tag, Question.tags).filter(Tag.id.in_([_.id for _ in tags])).group_by(Question)
     
     print(form.topic.data)
     request_args = request.args
@@ -303,13 +308,13 @@ def to_approve():
     if order:
         if order in Question.__table__.columns:
             if topic:
-                q = Question.query.filter(
+                q = query.filter(
                     Question.answer != None,
                     Question.answer_approved == False,
                     Question.topic_id == topic.id,
                 ).order_by(column_type())
             else:
-                q = Question.query.filter(
+                q = query.filter(
                     Question.answer != None, Question.answer_approved == False
                 ).order_by(column_type())
         else:
@@ -318,7 +323,7 @@ def to_approve():
             relationship_type_order = getattr(relationship_class.name, order_type)
             if topic != None:
                 q = (
-                    db.session.query(Question)
+                    query
                     .filter(
                         Question.answer != None,
                         Question.answer_approved == False,
@@ -329,22 +334,30 @@ def to_approve():
                 )
             else:
                 q = (
-                    db.session.query(Question)
+                   query
                     .filter(Question.answer != None, Question.answer_approved == False)
                     .join(relationship_class, relationship_type)
                     .order_by(relationship_type_order())
                 )
     else:
         if topic != None:
-            q = Question.query.filter(
+            q = query.filter(
                 Question.answer != None,
                 Question.answer_approved == False,
                 Question.topic_id == topic.id,
             ).order_by(Question.create_at.asc())
         else:
-            q = Question.query.filter(
+            q = query.filter(
                 Question.answer != None, Question.answer_approved == False
             ).order_by(Question.create_at.asc())
+
+    if form.validate():
+        if len(form.topic.data) > 0:
+            q = q.filter(Question.topic_id.in_([_.id for _ in form.topic.data]))
+        if len(form.sub_topic.data) > 0:
+            q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
+        if len(form.tag.data) > 0:
+            q = q.filter(Question.tags.any(Tag.id.in_([_.id for _ in form.tag.data])))
     paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]

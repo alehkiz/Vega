@@ -403,10 +403,11 @@ def tag(name):
 @bp.route('/topic/<string:name>/<string:type>/')
 @counter
 def topic(name, type):
-    if name != g.selected_access:
+    if name != g.selected_access and current_user.is_anonymous:
         abort(404)
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
+    print(name)
     pagination_args = {'name':name, 'type': type}
     topic = Topic.query.filter(Topic.name==name).first_or_404()
     if type in ['pendente', 'aprovada']:
