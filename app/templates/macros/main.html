@@ -1,6 +1,5 @@
 {% macro render_pagination(pagination, first_page, last_page, endpoint, url_arguments = {}) %}
 
-
 <nav aria-label="pagination">
     <ul class="pagination justify-content-end">
         {%- if first_page != pagination.page and not first_page is none%}
