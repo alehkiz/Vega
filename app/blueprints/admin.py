@@ -284,13 +284,6 @@ def to_approve():
     order_type = request.args.get("order_type", "desc")
     topic = request.args.get("topic", None)
     form = QuestionFilter(request.args, meta={'csrf': False})
-    topics = form.topic.data
-    subtopics = form.sub_topic.data
-    tags = form.tag.data
-
-    query = db.session.query(Question).outerjoin(Tag, Question.tags).filter(Tag.id.in_([_.id for _ in tags])).group_by(Question)
-    
-    print(form.topic.data)
     request_args = request.args
     if topic != None:
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
@@ -308,13 +301,13 @@ def to_approve():
     if order:
         if order in Question.__table__.columns:
             if topic:
-                q = query.filter(
+                q = Question.query.filter(
                     Question.answer != None,
                     Question.answer_approved == False,
                     Question.topic_id == topic.id,
                 ).order_by(column_type())
             else:
-                q = query.filter(
+                q = Question.query.filter(
                     Question.answer != None, Question.answer_approved == False
                 ).order_by(column_type())
         else:
@@ -323,7 +316,7 @@ def to_approve():
             relationship_type_order = getattr(relationship_class.name, order_type)
             if topic != None:
                 q = (
-                    query
+                    db.session.query(Question)
                     .filter(
                         Question.answer != None,
                         Question.answer_approved == False,
@@ -334,20 +327,20 @@ def to_approve():
                 )
             else:
                 q = (
-                   query
+                   db.session.query(Question)
                     .filter(Question.answer != None, Question.answer_approved == False)
                     .join(relationship_class, relationship_type)
                     .order_by(relationship_type_order())
                 )
     else:
         if topic != None:
-            q = query.filter(
+            q = Question.query.filter(
                 Question.answer != None,
                 Question.answer_approved == False,
                 Question.topic_id == topic.id,
             ).order_by(Question.create_at.asc())
         else:
-            q = query.filter(
+            q = Question.query.filter(
                 Question.answer != None, Question.answer_approved == False
             ).order_by(Question.create_at.asc())
 
