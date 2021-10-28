@@ -805,13 +805,6 @@ class Transaction(db.Model):
         return f'<{self.transaction}>'
     
 
-
-
-
-
-
-
-
 # TESTE
 # (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article._text, func.to_tsquery('smit:* | ji:*')).label('rank'))
 #     .filter(Article._text.op('@@')(func.to_tsquery('smit:* | ji:*')))

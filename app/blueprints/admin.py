@@ -154,6 +154,10 @@ def answers():
 
     last_page = paginate.pages
     order_type = "asc" if order_type == "desc" else "desc"
+
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
     return render_template(
         "admin.html",
         pagination=paginate,
@@ -167,7 +171,8 @@ def answers():
         request_args=request_args,
         _topic = Topic.query.filter(Topic.selectable==True),
         _sub_topic = SubTopic.query,
-        form=form
+        form=form,
+        url_args=url_args
     )
 
 
@@ -257,6 +262,10 @@ def questions():
     )
     last_page = paginate.pages
     order_type = "asc" if order_type == "desc" else "desc"
+    
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
     return render_template(
         "admin.html",
         pagination=paginate,
@@ -271,7 +280,8 @@ def questions():
         _topic = Topic.query.filter(Topic.selectable==True),
         _sub_topic = SubTopic.query,
         request_args=request_args, 
-        form=form
+        form=form,
+        url_args=url_args
     )
 
 
@@ -342,6 +352,7 @@ def to_approve():
         else:
             q = Question.query.filter(
                 Question.answer != None, Question.answer_approved == False
+            # ).order_by(asc(Question.create_at))
             ).order_by(Question.create_at.asc())
 
     if form.validate():
@@ -359,6 +370,9 @@ def to_approve():
     )
     last_page = paginate.pages
     order_type = "asc" if order_type == "desc" else "desc"
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
     return render_template(
         "admin.html",
         pagination=paginate,
@@ -372,6 +386,7 @@ def to_approve():
         mode="question",
         type="aprovar",
         form=form,
+        url_args=url_args
     )
 
 
@@ -541,6 +556,10 @@ def notifier():
     )
     last_page = paginate.pages
     order_type = "asc" if order_type == "desc" else "desc"
+
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
     return render_template(
         "admin.html",
         pagination=paginate,
@@ -551,4 +570,5 @@ def notifier():
         list=True,
         page_name="Notificações",
         order_type=order_type,
+        url_args=url_args
     )

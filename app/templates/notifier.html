@@ -18,7 +18,14 @@
             aria-labelledby="active-tab">
             {% if notices_active is defined %}
             {% for notice in notices_active %}
-            <span class="badge bg-info mt-3 float-end">{{notice.topic.name}}</span>
+            <div class="row">
+
+                <div class="mt-2">
+                    <span class="badge bg-info mt-0 float-start">{{notice.topic.name}}</span>
+                    <a class="edit text-decoration-none float-end" id="edit_34170"
+                        href="{{ url_for('notifier.edit', id=notice.id)}}"><i class="fas fa-edit"></i></a>
+                </div>
+            </div>
             <div class="row m-3">
                 <div class="row">
                     <h5 class="fw-normal text-success">{{notice.title}}</h5>
