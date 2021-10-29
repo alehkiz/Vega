@@ -193,11 +193,11 @@ def questions():
             column = getattr(Question, order)
             column_type = getattr(column, order_type)
         except Exception as e:
-            column = Question.id
-            column_type = Question.id.desc
+            column = Question.create_at
+            column_type = Question.create_at.asc
     else:
-        column = Question.id
-        column_type = column.desc
+        column = Question.create_at
+        column_type = column.asc
     if order:
         if order in Question.__table__.columns:
             if topic != None:
