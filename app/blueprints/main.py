@@ -207,7 +207,9 @@ def index():
             }
         ]
 
-        tags = Tag.query.all()
+        tags = db.session.query(Tag).join(Question.tags)
+
+        tags.group_by(Tag).order_by(func.count(Question.id).desc())
 
         tags_question = [{"name": 'Marcações', "values": [{
             'title': _.name,
