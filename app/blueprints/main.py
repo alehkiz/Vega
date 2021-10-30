@@ -139,6 +139,13 @@ def teardow_request_test(exception):
         app.logger.error(e)
         # return abort(500)
 
+@bp.teardown_app_request
+def teardown_request(exception):
+    try:
+        db.session.close()
+    except Exception as e:
+        app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
+        app.logger.error(e)
 
 @bp.route("/")
 @bp.route("/index")

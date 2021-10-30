@@ -434,6 +434,15 @@ def topic(name, type):
     search_form = QuestionSearchForm()
     print(name)
     pagination_args = {'name':name, 'type': type}
+
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
+    pagination_args = pagination_args | url_args
+
+    print(pagination_args)
+    print(url_for('question.topic', page=1, **pagination_args))
+    print(request.endpoint)
     topic = Topic.query.filter(Topic.name==name).first_or_404()
     if type in ['pendente', 'aprovada']:
         if type == 'pendente':
