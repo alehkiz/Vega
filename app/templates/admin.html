@@ -34,6 +34,6 @@
         </div>
     </div>#}
     {{ macros.render_table(cls_table, pagination, page_name, order_type=order_type, mode=mode, type=type) }}
-    {{ macros.render_pagination(pagination, first_page, last_page, endpoint, url_args)}}
+    {{ macros.render_pagination(pagination, first_page, last_page, endpoint, url_args if url_args is defined else {})}}
 </div>
 {% endblock %}
