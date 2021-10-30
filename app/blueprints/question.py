@@ -30,13 +30,38 @@ def index():
     page = request.args.get('page', 1, type=int)
     if not session.get('AccessType', False):
         return redirect(url_for('main.index'))
+    sub_topic = request.args.get('sub_topic', False)
+    if not sub_topic is False:
+        sub_topic = SubTopic.query.filter(SubTopic.name == sub_topic).first()
+        if sub_topic is None:
+            return abort(404)
     topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
     search_form = QuestionSearchForm()
-    paginate = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    query = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
+    if not sub_topic is False:
+        print('aqui')
+        print(sub_topic.name)
+        paginate = query.filter(Question.sub_topic_id == sub_topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    else:
+        paginate = query.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
-    return render_template('question.html', pagination=paginate, cls_question=Question, form=search_form, mode='views', first_page=first_page, last_page=last_page)
+
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
+    return render_template(
+        'question.html', 
+        pagination=paginate, 
+        cls_question=Question, 
+        form=search_form, 
+        mode='views', 
+        first_page=first_page, 
+        last_page=last_page, 
+        sub_topics=SubTopic.query,
+        url_args=url_args
+        )
 
 
 @bp.route('/search/', methods=['GET', 'POST'])
