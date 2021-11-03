@@ -330,6 +330,7 @@ def answer(id: int):
         q.tags = form.tag.data
         q.topic_id = form.topic.data.id
         q.sub_topic = form.sub_topic.data
+        q.question = form.question.data
         try:
             db.session.commit()
             return redirect(url_for('question.view', id=q.id))
@@ -416,13 +417,17 @@ def tag(name):
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
+
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
     return render_template('question.html', 
                                 pagination=paginate, 
                                 cls_question=Question, 
                                 form=search_form, mode='views', 
                                 first_page=first_page, 
                                 last_page=last_page, 
-                                url_arguments=pagination_args)
+                                url_arguments=url_args)
 
 
 @bp.route('/topic/<string:name>/<string:type>/')
@@ -446,13 +451,17 @@ def topic(name, type):
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
+
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
     return render_template('question.html', 
                                 pagination=paginate, 
                                 cls_question=Question, 
                                 form=search_form, mode='views', 
                                 first_page=first_page, 
                                 last_page=last_page, 
-                                url_arguments=pagination_args)
+                                url_arguments=url_args)
 # @bp.route('/topic/<string:topic_name>')
 # def topic(topic_name):
 #     topic = Topic.query.filter_by(format_name=topic_name).first_or_404()
