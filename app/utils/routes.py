@@ -41,7 +41,6 @@ def counter(f):
         try:
             db.session.commit()
             page.add_view(user.id, g.ip_id)
-            # print('aqui')s
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))

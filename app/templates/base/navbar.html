@@ -37,6 +37,9 @@
                 <li class="nav-item">
                     <a class='btn btn-sm btn-outline-primary me-2' type='button' href="{{ url_for('notifier.index')}}" class='nav-link'>Notificações</a>
                 </li>
+                <li class="nav-item">
+                    <a class="btn btn-sm btn-outline-primary me-2" type='button' href="{{ url_for('transactions.index')}}" class='nav-link'>Transações</a>
+                </li>
                 {% endif %}
             </ul>
 
@@ -74,7 +77,7 @@
                     <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
                 </li>
                 {% else %}
-                {% if current_user.is_admin %}
+                {% if current_user.has_support %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
                         aria-expanded="false">
@@ -92,6 +95,13 @@
                         <li><a class="dropdown-item" href="{{url_for('admin.tag')}}">Marcação</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.topic')}}">Tópico</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.sub_topic')}}">Sub Tópico</a></li>
+
+                        {% if config.get('MODE', False) == 'dev' %}<!-- #TODO apenas em DEV -->
+                        <hr class="dropdown-divider">
+                        <li><a class="dropdown-item" href='{{url_for("admin.notifier")}}'>Notificações</a></li>
+                        <hr class="dropdown-divider">
+                        <li><a class="dropdown-item" href='{{url_for("admin.notifier")}}'>Notificações</a></li>
+                        {% endif %}
 
                     </ul>
 

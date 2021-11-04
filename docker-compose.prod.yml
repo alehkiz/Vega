@@ -5,7 +5,7 @@ services:
     build: 
         context: ./
         dockerfile: Dockerfile.prod
-    command: gunicorn -b :80 --access-logfile - --error-logfile - server:app
+    command: gunicorn -b :80 --access-logfile - --error-logfile - server:app --workers 4
     ports:
       - 80:80
     env_file:

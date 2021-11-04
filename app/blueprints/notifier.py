@@ -111,7 +111,6 @@ def edit(id: int):
     return render_template('edit.html', form=form, title='Editar', notifier=True)
 
 @bp.route('/remove/<int:id>', methods=['GET', 'POST'])
-@counter
 def remove(id: int):
     confirm = request.form.get('confirm', False)
     if confirm != 'true':

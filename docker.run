@@ -5,5 +5,13 @@ docker-compose -f docker-compose.yml down -v
 docker-compose -f docker-compose.yml up -d --build
 
 docker-compose up -d --build
-copy to server:
+#copy to server:
 scp -rp */ user@10.138.10.202:/srv/vega
+
+
+
+# set env vars to system
+for /F %A in (.env) do set %A
+
+# Run waitress server
+waitress-serve --host localhost --port 80 server:app

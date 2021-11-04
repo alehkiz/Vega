@@ -20,6 +20,7 @@ from sqlalchemy import inspect, desc, asc
 
 from app.models.wiki import Article, Topic, User, Question, Tag, SubTopic
 from app.forms.wiki import ArticleForm
+from app.forms.question import QuestionFilter
 from app.core.db import db
 from app.utils.routes import counter
 
@@ -29,7 +30,6 @@ bp = Blueprint("admin", __name__, url_prefix="/admin/")
 @bp.before_request
 @login_required
 @roles_accepted("admin", 'support', 'manager_user', 'manager_content')
-@counter
 def before_request():
     pass
 
@@ -108,6 +108,11 @@ def answers():
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
     order_dict = {'desc':desc, 'asc': asc}
+    topic = request.args.get('topic', False)
+    form = QuestionFilter(request.args, meta={'csrf': False})
+    request_args = request.args
+    if topic != False:
+        topic = Topic.query.filter(Topic.name.ilike(topic)).first()
     if not order_type in order_dict.keys():
         order_type = 'desc'
     if not order is False or not order_type is False:
@@ -120,11 +125,10 @@ def answers():
     else:
         column = Question.id
         column_type = column.desc
+    
+
     # TODO Incluir a odernação por relacionamento de acordo com a seleção do usuário
     relations = inspect(Question).relationships
-    print(column)
-    # print(column.property.target.name)
-    # print(type(str(column.property.target.name)))
     if hasattr(column.property, 'target'):
         if column.property.target.name in relations:
             relationship = getattr(relations, str(column.property.target.name), False)
@@ -133,14 +137,27 @@ def answers():
             q = db.session.query(Question).filter(Question.answer != None, Question.answer_approved == True).join(relationship.mapper.class_, getattr(Question, str(column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
     else:
         q = Question.query.filter(Question.answer != None, Question.answer_approved == True).order_by(column_type())
+
+    if form.validate():
+        if len(form.topic.data) > 0:
+            q = q.filter(Question.topic_id.in_([_.id for _ in form.topic.data]))
+        if len(form.sub_topic.data) > 0:
+            q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
+        if len(form.tag.data) > 0:
+            q = q.filter(Question.tags.any(Tag.id.in_([_.id for _ in form.tag.data])))
     paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
         if len(list(paginate.iter_pages())) >= 1
         else None
     )
+
     last_page = paginate.pages
     order_type = "asc" if order_type == "desc" else "desc"
+
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
     return render_template(
         "admin.html",
         pagination=paginate,
@@ -151,6 +168,11 @@ def answers():
         list=True,
         page_name="Respostas",
         order_type=order_type,
+        request_args=request_args,
+        _topic = Topic.query.filter(Topic.selectable==True),
+        _sub_topic = SubTopic.query,
+        form=form,
+        url_args=url_args
     )
 
 
@@ -162,6 +184,8 @@ def questions():
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
     topic = request.args.get("topic", None)
+    form = QuestionFilter(request.args, meta={'csrf': False})
+    request_args = request.args
     if topic != None:
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
     if not order is False or not order_type is False:
@@ -169,21 +193,23 @@ def questions():
             column = getattr(Question, order)
             column_type = getattr(column, order_type)
         except Exception as e:
-            column = Question.id
-            column_type = Question.id.desc
+            column = Question.create_at
+            column_type = Question.create_at.asc
     else:
-        column = Question.id
-        column_type = column.desc
+        column = Question.create_at
+        column_type = column.asc
     if order:
         if order in Question.__table__.columns:
             if topic != None:
-                q = Question.query.filter(
-                    Question.answer == None, Question.topic_id == topic.id
-                ).order_by(column_type())
+                q = db.session.query(Question).filter(Question.answer == None, Question.topic_id == topic.id).order_by(column_type())
+                # q = Question.query.filter(
+                #     Question.answer == None, Question.topic_id == topic.id
+                # ).order_by(column_type())
             else:
-                q = Question.query.filter(Question.answer == None).order_by(
-                    column_type()
-                )
+                q = db.session.query(Question).filter(Question.answer == None).order_by(column_type())
+                # Question.query.filter(Question.answer == None).order_by(
+                #     column_type()
+                # )
         else:
             relationship_class = getattr(Question, order).property.mapper.class_
             relationship_type = getattr(Question, order)
@@ -203,14 +229,31 @@ def questions():
                     .order_by(relationship_type_order())
                 )
     else:
+        # if topic != None:
+        #     q = Question.query.filter(
+        #         Question.answer == None, Question.topic_id == topic.id
+        #     ).order_by(Question.create_at.asc())
+        # else:
+        #     q = Question.query.filter(Question.answer == None).order_by(
+        #         Question.create_at.asc()
+        #     )
         if topic != None:
-            q = Question.query.filter(
-                Question.answer == None, Question.topic_id == topic.id
-            ).order_by(Question.create_at.asc())
+            q = db.session.query(Question).filter(Question.answer == None, Question.topic_id == topic.id).order_by(column_type())
+            # q = Question.query.filter(
+            #     Question.answer == None, Question.topic_id == topic.id
+            # ).order_by(column_type())
         else:
-            q = Question.query.filter(Question.answer == None).order_by(
-                Question.create_at.asc()
-            )
+            q = db.session.query(Question).filter(Question.answer == None).order_by(column_type())
+            # Question.query.filter(Question.answer == None).order_by(
+            #     column_type()
+            # )
+    if form.validate():
+        if len(form.topic.data) > 0:
+            q = q.filter(Question.topic_id.in_([_.id for _ in form.topic.data]))
+        if len(form.sub_topic.data) > 0:
+            q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
+        if len(form.tag.data) > 0:
+            q = q.filter(Question.tags.any(Tag.id.in_([_.id for _ in form.tag.data])))
     paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
@@ -219,6 +262,10 @@ def questions():
     )
     last_page = paginate.pages
     order_type = "asc" if order_type == "desc" else "desc"
+    
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
     return render_template(
         "admin.html",
         pagination=paginate,
@@ -227,9 +274,14 @@ def questions():
         endpoint=request.url_rule.endpoint,
         cls_table=Question,
         list=True,
-        page_name="Dúvidas",
+        page_name="Dúvidas pendentes de respostas",
         order_type=order_type,
         mode="question",
+        _topic = Topic.query.filter(Topic.selectable==True),
+        _sub_topic = SubTopic.query,
+        request_args=request_args, 
+        form=form,
+        url_args=url_args
     )
 
 
@@ -241,6 +293,8 @@ def to_approve():
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
     topic = request.args.get("topic", None)
+    form = QuestionFilter(request.args, meta={'csrf': False})
+    request_args = request.args
     if topic != None:
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
 
@@ -283,7 +337,7 @@ def to_approve():
                 )
             else:
                 q = (
-                    db.session.query(Question)
+                   db.session.query(Question)
                     .filter(Question.answer != None, Question.answer_approved == False)
                     .join(relationship_class, relationship_type)
                     .order_by(relationship_type_order())
@@ -298,7 +352,16 @@ def to_approve():
         else:
             q = Question.query.filter(
                 Question.answer != None, Question.answer_approved == False
+            # ).order_by(asc(Question.create_at))
             ).order_by(Question.create_at.asc())
+
+    if form.validate():
+        if len(form.topic.data) > 0:
+            q = q.filter(Question.topic_id.in_([_.id for _ in form.topic.data]))
+        if len(form.sub_topic.data) > 0:
+            q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
+        if len(form.tag.data) > 0:
+            q = q.filter(Question.tags.any(Tag.id.in_([_.id for _ in form.tag.data])))
     paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
@@ -307,6 +370,9 @@ def to_approve():
     )
     last_page = paginate.pages
     order_type = "asc" if order_type == "desc" else "desc"
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
     return render_template(
         "admin.html",
         pagination=paginate,
@@ -319,6 +385,8 @@ def to_approve():
         order_type=order_type,
         mode="question",
         type="aprovar",
+        form=form,
+        url_args=url_args
     )
 
 
@@ -488,6 +556,10 @@ def notifier():
     )
     last_page = paginate.pages
     order_type = "asc" if order_type == "desc" else "desc"
+
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
     return render_template(
         "admin.html",
         pagination=paginate,
@@ -498,4 +570,5 @@ def notifier():
         list=True,
         page_name="Notificações",
         order_type=order_type,
+        url_args=url_args
     )
