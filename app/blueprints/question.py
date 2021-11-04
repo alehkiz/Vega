@@ -39,8 +39,6 @@ def index():
     search_form = QuestionSearchForm()
     query = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
     if not sub_topic is False:
-        print('aqui')
-        print(sub_topic.name)
         paginate = query.filter(Question.sub_topic_id == sub_topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     else:
         paginate = query.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
@@ -420,6 +418,7 @@ def tag(name):
 
     url_args = dict(request.args)
     url_args.pop('page') if 'page' in url_args.keys() else None
+    url_args['name'] = name
 
     return render_template('question.html', 
                                 pagination=paginate, 
@@ -427,7 +426,7 @@ def tag(name):
                                 form=search_form, mode='views', 
                                 first_page=first_page, 
                                 last_page=last_page, 
-                                url_arguments=url_args)
+                                url_args=url_args)
 
 
 @bp.route('/topic/<string:name>/<string:type>/')
@@ -437,7 +436,6 @@ def topic(name, type):
         abort(404)
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
-    print(name)
     pagination_args = {'name':name, 'type': type}
     topic = Topic.query.filter(Topic.name==name).first_or_404()
     if type in ['pendente', 'aprovada']:
@@ -455,13 +453,16 @@ def topic(name, type):
     url_args = dict(request.args)
     url_args.pop('page') if 'page' in url_args.keys() else None
 
+    url_args['name'] = name
+    url_args['type'] = type
+
     return render_template('question.html', 
                                 pagination=paginate, 
                                 cls_question=Question, 
                                 form=search_form, mode='views', 
                                 first_page=first_page, 
                                 last_page=last_page, 
-                                url_arguments=url_args)
+                                url_args=url_args)
 # @bp.route('/topic/<string:topic_name>')
 # def topic(topic_name):
 #     topic = Topic.query.filter_by(format_name=topic_name).first_or_404()
