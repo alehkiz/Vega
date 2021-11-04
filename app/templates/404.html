@@ -1,7 +1,20 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block app_content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="error-template">
+            <h1>
+                Oops!</h1>
+            <h2>
+                Página não encontrada</h2>
+            <div class="error-details">
+                Desculpe, esse recurso não está disponível
+            </div>
+            <div class="error-actions">
+                <a href="{{url_for('main.index')}}" class="btn btn-primary btn-lg">Página inicial</a>
 
-{% block app_content %}
-
-Página não encontrada
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

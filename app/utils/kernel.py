@@ -85,7 +85,6 @@ def order_dict(dictionary: dict, size:int =5, summarize=False,other_key:str='Out
 
     _nd = dict(sorted(dictionary.items(), key= lambda item: item[1], reverse=True))
     agg = 0
-    # print(_nd)
     if summarize:
         if not extra_size:
             size = size-1
@@ -93,7 +92,6 @@ def order_dict(dictionary: dict, size:int =5, summarize=False,other_key:str='Out
             if i >= size:
                 agg += dictionary[_d[0]]
                 _nd.pop(_d[0], None)
-        # print(_nd)
 
         if other_key in _nd.keys():
             agg += _nd[other_key]

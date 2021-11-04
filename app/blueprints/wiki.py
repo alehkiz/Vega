@@ -8,7 +8,6 @@ bp = Blueprint('wiki', __name__, url_prefix='/wiki/')
 @bp.route('/')
 @bp.route('/index')
 def index():
-    print(request.access_route[0])
     articles = Article.query.order_by(Article.create_at.desc()).all()
     return render_template('wiki.html', articles=articles, cls_article=Article)
 

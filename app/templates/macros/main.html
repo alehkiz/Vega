@@ -1,6 +1,5 @@
 {% macro render_pagination(pagination, first_page, last_page, endpoint, url_arguments = {}) %}
 
-
 <nav aria-label="pagination">
     <ul class="pagination justify-content-end">
         {%- if first_page != pagination.page and not first_page is none%}
@@ -90,9 +89,10 @@
         <thead class="table-dark">
             <tr>
                 {% for key, value in config['TABULATE'].get(cls_table.__tablename__).items() %}
+                {% if request_args is defined %}
+                <th><a href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type'], ** request_args)}}">{{value['name'].capitalize()}}</a></th>
+                {% endif %}
                 <th><a href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type'])}}">{{value['name'].capitalize()}}</a></th>
-
-
                 {% endfor %}
                 <th class="actions">Ações</th>
             </tr>
@@ -104,12 +104,13 @@
             <tr id='{{item.id}}'>
                 {% for tabulate_item in config['TABULATE'].get(cls_table.__tablename__).items() %}
                 {% if not tabulate_item[1].get('attr') is none %}
-                <td>{{item | attr(tabulate_item[1].get('attr')) | string | truncate(40, True)}}</td>
+                <td>{{item | attr(tabulate_item[1].get('attr')) | string | truncate(250, True)}}</td>
                 {% else %}
-                <td>{{item | attr(tabulate_item[0]) | string | truncate(40, True)}}</td>
+                <td>{{item | attr(tabulate_item[0]) | string | truncate(250, True)}}</td>
                 {% endif %}
                 {% endfor %}
                 <td class="actions">
+                    <div class="btn-group" role="group">
                     {% if kwargs['mode'] is defined %}
                     {% if kwargs['mode'] == 'question' %}
                     {% if kwargs.get('type', false) is defined %}
@@ -121,11 +122,17 @@
                         href="{{ url_for(cls_table.__tablename__+'.answer', id=item.id)}}">
                     <i class="fas fa-question"></i></a>
                     {% endif %}
-                    
+                    {% if item.active is true %}
                     <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}"
                         href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}">
                         <i class="fas fa-trash-alt"></i>
                         </button>
+                    {% else %}
+                    <button class="btn btn-outline-success btn-sm remove" id="remove-{{item.id}}"
+                        href="{{ url_for(cls_table.__tablename__+'.activate', id=item.id)}}">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    {% endif %}
                     {% endif %}
                     {% else %}
                     <a class="btn btn-outline-primary btn-sm"
@@ -141,6 +148,7 @@
                     </button>
                     
                     {% endif %}
+                </div>
                 </td>
 
             </tr>

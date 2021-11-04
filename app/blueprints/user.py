@@ -13,10 +13,7 @@ from app.utils.routes import counter
 bp = Blueprint('user', __name__, url_prefix='/user/')
 
 
-@bp.before_request
-@counter
-def before_request():
-    pass
+
 
 
 @bp.route('/')

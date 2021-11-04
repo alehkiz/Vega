@@ -59,7 +59,7 @@ class Article(db.Model):
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     # updater = db.relationship('User', foreign_keys = [update_user_id], backref='articles_updated')
     # author = db.relationship('User', foreign_keys = [user_id], backref='articles', lazy='dynamic')
-    search_vector = db.Column(TSVectorType('_text', 'title', regconfig='public.pt'))
+    search_vector = db.Column(TSVectorType('_text', 'title', regconfig='public.pt', cache_ok=False))
     # __ts_vector__ = create_tsvector(
     #     cast(func.coalesce(_text, ''), postgresql.TEXT))
 
@@ -320,7 +320,7 @@ class Question(db.Model):
     '''
     __searchable__ = ['question', 'answer']
     id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(256), index=False,
+    question = db.Column(db.String(800), index=False,
                          nullable=False, unique=True)
     _answer = db.Column('answer', db.Text, index=False, nullable=True, unique=False)
     answer_approved = db.Column(db.Boolean, nullable=True, default=False)
@@ -330,6 +330,7 @@ class Question(db.Model):
     update_at = db.Column(db.DateTime)
     update_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    answer_approve_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_at = db.Column(db.DateTime)
     # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
@@ -503,7 +504,7 @@ class Question(db.Model):
         ql = QuestionLike.query.filter(QuestionLike.question_id==self.id)
         like_user = ql.filter(QuestionLike.user_id==user_id).first()
         if not like_user is None:
-            print('Questão já curtida')
+            flash('Questão já curtida', category='info')
         ql = ql.first()
         if ql is None or like_user is None:
             ql = QuestionLike()
@@ -553,7 +554,7 @@ class Question(db.Model):
         qs = QuestionSave.query.filter(QuestionSave.question_id==self.id)
         save_user = qs.filter(QuestionSave.user_id==user_id).first()
         if not save_user is None:
-            print('Questão já curtida')
+            flash('Questão já salva', category='info')
         qs = qs.first()
         if qs is None or save_user is None:
             qs = QuestionSave()
@@ -663,7 +664,6 @@ class Question(db.Model):
     def saves_by_user(user_id, topic:Topic=None):
         if topic is None:
             return None
-        print(topic.id)
         user = User.query.filter(User.id==user_id).first_or_404()
         rs = db.session.query(Question).filter(Question.topic_id==topic.id).join(
             QuestionSave.question).filter(
@@ -694,7 +694,8 @@ class Question(db.Model):
                 'answered_by' : self.answered_by.name if self.was_answered else None,
                 'answered_at' : self.get_answer_time_elapsed if self.was_answered else None,
                 'topic' : self.topic.name if not self.topic is None else None,
-                'tags' : [x.name for x in self.tags]
+                'tags' : [x.name for x in self.tags],
+                'views' : self.views
                 }
     @staticmethod
     def query_by_month_year(year : int, month : int):
@@ -793,21 +794,16 @@ class QuestionSave(db.Model):
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    transaction = db.Column(db.String, unique=True, nullable=False)
+    transaction = db.Column(db.Text(10), unique=False, nullable=False)
     parameter = db.Column(db.String, nullable=True)
     option = db.Column(db.String)
     description = db.Column(db.String)
     datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
     
-
-
-
-
-
-
-
+    def __repr__(self):
+        return f'<{self.transaction}>'
+    
 
 # TESTE
 # (db.session.query(Article, func.ts_rank('{0.1,0.1,0.1,0.1}', Article._text, func.to_tsquery('smit:* | ji:*')).label('rank'))

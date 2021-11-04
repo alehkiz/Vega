@@ -1,16 +1,16 @@
-from flask_security import Security
-from flask_migrate import Migrate
-from flask_wtf.csrf import CSRFProtect, CsrfProtect
 from flask.cli import with_appcontext
-from flask_login import LoginManager
+
 # from flask_babel import Babel
 from logging.handlers import RotatingFileHandler
+
 import logging
 # from flask_talisman import Talisman
 # from elasticsearch import Elasticsearch
-
+from datetime import datetime
 from os.path import exists
 from os import mkdir
+
+from app.core.extensions import security, migrate, login, csrf
 
 from app.dashboard.index import dash_app
 
@@ -25,13 +25,12 @@ from app.models.notifier import Notifier, NotifierPriority, NotifierStatus
 # from app.dashboard import dash
 
 # dash = dash.dash_appication()
-security = Security()
-migrate = Migrate()
-login = LoginManager()
+
 login.login_view = 'auth.login'
 login.login_message = 'Faça login para acessar a página'
 login.login_message_category = 'danger'
-csrf = CSRFProtect()
+
+
 # babel = Babel()
 # dash_app = dash.dash_appication()
 
@@ -119,19 +118,17 @@ def init(app):
         app = dash_app(app)
         register_blueprints(app)
     
-    print('Debug: ', app.debug)
+    print('Servidor iniciado: ', datetime.now())
     if app.debug is not True:
-        print('Debugger')
         # logger
         if not exists('logs'):
             mkdir('logs')
         file_handler = RotatingFileHandler(
-            'logs/erros.log', maxBytes=1024000, backupCount=100)
+            'logs/errors.log', maxBytes=1024000, backupCount=100)
         file_handler.setFormatter(logging.Formatter(
             "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"))
-        file_handler.setLevel(logging.INFO)
+        file_handler.setLevel(logging.ERROR)
         app.logger.addHandler(file_handler)
-    #     print('aqui')
     @login.user_loader
     def load_user(id):
         try:
