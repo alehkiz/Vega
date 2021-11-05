@@ -369,13 +369,14 @@ def approve(id: int):
         # q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
         q.answer = form.answer.data
-        q.answer_at = datetime.now()
+        # q.answer_at = datetime.now()
         q.tags = form.tag.data
         q.topic_id = form.topic.data.id
         q.sub_topic = form.sub_topic.data
         q.answer_approved = form.approve.data
         q.answer_approve_user_id = current_user.id
         q.active = True
+        q.answer_approved_at = datetime.now()
         try:
             db.session.commit()
             flash('Pergunta aprovada com sucesso', category='success')
