@@ -340,6 +340,8 @@ def answer(id: int):
             return render_template('answer.html', form=form, answer=True)
     
     form.question.data = q.question
+    form.topic.data = q.topic
+    form.sub_topic.data = q.sub_topic
 
 
     return render_template('answer.html', form=form, answer=True)
