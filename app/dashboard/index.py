@@ -4,9 +4,11 @@ from dash_html_components.B import B
 from dash_html_components.Br import Br
 import dash_table
 from sqlalchemy.sql.expression import column, label
+from sqlalchemy import extract
+from sqlalchemy.sql.functions import now
 from app.models.app import Visit
 from app.utils.kernel import format_number_as_thousand
-
+import datetime
 from re import template
 from dash_core_components.Checklist import Checklist
 # from flask import config, url_for, app as current_app
@@ -139,6 +141,23 @@ def get_total_questions_views():
     return QuestionView.query.filter(or_(QuestionView.user_id == 4, QuestionView.user_id == None)).count()
 def get_questions_answered():
     return Question.query.filter(Question.active == True, Question.answer != '', Question.answer_approved==True).count()
+
+def get_report_last_month():
+    last_month = datetime.date.today().replace(days=1) - datetime.timedelta(days=1)
+    return Question.query.filter(
+        Question.active == True,
+        Question.answer != '',
+        Question.answer_approved == True
+    ).filter(
+        extract(
+            'year', 
+            Question.answer_approved_at) == last_month.year
+    ).filter(
+        extract(
+            'month',
+            Question.answer_approved_at) == last_month.month
+        )
+    
 
 
 
