@@ -4,9 +4,11 @@ from dash_html_components.B import B
 from dash_html_components.Br import Br
 import dash_table
 from sqlalchemy.sql.expression import column, label
+from sqlalchemy import extract
+from sqlalchemy.sql.functions import now
 from app.models.app import Visit
 from app.utils.kernel import format_number_as_thousand
-
+import datetime
 from re import template
 from dash_core_components.Checklist import Checklist
 # from flask import config, url_for, app as current_app
@@ -37,14 +39,14 @@ def get_graph_topics():
     return graph
 
 def get_graph_sub_topics():
-    df = pd.read_sql(db.session.query(SubTopic.name.label('Nome'), func.count(Question.id).label('Total')).outerjoin(Question).group_by(SubTopic).statement, con=db.session.bind)
+    df = pd.read_sql(db.session.query(SubTopic.name.label('Nome'), func.count(Question.id).label('Total')).filter(or_(QuestionView.user_id == 4, QuestionView.user_id == None)).outerjoin(Question).group_by(SubTopic).statement, con=db.session.bind)
     graph = px.pie(df, values='Total', names='Nome', title='Sub-Tópicos')
     return graph
 
 def get_graph_questions_by_month(names=None):
     df = pd.read_sql(db.session.query(func.count(Question.id).label('Total'), 
         func.date_trunc('month', Question.create_at).label('Mês'), Topic.name.label('Assunto')
-        ).join(Topic.questions).group_by('Mês', 'Assunto').order_by(asc('Mês')
+        ).filter(or_(QuestionView.user_id == 4, QuestionView.user_id == None)).join(Topic.questions).group_by('Mês', 'Assunto').order_by(asc('Mês')
         ).statement, db.session.bind)
     if df.empty is True:
         df.Total = pd.Series([0])
@@ -58,7 +60,7 @@ def get_graph_questions_by_month(names=None):
 
 def get_questions_views_by_date():
     df = pd.read_sql(
-        db.session.query(func.count(QuestionView.id).label('Total'), func.date_trunc('day', QuestionView.datetime).label('Data')).group_by('Data').order_by(asc('Data')).statement, con=db.session.bind)
+        db.session.query(func.count(QuestionView.id).label('Total'), func.date_trunc('day', QuestionView.datetime).label('Data')).filter(or_(QuestionView.user_id == 4, QuestionView.user_id == None)).group_by('Data').order_by(asc('Data')).statement, con=db.session.bind)
     graph = px.line(df, x = 'Data', y= 'Total', title='Perguntas visualizadas por dia')
     return graph
 
@@ -71,7 +73,7 @@ def get_graph_questions_answers_by_date():
 def get_graph_access_by_date():
     df = pd.read_sql(
         db.session.query(func.count(Visit.id).label('Total'), 
-                func.date_trunc('day', Visit.datetime).label('Data')).group_by('Data').order_by(
+                func.date_trunc('day', Visit.datetime).label('Data')).filter(or_(Visit.user_id == 4, Visit.user_id == None)).group_by('Data').order_by(
                     asc('Data')).statement, con=db.session.bind)
     graph = px.line(df, x = 'Data', y= 'Total', title='Acessos por dia')
     return graph
@@ -139,6 +141,23 @@ def get_total_questions_views():
     return QuestionView.query.filter(or_(QuestionView.user_id == 4, QuestionView.user_id == None)).count()
 def get_questions_answered():
     return Question.query.filter(Question.active == True, Question.answer != '', Question.answer_approved==True).count()
+
+def get_report_last_month():
+    last_month = datetime.date.today().replace(days=1) - datetime.timedelta(days=1)
+    return Question.query.filter(
+        Question.active == True,
+        Question.answer != '',
+        Question.answer_approved == True
+    ).filter(
+        extract(
+            'year', 
+            Question.answer_approved_at) == last_month.year
+    ).filter(
+        extract(
+            'month',
+            Question.answer_approved_at) == last_month.month
+        )
+    
 
 
 

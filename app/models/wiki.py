@@ -324,6 +324,7 @@ class Question(db.Model):
                          nullable=False, unique=True)
     _answer = db.Column('answer', db.Text, index=False, nullable=True, unique=False)
     answer_approved = db.Column(db.Boolean, nullable=True, default=False)
+    answer_approved_at = db.Column(db.DateTime)
     create_at = db.Column(db.DateTime, index=False, default=datetime.utcnow)
     create_user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -794,7 +795,7 @@ class QuestionSave(db.Model):
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    transaction = db.Column(db.Text(10), unique=False, nullable=False)
+    transaction = db.Column(db.String(10), unique=False, nullable=False)
     parameter = db.Column(db.String, nullable=True)
     option = db.Column(db.String)
     description = db.Column(db.String)
