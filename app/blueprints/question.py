@@ -37,7 +37,8 @@ def index():
             return abort(404)
     topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
     search_form = QuestionSearchForm()
-    query = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
+    query = db.session.query(Question).filter(Question.answer_approved == True).join(Question.topics).filter(Topic.id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
+    # query = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
     if not sub_topic is False:
         paginate = query.filter(Question.sub_topic_id == sub_topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     else:
@@ -123,7 +124,7 @@ def search():
 
                     question = Question()
                     question.question = form.question.data
-                    question.topic = topic
+                    question.topics = topic
                     question.sub_topic = form.sub_topic.data
                     question.create_user_id = user.id
                     question.question_network_id = g.ip_id
@@ -182,7 +183,7 @@ def edit(id):
         # try:
         question.question = process_html(form.question.data).text
         question.tags = form.tag.data
-        question.topic_id = form.topic.data.id
+        question.topics = form.topic.data
         question.sub_topic = form.sub_topic.data
         question.update_user_id = current_user.id
         question.update_at = datetime.utcnow()
@@ -200,7 +201,7 @@ def edit(id):
 
     form.question.data = question.question
     form.tag.data = question.tags
-    form.topic.data = question.topic
+    form.topic.data = question.topics
     form.answer.data = question.answer
     if current_user.is_admin:
         form.approved.data = question.answer_approved
@@ -396,7 +397,7 @@ def approve(id: int):
     form.question.data = q.question
     form.answer.data = q.answer
     form.tag.data = q.tags
-    form.topic.data = q.topic
+    form.topic.data = q.topics
     form.sub_topic.data = q.sub_topic
     form.approve.data = q.answer_approved
 
@@ -467,7 +468,7 @@ def topic(name, type):
 
     url_args['name'] = name
     url_args['type'] = type
-
+    print(url_args)
     return render_template('question.html', 
                                 pagination=paginate, 
                                 cls_question=Question, 
@@ -635,7 +636,7 @@ def make_question():
                 return abort(500)
 
             question.question = form.question.data
-            question.topic = topic
+            question.topics = topic
             question.sub_topic = form.sub_topic.data
             question.create_user_id = user.id
             question.question_network_id = ip.id

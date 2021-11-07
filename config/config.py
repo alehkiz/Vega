@@ -96,8 +96,8 @@ class BaseConfig(object):
                 'name' : 'Dúvida',
                 'atrr' : None
             },
-            'topic' : {
-                'name' : 'Tópico',
+            'topics' : {
+                'name' : 'Tópicos',
                 'attr' : 'topic_name'
             },
             'sub_topic' :{
