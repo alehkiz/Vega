@@ -5,9 +5,9 @@
     {% set question, pos = question %}
     {% endif %}
 
-    {% if question.topic.name == 'Retaguarda' %}
+    {% if question.topics.filter_by(name = 'Retaguarda').count() >= 1 %}
         {% set bg_color = 'text-info fw-bold' %}
-    {% elif question.topic.name == 'Atendimento' %}
+    {% elif question.topics.filter_by(name = 'Atendimento').count() >= 1  %}
         {% set bg_color = 'text-success fw-bold' %}
     {% endif %}
     <div class="accordion-item">
@@ -18,8 +18,15 @@
                 {{question.question}}
                 {% if question.is_support %}
                 <span class="badge bg-success mx-3 float-end">Suporte</span>
-                {% elif question.topic.name %}
-                <span class="badge bg-secondary mx-3 float-end">{{question.topic.name}}</span>
+                {% else %}
+                {% for tp in question.topics %}
+                {% if tp.name == 'Retaguarda' %}
+                <span class="badge bg-secondary mx-3 float-end">{{tp.name}}</span>
+                {% endif %}
+                {% if 'SAC' in tp.name%}
+                <span class="badge bg-primary mx-3 float-end">{{tp.name}}</span>
+                {% endif %}
+                {% endfor %}
                 {% endif %}
                 
 
