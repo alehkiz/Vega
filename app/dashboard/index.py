@@ -34,7 +34,7 @@ def get_graph_tags():
     return graph
 
 def get_graph_topics():
-    df = pd.read_sql(db.session.query(Topic.name.label('Nome'), Topic.selectable.label('Selecionável'), func.count(Question.id).label('Total')).filter(Topic.selectable == True, Topic.active == True).outerjoin(Question).group_by(Topic).statement, con=db.session.bind)
+    df = pd.read_sql(db.session.query(Topic.name.label('Nome'), Topic.selectable.label('Selecionável'), func.count(Question.id).label('Total')).filter(Topic.selectable == True, Topic.active == True).outerjoin(Question.topics).group_by(Topic).statement, con=db.session.bind)
     graph = px.pie(df, values='Total', names='Nome', title='Tópicos')
     return graph
 
