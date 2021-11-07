@@ -428,7 +428,7 @@ class Question(db.Model):
 
     @property
     def is_support(self):
-        return self.topic.name == 'Suporte'
+        return 'Suporte' in [_.name for _ in self.topics]
 
     @hybrid_property
     def answer(self):
@@ -489,7 +489,10 @@ class Question(db.Model):
                       # desc('similarity'))
                       )
         result = result.filter(Question.sub_topic_id.in_(
-            [_.id for _ in sub_topics]), Question.topic_id.in_([_.id for _ in topics]))
+            [_.id for _ in sub_topics])).join(Question.topics).filter(
+                Topic.id.in_([_.id for _ in topics])
+                
+            )
         if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result

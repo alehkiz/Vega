@@ -327,7 +327,7 @@ def answer(id: int):
         q.answer = form.answer.data
         q.answer_at = datetime.now()
         q.tags = form.tag.data
-        q.topic_id = form.topic.data.id
+        q.topics = form.topic.data
         q.sub_topic = form.sub_topic.data
         q.question = form.question.data
         try:
@@ -341,7 +341,7 @@ def answer(id: int):
             return render_template('answer.html', form=form, answer=True)
     
     form.question.data = q.question
-    form.topic.data = q.topic
+    form.topic.data = q.topics
     form.sub_topic.data = q.sub_topic
 
 
@@ -374,7 +374,7 @@ def approve(id: int):
         q.answer = form.answer.data
         # q.answer_at = datetime.now()
         q.tags = form.tag.data
-        q.topic_id = form.topic.data.id
+        q.topics = form.topic.data
         q.sub_topic = form.sub_topic.data
         q.answer_approved = form.approve.data
         q.answer_approve_user_id = current_user.id
