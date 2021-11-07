@@ -16,7 +16,7 @@ from sqlalchemy.dialects.postgresql import INET
 from sqlalchemy_searchable import make_searchable
 
 from app.core.db import db
-from app.utils.kernel import format_elapsed_time, get_list_max_len, only_letters, format_datetime_local
+from app.utils.kernel import format_elapsed_time, get_list_max_len, only_letters, format_datetime_local, days_elapsed
 from app.utils.html import process_html
 from app.models.security import User
 
@@ -375,6 +375,10 @@ class Question(db.Model):
     @property
     def get_answer_datetime(self):
         return format_datetime_local(self.answer_at)
+
+    @property
+    def get_days_elapsed(self):
+        return days_elapsed(self.create_at)
 
     # @property
     # def format_create_date(self):
