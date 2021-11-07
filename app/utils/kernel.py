@@ -3,7 +3,7 @@ from re import search
 from dateutil.tz import tzutc
 from babel.dates import format_timedelta, format_datetime, get_timezone
 from functools import wraps
-from datetime import datetime
+from datetime import date, datetime
 from unicodedata import normalize, category
 from werkzeug.urls import url_parse
 from flask import request
@@ -40,6 +40,13 @@ def format_datetime_local(timestamp, format='short'):
         format = 'short'
     if isinstance(timestamp, datetime):
         return format_datetime(timestamp, locale='pt_BR', format=format, tzinfo=get_timezone('America/Sao_Paulo'))
+
+def days_elapsed(timestamp : datetime):
+    '''
+    Retornar os dias decorridos entre o ´timestamp´ e o tempo atual
+    '''
+    if isinstance(timestamp, datetime):
+        return (datetime.utcnow() - timestamp).days
 
 def get_list_max_len(l, max_value):
     '''
