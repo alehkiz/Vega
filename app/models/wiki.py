@@ -348,7 +348,7 @@ class Question(db.Model):
     answer_approve_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_at = db.Column(db.DateTime)
     # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
-    # topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
+    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     sub_topic_id = db.Column(
         db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
     question_network_id = db.Column(
