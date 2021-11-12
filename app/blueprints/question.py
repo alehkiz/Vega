@@ -1,4 +1,5 @@
 from logging import disable
+from typing import Type
 from flask_migrate import current
 from app.blueprints.admin import sub_topic
 from datetime import datetime
@@ -444,8 +445,10 @@ def topic(name, type):
 
     url_args = dict(request.args)
     url_args.pop('page') if 'page' in url_args.keys() else None
-
-    pagination_args = pagination_args | url_args
+    try:
+        pagination_args = pagination_args | url_args
+    except TypeError:
+        pagination_args = dict(pagination_args.items() | url_args.items())
 
     print(pagination_args)
     print(url_for('question.topic', page=1, **pagination_args))

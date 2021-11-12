@@ -5,9 +5,9 @@
     {% set question, pos = question %}
     {% endif %}
 
-    {% if question.topics.filter_by(name = 'Retaguarda').count() >= 1 %}
+    {% if question.topics.filter_by(_name = 'Retaguarda').count() >= 1 %}
         {% set bg_color = 'text-info fw-bold' %}
-    {% elif question.topics.filter_by(name = 'Atendimento').count() >= 1  %}
+    {% elif question.topics.filter_by(_name = 'SAC (Cidadão e Credenciados)').count() >= 1  %}
         {% set bg_color = 'text-success fw-bold' %}
     {% endif %}
     <div class="accordion-item">
