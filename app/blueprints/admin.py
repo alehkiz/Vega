@@ -219,7 +219,7 @@ def questions():
         if order in Question.__table__.columns:
             if topic != None:
                 q = db.session.query(Question).filter(
-                    Question.answer == None, Question.topic_id == topic.id).order_by(column_type())
+                    Question.answer == None).join(Question.topics).filter(Topic.id == topic.id).order_by(column_type())
                 # q = Question.query.filter(
                 #     Question.answer == None, Question.topic_id == topic.id
                 # ).order_by(column_type())
@@ -238,7 +238,9 @@ def questions():
             if topic != None:
                 q = (
                     db.session.query(Question)
-                    .filter(Question.answer == None, Question.topic_id == topic.id)
+                    .filter(Question.answer == None)
+                    .join(Question.topics)
+                    .filter(Topic.id == topic.id)
                     .join(relationship_class, relationship_type)
                     .order_by(relationship_type_order())
                 )
@@ -343,7 +345,8 @@ def to_approve():
                 q = Question.query.filter(
                     Question.answer != None,
                     Question.answer_approved == False,
-                    Question.topic_id == topic.id,
+                ).join(Question.topics
+                ).filter(Topic.id == topic.id
                 ).order_by(column_type())
             else:
                 q = Question.query.filter(
@@ -361,8 +364,8 @@ def to_approve():
                     .filter(
                         Question.answer != None,
                         Question.answer_approved == False,
-                        Question.topic_id == topic.id,
-                    )
+                    ).join(Question.topics
+                    ).filter(Topic.id == topic.id)
                     .join(relationship_class, relationship_type)
                     .order_by(relationship_type_order())
                 )
