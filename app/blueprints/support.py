@@ -18,8 +18,10 @@ bp = Blueprint('support', __name__, url_prefix='/suporte/')
 def index():
     support = Topic.query.filter(Topic.name == 'Suporte').first_or_404()
     page = request.args.get('page', 1, type=int)
-    questions = Question.query.filter(Question.answer_approved==True, Question.topic_id == support.id).order_by(Question.create_at.desc())
-    paginate = questions.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    questions = db.session.query(Question).filter(Question.answer_approved == True).join(
+        Question.topics).filter(Topic.id == support.id).order_by(Question.create_at.desc())
+    paginate = questions.paginate(
+        per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None

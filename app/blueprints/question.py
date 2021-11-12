@@ -156,7 +156,11 @@ def search():
 @counter
 def view(id=None):
     if current_user.is_anonymous:
-        question = Question.query.filter(Question.id == id, Question.topic_id == g.topic.id).first_or_404()
+        question = db.session.query(Question
+        ).filter(Question.id == id
+        ).join(Question.topics
+        ).filter(Topic.id == g.topic.id
+        ).first_or_404()
     else:
         question = Question.query.filter(Question.id == id).first_or_404()
     if not question.was_answered:
@@ -416,7 +420,7 @@ def tag(name):
     search_form = QuestionSearchForm()
     pagination_args = {'name':name}
     tag = Tag.query.filter_by(name=name).first_or_404()
-    paginate = Question.query.filter(Question.tags.contains(tag), Question.answer_approved == True, Question.topic_id == topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    paginate = db.session.query(Question).filter(Question.tags.contains(tag), Question.answer_approved == True).join(Question.topics).filter(Topic.id == topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None

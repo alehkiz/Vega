@@ -308,7 +308,7 @@ class Tag(db.Model):
 
     def questions_approved(self, topic=None):
         if topic != None:
-            return db.session.query(Topic).join(Topic.questions).filter(Question.answer_approved == True, Topic.id== topic.id)
+            return db.session.query(Tag).join(Tag.questions).join(Question.topics).filter(Question.answer_approved == True, Topic.id== topic.id, Tag.id == self.id)
             # return self.questions.filter(Question.answer != None, Question.answer_approved == True, Question.topic_id == topic.id)
         return self.questions.filter(Question.answer != None, Question.answer_approved == True)
 
@@ -713,7 +713,10 @@ class Question(db.Model):
         user = User.query.filter(User.id == user_id).first_or_404()
         rs = db.session.query(Question).join(
             QuestionLike.question).filter(
-                QuestionLike.user_id == user.id, Question.topic_id == topic.id).order_by(Question.create_at.desc())
+                QuestionLike.user_id == user.id
+                ).join(Question.topics
+                ).filter(Topic.id == topic.id
+                ).order_by(Question.create_at.desc())
         return rs
 
     @staticmethod
