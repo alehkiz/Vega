@@ -294,7 +294,7 @@ def add():
                 flash('Não foi possível concluir o pedido')
             question.question_network_id = g.ip_id
             question.create_user_id = current_user.id
-            question.topic_id = form.topic.data.id
+            question.topics.extend(form.topic.data)
             question.sub_topic_id = form.sub_topic.data.id
             question.tags = form.tag.data
             question.active = True
