@@ -191,7 +191,7 @@ def edit(id):
         question.topics = form.topic.data
         question.sub_topic = form.sub_topic.data
         question.update_user_id = current_user.id
-        question.update_at = datetime.utcnow()
+        question.update_at = datetime.now()
         # question.answer_user_id = current_user.id
         question.answer = process_html(form.answer.data).text
 

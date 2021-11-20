@@ -71,7 +71,7 @@ def edit(id):
             article.title = form.title.data
             article.description = form.description.data
             article.text = form.text.data
-            article.update_at = datetime.utcnow()
+            article.update_at = datetime.now()
             article.update_user_id = current_user.id
             db.session.commit()
             return redirect(url_for('article.view', id=article.id))

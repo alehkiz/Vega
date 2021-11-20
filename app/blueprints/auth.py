@@ -39,8 +39,8 @@ def login():
             return redirect(url_for('auth.temp_password'))
         login_user(user, remember=login.remember_me.data)
         user.last_login_ip = request.remote_addr
-        user.last_login_at = datetime.utcnow()
-        user.current_login_at = datetime.utcnow()
+        user.last_login_at = datetime.now()
+        user.current_login_at = datetime.now()
         user.current_login_ip = request.remote_addr
         # user.login_count += 1
         try:

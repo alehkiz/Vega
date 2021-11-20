@@ -46,7 +46,7 @@ def before_request():
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
     if current_user.is_authenticated:
-        current_user.last_seen = datetime.utcnow()
+        current_user.last_seen = datetime.now()
         try:
             db.session.commit()
         except Exception as e:
