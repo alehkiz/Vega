@@ -29,7 +29,7 @@ def edit(id):
             # question.tags = form.tag.data
             # question.topic = form.topic.data
             # question.updater = current_user
-            # question.update_at = datetime.utcnow()
+            # question.update_at = datetime.now()
             db.session.commit()
             return redirect(url_for('admin.tag'))
         except Exception as e:

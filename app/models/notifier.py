@@ -15,7 +15,7 @@ class Notifier(db.Model):
     content = db.Column(db.String, index=True, nullable=False)
     status_id = db.Column(db.Integer, db.ForeignKey('notifier_status.id'), nullable=False)
     priority_id = db.Column(db.Integer, db.ForeignKey('notifier_priority.id'), nullable=False)
-    create_at = db.Column(db.DateTime, index=False, default=datetime.utcnow)
+    create_at = db.Column(db.DateTime, index=False, default=datetime.now)
     created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     created_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)

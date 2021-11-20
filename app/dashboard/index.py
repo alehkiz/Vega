@@ -7,6 +7,7 @@ from sqlalchemy.sql.expression import column, label
 from sqlalchemy import extract
 from sqlalchemy.sql.functions import now
 from app.models.app import Visit
+from app.models.search import SearchDateTime
 from app.utils.kernel import format_number_as_thousand
 import datetime
 from re import template
@@ -26,6 +27,7 @@ from app.models.wiki import Question, SubTopic, Topic, Tag, QuestionView
 from app.models.security import User
 from app.core.db import db
 from sqlalchemy import func, asc, inspect, text, or_
+from sqlalchemy.sql.expression import literal_column
 
 def get_graph_tags():
     df = pd.read_sql(db.session.query(Tag.name.label('Marcação'), func.count(Question.id).label('Total')).outerjoin(Question.tags).group_by(Tag).statement, con=db.session.bind)
@@ -61,13 +63,36 @@ def get_graph_questions_by_month(names=None):
 def get_questions_views_by_date():
     df = pd.read_sql(
         db.session.query(func.count(QuestionView.id).label('Total'), func.date_trunc('day', QuestionView.datetime).label('Data')).filter(or_(QuestionView.user_id == 4, QuestionView.user_id == None)).group_by('Data').order_by(asc('Data')).statement, con=db.session.bind)
+    df.Data = df.Data.dt.date
     graph = px.line(df, x = 'Data', y= 'Total', title='Perguntas visualizadas por dia')
     return graph
 
 def get_graph_questions_answers_by_date():
     df = pd.read_sql(
-        db.session.query(func.count(Question.id).label('Total'), func.date_trunc('day', Question.answer_at).label('Data')).filter(Question.answer != None).group_by('Data').order_by(asc('Data')).statement, con=db.session.bind)
-    graph = px.line(df, x = 'Data', y= 'Total', title='Respostas por dia')
+        db.session.query(func.count(Question.id).label('Total'), 
+            func.date_trunc('day', Question.answer_at).label('Data')).group_by('Data').order_by(asc('Data')).statement, con=db.session.bind)
+    a1 = db.session.query(func.count(Question.id).label('Total'), func.date_trunc('day', Question.create_at).label("Data"), literal_column("'Perguntas'").label('Tipo')).group_by('Data').order_by("Data")
+    a2 = db.session.query(func.count(Question.id).label('Total'), func.date_trunc('day', Question.answer_at).label('Data'), literal_column("'Respostas'").label('Tipo')).group_by('Data').order_by("Data")
+
+    result = a1.union(a2)
+    df = pd.read_sql(result.statement, con=db.session.bind)
+    # df = pd.read_sql(
+    #     db.session.query(func.count(Question.id).label('Total'), 
+    #         func.date_trunc('day', Question.answer_at).label('Data')).group_by('Data').order_by(asc('Data')).statement, con=db.session.bind)
+    # db.session.query(func.count(Question.id).label('Respostas'), func.date_trunc('day', Question.answer_at).label('Data')).filter(Question.answer != None).group_by('Data').order_by(asc('Data'))
+    df.Data = df.Data.dt.date
+    df = df.sort_values('Data')
+    graph = px.line(df, x = 'Data', y= 'Total', color='Tipo', title='Perguntas e respostas por dia')
+    return graph
+
+
+def get_graph_search_by_date():
+    df = pd.read_sql(
+        db.session.query(func.count(SearchDateTime.id).label('Pesquisas'),
+            func.date_trunc('day', SearchDateTime.search_datetime).label('Data')).group_by('Data').order_by(asc('Data')).statement, con=db.session.bind)
+    
+    df.Data = df.Data.dt.date
+    graph = px.line(df, x= 'Data', y= 'Pesquisas', title='Pesquisas por dia')
     return graph
 
 def get_graph_access_by_date():
@@ -75,6 +100,7 @@ def get_graph_access_by_date():
         db.session.query(func.count(Visit.id).label('Total'), 
                 func.date_trunc('day', Visit.datetime).label('Data')).filter(or_(Visit.user_id == 4, Visit.user_id == None)).group_by('Data').order_by(
                     asc('Data')).statement, con=db.session.bind)
+    df.Data = df.Data.dt.date
     graph = px.line(df, x = 'Data', y= 'Total', title='Acessos por dia')
     return graph
 
@@ -192,6 +218,7 @@ def dash_app(app=False):
                         dbc.Tab(label='Acessos', tab_id='diary-access'),
                         dbc.Tab(label='Visualizações de perguntas', tab_id='diary-questions-views'),
                         dbc.Tab(label='Perguntas e Respostas', tab_id='diary-questions-answers'),
+                        dbc.Tab(label='Pesquisas por dia', tab_id='diary-searches')
                         # dbc.Tab(label='', tab_id='diary-'),
                     ], id='diary-tab', active_tab='diary-access')]),
                 dbc.Tab(label='Comparativos percentuais', tab_id='percent', children=[
@@ -239,6 +266,9 @@ def dash_app(app=False):
                 return get_user_answers()
             elif active_subtab == 'user-approve':
                 return get_user_approve()
+            elif active_subtab == 'diary-searches':
+                print('aqui')
+                return dcc.Graph(figure=get_graph_search_by_date(), config={'displayModeBar': False})
         else:
             return 'Nenhuma seleção'
 

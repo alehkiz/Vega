@@ -32,8 +32,8 @@ def format_elapsed_time(timestamp):
     Retorna o tempo decorrido entre o ´timezone´ e tempo atual, retona no formato do tizone atual.
     '''
     if isinstance(timestamp, datetime):
-        timestamp = timestamp.replace(microsecond=0)
-        return format_timedelta(timestamp - datetime.utcnow(), add_direction=True, locale='pt_BR')
+        timestamp = timestamp.replace(microsecond=0, tzinfo=None)
+        return format_timedelta(timestamp - datetime.now(), add_direction=True, locale='pt_BR')
 
 def format_datetime_local(timestamp, format='short'):
     if not format in ['full', 'long', 'medium', 'short']:
@@ -46,7 +46,8 @@ def days_elapsed(timestamp : datetime):
     Retornar os dias decorridos entre o ´timestamp´ e o tempo atual
     '''
     if isinstance(timestamp, datetime):
-        return (datetime.utcnow() - timestamp).days
+        timestamp = timestamp.replace(microsecond=0, tzinfo=None)
+        return (datetime.now() - timestamp).days
 
 def get_list_max_len(l, max_value):
     '''
