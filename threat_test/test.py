@@ -12,6 +12,7 @@ def get_url(url, cookie = ''):
         return requests.get(url, cookies=cookie)
     except Exception as e:
         print('Erro')
+        print(e)
         return ''
 
 def thread_(url : str = '', number_exec : int = 100, cookie = ''):
@@ -31,7 +32,7 @@ def run_test(url : str = '', number_exec : int = 100, cookie = ''):
             cookie = requests.get(cookie_url).cookies
         except Exception as e:
             print(e)
-            time.sleep(2)
+            time.sleep(1)
             try:
                 cookie = requests.get(cookie_url).cookies
             except Exception as e:

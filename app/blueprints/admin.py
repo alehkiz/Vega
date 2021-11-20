@@ -33,6 +33,7 @@ bp = Blueprint("admin", __name__, url_prefix="/admin/")
 def before_request():
     pass
 
+
 @bp.route("/")
 @login_required
 @roles_accepted("admin", 'support', 'manager_user', 'manager_content')
@@ -58,7 +59,8 @@ def users():
         column = User.id
         column_type = column.desc
     u = User.query.filter(User.active == True).order_by(column_type())
-    paginate = u.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
+    paginate = u.paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
     # paginate = User.query.paginate(page, app.config.get('TABLE_ITEMS_PER_PAGE', 10), False)
     first_page = list(paginate.iter_pages())[0]
     order_type = "asc" if order_type == "desc" else "desc"
@@ -107,7 +109,7 @@ def answers():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
-    order_dict = {'desc':desc, 'asc': asc}
+    order_dict = {'desc': desc, 'asc': asc}
     topic = request.args.get('topic', False)
     form = QuestionFilter(request.args, meta={'csrf': False})
     request_args = request.args
@@ -115,6 +117,7 @@ def answers():
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
     if not order_type in order_dict.keys():
         order_type = 'desc'
+    print(order)
     if not order is False or not order_type is False:
         try:
             column = getattr(Question, order)
@@ -125,27 +128,38 @@ def answers():
     else:
         column = Question.id
         column_type = column.desc
-    
 
     # TODO Incluir a odernação por relacionamento de acordo com a seleção do usuário
     relations = inspect(Question).relationships
     if hasattr(column.property, 'target'):
-        if column.property.target.name in relations:
-            relationship = getattr(relations, str(column.property.target.name), False)
+        print(column.property.target.name)
+        # print(relations.all())
+        print(column.property.backref[0])
+        if column.property.key in relations:
+            print('aqui')
+            relationship = getattr(relations, str(
+                column.property.key), False)
             if relationship is False:
-                raise Exception(f'{column.property.target.name} não é um relacionamento em Question')
-            q = db.session.query(Question).filter(Question.answer != None, Question.answer_approved == True).join(relationship.mapper.class_, getattr(Question, str(column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
+                raise Exception(
+                    f'{column.property.key} não é um relacionamento em Question')
+            q = db.session.query(Question).filter(Question.answer != None, Question.answer_approved == True).join(relationship.mapper.class_, getattr(
+                Question, str(column.property.key))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
     else:
-        q = Question.query.filter(Question.answer != None, Question.answer_approved == True).order_by(column_type())
+        q = Question.query.filter(
+            Question.answer != None, Question.answer_approved == True).order_by(column_type())
 
     if form.validate():
         if len(form.topic.data) > 0:
-            q = q.filter(Question.topic_id.in_([_.id for _ in form.topic.data]))
+            q = q.join(Question.topics).filter(Topic.id.in_(
+                [_.id for _ in form.topic.data]))
         if len(form.sub_topic.data) > 0:
-            q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
+            q = q.filter(Question.sub_topic_id.in_(
+                [_.id for _ in form.sub_topic.data]))
         if len(form.tag.data) > 0:
-            q = q.filter(Question.tags.any(Tag.id.in_([_.id for _ in form.tag.data])))
-    paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
+            q = q.filter(Question.tags.any(
+                Tag.id.in_([_.id for _ in form.tag.data])))
+    paginate = q.paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
         if len(list(paginate.iter_pages())) >= 1
@@ -169,8 +183,8 @@ def answers():
         page_name="Respostas",
         order_type=order_type,
         request_args=request_args,
-        _topic = Topic.query.filter(Topic.selectable==True),
-        _sub_topic = SubTopic.query,
+        _topic=Topic.query.filter(Topic.selectable == True),
+        _sub_topic=SubTopic.query,
         form=form,
         url_args=url_args
     )
@@ -186,8 +200,11 @@ def questions():
     topic = request.args.get("topic", None)
     form = QuestionFilter(request.args, meta={'csrf': False})
     request_args = request.args
-    if topic != None:
+    if topic != None and not topic.isnumeric():
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
+    elif topic != None and topic.isnumeric():
+        topic = Topic.query.filter(Topic.id == int(topic)).first()
+    print(topic)
     if not order is False or not order_type is False:
         try:
             column = getattr(Question, order)
@@ -201,23 +218,29 @@ def questions():
     if order:
         if order in Question.__table__.columns:
             if topic != None:
-                q = db.session.query(Question).filter(Question.answer == None, Question.topic_id == topic.id).order_by(column_type())
+                q = db.session.query(Question).filter(
+                    Question.answer == None).join(Question.topics).filter(Topic.id == topic.id).order_by(column_type())
                 # q = Question.query.filter(
                 #     Question.answer == None, Question.topic_id == topic.id
                 # ).order_by(column_type())
             else:
-                q = db.session.query(Question).filter(Question.answer == None).order_by(column_type())
+                q = db.session.query(Question).filter(
+                    Question.answer == None).order_by(column_type())
                 # Question.query.filter(Question.answer == None).order_by(
                 #     column_type()
                 # )
         else:
-            relationship_class = getattr(Question, order).property.mapper.class_
+            relationship_class = getattr(
+                Question, order).property.mapper.class_
             relationship_type = getattr(Question, order)
-            relationship_type_order = getattr(relationship_class.name, order_type)
+            relationship_type_order = getattr(
+                relationship_class.name, order_type)
             if topic != None:
                 q = (
                     db.session.query(Question)
-                    .filter(Question.answer == None, Question.topic_id == topic.id)
+                    .filter(Question.answer == None)
+                    .join(Question.topics)
+                    .filter(Topic.id == topic.id)
                     .join(relationship_class, relationship_type)
                     .order_by(relationship_type_order())
                 )
@@ -238,23 +261,29 @@ def questions():
         #         Question.create_at.asc()
         #     )
         if topic != None:
-            q = db.session.query(Question).filter(Question.answer == None, Question.topic_id == topic.id).order_by(column_type())
+            q = db.session.query(Question).filter(
+                Question.answer == None).join(Question.topics).filter(Topic.id == topic.id).order_by(column_type())
             # q = Question.query.filter(
             #     Question.answer == None, Question.topic_id == topic.id
             # ).order_by(column_type())
         else:
-            q = db.session.query(Question).filter(Question.answer == None).order_by(column_type())
+            q = db.session.query(Question).filter(
+                Question.answer == None).order_by(column_type())
             # Question.query.filter(Question.answer == None).order_by(
             #     column_type()
             # )
     if form.validate():
         if len(form.topic.data) > 0:
-            q = q.filter(Question.topic_id.in_([_.id for _ in form.topic.data]))
+            q = q.join(Question.topics).filter(Topic.id.in_(
+                [_.id for _ in form.topic.data]))
         if len(form.sub_topic.data) > 0:
-            q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
+            q = q.filter(Question.sub_topic_id.in_(
+                [_.id for _ in form.sub_topic.data]))
         if len(form.tag.data) > 0:
-            q = q.filter(Question.tags.any(Tag.id.in_([_.id for _ in form.tag.data])))
-    paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
+            q = q.filter(Question.tags.any(
+                Tag.id.in_([_.id for _ in form.tag.data])))
+    paginate = q.paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
         if len(list(paginate.iter_pages())) >= 1
@@ -262,7 +291,7 @@ def questions():
     )
     last_page = paginate.pages
     order_type = "asc" if order_type == "desc" else "desc"
-    
+
     url_args = dict(request.args)
     url_args.pop('page') if 'page' in url_args.keys() else None
 
@@ -277,9 +306,9 @@ def questions():
         page_name="Dúvidas pendentes de respostas",
         order_type=order_type,
         mode="question",
-        _topic = Topic.query.filter(Topic.selectable==True),
-        _sub_topic = SubTopic.query,
-        request_args=request_args, 
+        _topic=Topic.query.filter(Topic.selectable == True),
+        _sub_topic=SubTopic.query,
+        request_args=request_args,
         form=form,
         url_args=url_args
     )
@@ -295,8 +324,10 @@ def to_approve():
     topic = request.args.get("topic", None)
     form = QuestionFilter(request.args, meta={'csrf': False})
     request_args = request.args
-    if topic != None:
+    if topic != None and not topic.isnumeric():
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
+    elif topic != None and topic.isnumeric():
+        topic = Topic.query.filter(Topic.id == int(topic)).first()
 
     if not order is False or not order_type is False:
         try:
@@ -314,55 +345,65 @@ def to_approve():
                 q = Question.query.filter(
                     Question.answer != None,
                     Question.answer_approved == False,
-                    Question.topic_id == topic.id,
+                ).join(Question.topics
+                ).filter(Topic.id == topic.id
                 ).order_by(column_type())
             else:
                 q = Question.query.filter(
                     Question.answer != None, Question.answer_approved == False
                 ).order_by(column_type())
         else:
-            relationship_class = getattr(Question, order).property.mapper.class_
+            relationship_class = getattr(
+                Question, order).property.mapper.class_
             relationship_type = getattr(Question, order)
-            relationship_type_order = getattr(relationship_class.name, order_type)
+            relationship_type_order = getattr(
+                relationship_class.name, order_type)
             if topic != None:
                 q = (
                     db.session.query(Question)
                     .filter(
                         Question.answer != None,
                         Question.answer_approved == False,
-                        Question.topic_id == topic.id,
-                    )
+                    ).join(Question.topics
+                    ).filter(Topic.id == topic.id)
                     .join(relationship_class, relationship_type)
                     .order_by(relationship_type_order())
                 )
             else:
                 q = (
-                   db.session.query(Question)
+                    db.session.query(Question)
                     .filter(Question.answer != None, Question.answer_approved == False)
                     .join(relationship_class, relationship_type)
                     .order_by(relationship_type_order())
                 )
     else:
         if topic != None:
-            q = Question.query.filter(
-                Question.answer != None,
-                Question.answer_approved == False,
-                Question.topic_id == topic.id,
-            ).order_by(Question.create_at.asc())
+            q = db.session.query(Question).filter(Question.answer != None, Question.answer_approved == False).join(
+                Question.topics).filter(Topic.id == topic.id).order_by(Question.create_at.asc())
+            # Question.query.filter(
+            #     Question.answer != None,
+            #     Question.answer_approved == False,
+            #     Question.topic_id == topic.id,
+            # ).order_by(Question.create_at.asc())
         else:
             q = Question.query.filter(
                 Question.answer != None, Question.answer_approved == False
-            # ).order_by(asc(Question.create_at))
+                # ).order_by(asc(Question.create_at))
             ).order_by(Question.create_at.asc())
 
     if form.validate():
         if len(form.topic.data) > 0:
-            q = q.filter(Question.topic_id.in_([_.id for _ in form.topic.data]))
+            q = q.filter(Topic.id.in_(
+                [_.id for _ in form.topic.data]))
+            print(form.topic.data)
         if len(form.sub_topic.data) > 0:
-            q = q.filter(Question.sub_topic_id.in_([_.id for _ in form.sub_topic.data]))
+            q = q.filter(Question.sub_topic_id.in_(
+                [_.id for _ in form.sub_topic.data]))
         if len(form.tag.data) > 0:
-            q = q.filter(Question.tags.any(Tag.id.in_([_.id for _ in form.tag.data])))
-    paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
+            q = q.filter(Question.tags.any(
+                Tag.id.in_([_.id for _ in form.tag.data])))
+    paginate = q.paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
         if len(list(paginate.iter_pages())) >= 1
@@ -408,7 +449,8 @@ def topic():
         column = Topic.id
         column_type = column.desc
     t = Topic.query.order_by(column_type())
-    paginate = t.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
+    paginate = t.paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
         if len(list(paginate.iter_pages())) >= 1
@@ -447,7 +489,8 @@ def sub_topic():
         column = SubTopic.id
         column_type = column.desc
     t = SubTopic.query.order_by(column_type())
-    paginate = t.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
+    paginate = t.paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
         if len(list(paginate.iter_pages())) >= 1
@@ -475,7 +518,7 @@ def tag():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
-    order_dict = {'desc':desc, 'asc': asc}
+    order_dict = {'desc': desc, 'asc': asc}
     if not order_type in order_dict.keys():
         order_type = 'desc'
     if not order is False or not order_type is False:
@@ -492,13 +535,17 @@ def tag():
     relations = inspect(Tag).relationships
     if hasattr(column.property, 'target'):
         if column.property.target.name in relations:
-            relationship = getattr(relations, str(column.property.target.name), False)
+            relationship = getattr(relations, str(
+                column.property.target.name), False)
             if relationship is False:
-                raise Exception(f'{column.property.target.name} não é um relacionamento em Tag')
-            q = db.session.query(Tag).join(relationship.mapper.class_, getattr(Tag, str(column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
+                raise Exception(
+                    f'{column.property.target.name} não é um relacionamento em Tag')
+            q = db.session.query(Tag).join(relationship.mapper.class_, getattr(Tag, str(
+                column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
     else:
         q = Tag.query.order_by(column_type())
-    paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
+    paginate = q.paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
         if len(list(paginate.iter_pages())) >= 1
@@ -518,6 +565,7 @@ def tag():
         order_type=order_type,
     )
 
+
 @bp.route('/notifier')
 @login_required
 @roles_accepted('admin')
@@ -525,7 +573,7 @@ def notifier():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
-    order_dict = {'desc':desc, 'asc': asc}
+    order_dict = {'desc': desc, 'asc': asc}
     if not order_type in order_dict.keys():
         order_type = 'desc'
     if not order is False or not order_type is False:
@@ -542,13 +590,17 @@ def notifier():
     relations = inspect(Notifier).relationships
     if hasattr(column.property, 'target'):
         if column.property.target.name in relations:
-            relationship = getattr(relations, str(column.property.target.name), False)
+            relationship = getattr(relations, str(
+                column.property.target.name), False)
             if relationship is False:
-                raise Exception(f'{column.property.target.name} não é um relacionamento em Notifier')
-            q = db.session.query(Notifier).join(relationship.mapper.class_, getattr(Notifier, str(column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
+                raise Exception(
+                    f'{column.property.target.name} não é um relacionamento em Notifier')
+            q = db.session.query(Notifier).join(relationship.mapper.class_, getattr(Notifier, str(
+                column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
     else:
         q = Notifier.query.order_by(column_type())
-    paginate = q.paginate(page, app.config.get("TABLE_ITEMS_PER_PAGE", 10), False)
+    paginate = q.paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
         if len(list(paginate.iter_pages())) >= 1

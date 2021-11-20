@@ -1,37 +1,30 @@
-{% extends 'base_question.html' %} 
-{% from "macros/form.html" import render_field %} 
-{% from "macros/main.html" import render_pagination %} 
-{% block question_content %} {#{% set url_arguments= {} if not url_arguments is mapping else none %}#} 
-{% if not url_arguments is mapping or url_arguments is none %} 
+{% extends 'base_question.html' %} {% from "macros/form.html" import render_field %} {% from "macros/main.html" import
+render_pagination %} 
+{% block question_content %} 
+{#{% set url_arguments= {} if not url_arguments is mapping else none
+%}#} 
+{% if not url_arguments is defined %} 
 {% set url_arguments= {} %} 
-{% endif %}
-<!-- {{url_arguments}} -->
-
-{% if mode == 'search' %}
- {% if pagination %} 
- {% if pagination.total == 0 %}
+{% endif %} {% if mode == 'search' %} 
+{% if pagination %} 
+{% if pagination.total == 0 %}
 <h2>Incluir</h2>
 {% include 'create_question.html' %}
 <!-- <div class="d-flex justify-content-between mt-5">
         <a type="button" class="btn btn-info" href="{{url_for('question.index')}}">Voltar</a>
     </div> -->
-{% else %} {% include '_question.html' %} 
-{{ render_pagination(pagination, first_page, last_page, request.endpoint, url_arguments=url_arguments)}} 
-
-{% endif %}
-{% endif %} 
-{% endif %} 
-{% if mode == 'views' %} 
+{% else %} {% include '_question.html' %} {{ render_pagination(pagination, first_page, last_page, request.endpoint,
+url_arguments=url_arguments)}} {% endif %} {% endif %} {% endif %} {% if mode == 'views' %}
 
 <div class="btn-group btn-group-lg" role="group" aria-label="...">
     {% for sub_topic in sub_topics %}
-    <a href='{{ url_for(".index",  sub_topic=sub_topic.name, **url_arguments)}}' class="btn btn-primary rouded border">{{sub_topic.name}}</a>
-    {% endfor %} 
+    <a href='{{ url_for(".index",  sub_topic=sub_topic.name, **url_arguments)}}'
+        class="btn btn-primary rouded border">{{sub_topic.name}}</a> {% endfor %}
 </div>
-{% include '_question.html' %} 
-{{ render_pagination(pagination,
-first_page, last_page, request.endpoint, url_args if url_args is defined else {})}} 
-{% endif %} {% if mode == 'view' %}
+{% include '_question.html' %}
+
+{{ render_pagination(pagination, first_page, last_page, request.endpoint, url_args if url_args is defined else
+{})}} {% endif %} {% if mode == 'view' %}
 <article class="article-post">
     <div class="article-header">
         <h6 class="article-title">
@@ -41,9 +34,8 @@ first_page, last_page, request.endpoint, url_args if url_args is defined else {}
                 
             </p> -->
         <div class="article-meta">
-            Criado {{question.get_create_time_elapsed}} 
-            {% if question.was_updated() %} 
-            {{'Atualizado '+ question.get_update_time_elapsed}} {% endif %}
+            Criado {{question.get_create_time_elapsed}} {% if question.was_updated() %} {{'Atualizado '+
+            question.get_update_time_elapsed}} {% endif %}
             <div class="float-end">Visualizações {{question.views}}</div>
         </div>
     </div>
@@ -53,9 +45,10 @@ first_page, last_page, request.endpoint, url_args if url_args is defined else {}
     {% if question.tag != none %}
     <br> {% for tag in question.tags %}
     <span class="badge bg-secondary"><a href="{{url_for('question.tag', name=tag.name)}}"
-                class="text-white">{{tag.name}}</a> </span> {% endfor %} {% endif %}
+            class="text-white">{{tag.name}}</a> </span> {% endfor %} {% endif %}
 </article>
-{% endif %} {% if mode == 'make_question' %} {% include 'create_question.html' %} {% endif %} {% endblock %} {% block scripts %} {{ super() }} {% if article == true %}
+{% endif %} {% if mode == 'make_question' %} {% include 'create_question.html' %} {% endif %} {% endblock %} {% block
+scripts %} {{ super() }} {% if article == true %}
 <!-- <script src="{{url_for('static', filename='js/editormd/editormd.min.js')}}"></script> -->
 <script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}"></script>
 

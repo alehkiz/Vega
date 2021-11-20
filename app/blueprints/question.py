@@ -1,4 +1,5 @@
 from logging import disable
+from typing import Type
 from flask_migrate import current
 from app.blueprints.admin import sub_topic
 from datetime import datetime
@@ -37,7 +38,8 @@ def index():
             return abort(404)
     topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
     search_form = QuestionSearchForm()
-    query = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
+    query = db.session.query(Question).filter(Question.answer_approved == True).join(Question.topics).filter(Topic.id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
+    # query = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
     if not sub_topic is False:
         paginate = query.filter(Question.sub_topic_id == sub_topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     else:
@@ -123,7 +125,7 @@ def search():
 
                     question = Question()
                     question.question = form.question.data
-                    question.topic = topic
+                    question.topics = topic
                     question.sub_topic = form.sub_topic.data
                     question.create_user_id = user.id
                     question.question_network_id = g.ip_id
@@ -154,7 +156,11 @@ def search():
 @counter
 def view(id=None):
     if current_user.is_anonymous:
-        question = Question.query.filter(Question.id == id, Question.topic_id == g.topic.id).first_or_404()
+        question = db.session.query(Question
+        ).filter(Question.id == id
+        ).join(Question.topics
+        ).filter(Topic.id == g.topic.id
+        ).first_or_404()
     else:
         question = Question.query.filter(Question.id == id).first_or_404()
     if not question.was_answered:
@@ -182,7 +188,7 @@ def edit(id):
         # try:
         question.question = process_html(form.question.data).text
         question.tags = form.tag.data
-        question.topic_id = form.topic.data.id
+        question.topics = form.topic.data
         question.sub_topic = form.sub_topic.data
         question.update_user_id = current_user.id
         question.update_at = datetime.utcnow()
@@ -200,7 +206,7 @@ def edit(id):
 
     form.question.data = question.question
     form.tag.data = question.tags
-    form.topic.data = question.topic
+    form.topic.data = question.topics
     form.answer.data = question.answer
     if current_user.is_admin:
         form.approved.data = question.answer_approved
@@ -288,7 +294,7 @@ def add():
                 flash('Não foi possível concluir o pedido')
             question.question_network_id = g.ip_id
             question.create_user_id = current_user.id
-            question.topic_id = form.topic.data.id
+            question.topics.extend(form.topic.data)
             question.sub_topic_id = form.sub_topic.data.id
             question.tags = form.tag.data
             question.active = True
@@ -326,7 +332,7 @@ def answer(id: int):
         q.answer = form.answer.data
         q.answer_at = datetime.now()
         q.tags = form.tag.data
-        q.topic_id = form.topic.data.id
+        q.topics = form.topic.data
         q.sub_topic = form.sub_topic.data
         q.question = form.question.data
         try:
@@ -340,6 +346,8 @@ def answer(id: int):
             return render_template('answer.html', form=form, answer=True)
     
     form.question.data = q.question
+    form.topic.data = q.topics
+    form.sub_topic.data = q.sub_topic
 
 
     return render_template('answer.html', form=form, answer=True)
@@ -369,13 +377,14 @@ def approve(id: int):
         # q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
         q.answer = form.answer.data
-        q.answer_at = datetime.now()
+        # q.answer_at = datetime.now()
         q.tags = form.tag.data
-        q.topic_id = form.topic.data.id
+        q.topics = form.topic.data
         q.sub_topic = form.sub_topic.data
         q.answer_approved = form.approve.data
         q.answer_approve_user_id = current_user.id
         q.active = True
+        q.answer_approved_at = datetime.now()
         try:
             db.session.commit()
             flash('Pergunta aprovada com sucesso', category='success')
@@ -393,7 +402,7 @@ def approve(id: int):
     form.question.data = q.question
     form.answer.data = q.answer
     form.tag.data = q.tags
-    form.topic.data = q.topic
+    form.topic.data = q.topics
     form.sub_topic.data = q.sub_topic
     form.approve.data = q.answer_approved
 
@@ -411,7 +420,7 @@ def tag(name):
     search_form = QuestionSearchForm()
     pagination_args = {'name':name}
     tag = Tag.query.filter_by(name=name).first_or_404()
-    paginate = Question.query.filter(Question.tags.contains(tag), Question.answer_approved == True, Question.topic_id == topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    paginate = db.session.query(Question).filter(Question.tags.contains(tag), Question.answer_approved == True).join(Question.topics).filter(Topic.id == topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
@@ -437,6 +446,17 @@ def topic(name, type):
     page = request.args.get('page', 1, type=int)
     search_form = QuestionSearchForm()
     pagination_args = {'name':name, 'type': type}
+
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+    try:
+        pagination_args = pagination_args | url_args
+    except TypeError:
+        pagination_args = dict(pagination_args.items() | url_args.items())
+
+    print(pagination_args)
+    print(url_for('question.topic', page=1, **pagination_args))
+    print(request.endpoint)
     topic = Topic.query.filter(Topic.name==name).first_or_404()
     if type in ['pendente', 'aprovada']:
         if type == 'pendente':
@@ -455,7 +475,7 @@ def topic(name, type):
 
     url_args['name'] = name
     url_args['type'] = type
-
+    print(url_args)
     return render_template('question.html', 
                                 pagination=paginate, 
                                 cls_question=Question, 
@@ -620,10 +640,11 @@ def make_question():
             topic = Topic.query.filter(Topic.name == g.selected_access).first()
             if topic is None:
                 app.logger.error(f"Tópico {g.selected_access} não existe")
-                return abort(500)
+                return abort(500)  
+            print(topic)
 
             question.question = form.question.data
-            question.topic = topic
+            question.topics.append(topic)
             question.sub_topic = form.sub_topic.data
             question.create_user_id = user.id
             question.question_network_id = ip.id
