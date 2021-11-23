@@ -208,6 +208,7 @@ def edit(id):
     form.tag.data = question.tags
     form.topic.data = question.topics
     form.answer.data = question.answer
+    form.sub_topic.data = question.sub_topic
     if current_user.is_admin:
         form.approved.data = question.answer_approved
     return render_template('edit.html',form=form, title='Editar', question=True)
