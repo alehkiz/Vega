@@ -338,7 +338,7 @@ class Question(db.Model):
     _answer = db.Column('answer', db.Text, index=False,
                         nullable=True, unique=False)
     answer_approved = db.Column(db.Boolean, nullable=True, default=False)
-    answer_approved_at = db.Column(db.DateTime)
+    answer_approved_at = db.Column(db.DateTime(timezone=True))
     create_at = db.Column(db.DateTime(timezone=True), index=False, default=datetime.now)
     create_user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
