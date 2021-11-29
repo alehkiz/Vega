@@ -125,7 +125,7 @@ def search():
 
                     question = Question()
                     question.question = form.question.data
-                    question.topics = topic
+                    question.topics.append(topic)
                     question.sub_topic = form.sub_topic.data
                     question.create_user_id = user.id
                     question.question_network_id = g.ip_id
