@@ -342,11 +342,11 @@ class Question(db.Model):
     create_at = db.Column(db.DateTime(timezone=True), index=False, default=datetime.now)
     create_user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
-    update_at = db.Column(db.DateTime)
+    update_at = db.Column(db.DateTime(timezone=True))
     update_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     answer_approve_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    answer_at = db.Column(db.DateTime)
+    answer_at = db.Column(db.DateTime(timezone=True))
     # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
     # topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     sub_topic_id = db.Column(
