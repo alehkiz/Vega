@@ -114,7 +114,7 @@ class BaseConfig(object):
                 'name' : 'Respondida?',
                 'attr' : 'was_answered_to'
             },
-            'approved':{
+            'answer_approved':{
                 'name' : 'Aprovada?',
                 'attr' : 'is_approved_to'
             },
@@ -138,7 +138,7 @@ class BaseConfig(object):
                 'attr': 'username'
             }
         },
-        'topic' :{
+        'topics' :{
             'id' :{
                 'name' : 'id',
                 'attr' : None
