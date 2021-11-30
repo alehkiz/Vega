@@ -252,14 +252,13 @@ $(document).on('click', ".save, .unsave", function(e) {
 });
 
 $(document).on('click', ".remove", function(e) {
-
+    
     remove_link = true;
     var remove_href = $(this).attr('href');
     remove_confirm = $("#delete-modal").find('.delete')
         // console.log(remove_confirm)
     remove_confirm.attr('href', remove_href)
     removeModal.show();
-
 
 });
 
@@ -277,7 +276,9 @@ $(document).on('click', "#confirm-delete", function(e) {
         },
         success: function(data) {
             removeModal.toggle();
-            if (data.status === 'success') {}
+            if (data.status === 'success') {
+                
+            }
         }
     });
 

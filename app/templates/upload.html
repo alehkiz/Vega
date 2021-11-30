@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block app_content %}
+{% if form is defined %}
+    <form action="{{url_for('upload.index')}}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        {{form.file_upload.label()}}
+        {{form.file_upload()}}
+        <br>
+        {{ form.reference_date.label()}}
+        {{form.reference_date()}}
+        <br>
+        {{form.submit()}}
+    </form>
+{% endif %}
+{% endblock %}

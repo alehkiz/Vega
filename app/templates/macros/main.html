@@ -99,7 +99,7 @@
                         <a class="btn btn-outline-primary btn-sm" href="{{ url_for(cls_table.__tablename__+'.answer', id=item.id)}}">
                             <i class="fas fa-question"></i></a>
                         {% endif %} {% if item.active is true %}
-                        <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}" href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}">
+                        <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}" href="{{ url_for(cls_table.__tablename__+'.deactive', id=item.id)}}">
                         <i class="fas fa-trash-alt"></i>
                         </button> {% else %}
                         <button class="btn btn-outline-success btn-sm remove" id="remove-{{item.id}}" href="{{ url_for(cls_table.__tablename__+'.activate', id=item.id)}}">
