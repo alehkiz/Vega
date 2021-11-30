@@ -125,7 +125,7 @@ def search():
 
                     question = Question()
                     question.question = form.question.data
-                    question.topics = topic
+                    question.topics.append(topic)
                     question.sub_topic = form.sub_topic.data
                     question.create_user_id = user.id
                     question.question_network_id = g.ip_id
@@ -191,7 +191,7 @@ def edit(id):
         question.topics = form.topic.data
         question.sub_topic = form.sub_topic.data
         question.update_user_id = current_user.id
-        question.update_at = datetime.utcnow()
+        question.update_at = datetime.now()
         # question.answer_user_id = current_user.id
         question.answer = process_html(form.answer.data).text
 
@@ -208,6 +208,7 @@ def edit(id):
     form.tag.data = question.tags
     form.topic.data = question.topics
     form.answer.data = question.answer
+    form.sub_topic.data = question.sub_topic
     if current_user.is_admin:
         form.approved.data = question.answer_approved
     return render_template('edit.html',form=form, title='Editar', question=True)
@@ -279,8 +280,7 @@ def add():
             question = Question()
             # remove tags html
             question.question = process_html(form.question.data).text
-            if current_user.is_admin:
-                question.answer_approved = form.approved.data
+            
             question.answer_user_id = current_user.id
             
             # remove tag html
@@ -298,7 +298,15 @@ def add():
             question.sub_topic_id = form.sub_topic.data.id
             question.tags = form.tag.data
             question.active = True
+            question.answer_at = datetime.now()
+            if current_user.is_admin:
+                if form.approved.data is True:
+                    question.answer_approved = form.approved.data
+                    question.answer_approved_at = datetime.now()
+                    question.answer_approve_user_id = current_user.id
+            print(question.answer_approved)
             try:
+                print(question.answer_approved)
                 db.session.add(question)
                 db.session.commit()
                 return redirect(url_for('question.view', id=question.id))

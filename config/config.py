@@ -32,6 +32,8 @@ class BaseConfig(object):
     SECURITY_MSG_LOGIN = (
         'É necessário se logar para acessar essa página', 'info')
 
+    SQLALCHEMY_ENGINE_OPTIONS = {"connect_args": {"options": "-c timezone=America/Sao_Paulo"}}
+
     BABEL_DEFAULT_LOCALE = 'pt_BR'
 
     _SQLALCHEMY_DATABASE_NAME = environ.get('DATABASE', False) or PROJECT_NAME.lower()
@@ -112,7 +114,7 @@ class BaseConfig(object):
                 'name' : 'Respondida?',
                 'attr' : 'was_answered_to'
             },
-            'approved':{
+            'answer_approved':{
                 'name' : 'Aprovada?',
                 'attr' : 'is_approved_to'
             },
@@ -136,7 +138,7 @@ class BaseConfig(object):
                 'attr': 'username'
             }
         },
-        'topic' :{
+        'topics' :{
             'id' :{
                 'name' : 'id',
                 'attr' : None

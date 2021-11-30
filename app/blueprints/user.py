@@ -104,7 +104,7 @@ def edit(id):
             user.name = form.name.data
             user.email = form.email.data
             user.about_me = form.about_me.data
-            user.updated_at = datetime.utcnow()
+            user.updated_at = datetime.now()
             user.active = form.active.data
             user.created_ip = request.remote_addr
             user.roles = form.role.data
