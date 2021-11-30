@@ -117,3 +117,18 @@ class Network(db.Model):
     confirmed_user = db.relationship('User', backref='confirmed_network', lazy='dynamic', foreign_keys='[User.confirmed_network_id]')
     notifiers = db.relationship('Notifier', backref='network', lazy='dynamic', single_parent=True)
     # created_citizen = db.relationship('Citizen', backref='created_network', lazy='dynamic', foreign_keys='[Citizen.created_network_id]')
+
+
+class FilePDF(db.Model):
+    __tablename__ = 'file_pdf'
+    id = db.Column(db.Integer, primary_key=True)
+    uploaded_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    uploaded_at = db.Column(db.DateTime(timezone=True), default=datetime.now)
+    mimetype = db.Column(db.Text, nullable=False)
+    file_name = db.Column(db.Text, nullable=False, unique=True)
+    approved_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    active = db.Column(db.Boolean, nullable=False)
+    approved = db.Column(db.Boolean, nullable=False, default=False)
+    path = db.Column(db.Text, nullable=False, unique=True)
+    size = db.Column(db.Float, nullable=False)
+    reference_date = db.Column(db.Date, nullable=True)

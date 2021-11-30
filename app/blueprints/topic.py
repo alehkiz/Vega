@@ -95,6 +95,6 @@ def view(id):
                                 last_page=last_page, 
                                 url_arguments=pagination_args)
 
-@bp.route('/remove/<int:id>')
-def remove(id):
+@bp.route('/deactive/<int:id>')
+def deactive(id):
     return ''

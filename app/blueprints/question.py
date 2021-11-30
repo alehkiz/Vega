@@ -236,18 +236,23 @@ def activate(id):
         db.session.rollback()
         return abort(404)
 
-@bp.route('remove/<int:id>', methods=['POST'])
+@bp.route('deactive/<int:id>', methods=['POST'])
 @login_required
 @roles_accepted("admin", "manager_content", 'support')
 @counter
-def remove(id):
+def deactive(id):
     confirm = request.form.get('confirm', False)
     if confirm != 'true':
         return jsonify({
             'status': 'error',
             'message': 'not confirmed'
         }), 404
-    q = Question.query.filter(Question.id == id).first_or_404()
+    q = Question.query.filter(Question.id == id).first()
+    if q is None:
+        return jsonify({
+            'status': 'error',
+            'message': 'not found'
+        }), 404
     id = q.id 
     try:
         q.active = False
@@ -258,10 +263,44 @@ def remove(id):
         app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
         app.logger.error(e)
         db.session.rollback()
-        return abort(404)
+        return jsonify({
+            'status': 'error',
+            'message': 'database error'
+        }), 500
     # return jsonify(q.to_dict())
     return jsonify({'status': 'error'})
 
+@bp.route('active/<int:id>', methods=['POST'])
+@login_required
+@roles_accepted("admin", "manager_content", 'support')
+@counter
+def active(id):
+    confirm = request.form.get('confirm', False)
+    if confirm != 'true':
+        return jsonify({
+            'status': 'error',
+            'message': 'not confirmed'
+        }), 404
+    q = Question.query.filter(Question.id == id).first()
+    if q is None: 
+        return jsonify({
+            'status': 'error',
+            'message': 'not found'
+        }), 404
+    q.active = True
+    try:
+        q.active = True
+        db.session.commit()
+        return jsonify({'id':q.id,
+                    'status': 'success'})
+    except Exception as e:
+        app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+        app.logger.error(e)
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': 'database error'
+        }), 500
 
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
