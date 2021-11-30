@@ -46,7 +46,7 @@ class Visit(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     page_id = db.Column(db.Integer, db.ForeignKey('page.id'), nullable=False)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=True)
-    datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    datetime = db.Column(db.DateTime(timezone=True), nullable=False, default=datetime.now)
     network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
 
     @staticmethod
@@ -105,9 +105,9 @@ class Visit(db.Model):
 class Network(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ip = db.Column(INET, nullable=False)
-    create_at = db.Column(db.DateTime, default=datetime.utcnow)
+    create_at = db.Column(db.DateTime(timezone=True), default=datetime.now)
     created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # first_access = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    # first_access = db.Column(db.DateTime, nullable=False, default=datetime.now)
     question_created_ip = db.relationship('Question', backref='question_created_network', lazy='dynamic', foreign_keys='[Question.question_network_id]')
     answer_created_ip = db.relationship('Question', backref='answer_created_network', lazy='dynamic', foreign_keys='[Question.answer_network_id]')
     questions_views = db.relationship('QuestionView', cascade='all, delete-orphan', single_parent=True, backref='network', lazy='dynamic')
