@@ -110,7 +110,7 @@
                         <a class="btn btn-outline-success btn-sm" href="{{ url_for(cls_table.__tablename__+'.edit', id=item.id)}}">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}" href="{{ url_for(cls_table.__tablename__+'.remove', id=item.id)}}">
+                        <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}" href="{{ url_for(cls_table.__tablename__+'.deactive', id=item.id)}}">
                         <i class="fas fa-trash-alt"></i>
                     </button> {% endif %}
                     </div>

@@ -9,7 +9,7 @@ from app.models.app import FilePDF
 
 bp = Blueprint('upload', __name__, url_prefix='/upload/')
 
-@bp.route('/send', methods=['POST', 'GET'])
+@bp.route('/', methods=['POST', 'GET'])
 @login_required
 @roles_accepted('admin')
 def index():
@@ -32,6 +32,9 @@ def index():
             file.uploaded_user_id = current_user.id
             file.mimetype = file_uploaded.content_type
             file.file_name = file_uploaded.filename
+            if not FilePDF.query.filter(FilePDF.file_name.like(file_uploaded.filename)) is None:
+                form.file_upload.errors.append('Arquivo já existe')
+                return render_template('upload.html', form=form)
             file.active = True
             file.path = join(current_app.config['UPLOAD_FOLDER'], file_uploaded.filename)
             file.reference_date = form.reference_date.data
@@ -39,9 +42,10 @@ def index():
             file_uploaded.save(join(current_app.config['UPLOAD_FOLDER'], file_uploaded.filename))
             size = stat(join(current_app.config['UPLOAD_FOLDER'], file_uploaded.filename)).st_size
             file.size = size
+            file.title = form.title.data
             db.session.add(file)
             db.session.commit()
-            return 'sucesso'
+            return render_template('upload.html', form=form)
     return render_template('upload.html', form=form)
 
 # @bp.route('/index/')

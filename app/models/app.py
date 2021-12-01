@@ -132,3 +132,4 @@ class FilePDF(db.Model):
     path = db.Column(db.Text, nullable=False, unique=True)
     size = db.Column(db.Float, nullable=False)
     reference_date = db.Column(db.Date, nullable=True)
+    title = db.Column(db.Text, nullable=False)

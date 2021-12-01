@@ -5,8 +5,7 @@ from app.blueprints.admin import sub_topic
 from datetime import datetime
 from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify, session
 from flask.globals import current_app
-from flask_security import login_required, current_user
-from flask_security import roles_accepted
+from flask_security import login_required, current_user, roles_accepted
 from app.core.db import db
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, SubTopic, Tag, Topic
 from app.models.security import User
