@@ -158,7 +158,7 @@ def view(id=None):
         question = db.session.query(Question
         ).filter(Question.id == id
         ).join(Question.topics
-        ).filter(Topic.id == g.topic.id
+        ).filter(Topic.id == g.topic.id, Question.active == True
         ).first_or_404()
     else:
         question = Question.query.filter(Question.id == id).first_or_404()
