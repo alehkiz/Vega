@@ -205,8 +205,8 @@ class BaseConfig(object):
     }
     USER_ANON_ID = 4
     UPLOAD_FOLDER = join(APP_DIR, 'upload')
-    MAX_CONTENT_PATH = 20971520 #20MB
-    UPLOAD_EXTENSIONS = ['.pdf']
+    MAX_CONTENT_LENGTH = 10485760 #20MB
+    UPLOAD_EXTENSIONS = ['pdf']
 
 class DevelopmentConfig(BaseConfig):
     # SQLALCHEMY_DATABASE_URI = f'sqlite:///{BaseConfig.DEV_DB}'
