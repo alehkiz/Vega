@@ -624,3 +624,11 @@ def notifier():
         order_type=order_type,
         url_args=url_args
     )
+
+
+
+@bp.route('/upload')
+@login_required
+@roles_accepted('admin', 'suporte')
+def upload():
+    return render_template('admin.html')

@@ -1,4 +1,3 @@
-from app.blueprints.admin import notifier
 from flask.json import jsonify
 from app.utils.routes import counter
 from flask.helpers import flash, url_for
