@@ -5,7 +5,7 @@ static/
 regras/
 .vscode/
 logs/
-app/upload/
+app/upload/ 
 
 
 !*/static/css/login.css
