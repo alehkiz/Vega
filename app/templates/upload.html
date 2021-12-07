@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
+{% import "macros/form.html" as macros %} 
+
 {% block app_content %}
 {% if form is defined %}
-    <form action="{{url_for('upload.index')}}" method="POST" enctype="multipart/form-data">
+    <form action="{{url_for('upload.send')}}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="mb-3">
-            {{form.file_upload.label()}}
-            {{form.file_upload(class='form-control')}}
+            {{ macros.render_field(form.file_upload, class='form-control') }}
         </div>  
         <div class="mb-3">
-            {{ form.reference_date.label()}}
-            {{form.reference_date(class='form-control')}}
+            {{ macros.render_field(form.reference_date, class='form-control')}}
         </div>
         <div class="mb-3">
-            {{ form.title.label()}}
-            {{ form.title(class='form-control')}}
+
+            {{ macros.render_field(form.title, class='form-control')}}
         </div>
         <br>
         {{form.submit()}}

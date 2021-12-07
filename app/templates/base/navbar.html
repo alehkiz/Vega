@@ -48,6 +48,7 @@
                 <form class="row row-cols-lg-auto g-3" method="GET"
                     action="{{ url_for('question.search') }}">
                     <div class="col">
+                        {{g}}
                         {{ render_field(g.question_search_form.filter, class='selectpicker', nolabel=true,
                         multiple=true, **{'data-actions-box':"true", 'data-style':"btn-primary",
                         'data-selected-text-format':"count"})}}
