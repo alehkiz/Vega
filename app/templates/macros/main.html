@@ -48,7 +48,13 @@
 
     </ul>
 </nav>
-{% endmacro %} {% macro render_table(cls_table, pagination, page_name) %} {% if cls_table %} {% if config['TABULATE'].get(cls_table.__tablename__) %}
+{% endmacro %} 
+
+
+{% macro render_table(cls_table, pagination, page_name, user = current_user) %} 
+{% if cls_table %} 
+
+{% if config['TABULATE'].get(cls_table.__tablename__) %}
 
 <div id="top" class="row">
     <div class="col-md-6">
@@ -93,24 +99,37 @@
                 <td class="actions">
                     <div class="btn-group" role="group">
                         {% if kwargs['mode'] is defined %} {% if kwargs['mode'] == 'question' %} {% if kwargs.get('type', false) is defined %}
-                        <a class="btn btn-outline-primary btn-sm" href="{{ url_for(cls_table.__tablename__+'.approve', id=item.id)}}">
+                        {% if kwargs.get('type', false) == 'aprovar' %}
+                        {% if user.has_role('admin') is true %}
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url_for(cls_table.__tablename__+'.approve', id=item.id)}}" data-bs-toggle="tooltip" title="Aprovar">
                             <i class="fas fa-clipboard-check"></i></a>
-                        {% else %}
-                        <a class="btn btn-outline-primary btn-sm" href="{{ url_for(cls_table.__tablename__+'.answer', id=item.id)}}">
-                            <i class="fas fa-question"></i></a>
-                        {% endif %} {% if item.active is true %}
-                        <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}" href="{{ url_for(cls_table.__tablename__+'.deactive', id=item.id)}}">
-                        <i class="fas fa-trash-alt"></i>
-                        </button> {% else %}
-                        <button class="btn btn-outline-success btn-sm remove" id="remove-{{item.id}}" href="{{ url_for(cls_table.__tablename__+'.activate', id=item.id)}}">
-                        <i class="fas fa-plus"></i>
-                    </button> {% endif %} {% endif %} {% else %}
-                        <a class="btn btn-outline-primary btn-sm" href="{{ url_for(cls_table.__tablename__+'.view', id=item.id)}}">
-                            <i class="fas fa-search-plus"></i></a>
-                        <a class="btn btn-outline-success btn-sm" href="{{ url_for(cls_table.__tablename__+'.edit', id=item.id)}}">
+                        
+                        {% elif (user.has_role('support') or user.has_role('admin'))is true %}
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url_for(cls_table.__tablename__+'.edit', id=item.id)}}" data-bs-toggle="tooltip" title="Editar">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}" href="{{ url_for(cls_table.__tablename__+'.deactive', id=item.id)}}">
+                        {% endif %}
+                        {% endif %}
+                        {% if (user.has_role('support') or user.has_role('admin')) and  kwargs.get('type', false) == 'responder' %}
+                        <a class="btn btn-outline-success btn-sm" href="{{ url_for(cls_table.__tablename__+'.answer', id=item.id)}}" data-bs-toggle="tooltip" title="Responder">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        {% endif %}  
+                        {% endif %}  
+                        
+                        {% if item.active is true %}
+                        <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}" href="{{ url_for(cls_table.__tablename__+'.deactive', id=item.id)}}" data-bs-toggle="tooltip" title="Desativar">
+                        <i class="fas fa-trash-alt"></i>
+                        </button> {% else %}
+                        <button class="btn btn-outline-success btn-sm remove" id="remove-{{item.id}}" href="{{ url_for(cls_table.__tablename__+'.activate', id=item.id)}}" data-bs-toggle="tooltip" title="Ativar">
+                        <i class="fas fa-plus"></i>
+                    </button> {% endif %} {% endif %} {% else %}
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url_for(cls_table.__tablename__+'.view', id=item.id)}}" data-bs-toggle="tooltip" title="Visualizar">
+                            <i class="fas fa-search-plus"></i></a>
+                        <a class="btn btn-outline-success btn-sm" href="{{ url_for(cls_table.__tablename__+'.edit', id=item.id)}}" data-bs-toggle="tooltip" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-outline-danger btn-sm remove" id="remove-{{item.id}}" href="{{ url_for(cls_table.__tablename__+'.deactive', id=item.id)}}" data-bs-toggle="tooltip" title="Desativar">
                         <i class="fas fa-trash-alt"></i>
                     </button> {% endif %}
                     </div>

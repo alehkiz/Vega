@@ -7,7 +7,7 @@ from sqlalchemy.sql.expression import column, label
 from sqlalchemy import extract
 from sqlalchemy.sql.functions import now
 from app.models.app import Visit
-from app.models.search import SearchDateTime
+from app.models.search import Search, SearchDateTime
 from app.utils.kernel import format_number_as_thousand
 import datetime
 from re import template
@@ -163,6 +163,9 @@ def get_user_approve():
 def get_total_access():
     return Visit.query.filter(or_(Visit.user_id == 4, Visit.user_id == None)).count()
 
+def get_total_search():
+    return SearchDateTime.query.filter(or_(SearchDateTime.search_user_id == 4, SearchDateTime.search_user_id == None)).count()
+
 def get_total_questions_views():
     return QuestionView.query.filter(or_(QuestionView.user_id == 4, QuestionView.user_id == None)).count()
 def get_questions_answered():
@@ -292,7 +295,15 @@ def dash_app(app=False):
             f" visualizações de  ",
             html.B(format_number_as_thousand(get_questions_answered())),
             " perguntas respondidas."
-        ], id='questions-anwsered'),]
+        ], id='questions-anwsered'),
+        html.Hr(className='my-2'),
+        html.P([
+            f'E ',
+            html.B(get_total_search()),
+            ' pesquisas'
+        ], id='searches')
+        
+        ]
         
         
          

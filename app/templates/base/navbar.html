@@ -48,7 +48,6 @@
                 <form class="row row-cols-lg-auto g-3" method="GET"
                     action="{{ url_for('question.search') }}">
                     <div class="col">
-                        {{g}}
                         {{ render_field(g.question_search_form.filter, class='selectpicker', nolabel=true,
                         multiple=true, **{'data-actions-box':"true", 'data-style':"btn-primary",
                         'data-selected-text-format':"count"})}}
@@ -88,15 +87,15 @@
                         <li><a class="dropdown-item" href="{{url_for('admin.questions')}}">Perguntas</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.to_approve')}}">Pendentes</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.answers')}}">Respondidas</a></li>
+                        {% if current_user.has_role('admin') %}
                         <li><a class="dropdown-item" href="{{url_for('admin.users')}}">Usuários</a></li>
-
                         <li>
                             <hr class="dropdown-divider">
                         </li>
                         <li><a class="dropdown-item" href="{{url_for('admin.tag')}}">Marcação</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.topic')}}">Tópico</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.sub_topic')}}">Sub Tópico</a></li>
-
+                        {% endif %}
                         {% if config.get('MODE', False) == 'dev' %}<!-- #TODO apenas em DEV -->
                         <hr class="dropdown-divider">
                         <li><a class="dropdown-item" href='{{url_for("admin.notifier")}}'>Notificações</a></li>
