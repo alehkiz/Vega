@@ -37,7 +37,10 @@ def index():
             return abort(404)
     topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
     search_form = QuestionSearchForm()
-    query = db.session.query(Question).filter(Question.answer_approved == True, Question.active == True).join(Question.topics).filter(Topic.id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
+    if current_user.is_authenticated and current_user.is_support:
+        query = db.session.query(Question).filter(Question.answer_approved == True, Question.active == True).order_by(Question.create_at.desc())
+    else:
+        query = db.session.query(Question).filter(Question.answer_approved == True, Question.active == True).join(Question.topics).filter(Topic.id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
     # query = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
     if not sub_topic is False:
         paginate = query.filter(Question.sub_topic_id == sub_topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
@@ -72,13 +75,12 @@ def search():
     if g.question_search_form.validate():
         if not session.get('AccessType', False):
             return redirect(url_for('main.index'))
-        if current_user.is_authenticated and current_user.is_support:
-            topics = Topic.query.all()
-        else:
-            topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
+        topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
         sub_topics = g.question_search_form.filter.data
         if not sub_topics:
             sub_topics = SubTopic.query.all()
+        if current_user.is_authenticated and current_user.is_support:
+            topics = []
         q = Question.search(g.question_search_form.q.data, pagination=False, sub_topics=sub_topics, topics=topics).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
         
         paginate = q.paginate(per_page = app.config.get('QUESTIONS_PER_PAGE', 1), page = page)
