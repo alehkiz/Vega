@@ -459,8 +459,8 @@ class Question(db.Model):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         if not sub_topics:
             raise Exception('sub_topics não pode ser vazio')
-        if not topics:
-            raise Exception('topics não pode ser vazio')
+        # if not topics:
+        #     raise Exception('topics não pode ser vazio')
         if resume:
             result = (db.session.query(Question.question, (
                 func.ts_rank_cd(
@@ -488,11 +488,13 @@ class Question(db.Model):
                                     Question.search_vector, func.plainto_tsquery('public.pt', expression))) > 0)  # .order_by(
                       # desc('similarity'))
                       )
-        result = result.filter(Question.sub_topic_id.in_(
-            [_.id for _ in sub_topics])).join(Question.topics).filter(
-                Topic.id.in_([_.id for _ in topics])
-                
-            )
+        if not topics:
+            result = result.filter(Question.sub_topic_id.in_(
+                [_.id for _ in sub_topics]))
+        else:
+            result = result.filter(Question.sub_topic_id.in_(
+                [_.id for _ in sub_topics])).join(Question.topics).filter(
+                    Topic.id.in_([_.id for _ in topics]))
         if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result

@@ -299,7 +299,7 @@ def dash_app(app=False):
         html.Hr(className='my-2'),
         html.P([
             f'E ',
-            html.B(get_total_search()),
+            html.B(format_number_as_thousand(get_total_search())),
             ' pesquisas'
         ], id='searches')
         

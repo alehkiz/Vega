@@ -9,6 +9,9 @@
         {% set bg_color = 'text-info fw-bold' %}
     {% elif question.topics.filter_by(_name = 'SAC (Cidadão e Credenciados)').count() >= 1  %}
         {% set bg_color = 'text-success fw-bold' %}
+
+    {% elif question.topics.filter_by(_name = 'Atendimento - Linha de frente').count() >= 1 %}
+        {% set bg_color = 'text-dark fw-bold' %}
     {% endif %}
     <div class="accordion-item">
         <h2 class="accordion-header" id="flush-heading_{{question.id}}">
