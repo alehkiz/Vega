@@ -306,6 +306,7 @@ def questions():
         page_name="Dúvidas pendentes de respostas",
         order_type=order_type,
         mode="question",
+        type='responder',
         _topic=Topic.query.filter(Topic.selectable == True),
         _sub_topic=SubTopic.query,
         request_args=request_args,
@@ -413,7 +414,6 @@ def to_approve():
     order_type = "asc" if order_type == "desc" else "desc"
     url_args = dict(request.args)
     url_args.pop('page') if 'page' in url_args.keys() else None
-
     return render_template(
         "admin.html",
         pagination=paginate,

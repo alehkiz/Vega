@@ -222,7 +222,7 @@ class Role(RoleMixin, db.Model):
     
     @property
     def is_support(self):
-        if self.level == 4:
+        if self.level in [0, 2, 3, 4]:
             return True
         return False
     @property

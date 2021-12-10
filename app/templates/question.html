@@ -1,12 +1,12 @@
 {% extends 'base_question.html' %} {% from "macros/form.html" import render_field %} {% from "macros/main.html" import
-render_pagination %} 
-{% block question_content %} 
+render_pagination %}
+{% block question_content %}
 {#{% set url_arguments= {} if not url_arguments is mapping else none
-%}#} 
-{% if not url_arguments is defined %} 
-{% set url_arguments= {} %} 
-{% endif %} {% if mode == 'search' %} 
-{% if pagination %} 
+%}#}
+{% if not url_arguments is defined %}
+{% set url_arguments= {} %}
+{% endif %} {% if mode == 'search' %}
+{% if pagination %}
 {% if pagination.total == 0 %}
 <h2>Incluir</h2>
 {% include 'create_question.html' %}
@@ -27,6 +27,10 @@ url_arguments=url_arguments)}} {% endif %} {% endif %} {% endif %} {% if mode ==
 {})}} {% endif %} {% if mode == 'view' %}
 <article class="article-post">
     <div class="article-header">
+        <div class="float-end">
+            <a class="edit text-decoration-none" id="edit_{{question.id}}" href="{{url_for('question.edit', id=question.id)}}" data-bs-toggle="tooltip" title="Editar">
+                <i class="fas fa-edit"></i></a>
+        </div>
         <h6 class="article-title">
             {{question.question}}
         </h6>
