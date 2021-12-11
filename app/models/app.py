@@ -133,3 +133,17 @@ class FilePDF(db.Model):
     size = db.Column(db.Float, nullable=False)
     reference_date = db.Column(db.Date, nullable=True)
     title = db.Column(db.Text, nullable=False)
+    type_id = db.Column(db.Integer, db.ForeignKey("file_pdf_type.id"), nullable=False)
+
+
+class FilePDFType(db.Model):
+    __tablename__ = 'file_pdf_type'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+    create_at = db.Column(db.DateTime(timezone=True), default=datetime.now)
+    create_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    active = db.Column(db.Boolean, default=False)
+    files = db.relationship('FilePDF', backref='type', lazy='dynamic')
+
+
+

@@ -12,8 +12,11 @@
             {{ macros.render_field(form.reference_date, class='form-control')}}
         </div>
         <div class="mb-3">
-
             {{ macros.render_field(form.title, class='form-control')}}
+        </div>
+        <div class="mb-3">
+        {{ macros.render_field(form.type, class='selectpicker', nolabel=true, multiple=true,
+        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
         </div>
         <br>
         {{form.submit()}}
