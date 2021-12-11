@@ -16,7 +16,10 @@ bp = Blueprint('upload', __name__, url_prefix='/upload/')
 def index():
     files = FilePDF.query.filter(FilePDF.active == True, FilePDF.approved == True)
 
-    
+
+@bp.route('/atas')
+def atas():
+    return ''
 
 @bp.route('/send', methods=['POST', 'GET'])
 @login_required
@@ -44,7 +47,7 @@ def send():
             file.path = join(app.config['UPLOAD_FOLDER'], file_uploaded.filename)
             file.reference_date = form.reference_date.data
             file.title = form.title.data
-            
+            file.type = form.type.data
             
             if not FilePDF.query.filter(FilePDF.title == file.title).first() is None:
                 form.title.errors.append('Arquivo com o mesmo título, já adicionado')
