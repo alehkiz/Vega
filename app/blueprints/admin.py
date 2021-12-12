@@ -1,3 +1,4 @@
+from app.models.app import FilePDF
 from app.models.notifier import Notifier
 from flask import (
     current_app as app,
@@ -631,4 +632,115 @@ def notifier():
 @login_required
 @roles_accepted('admin', 'suporte')
 def upload():
-    return render_template('admin.html')
+    page = request.args.get("page", 1, type=int)
+    order = request.args.get("order", False)
+    order_type = request.args.get("order_type", "desc")
+    topic = request.args.get("topic", None)
+    # form = QuestionFilter(request.args, meta={'csrf': False})
+    request_args = request.args
+    if topic != None and not topic.isnumeric():
+        topic = Topic.query.filter(Topic.name.ilike(topic)).first()
+    elif topic != None and topic.isnumeric():
+        topic = Topic.query.filter(Topic.id == int(topic)).first()
+    print(topic)
+    if not order is False or not order_type is False:
+        try:
+            column = getattr(FilePDF, order)
+            column_type = getattr(column, order_type)
+        except Exception as e:
+            column = FilePDF.uploaded_at
+            column_type = FilePDF.uploaded_at.asc
+    else:
+        column = FilePDF.uploaded_at
+        column_type = column.asc
+    if order:
+        if order in FilePDF.__table__.columns:
+            if topic != None:
+                q = db.session.query(FilePDF).join(FilePDF.topics).filter(Topic.id == topic.id).order_by(column_type())
+                # q = Question.query.filter(
+                #     Question.answer == None, Question.topic_id == topic.id
+                # ).order_by(column_type())
+            else:
+                q = db.session.query(FilePDF).order_by(column_type())
+                # Question.query.filter(Question.answer == None).order_by(
+                #     column_type()
+                # )
+        else:
+            relationship_class = getattr(
+                FilePDF, order).property.mapper.class_
+            relationship_type = getattr(FilePDF, order)
+            relationship_type_order = getattr(
+                relationship_class.name, order_type)
+            if topic != None:
+                q = (
+                    db.session.query(FilePDF)
+                    .join(Question.topics)
+                    .filter(Topic.id == topic.id)
+                    .join(relationship_class, relationship_type)
+                    .order_by(relationship_type_order())
+                )
+            else:
+                q = (
+                    db.session.query(FilePDF)
+                    .join(relationship_class, relationship_type)
+                    .order_by(relationship_type_order())
+                )
+    else:
+        # if topic != None:
+        #     q = Question.query.filter(
+        #         Question.answer == None, Question.topic_id == topic.id
+        #     ).order_by(Question.create_at.asc())
+        # else:
+        #     q = Question.query.filter(Question.answer == None).order_by(
+        #         Question.create_at.asc()
+        #     )
+        if topic != None:
+            q = db.session.query(FilePDF).join(FilePDF.topics).filter(Topic.id == topic.id).order_by(column_type())
+            # q = Question.query.filter(
+            #     Question.answer == None, Question.topic_id == topic.id
+            # ).order_by(column_type())
+        else:
+            q = db.session.query(FilePDF).order_by(column_type())
+            # Question.query.filter(Question.answer == None).order_by(
+            #     column_type()
+            # )
+    # if form.validate():
+    #     if len(form.topic.data) > 0:
+    #         q = q.join(Question.topics).filter(Topic.id.in_(
+    #             [_.id for _ in form.topic.data]))
+    #     if len(form.sub_topic.data) > 0:
+    #         q = q.filter(Question.sub_topic_id.in_(
+    #             [_.id for _ in form.sub_topic.data]))
+    #     if len(form.tag.data) > 0:
+    #         q = q.filter(Question.tags.any(
+    #             Tag.id.in_([_.id for _ in form.tag.data])))
+    paginate = q.paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
+    first_page = (
+        list(paginate.iter_pages())[0]
+        if len(list(paginate.iter_pages())) >= 1
+        else None
+    )
+    last_page = paginate.pages
+    order_type = "asc" if order_type == "desc" else "desc"
+
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
+    return render_template(
+        "admin.html",
+        pagination=paginate,
+        first_page=first_page,
+        last_page=last_page,
+        endpoint=request.url_rule.endpoint,
+        cls_table=FilePDF,
+        list=True,
+        page_name="Arquivos",
+        order_type=order_type,
+        mode="file_pdf",
+        type='aprovar',
+        _topic=Topic.query.filter(Topic.selectable == True),
+        _sub_topic=SubTopic.query,
+        request_args=request_args,
+        url_args=url_args
+    )

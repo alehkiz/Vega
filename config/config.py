@@ -193,7 +193,32 @@ class BaseConfig(object):
                 'name': 'Criado em',
                 'attr': 'get_formated_date'
             }
-
+        },
+        'file_pdf':{
+            'id':{
+                'name': 'id',
+                'attr': None
+            },
+            'title':{
+                'name': 'title',
+                'attr': None
+            },
+            'create_at':{
+                'name': 'Criado em',
+                'attr': 'get_create_datetime'
+            },
+            'approved': {
+                'name': "Aprovado",
+                'attr': 'was_approved'
+            },
+            'type': {
+                'name': 'Tipo',
+                'attr': 'type_name'
+            },
+            'topics' : {
+                'name' : 'Tópicos',
+                'attr' : 'topic_name'
+            },
         }
     }
     ROUTES_NAMES = {

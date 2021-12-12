@@ -1,4 +1,8 @@
-from flask import Blueprint, request, render_template, current_app as app, abort, flash, redirect, url_for
+from flask import Blueprint, current_app as app, render_template, url_for, abort, flash
+from flask_login.utils import login_required
+from flask_security.decorators import roles_accepted
+from app.models.app import FilePDF, FilePDFType
+from app.models.wiki import Topic
 from flask_security import login_required, current_user, roles_accepted
 from werkzeug.utils import redirect
 from app.core.db import db
@@ -6,35 +10,17 @@ from app.forms.upload import UploadForm
 from os.path import splitext, join, isfile
 from os import stat, remove
 
-from app.models.app import FilePDF, FilePDFType
-
-bp = Blueprint('upload', __name__, url_prefix='/upload/')
-
+bp = Blueprint('file_pdf', __name__, url_prefix='/files/')
 
 @bp.route('/')
 @bp.route('/index')
 def index():
-    files = FilePDF.query.filter(FilePDF.active == True, FilePDF.approved == True)
+    return ''
 
-
-@bp.route('/atas')
-def atas():
-    files = db.session.query(FilePDF).join(FilePDFType.files).filter(FilePDFType.name == 'Ata').paginate(page, app.config.get(
-        "TABLE_ITEMS_PER_PAGE", 10), False)
-    first_page = (
-        list(paginate.iter_pages())[0]
-        if len(list(paginate.iter_pages())) >= 1
-        else None
-    )
-
-    # file = files.first()
-    # print(file.title)
-    # return f'{file.title}'
-
-@bp.route('/disable', methods=['POST', 'GET'])
+@bp.route('/add', methods=['POST', 'GET'])
 @login_required
-@roles_accepted('admin')
-def disabled():
+@roles_accepted('admin', 'support')
+def add():
     form = UploadForm()
     if form.validate_on_submit():
         file_uploaded = form.file_upload.data
@@ -58,7 +44,7 @@ def disabled():
             file.reference_date = form.reference_date.data
             file.title = form.title.data
             file.type = form.type.data
-            
+            file.topics.extend(form.topic.data)
             if not FilePDF.query.filter(FilePDF.title == file.title).first() is None:
                 form.title.errors.append('Arquivo com o mesmo título, já adicionado')
                 return render_template('upload.html', form=form)
@@ -75,7 +61,7 @@ def disabled():
                 db.session.add(file)
                 db.session.commit()
                 flash('Arquivo enviado com sucesso', category='success')
-                return redirect(url_for('upload.send'))
+                return redirect(url_for('file_pdf.add'))
             except Exception as e:
                 db.session.rollback()
                 app.logger.error(f"Erro ao salvar no banco de dados: {e}")
@@ -94,6 +80,9 @@ def disabled():
             return render_template('upload.html', form=form)
     return render_template('upload.html', form=form)
 
-# @bp.route('/index/')
-# def index():
-#     ...
+
+@bp.route('/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('admin', 'support')
+def edit(id):
+    return ''
