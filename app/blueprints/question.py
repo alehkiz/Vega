@@ -1,7 +1,3 @@
-from logging import disable
-from typing import Type
-from flask_migrate import current
-from app.blueprints.admin import sub_topic
 from datetime import datetime
 from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify, session
 from flask.globals import current_app
@@ -344,9 +340,7 @@ def add():
                     question.answer_approved = form.approved.data
                     question.answer_approved_at = datetime.now()
                     question.answer_approve_user_id = current_user.id
-            print(question.answer_approved)
             try:
-                print(question.answer_approved)
                 db.session.add(question)
                 db.session.commit()
                 return redirect(url_for('question.view', id=question.id))

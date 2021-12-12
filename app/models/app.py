@@ -12,6 +12,12 @@ from sqlalchemy.dialects.postgresql import INET
 from app.core.db import db
 
 from app.models.security import User
+from app.utils.kernel import format_datetime_local
+
+file_topic = db.Table('file_pdf_topic',
+                        db.Column('file_id', db.Integer, db.ForeignKey('file_pdf.id')),
+                        db.Column('topic_id', db.Integer, db.ForeignKey('topic.id')))
+
 
 class Page(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -134,8 +140,30 @@ class FilePDF(db.Model):
     reference_date = db.Column(db.Date, nullable=True)
     title = db.Column(db.Text, nullable=False)
     type_id = db.Column(db.Integer, db.ForeignKey("file_pdf_type.id"), nullable=False)
+    sub_topic_id = db.Column(db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
+    topics = db.relationship('Topic', secondary=file_topic, 
+                                backref=db.backref('files', lazy='dynamic', cascade='all, delete-orphan', single_parent=True), lazy='dynamic')
 
 
+    @property
+    def get_create_datetime(self):
+        return format_datetime_local(self.uploaded_at)
+
+    @property
+    def was_approved(self):
+        if self.approved == True:
+            return "Sim" 
+        return 'Não'
+    
+    @property
+    def type_name(self):
+        if self.type != None:
+            return self.type.name
+        return None
+    @property
+    def topic_name(self):
+        return ', '.join([_.name for _ in self.topics])
+        
 class FilePDFType(db.Model):
     __tablename__ = 'file_pdf_type'
     id = db.Column(db.Integer, primary_key=True)
