@@ -35,6 +35,9 @@
         {% elif approve is defined %}
         {{ form.approve(class='btn btn-success') }}
         {{ form.repprove(class='btn btn-danger') }}
+        <br> 
+        <br> 
+        {{ macros.render_field(form.answered_by, size=32, class='form-control', placeholder='Titulo') }}
         {% endif %}
 
     </form>
