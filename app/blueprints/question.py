@@ -447,6 +447,7 @@ def approve(id: int):
     form.topic.data = q.topics
     form.sub_topic.data = q.sub_topic
     form.approve.data = q.answer_approved
+    form.answered_by.data = q.answered_by.name
 
 
     return render_template('answer.html', form=form, approve=True)

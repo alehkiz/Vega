@@ -63,6 +63,7 @@ class QuestionApproveForm(FlaskForm):
     # text = TextAreaField('Text', validators=[DataRequired('Item obrigatório'), Length(min=32, message='O campo texto deve conter pelo menos 32 caracteres')])
     # topic = QuerySelectField('Topico', validators=[DataRequired('Item obrigatório')], query_factory=lambda: Topic.query, get_label='name', allow_blank=False)
     # approve = BooleanField('Aprovada')
+    answered_by = StringField("Respondido por",render_kw={'disabled':''})
     approve = SubmitField('Aprovar')
     repprove = SubmitField('Reprovar')
 
