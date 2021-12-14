@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import INET
 from app.core.db import db
 
 from app.models.security import User
-from app.utils.kernel import format_datetime_local
+from app.utils.kernel import format_date_local, format_datetime_local
 
 file_topic = db.Table('file_pdf_topic',
                         db.Column('file_id', db.Integer, db.ForeignKey('file_pdf.id')),
@@ -148,6 +148,10 @@ class FilePDF(db.Model):
     @property
     def get_create_datetime(self):
         return format_datetime_local(self.uploaded_at)
+    
+    @property
+    def get_reference_date(self):
+        return format_date_local(self.reference_date)
 
     @property
     def was_approved(self):

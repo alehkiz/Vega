@@ -33,20 +33,34 @@
                         class='nav-link'>Dashboard</a>
                 </li>
                 {% endif %}
-                {% if config.get('MODE', False) == 'dev' %}<!-- #TODO apenas em DEV -->
-                <li class="nav-item">
-                    <a class='btn btn-sm btn-outline-primary me-2' type='button' href="{{ url_for('notifier.index')}}" class='nav-link'>Notificações</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-sm btn-outline-primary me-2" type='button' href="{{ url_for('transactions.index')}}" class='nav-link'>Transações</a>
-                </li>
-                {% endif %}
+
             </ul>
+
+
+            <div class="dropdown">
+                <button class="btn btn-outline-success dropdown-toggle" type="button" id="dropdownMenuButton1"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    Menu
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item" href="{{url_for('file_pdf.index')}}">Atas</a></li>
+                    <!-- <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li><a class="dropdown-item" href="#">Something else here</a></li> -->
+                    {% if config.get('MODE', False) == 'dev' %}
+                    <!-- #TODO apenas em DEV -->
+                    <li><a class='dropdown-item' type='button' href="{{ url_for('notifier.index')}}"
+                            class='nav-link'>Notificações</a>
+                    </li>
+                    <li><a class="dropdown-item" type='button' href="{{ url_for('transactions.index')}}"
+                            class='nav-link'>Transações</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
 
             <div class="navbar-nav col-6 w-50 justify-content-center">
 
-                <form class="row row-cols-lg-auto g-3" method="GET"
-                    action="{{ url_for('question.search') }}">
+                <form class="row row-cols-lg-auto g-3" method="GET" action="{{ url_for('question.search') }}">
                     <div class="col">
                         {{ render_field(g.question_search_form.filter, class='selectpicker', nolabel=true,
                         multiple=true, **{'data-actions-box':"true", 'data-style':"btn-primary",
@@ -55,14 +69,14 @@
                     <div class="col">
                         <!-- <i class="fa fa-search"></i> -->
                         <div class="input-group mb-3">
-                        {{ render_field(g.question_search_form.q, size=15, class='form-control',
-                        placeholder='Buscar...', nolabel=true, type='search', **{'aria-label':"Buscar",
-                        'aria-describedby':"submit"})}}
-                        <div class="input-group-append">
-                            {{ render_field(g.question_search_form.submit, class='btn btn-primary',
-                            nolabel=true, id='submit')}}
+                            {{ render_field(g.question_search_form.q, size=15, class='form-control',
+                            placeholder='Buscar...', nolabel=true, type='search', **{'aria-label':"Buscar",
+                            'aria-describedby':"submit"})}}
+                            <div class="input-group-append">
+                                {{ render_field(g.question_search_form.submit, class='btn btn-primary',
+                                nolabel=true, id='submit')}}
+                            </div>
                         </div>
-                    </div>
                         <!-- <input type="search" placeholder="Buscar..." class="form-control me-2" id="search" name="search"> -->
                         <!-- <button class="btn btn-primary">Search</button> -->
                     </div>
@@ -96,7 +110,8 @@
                         <li><a class="dropdown-item" href="{{url_for('admin.topic')}}">Tópico</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.sub_topic')}}">Sub Tópico</a></li>
                         {% endif %}
-                        {% if config.get('MODE', False) == 'dev' %}<!-- #TODO apenas em DEV -->
+                        {% if config.get('MODE', False) == 'dev' %}
+                        <!-- #TODO apenas em DEV -->
                         <hr class="dropdown-divider">
                         <li><a class="dropdown-item" href='{{url_for("admin.notifier")}}'>Notificações</a></li>
                         <hr class="dropdown-divider">
@@ -151,10 +166,3 @@
 
 
 {% endblock %}
-
-
-
-
-
-
-
