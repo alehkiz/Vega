@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app as app, render_template, url_for, abort, flash
+from flask import Blueprint, current_app as app, render_template, url_for, abort, flash, request, make_response, send_from_directory
 from flask_login.utils import login_required
 from flask_security.decorators import roles_accepted
 from app.models.app import FilePDF, FilePDFType
@@ -15,7 +15,20 @@ bp = Blueprint('file_pdf', __name__, url_prefix='/files/')
 @bp.route('/')
 @bp.route('/index')
 def index():
-    return ''
+    page = request.args.get("page", 1, type=int)
+    paginate = db.session.query(FilePDF).join(FilePDFType.files).filter(FilePDFType.name == 'Ata').paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
+    # paginate = files.paginate(page, app.config.get( "TABLE_ITEMS_PER_PAGE", 10), False)
+    first_page = (
+        list(paginate.iter_pages())[0]
+        if len(list(paginate.iter_pages())) >= 1
+        else None
+    )
+    last_page = paginate.pages
+    print(paginate.items)
+    return render_template('files.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint)
+
+
 
 @bp.route('/add', methods=['POST', 'GET'])
 @login_required
@@ -86,3 +99,15 @@ def add():
 @roles_accepted('admin', 'support')
 def edit(id):
     return ''
+
+@bp.route('/view/<int:id>')
+def get_pdf(id=None):
+    if not id is None:
+        file = FilePDF.query.filter(FilePDF.id == id).first_or_404()
+        print(file)
+        # binary_pdf = file.path
+        response = make_response(send_from_directory(app.config['UPLOAD_FOLDER'], file.file_name))
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = \
+            'inline; filename=%s' % f'{file.file_name}'
+        return response

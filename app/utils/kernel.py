@@ -1,9 +1,9 @@
 import enum
 from re import search
 from dateutil.tz import tzutc
-from babel.dates import format_timedelta, format_datetime, get_timezone
+from babel.dates import format_timedelta, format_datetime, get_timezone, format_date
 from functools import wraps
-from datetime import date, datetime
+from datetime import date as d_date, datetime, tzinfo
 from unicodedata import normalize, category
 from werkzeug.urls import url_parse
 from flask import request
@@ -40,6 +40,13 @@ def format_datetime_local(timestamp, format='short'):
         format = 'short'
     if isinstance(timestamp, datetime):
         return format_datetime(timestamp, locale='pt_BR', format=format, tzinfo=get_timezone('America/Sao_Paulo'))
+
+def format_date_local(date, format='short'):
+    if not format in ['full', 'long', 'medium', 'short']:
+        format = 'short'
+    if isinstance(date, d_date):
+        print('aqui')
+        return format_date(date, locale='pt_BR', format=format)
 
 def days_elapsed(timestamp : datetime):
     '''
