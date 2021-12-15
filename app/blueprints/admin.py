@@ -628,10 +628,10 @@ def notifier():
 
 
 
-@bp.route('/upload')
+@bp.route('/file')
 @login_required
 @roles_accepted('admin', 'suporte')
-def upload():
+def file():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
@@ -642,7 +642,6 @@ def upload():
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
     elif topic != None and topic.isnumeric():
         topic = Topic.query.filter(Topic.id == int(topic)).first()
-    print(topic)
     if not order is False or not order_type is False:
         try:
             column = getattr(FilePDF, order)

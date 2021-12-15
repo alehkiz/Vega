@@ -6,7 +6,7 @@ from app.models.wiki import Topic
 from flask_security import login_required, current_user, roles_accepted
 from werkzeug.utils import redirect
 from app.core.db import db
-from app.forms.upload import UploadForm
+from app.forms.file import SendFileForm
 from os.path import splitext, join, isfile
 from os import stat, remove
 
@@ -34,14 +34,14 @@ def index():
 @login_required
 @roles_accepted('admin', 'support')
 def add():
-    form = UploadForm()
+    form = SendFileForm()
     if form.validate_on_submit():
-        file_uploaded = form.file_upload.data
+        file_uploaded = form.file.data
         if file_uploaded != '':
             # file_ext = splitext(file_uploaded.filename)[1].lower()
             # print(file_ext)
             if file_uploaded.filename.rsplit('.', 1)[1].lower() not in app.config['UPLOAD_EXTENSIONS']:
-                form.file_upload.errors.append('Arquivo não aceito, envie apenas arquivos no formato PDF')
+                form.file.errors.append('Arquivo não aceito, envie apenas arquivos no formato PDF')
                 return render_template('upload.html', form=form)
             
             file = FilePDF()
@@ -50,7 +50,7 @@ def add():
             file.file_name = file_uploaded.filename
 
             if not FilePDF.query.filter(FilePDF.file_name.like(file_uploaded.filename)).first() is None:
-                form.file_upload.errors.append('Arquivo já existe')
+                form.file.errors.append('Arquivo já existe')
                 return render_template('upload.html', form=form)
             file.active = True
             file.path = join(app.config['UPLOAD_FOLDER'], file_uploaded.filename)
