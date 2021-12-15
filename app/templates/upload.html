@@ -6,7 +6,7 @@
     <form action="{{url_for('file_pdf.add')}}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="mb-3">
-            {{ macros.render_field(form.file_upload, class='form-control') }}
+            {{ macros.render_field(form.file, class='form-control') }}
         </div>  
         <div class="mb-3">
             {{ macros.render_field(form.reference_date, class='form-control')}}

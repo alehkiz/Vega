@@ -45,8 +45,10 @@
         {{ form.csrf_token }}
         {{ macros.render_field(form.question, style="height: 120px;", class='form-control', placeholder='Titulo') }}
         {{ macros.render_field(form.answer, size=128, class='form-control', placeholder='Descrição')}}
-        {{ macros.render_field(form.tag, class='selectpicker', nolabel=true, multiple=true,
-        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
+        {# macros.render_field(form.tag, class='selectpicker', nolabel=true, multiple=true,
+        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})#}
+        {{ macros.render_field(form.tag, class='form-select', class='selectpicker', nolabel=true, multiple=true,
+        **{'data-style':"btn-primary", 'data-selected-text-format':"count", "data-live-search":"true", "data-size":"5", 'data-width':"auto"})}}
         <br>
         <br>
         {{ macros.render_field(form.topic, class='selectpicker', nolabel=true, multiple=true,
