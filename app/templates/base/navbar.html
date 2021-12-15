@@ -20,44 +20,86 @@
                     <a class="btn btn-sm btn-outline-secondary me-2" type="button" href="{{ url_for('question.index')}}"
                         class='nav-link'>Dúvidas</a>
                 </li>
+                {% if current_user.is_authenticated or current_user.is_support %}
+                <div class="dropdown nav-item">
+                    <button class="btn btn-outline-success dropdown-toggle" type="button" id="dropdownMenuButton1"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Menu
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton1">
+                        {% if current_user.is_authenticated %}
+                        
+                        <li class="dropdown-submenu dropdown-item">
+                            <a class="dropdown-item" href="#">Arquivos</a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item" href="{{url_for('file_pdf.index')}}">Atas</a></li>
+                            <li><a class="dropdown-item" href="#">Manuais</a></li>
+                            <!-- <li><a class="dropdown-item" href="#">Second level</a></li> -->
+                            </ul>
+                        </li>
+                        {% if current_user.is_support %}
+                        <li>
+                            <hr class="dropdown-divider" />
+                          </li>
+                        <li>
+                            <a class="dropdown-item" type="button"
+                                href="{{ url_for('support.index')}}">Suporte</a>
+                        </li>
+                        {% endif %}
 
-                {% if current_user.is_support %}
-                <li class="nav-item">
-                    <a class="btn btn-sm btn-outline-success me-2" type="button"
-                        href="{{ url_for('support.index')}}">Suporte</a>
-                </li>
-                {% endif %}
-                {% if current_user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="btn btn-sm btn-outline-primary me-2" type="button" href="{{ url_for('dashboard')}}"
-                        class='nav-link'>Dashboard</a>
-                </li>
+                        <li>
+                            <a class="dropdown-item" type="button"
+                                href="{{ url_for('dashboard')}}" class='nav-link'>Dashboard</a>
+                        </li>
+                        {% endif %}
+                        <li>
+                            <hr class="dropdown-divider" />
+                          </li>
+                          <li class="dropdown-submenu dropdown-item">
+                            <a class="dropdown-item" href="#">Desenvolvimento</a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class='dropdown-item' type='button' href="{{ url_for('notifier.index')}}"
+                                    class='nav-link'>Notificações</a>
+                            </li>
+                            <li><a class="dropdown-item" type='button' href="{{ url_for('transactions.index')}}"
+                                    class='nav-link'>Transações</a>
+                            </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>  
                 {% endif %}
 
             </ul>
 
 
-            <div class="dropdown">
+            <div class="dropdown nav-item">
                 <button class="btn btn-outline-success dropdown-toggle" type="button" id="dropdownMenuButton1"
                     data-bs-toggle="dropdown" aria-expanded="false">
-                    Menu
+                    Arquivos
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <li><a class="dropdown-item" href="{{url_for('file_pdf.index')}}">Atas</a></li>
-                    <!-- <li><a class="dropdown-item" href="#">Another action</a></li>
-                    <li><a class="dropdown-item" href="#">Something else here</a></li> -->
-                    {% if config.get('MODE', False) == 'dev' %}
-                    <!-- #TODO apenas em DEV -->
+                </ul>
+            </div>
+            {% if config.get('MODE', False) == 'dev' %}
+            <!-- #TODO apenas em DEV -->
+            <div class="dropdown">
+                <button class="btn btn-outline-info dropdown-toggle" type="button" id="dropdownMenuButton1"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    Em desenvolvimento
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+
                     <li><a class='dropdown-item' type='button' href="{{ url_for('notifier.index')}}"
                             class='nav-link'>Notificações</a>
                     </li>
                     <li><a class="dropdown-item" type='button' href="{{ url_for('transactions.index')}}"
                             class='nav-link'>Transações</a>
                     </li>
-                    {% endif %}
                 </ul>
             </div>
-
+            {% endif %}
             <div class="navbar-nav col-6 w-50 justify-content-center">
 
                 <form class="row row-cols-lg-auto g-3" method="GET" action="{{ url_for('question.search') }}">
@@ -115,7 +157,7 @@
                         <hr class="dropdown-divider">
                         <li><a class="dropdown-item" href='{{url_for("admin.notifier")}}'>Notificações</a></li>
                         <hr class="dropdown-divider">
-                        <li><a class="dropdown-item" href='{{url_for("admin.upload")}}'>Upload</a></li>
+                        <li><a class="dropdown-item" href='{{url_for("admin.file")}}'>Upload</a></li>
                         {% endif %}
 
                     </ul>
