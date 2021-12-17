@@ -408,6 +408,12 @@ class Question(db.Model):
     def get_days_elapsed(self):
         return days_elapsed(self.create_at)
 
+    @property
+    def get_user_answer(self):
+        if self.answered_by is None:
+            return ''
+        return self.answered_by.name
+
     # @property
     # def format_create_date(self):
     #     return self.create_at.strftime("%d/%m/%Y")

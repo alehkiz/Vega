@@ -106,6 +106,10 @@ class BaseConfig(object):
                 'name' : 'Sub Tópico',
                 'attr' : 'sub_topic_name'
             },
+            'answered_by':{
+                'name': 'Respondido por',
+                'attr': 'get_user_answer'
+            },
             "create_at": {
                 'name' : 'criado em',
                 'attr' : 'get_create_datetime'
