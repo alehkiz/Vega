@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app as app, render_template, url_for, abort, flash, request, make_response, send_from_directory
+from flask import Blueprint, current_app as app, render_template, url_for, abort, flash, request, make_response, send_from_directory, g, session
 from flask_login.utils import login_required
 from flask_security.decorators import roles_accepted
 from app.models.app import FilePDF, FilePDFType
@@ -12,11 +12,18 @@ from os import stat, remove
 
 bp = Blueprint('file_pdf', __name__, url_prefix='/files/')
 
+
 @bp.route('/')
 @bp.route('/index')
 def index():
+    return ''
+    
+
+@bp.route('/atas')
+def atas():
     page = request.args.get("page", 1, type=int)
-    paginate = db.session.query(FilePDF).join(FilePDFType.files).filter(FilePDFType.name == 'Ata').paginate(page, app.config.get(
+    topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
+    paginate = db.session.query(FilePDF).filter(FilePDF.active == True, FilePDF.approved == True).join(FilePDFType.files).filter(FilePDFType.name == 'Ata').join(FilePDF.topics).filter(Topic.id.in_([_.id for _ in topics])).paginate(page, app.config.get(
         "TABLE_ITEMS_PER_PAGE", 10), False)
     # paginate = files.paginate(page, app.config.get( "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
@@ -28,7 +35,22 @@ def index():
     print(paginate.items)
     return render_template('files.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint)
 
-
+@bp.route('/')
+@bp.route('/manuais')
+def manuais():
+    page = request.args.get("page", 1, type=int)
+    topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
+    paginate = db.session.query(FilePDF).filter(FilePDF.active == True, FilePDF.approved == True).join(FilePDFType.files).filter(FilePDFType.name == 'Manual').join(FilePDF.topics).filter(Topic.id.in_([_.id for _ in topics])).paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
+    # paginate = files.paginate(page, app.config.get( "TABLE_ITEMS_PER_PAGE", 10), False)
+    first_page = (
+        list(paginate.iter_pages())[0]
+        if len(list(paginate.iter_pages())) >= 1
+        else None
+    )
+    last_page = paginate.pages
+    print(paginate.items)
+    return render_template('files.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint)
 
 @bp.route('/add', methods=['POST', 'GET'])
 @login_required

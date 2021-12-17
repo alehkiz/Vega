@@ -248,6 +248,7 @@ class Topic(db.Model):
     active = db.Column(db.Boolean, default=True)
     create_at = db.Column(db.DateTime(timezone=True), index=True, default=datetime.now)
     selectable = db.Column(db.Boolean, default=False, nullable=False)
+    nickname = db.Column(db.String(10), nullable=False, unique=True)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
     # questions_old = db.relationship('Question', backref='topic', lazy='dynamic', foreign_keys='[Question.topic_id]')
     notices = db.relationship('Notifier', backref='topic', lazy='dynamic')
