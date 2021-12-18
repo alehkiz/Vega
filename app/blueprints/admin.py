@@ -736,7 +736,6 @@ def file():
         list=True,
         page_name="Arquivos",
         order_type=order_type,
-        mode="file_pdf",
         type='aprovar',
         _topic=Topic.query.filter(Topic.selectable == True),
         _sub_topic=SubTopic.query,

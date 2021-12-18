@@ -4,18 +4,18 @@
     {% if mode == 'search' %}
     {% set question, pos = question %}
     {% endif %}
-
+    {#}
     {% if question.topics.filter_by(_name = 'Retaguarda').count() >= 1 %}
         {% set bg_color = 'text-info fw-bold' %}
     {% elif question.topics.filter_by(_name = 'SAC (Cidadão e Credenciados)').count() >= 1  %}
         {% set bg_color = 'text-success fw-bold' %}
 
-    {% elif question.topics.filter_by(_name = 'Atendimento - Linha de frente').count() >= 1 %}
+    {% elif question.topics.filter_by(_name = 'Atendimento - Linha de Frente').count() >= 1 %}
         {% set bg_color = 'text-dark fw-bold' %}
-    {% endif %}
+    {% endif %}#}
     <div class="accordion-item">
         <h2 class="accordion-header" id="flush-heading_{{question.id}}">
-            <button id='button-accordion-{{question.id}}' class="accordion-button collapsed {{ 'text-secondary fw-bold' if question.is_support else bg_color }} rounded-2" type="button" data-bs-toggle="collapse"
+            <button id='button-accordion-{{question.id}}' class="accordion-button collapsed {{ 'text-secondary fw-bold' if question.is_support else 'text-success fw-bold' }} rounded-2" type="button" data-bs-toggle="collapse"
                 data-bs-target="#flush-collapse_{{question.id}}" aria-expanded="false" aria-labelledby="flush-heading_{{question.id}}"
                 aria-controls="flush-collapse_{{question.id}}" href="{{url_for('api.question', id=question.id)}}">
                 {{question.question}}

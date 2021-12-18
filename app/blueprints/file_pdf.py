@@ -123,7 +123,7 @@ def edit(id):
     return ''
 
 @bp.route('/view/<int:id>')
-def get_pdf(id=None):
+def view(id=None):
     if not id is None:
         file = FilePDF.query.filter(FilePDF.id == id).first_or_404()
         print(file)
@@ -133,3 +133,7 @@ def get_pdf(id=None):
         response.headers['Content-Disposition'] = \
             'inline; filename=%s' % f'{file.file_name}'
         return response
+
+@bp.route('/deactive/<int:id>')
+def deactive(id=None):
+    return ''
