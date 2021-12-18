@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
 from flask_wtf.html5 import DateField
-from wtforms import SubmitField, TextField
+from wtforms import SubmitField, TextField, BooleanField
 from wtforms.validators import DataRequired, Length
 from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
 
@@ -22,4 +22,5 @@ class EditFileForm(FlaskForm):
     title = TextField("Titulo", validators=[DataRequired('Item Obrigatório')])
     type = QuerySelectField("Tipo", allow_blank=False, query_factory=lambda: FilePDFType.query.filter(FilePDFType.active == True), get_label='name', validators=[DataRequired('Item Obrigatório')])
     topic = QuerySelectMultipleField('Topic', allow_blank=False, query_factory= lambda: Topic.query.filter(Topic.active == True, Topic.selectable == True), get_label='name', validators=[DataRequired('Item Obrigatório')])
+    approve = BooleanField('Aprovado?')
     submit = SubmitField('Enviar') 
