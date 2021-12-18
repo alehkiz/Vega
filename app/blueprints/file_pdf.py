@@ -6,7 +6,7 @@ from app.models.wiki import Topic
 from flask_security import login_required, current_user, roles_accepted
 from werkzeug.utils import redirect
 from app.core.db import db
-from app.forms.file import SendFileForm
+from app.forms.file import EditFileForm, SendFileForm
 from os.path import splitext, join, isfile
 from os import stat, remove
 
@@ -120,7 +120,32 @@ def add():
 @login_required
 @roles_accepted('admin', 'support')
 def edit(id):
-    return ''
+    file = FilePDF.query.filter(FilePDF.id == id).first_or_404()
+    form = EditFileForm()
+    if form.validate_on_submit():
+        # file.file_name = form.file.data
+        file.reference_date = form.reference_date.data
+        file.type = form.type.data
+        file.approved = form.approved.data
+        file.active = form.active.data
+        file.title = form.title.data
+        file.topics = form.topic.data
+        try:
+            db.session.commit()
+            flash('Edição salva com sucesso', category='success')
+            return redirect(url_for('file_pdf.edit', id=file.id))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Erro ao salvar no banco de dados: {e}")
+            return abort(500)
+    form.file.data = file.file_name
+    form.reference_date.data = file.reference_date
+    form.type.data = file.type
+    form.approved.data = file.approved
+    form.active.data = file.active
+    form.title.data = file.title
+    form.topic.data = file.topics
+    return render_template('upload.html', form=form)
 
 @bp.route('/view/<int:id>')
 def view(id=None):

@@ -10,7 +10,7 @@
     <div class="container-fluid border rounded p-3">
         <div class="list-group">
             {% for item in pagination.items %}
-            <a href="{{ url_for('file_pdf.get_pdf', id=item.id) }}" class="list-group-item list-group-item-action text-primary" aria-current="true">
+            <a href="{{ url_for('file_pdf.view', id=item.id) }}" class="list-group-item list-group-item-action text-primary" aria-current="true">
                 <i class="fas fa-file-pdf"></i>
                 {{item.title}} 
                 <div class="float-end">
