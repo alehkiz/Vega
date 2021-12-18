@@ -3,7 +3,8 @@
 
 {% block app_content %}
 {% if form is defined %}
-    <form action="{{url_for('file_pdf.add')}}" method="POST" enctype="multipart/form-data">
+    {{request.path}}
+    <form action="{{request.path}}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="mb-3">
             {{ macros.render_field(form.file, class='form-control') }}
@@ -24,6 +25,13 @@
             **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
             </div>
             <br>
+        {% if form.approved is defined %}
+        <div class="mb-3">
+        {{ macros.render_field(form.approved)}}
+        <br>
+        {{ macros.render_field(form.active)}}
+    </div>
+        {% endif %}
         {{form.submit()}}
     </form>
 {% endif %}
