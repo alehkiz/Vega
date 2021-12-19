@@ -59,7 +59,7 @@ def add():
     if form.validate_on_submit():
         topic = Question.query.filter(Topic.name.ilike(form.name.data)).first()
         if not topic is None:
-            form.name.errors.append('Marcação já existte')
+            form.name.errors.append('Marcação já existe')
         if not form.errors:
             topic = Topic()
             topic.name = form.name.data

@@ -98,6 +98,13 @@
         <br>
         {{ form.submit }}
 
+        {% elif file_pdf_type is defined %}
+
+        {{ form.csrf_token}}
+        {{ macros.render_field(form.name, size=512, class='form-control', placeholder='Tipo do Arquivo')}}
+        <br>
+        {{ form.submit }}
+
         {% elif notifier is defined %}
 
         {{ form.csrf_token }}

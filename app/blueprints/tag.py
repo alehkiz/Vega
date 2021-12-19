@@ -54,7 +54,7 @@ def add():
     if form.validate_on_submit():
         tag = Tag.query.filter(Tag.name.ilike(form.name.data)).first()
         if not tag is None:
-            form.name.errors.append('Marcação já existte')
+            form.name.errors.append('Marcação já existe')
         if not form.errors:
             tag = Tag()
             tag.name = form.name.data

@@ -145,10 +145,12 @@
                         {% endif %} 
                         {% endif %} 
                         {% else %}
+                        {% if not kwargs.get('no_view', none) is defined %}
                         <a class="btn btn-outline-primary btn-sm"
                             href="{{ url_for(cls_table.__tablename__+'.view', id=item.id)}}" data-bs-toggle="tooltip"
                             title="Visualizar">
                             <i class="fas fa-search-plus"></i></a>
+                        {% endif %}
                         <a class="btn btn-outline-success btn-sm"
                             href="{{ url_for(cls_table.__tablename__+'.edit', id=item.id)}}" data-bs-toggle="tooltip"
                             title="Editar">
