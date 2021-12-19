@@ -3,7 +3,6 @@
 
 {% block app_content %}
 {% if form is defined %}
-    {{request.path}}
     <form action="{{request.path}}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="mb-3">
@@ -16,8 +15,7 @@
             {{ macros.render_field(form.title, class='form-control')}}
         </div>
         <div class="mb-3">
-        {{ macros.render_field(form.type, class='selectpicker', nolabel=true, multiple=true,
-        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
+        {{ macros.render_field(form.type, class='form-select', nosize=true)}}
         </div>
         <br>
         <div class="mb-3">

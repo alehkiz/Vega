@@ -50,7 +50,7 @@ def manuais():
     )
     last_page = paginate.pages
     print(paginate.items)
-    return render_template('files.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint)
+    return render_template('files.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint, title_name='Manuais')
 
 @bp.route('/add', methods=['POST', 'GET'])
 @login_required
@@ -133,7 +133,7 @@ def edit(id):
         try:
             db.session.commit()
             flash('Edição salva com sucesso', category='success')
-            return redirect(url_for('file_pdf.edit', id=file.id))
+            return redirect(url_for('admin.file'))
         except Exception as e:
             db.session.rollback()
             app.logger.error(f"Erro ao salvar no banco de dados: {e}")

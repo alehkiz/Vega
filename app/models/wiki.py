@@ -360,7 +360,7 @@ class Question(db.Model):
     topics = db.relationship('Topic',
                              secondary=question_topic,
                              backref=db.backref('questions',
-                                                lazy='dynamic', cascade='all, delete-orphan', single_parent=True), lazy='dynamic')
+                                                lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
 
     tags = db.relationship('Tag',
                            secondary=question_tag,

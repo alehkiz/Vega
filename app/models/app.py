@@ -142,8 +142,8 @@ class FilePDF(db.Model):
     type_id = db.Column(db.Integer, db.ForeignKey("file_pdf_type.id"), nullable=False)
     sub_topic_id = db.Column(db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
     topics = db.relationship('Topic', secondary=file_topic, 
-                                backref=db.backref('files', lazy='dynamic', cascade='all, delete-orphan', single_parent=True), lazy='dynamic')
-
+                                backref=db.backref('files', lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
+    
 
     @property
     def get_create_datetime(self):

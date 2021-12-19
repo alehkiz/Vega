@@ -172,6 +172,21 @@ class BaseConfig(object):
 
             }
         },
+        'topic' :{
+            'id' :{
+                'name' : 'id',
+                'attr' : None
+            },
+            'name': {
+                'name' : 'Nome',
+                'attr' : None
+            },
+            'user': {
+                'name' : 'criado por',
+                'attr': 'username'
+
+            }
+        },
         'notifier':{
             'id': {
                 'name': 'id',
@@ -223,7 +238,22 @@ class BaseConfig(object):
                 'name' : 'Tópicos',
                 'attr' : 'topic_name'
             },
-        }
+        },
+        'file_pdf_type' :{
+            'id' :{
+                'name' : 'id',
+                'attr' : None
+            },
+            'name': {
+                'name' : 'Nome',
+                'attr' : None
+            },
+            'user': {
+                'name' : 'criado por',
+                'attr': 'username'
+
+            }
+        },
     }
     ROUTES_NAMES = {
         'user': {
