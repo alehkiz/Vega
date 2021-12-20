@@ -415,7 +415,7 @@ def approve(id: int):
         if form.repprove.data is True:
             q.answer_approved = False
             flash('Questão reprovada.', category='success')
-            return redirect(url_for('admin.to_approve'))
+            return redirect(url_for('question.view', id=q.id))
         # q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
         q.answer = form.answer.data
@@ -430,7 +430,7 @@ def approve(id: int):
         try:
             db.session.commit()
             flash('Pergunta aprovada com sucesso', category='success')
-            return redirect(url_for('admin.to_approve'))
+            return redirect(url_for('question.view', id=q.id))
         except Exception as e:
             form.question.errors.append('Não foi possível atualizar')
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
