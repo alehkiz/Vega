@@ -143,7 +143,8 @@ class FilePDF(db.Model):
     sub_topic_id = db.Column(db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
     topics = db.relationship('Topic', secondary=file_topic, 
                                 backref=db.backref('files', lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
-    
+    view = db.relationship('FileView', cascade='save-update',
+                        single_parent=True, backref='file', lazy='dynamic')
 
     @property
     def get_create_datetime(self):
@@ -167,6 +168,25 @@ class FilePDF(db.Model):
     @property
     def topic_name(self):
         return ', '.join([_.name for _ in self.topics])
+    def add_view(self, user_id, network_id):
+        user = User.query.filter(User.id == user_id).first()
+        if user is None:
+            raise Exception('Usuário informado não existe')
+        # qv = QuestionView.query.filter(QuestionView.question_id==self.id, QuestionView.user_id==user.id).first()
+        fv = FileView()
+
+        fv.file_pdf_id = self.id
+        fv.user_id = user_id
+        fv.network_id = network_id
+        db.session.add(fv)
+        try:
+            db.session.commit()
+        except Exception as e:
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            db.session.rollback()
+            flash('Não foi possível atualizar a visualização', category='warning')
+        return fv
         
 class FilePDFType(db.Model):
     __tablename__ = 'file_pdf_type'

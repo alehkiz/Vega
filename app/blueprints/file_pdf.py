@@ -150,8 +150,12 @@ def edit(id):
 @bp.route('/view/<int:id>')
 def view(id=None):
     if not id is None:
-        file = FilePDF.query.filter(FilePDF.id == id).first_or_404()
-        print(file)
+        file = FilePDF.query.filter(FilePDF.id == id, FilePDF.active == True, FilePDF.approved == True).first_or_404()
+        if current_user.is_authenticated:
+            file.add_view(current_user.id, g.ip_id)
+        else:
+            file.add_view(app.config.get('USER_ANON_ID'), g.ip_id)
+            
         # binary_pdf = file.path
         response = make_response(send_from_directory(app.config['UPLOAD_FOLDER'], file.file_name))
         response.headers['Content-Type'] = 'application/pdf'
