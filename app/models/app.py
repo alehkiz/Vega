@@ -177,5 +177,35 @@ class FilePDFType(db.Model):
     active = db.Column(db.Boolean, default=False)
     files = db.relationship('FilePDF', backref='type', lazy='dynamic')
 
+class FileView(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', onupdate='CASCADE', ondelete='CASCADE'))
+    file_pdf_id = db.Column(db.Integer, db.ForeignKey('file_pdf.id'), nullable=False)
+    datetime = db.Column(db.DateTime(timezone=True), index=True, default=datetime.now)
+    network_id = db.Column(db.Integer, db.ForeignKey(
+        'network.id'), nullable=False)
+    def __repr__(self):
+        return f'<File View id: {self.file_pdf_id} by {self.id}>'
 
+    def views_by_file_pdf(self, file_pdf_id: int):
+        return db.session.query(func.count(self.id)).filter(self.file_pdf_id == file_pdf_id).scalar()
+    
+    def views_by_user(self, user_id:int):
+        return db.session.query(func.count(self.id)).filter(self.user_id == user_id).scalar()
+    
+    @staticmethod
+    def query_by_month_year(year: int, month: int):
+        return FileView.query.filter(extract('year', FileView.datetime) == year, extract('month', FileView.datetime) == month)
+
+    @staticmethod
+    def query_by_year(year: int):
+        return FileView.query.filter(extract('year', FileView.datetime) == year)
+
+    @staticmethod
+    def query_by_date(date: date):
+        return FileView.query.filter(cast(FileView.datetime, Date) == date)
+
+    @staticmethod
+    def query_by_interval(start: date, end: date):
+        return FileView.query.filter(cast(FileView.datetime, Date) == start, cast(FileView.datetime, Date) == end)
 
