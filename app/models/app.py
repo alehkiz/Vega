@@ -7,7 +7,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import date, datetime
 from sqlalchemy.orm import backref
 from sqlalchemy.dialects.postgresql import INET
-
+from app.utils.kernel import convert_datetime_to_local
 
 from app.core.db import db
 
@@ -52,7 +52,7 @@ class Visit(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     page_id = db.Column(db.Integer, db.ForeignKey('page.id'), nullable=False)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=True)
-    datetime = db.Column(db.DateTime(timezone=True), nullable=False, default=datetime.now)
+    datetime = db.Column(db.DateTime(timezone=True), nullable=False, default=convert_datetime_to_local(datetime.now()))
     network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
 
     @staticmethod
@@ -111,9 +111,9 @@ class Visit(db.Model):
 class Network(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ip = db.Column(INET, nullable=False)
-    create_at = db.Column(db.DateTime(timezone=True), default=datetime.now)
+    create_at = db.Column(db.DateTime(timezone=True), default=convert_datetime_to_local(datetime.now()))
     created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # first_access = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    # first_access = db.Column(db.DateTime, nullable=False, default=datetime.now())
     question_created_ip = db.relationship('Question', backref='question_created_network', lazy='dynamic', foreign_keys='[Question.question_network_id]')
     answer_created_ip = db.relationship('Question', backref='answer_created_network', lazy='dynamic', foreign_keys='[Question.answer_network_id]')
     questions_views = db.relationship('QuestionView', cascade='all, delete-orphan', single_parent=True, backref='network', lazy='dynamic')
@@ -129,7 +129,7 @@ class FilePDF(db.Model):
     __tablename__ = 'file_pdf'
     id = db.Column(db.Integer, primary_key=True)
     uploaded_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    uploaded_at = db.Column(db.DateTime(timezone=True), default=datetime.now)
+    uploaded_at = db.Column(db.DateTime(timezone=True), default=convert_datetime_to_local(datetime.now()))
     mimetype = db.Column(db.Text, nullable=False)
     file_name = db.Column(db.Text, nullable=False, unique=True)
     approved_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
@@ -192,7 +192,7 @@ class FilePDFType(db.Model):
     __tablename__ = 'file_pdf_type'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
-    create_at = db.Column(db.DateTime(timezone=True), default=datetime.now)
+    create_at = db.Column(db.DateTime(timezone=True), default=convert_datetime_to_local(datetime.now()))
     create_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     active = db.Column(db.Boolean, default=False)
     files = db.relationship('FilePDF', backref='type', lazy='dynamic')
@@ -201,7 +201,7 @@ class FileView(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', onupdate='CASCADE', ondelete='CASCADE'))
     file_pdf_id = db.Column(db.Integer, db.ForeignKey('file_pdf.id'), nullable=False)
-    datetime = db.Column(db.DateTime(timezone=True), index=True, default=datetime.now)
+    datetime = db.Column(db.DateTime(timezone=True), index=True, default=datetime.now())
     network_id = db.Column(db.Integer, db.ForeignKey(
         'network.id'), nullable=False)
     def __repr__(self):
@@ -228,4 +228,3 @@ class FileView(db.Model):
     @staticmethod
     def query_by_interval(start: date, end: date):
         return FileView.query.filter(cast(FileView.datetime, Date) == start, cast(FileView.datetime, Date) == end)
-

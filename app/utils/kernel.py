@@ -7,6 +7,8 @@ from datetime import date as d_date, datetime, tzinfo
 from unicodedata import normalize, category
 from werkzeug.urls import url_parse
 from flask import request
+import pytz
+
 
 ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_123456789'
 def validate_password(password):
@@ -124,3 +126,10 @@ def order_dict(dictionary: dict, size:int =5, summarize=False,other_key:str='Out
 
 def format_number_as_thousand(number: int):
     return f'{number:,d}'.replace(',','.')
+
+
+def convert_datetime_to_local(_datetime):
+    localtz = pytz.timezone('America/Sao_Paulo')
+    utc = pytz.timezone('UTC')
+    utctime = utc.localize(_datetime)
+    return localtz.normalize(utctime.astimezone(localtz))
