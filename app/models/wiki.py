@@ -689,7 +689,7 @@ class Question(db.Model):
 
     @property
     def was_answered(self):
-        return self._answer != None or self._answer != ''
+        return self._answer != None
 
     @property
     def was_answered_to(self):
