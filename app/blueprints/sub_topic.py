@@ -30,7 +30,7 @@ def edit(id):
             # question.sub_topics = form.sub_topic.data
             # question.sub_topic = form.sub_topic.data
             # question.updater = current_user
-            # question.update_at = datetime.now()
+            # question.update_at = convert_datetime_to_local(datetime.utcnow())
             db.session.commit()
             return redirect(url_for('admin.sub_topic'))
         except Exception as e:

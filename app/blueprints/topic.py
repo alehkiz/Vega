@@ -30,7 +30,7 @@ def edit(id):
             # question.topics = form.topic.data
             # question.topic = form.topic.data
             # question.updater = current_user
-            # question.update_at = datetime.now()
+            # question.update_at = convert_datetime_to_local(datetime.utcnow())
             topic.active = form.active.data
             topic.selectable = form.selectable.data
             db.session.commit()

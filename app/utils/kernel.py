@@ -8,6 +8,7 @@ from unicodedata import normalize, category
 from werkzeug.urls import url_parse
 from flask import request
 import pytz
+from flask import url_for
 
 
 ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_123456789'
@@ -34,8 +35,8 @@ def format_elapsed_time(timestamp):
     Retorna o tempo decorrido entre o ´timezone´ e tempo atual, retona no formato do tizone atual.
     '''
     if isinstance(timestamp, datetime):
-        timestamp = timestamp.replace(microsecond=0, tzinfo=None)
-        return format_timedelta(timestamp - datetime.now(), add_direction=True, locale='pt_BR')
+        timestamp = convert_datetime_to_local(timestamp).replace(microsecond=0)
+        return format_timedelta(convert_datetime_to_local(datetime.utcnow()).replace(microsecond=0) - timestamp , add_direction=True, locale='pt_BR')
 
 def format_datetime_local(timestamp, format='short'):
     if not format in ['full', 'long', 'medium', 'short']:
@@ -47,7 +48,6 @@ def format_date_local(date, format='short'):
     if not format in ['full', 'long', 'medium', 'short']:
         format = 'short'
     if isinstance(date, d_date):
-        print('aqui')
         return format_date(date, locale='pt_BR', format=format)
 
 def days_elapsed(timestamp : datetime):
@@ -56,7 +56,7 @@ def days_elapsed(timestamp : datetime):
     '''
     if isinstance(timestamp, datetime):
         timestamp = timestamp.replace(microsecond=0, tzinfo=None)
-        return (datetime.now() - timestamp).days
+        return (convert_datetime_to_local(datetime.utcnow()) - timestamp).days
 
 def get_list_max_len(l, max_value):
     '''
@@ -128,8 +128,36 @@ def format_number_as_thousand(number: int):
     return f'{number:,d}'.replace(',','.')
 
 
-def convert_datetime_to_local(_datetime):
+def convert_datetime_to_local(timestamp):
     localtz = pytz.timezone('America/Sao_Paulo')
     utc = pytz.timezone('UTC')
-    utctime = utc.localize(_datetime)
-    return localtz.normalize(utctime.astimezone(localtz))
+    if timestamp.tzinfo is None:
+        utctime = utc.localize(timestamp)
+        return localtz.normalize(utctime.astimezone(localtz))
+    utctime = utc.localize(timestamp.replace(tzinfo=None))
+    return localtz.normalize(timestamp.astimezone(localtz))
+
+def convert_datetime_utc(timestamp):
+    utc = pytz.timezone('UTC')
+    utctime = utc.localize(timestamp)
+    return utc.normalize(utctime.astimezone(utc))
+
+
+def process_value(value : str, cls_query, route : str = ''):
+    while value.find('{:q:') > 0:
+        l_start = value.find('{:q:')
+        l_end = value.find('}', l_start)
+        number = int(value[l_start+4:l_end])
+        old_value = '{:q:' + str(number) +'}'
+        obj_query = cls_query.query.filter(cls_query.id == number).first()
+        if obj_query is None:
+            raise Exception(f'O objeto {number} não foi identificado.')
+        try:
+            if route and route != '':
+                link = url_for(route, id=number)
+            else:
+                link = url_for('question.view', id=number)
+        except Exception as e:
+            raise Exception(f'O valor {number} não foi encontrado')
+        value = value.replace(old_value, '[aqui]('+link+')')
+    return value

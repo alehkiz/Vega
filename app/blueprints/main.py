@@ -27,6 +27,7 @@ from app.models.app import Network, Page, Visit
 from app.models.security import User
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
+from app.utils.kernel import convert_datetime_to_local
 from app.utils.routes import counter
 # from app.core.extensions import cache
 
@@ -46,7 +47,7 @@ def before_request():
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
     if current_user.is_authenticated:
-        current_user.last_seen = datetime.now()
+        current_user.last_seen = convert_datetime_to_local(datetime.utcnow())
         try:
             db.session.commit()
         except Exception as e:
