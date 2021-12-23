@@ -8,7 +8,7 @@ from app.models.security import User
 from app.models.app import Network
 from app.models.search import Search
 from app.utils.sql import unaccent
-from app.utils.kernel import strip_accents
+from app.utils.kernel import convert_datetime_to_local, strip_accents
 from app.utils.html import process_html
 from app.forms.question import QuestionAnswerForm, CreateQuestion, QuestionApproveForm, QuestionEditAndApproveForm
 from app.utils.routes import counter
@@ -334,11 +334,11 @@ def add():
             question.sub_topic_id = form.sub_topic.data.id
             question.tags = form.tag.data
             question.active = True
-            question.answer_at = datetime.now()
+            question.answer_at = convert_datetime_to_local(datetime.utcnow())
             if current_user.is_admin:
                 if form.approved.data is True:
                     question.answer_approved = form.approved.data
-                    question.answer_approved_at = datetime.now()
+                    question.answer_approved_at = convert_datetime_to_local(datetime.utcnow())
                     question.answer_approve_user_id = current_user.id
             try:
                 db.session.add(question)
@@ -372,7 +372,7 @@ def answer(id: int):
         q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
         q.answer = form.answer.data
-        q.answer_at = datetime.now()
+        q.answer_at = convert_datetime_to_local(datetime.utcnow())
         q.tags = form.tag.data
         q.topics = form.topic.data
         q.sub_topic = form.sub_topic.data
@@ -426,7 +426,7 @@ def approve(id: int):
         q.answer_approved = form.approve.data
         q.answer_approve_user_id = current_user.id
         q.active = True
-        q.answer_approved_at = datetime.now()
+        q.answer_approved_at = convert_datetime_to_local(datetime.utcnow())
         try:
             db.session.commit()
             flash('Pergunta aprovada com sucesso', category='success')

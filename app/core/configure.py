@@ -21,6 +21,7 @@ from app.models.wiki import Article, Topic, Tag, ArticleView, Question, Question
 from app.models.search import Search, SearchDateTime
 from app.models.app import FilePDF, Network, Visit, Page, FilePDFType
 from app.models.notifier import Notifier, NotifierPriority, NotifierStatus
+from app.utils.kernel import convert_datetime_to_local
 
 # from app.dashboard import dash
 
@@ -120,7 +121,7 @@ def init(app):
         app = dash_app(app)
         register_blueprints(app)
     
-    print('Servidor iniciado: ', datetime.now())
+    print('Servidor iniciado: ', convert_datetime_to_local(datetime.utcnow()))
     if app.debug is not True:
         # logger
         if not exists('logs'):

@@ -175,13 +175,13 @@ def get_total_search():
 def get_total_questions_views():
     return QuestionView.query.filter(or_(QuestionView.user_id == 4, QuestionView.user_id == None)).count()
 def get_questions_answered():
-    return Question.query.filter(Question.active == True, Question.answer != '', Question.answer_approved==True).count()
+    return Question.query.filter(Question.active == True, Question._answer != '', Question.answer_approved==True).count()
 
 def get_report_last_month():
     last_month = datetime.date.today().replace(days=1) - datetime.timedelta(days=1)
     return Question.query.filter(
         Question.active == True,
-        Question.answer != '',
+        Question._answer != '',
         Question.answer_approved == True
     ).filter(
         extract(

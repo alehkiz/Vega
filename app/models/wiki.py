@@ -16,7 +16,7 @@ from sqlalchemy.dialects.postgresql import INET
 from sqlalchemy_searchable import make_searchable
 
 from app.core.db import db
-from app.utils.kernel import format_elapsed_time, get_list_max_len, only_letters, format_datetime_local, days_elapsed
+from app.utils.kernel import convert_datetime_to_local, format_elapsed_time, get_list_max_len, only_letters, format_datetime_local, days_elapsed, process_value
 from app.utils.html import process_html
 from app.models.security import User
 
@@ -46,8 +46,8 @@ class ArticleView(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     article_id = db.Column(db.Integer, db.ForeignKey(
         'article.id'), nullable=False)
-    first_view = db.Column(db.DateTime(timezone=True), index=True, default=datetime.now)
-    last_view = db.Column(db.DateTime(timezone=True), index=True, default=datetime.now)
+    first_view = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
+    last_view = db.Column(db.DateTime(timezone=True), index=True)
     count_view = db.Column(db.Integer, default=1)
 
     def __repr__(self):
@@ -59,7 +59,7 @@ class Article(db.Model):
     title = db.Column(db.String(32), index=True, nullable=False, unique=True)
     description = db.Column(db.String(128), index=False, nullable=False)
     _text = db.Column(db.Text, index=False, nullable=False)
-    create_at = db.Column(db.DateTime(timezone=True), index=True, default=datetime.now)
+    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
     update_at = db.Column(db.DateTime(timezone=True), index=True)
     update_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -246,7 +246,7 @@ class Topic(db.Model):
     format_name = db.Column(db.String(32), index=True,
                             nullable=True, unique=True)
     active = db.Column(db.Boolean, default=True)
-    create_at = db.Column(db.DateTime(timezone=True), index=True, default=datetime.now)
+    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
     selectable = db.Column(db.Boolean, default=False, nullable=False)
     nickname = db.Column(db.String(10), nullable=False, unique=True)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
@@ -271,7 +271,7 @@ class SubTopic(db.Model):
     _name = db.Column(db.String(32), index=True, nullable=False, unique=True)
     format_name = db.Column(db.String(32), index=True,
                             nullable=True, unique=True)
-    create_at = db.Column(db.DateTime(timezone=True), index=True, default=datetime.now)
+    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
     # articles = db.relationship('Article', backref='topic', lazy='dynamic')
     questions = db.relationship('Question', backref='sub_topic',
                                 lazy='dynamic', foreign_keys='[Question.sub_topic_id]')
@@ -292,7 +292,7 @@ class SubTopic(db.Model):
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(48), index=True, nullable=False, unique=True)
-    create_at = db.Column(db.DateTime(timezone=True), index=True, default=datetime.now)
+    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref='tag')
     # questions = db.relationship('Question', backref=backref('tag', lazy='dynamic'), lazy='dynamic', foreign_keys='[Question.tag_id]')
@@ -340,7 +340,7 @@ class Question(db.Model):
                         nullable=True, unique=False)
     answer_approved = db.Column(db.Boolean, nullable=True, default=False)
     answer_approved_at = db.Column(db.DateTime(timezone=True))
-    create_at = db.Column(db.DateTime(timezone=True), index=False, default=datetime.now)
+    create_at = db.Column(db.DateTime(timezone=True), index=False, default=convert_datetime_to_local(datetime.utcnow()))
     create_user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
     update_at = db.Column(db.DateTime(timezone=True))
@@ -453,6 +453,17 @@ class Question(db.Model):
             return 'Sim'
         return 'Não'
 
+    @property
+    def process_answer(self):
+        if self._answer != '' or self._answer != None:
+            return process_value(self._answer, Question)
+        return self._answer
+
+    @hybrid_property
+    def answer(self):
+        return self._answer
+        # return self._answer
+
     @answer.setter
     def answer(self, answer):
         self._answer = answer
@@ -460,6 +471,7 @@ class Question(db.Model):
         if self.answer_user_id is None:
             raise Exception(
                 '´answer_user_id´ deve ser informado para responder uma questão')
+
 
     @staticmethod
     def search(expression, pagination=False, per_page=1, page=1, resume=False, sub_topics: list = [], topics: list = []):
@@ -559,7 +571,7 @@ class Question(db.Model):
             ql = QuestionLike()
             ql.user_id = user.id
             ql.question_id = self.id
-            ql.create_at = datetime.now()
+            ql.create_at = convert_datetime_to_local(datetime.utcnow())
             db.session.add(ql)
             try:
                 db.session.commit()
@@ -615,7 +627,7 @@ class Question(db.Model):
             qs = QuestionSave()
             qs.user_id = user.id
             qs.question_id = self.id
-            qs.create_at = datetime.now()
+            qs.create_at = convert_datetime_to_local(datetime.utcnow())
             db.session.add(qs)
             try:
                 db.session.commit()
@@ -677,7 +689,7 @@ class Question(db.Model):
 
     @property
     def was_answered(self):
-        return self.answer != None
+        return self._answer != None or self._answer != ''
 
     @property
     def was_answered_to(self):
@@ -743,12 +755,12 @@ class Question(db.Model):
                         'img': 'img img-fluid'}
         if resume:
             l_text = list(filter(lambda x: x not in [
-                          '', ' ', '\t'], self.answer.split('\n')))
+                          '', ' ', '\t'], self.process_answer.split('\n')))
             # text = get_list_max_len(l_text, 256)
-            return Markup(process_html(markdown('\n'.join(l_text), extras={"tables": None, "html-classes": html_classes}))).striptags()[0:size] + '...'
+            return Markup(process_html(markdown('\n'.join(l_text), extras={"tables": None, "html-classes": html_classes, 'target-blank-links':True}))).striptags()[0:size] + '...'
             # return Markup(process_html(markdown(text))).striptags()
 
-        return Markup(markdown(self.answer, extras={"tables": None, "html-classes": html_classes}))
+        return Markup(markdown(self.process_answer, extras={"tables": None, "html-classes": html_classes, 'target-blank-links':True}))
 
     def to_dict(self):
         return {'id': self.id,
@@ -796,7 +808,7 @@ class QuestionView(db.Model):
         'user.id', onupdate="CASCADE", ondelete="CASCADE"))
     question_id = db.Column(db.Integer, db.ForeignKey(
         'question.id'), nullable=False)
-    datetime = db.Column(db.DateTime(timezone=True), index=True, default=datetime.now)
+    datetime = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
     network_id = db.Column(db.Integer, db.ForeignKey(
         'network.id'), nullable=False)
 
@@ -835,7 +847,7 @@ class QuestionLike(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     question_id = db.Column(db.Integer, db.ForeignKey(
         'question.id'), nullable=False)
-    create_at = db.Column(db.DateTime, nullable=False)
+    create_at = db.Column(db.DateTime, nullable=False, default=convert_datetime_to_local(datetime.utcnow()))
     # user_like = db.relationship()
 
     def __repr__(self):
@@ -854,7 +866,7 @@ class QuestionSave(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     question_id = db.Column(db.Integer, db.ForeignKey(
         'question.id'), nullable=False)
-    create_at = db.Column(db.DateTime, nullable=False)
+    create_at = db.Column(db.DateTime, nullable=False, default=convert_datetime_to_local(datetime.utcnow()))
 
     def __repr__(self):
         return f'<Question Like id: {self.question_id} by {self.user_id}>'
@@ -872,7 +884,7 @@ class Transaction(db.Model):
     parameter = db.Column(db.String, nullable=True)
     option = db.Column(db.String)
     description = db.Column(db.String)
-    datetime = db.Column(db.DateTime(timezone=True), nullable=False, default=datetime.now)
+    datetime = db.Column(db.DateTime(timezone=True), nullable=False, default=convert_datetime_to_local(datetime.utcnow()))
     created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
