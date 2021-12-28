@@ -7,7 +7,7 @@ from datetime import date as d_date, datetime, tzinfo
 from unicodedata import normalize, category
 from werkzeug.urls import url_parse
 from flask import request
-import pytz
+from dateutil import tz
 from flask import url_for
 
 
@@ -21,6 +21,7 @@ def validate_password(password):
     Senha deve conter uma letra minúscula
     retorna um dicionário onde `ok` terá o resultado da validação com `True` se vaidado ou `False` se conter alguma inconsistêcnia
     '''
+
     valid_pass = {}
     valid_pass['length'] = len(password) >= 6
     valid_pass['digit'] = not search(r'\d', password) is None
@@ -129,18 +130,20 @@ def format_number_as_thousand(number: int):
 
 
 def convert_datetime_to_local(timestamp):
-    localtz = pytz.timezone('America/Sao_Paulo')
-    utc = pytz.timezone('UTC')
-    if timestamp.tzinfo is None:
-        utctime = utc.localize(timestamp)
-        return localtz.normalize(utctime.astimezone(localtz))
-    utctime = utc.localize(timestamp.replace(tzinfo=None))
-    return localtz.normalize(timestamp.astimezone(localtz))
+    to_zone = tz.gettz('America/Sao_Paulo')
+    from_zone = tz.gettz('UTC')
+    # if timestamp.tzinfo is None:
+    #     utctime = utc.localize(timestamp)
+    #     return localtz.normalize(utctime.astimezone(localtz))
+    # utctime = utc.localize(timestamp.replace(tzinfo=None))
+    # timestamp_utc = timestamp.replace(tzinfo=from_zone)
+    return timestamp.replace(tzinfo=from_zone).astimezone(to_zone)
 
 def convert_datetime_utc(timestamp):
-    utc = pytz.timezone('UTC')
-    utctime = utc.localize(timestamp)
-    return utc.normalize(utctime.astimezone(utc))
+    to_zone = tz.gettz('UTC')
+    # utc = pytz.timezone('UTC')
+    # utctime = utc.localize(timestamp)
+    return timestamp.astimezone(to_zone) 
 
 
 def process_value(value : str, cls_query, route : str = ''):
