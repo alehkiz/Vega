@@ -684,8 +684,8 @@ def make_question():
             if topic is None:
                 app.logger.error(f"Tópico {g.selected_access} não existe")
                 return abort(500)  
-            print(topic)
-
+            # print(topic)
+            question.create_at = convert_datetime_to_local(datetime.utcnow())
             question.question = form.question.data
             question.topics.append(topic)
             question.sub_topic = form.sub_topic.data

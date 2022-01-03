@@ -36,6 +36,7 @@ class Page(db.Model):
         visit.page_id = self.id
         visit.user_id = user.id
         visit.network_id = network_id
+        visit.datetime = convert_datetime_to_local(datetime.utcnow())
         db.session.add(visit)
         try:
             db.session.commit()

@@ -537,6 +537,7 @@ class Question(db.Model):
         qv.question_id = self.id
         qv.user_id = user_id
         qv.network_id = network_id
+        qv.datetime =  convert_datetime_to_local(datetime.utcnow())
         db.session.add(qv)
 
         # if qv == None:
