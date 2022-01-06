@@ -334,6 +334,7 @@ def add():
             question.sub_topic_id = form.sub_topic.data.id
             question.tags = form.tag.data
             question.active = True
+            question.create_at = convert_datetime_to_local(datetime.utcnow())
             question.answer_at = convert_datetime_to_local(datetime.utcnow())
             if current_user.is_admin:
                 if form.approved.data is True:
