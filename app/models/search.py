@@ -37,6 +37,7 @@ class Search(db.Model):
                 sdt.search_user_id = user.id
 
         sdt.search_id = self.id
+        sdt.search_datetime = convert_datetime_to_local(datetime.utcnow())
         db.session.add(sdt)
         try:
             db.session.commit()
