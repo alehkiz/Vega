@@ -106,9 +106,17 @@ class BaseConfig(object):
                 'name' : 'Sub Tópico',
                 'attr' : 'sub_topic_name'
             },
+            'answered_by':{
+                'name': 'Respondido por',
+                'attr': 'get_user_answer'
+            },
             "create_at": {
                 'name' : 'criado em',
                 'attr' : 'get_create_datetime'
+            },
+            'answer_at':{
+                'name': 'Respondida em',
+                'attr': 'get_answer_datetime'
             },
             'answer':{
                 'name' : 'Respondida?',
@@ -168,6 +176,21 @@ class BaseConfig(object):
 
             }
         },
+        'topic' :{
+            'id' :{
+                'name' : 'id',
+                'attr' : None
+            },
+            'name': {
+                'name' : 'Nome',
+                'attr' : None
+            },
+            'user': {
+                'name' : 'criado por',
+                'attr': 'username'
+
+            }
+        },
         'notifier':{
             'id': {
                 'name': 'id',
@@ -193,8 +216,48 @@ class BaseConfig(object):
                 'name': 'Criado em',
                 'attr': 'get_formated_date'
             }
+        },
+        'file_pdf':{
+            'id':{
+                'name': 'id',
+                'attr': None
+            },
+            'title':{
+                'name': 'title',
+                'attr': None
+            },
+            'create_at':{
+                'name': 'Criado em',
+                'attr': 'get_create_datetime'
+            },
+            'approved': {
+                'name': "Aprovado",
+                'attr': 'was_approved'
+            },
+            'type': {
+                'name': 'Tipo',
+                'attr': 'type_name'
+            },
+            'topics' : {
+                'name' : 'Tópicos',
+                'attr' : 'topic_name'
+            },
+        },
+        'file_pdf_type' :{
+            'id' :{
+                'name' : 'id',
+                'attr' : None
+            },
+            'name': {
+                'name' : 'Nome',
+                'attr' : None
+            },
+            'user': {
+                'name' : 'criado por',
+                'attr': 'username'
 
-        }
+            }
+        },
     }
     ROUTES_NAMES = {
         'user': {
@@ -204,6 +267,9 @@ class BaseConfig(object):
         },
     }
     USER_ANON_ID = 4
+    UPLOAD_FOLDER = join(APP_DIR, 'upload')
+    MAX_CONTENT_LENGTH = 10485760 #20MB
+    UPLOAD_EXTENSIONS = ['pdf']
 
 class DevelopmentConfig(BaseConfig):
     # SQLALCHEMY_DATABASE_URI = f'sqlite:///{BaseConfig.DEV_DB}'

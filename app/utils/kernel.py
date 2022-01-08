@@ -1,12 +1,15 @@
 import enum
 from re import search
 from dateutil.tz import tzutc
-from babel.dates import format_timedelta, format_datetime, get_timezone
+from babel.dates import format_timedelta, format_datetime, get_timezone, format_date
 from functools import wraps
-from datetime import date, datetime
+from datetime import date as d_date, datetime, tzinfo
 from unicodedata import normalize, category
 from werkzeug.urls import url_parse
 from flask import request
+from dateutil import tz
+from flask import url_for
+
 
 ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_123456789'
 def validate_password(password):
@@ -18,6 +21,7 @@ def validate_password(password):
     Senha deve conter uma letra minúscula
     retorna um dicionário onde `ok` terá o resultado da validação com `True` se vaidado ou `False` se conter alguma inconsistêcnia
     '''
+
     valid_pass = {}
     valid_pass['length'] = len(password) >= 6
     valid_pass['digit'] = not search(r'\d', password) is None
@@ -32,8 +36,8 @@ def format_elapsed_time(timestamp):
     Retorna o tempo decorrido entre o ´timezone´ e tempo atual, retona no formato do tizone atual.
     '''
     if isinstance(timestamp, datetime):
-        timestamp = timestamp.replace(microsecond=0, tzinfo=None)
-        return format_timedelta(timestamp - datetime.now(), add_direction=True, locale='pt_BR')
+        timestamp = convert_datetime_to_local(timestamp).replace(microsecond=0)
+        return format_timedelta(convert_datetime_to_local(datetime.utcnow()).replace(microsecond=0) - timestamp , add_direction=True, locale='pt_BR')
 
 def format_datetime_local(timestamp, format='short'):
     if not format in ['full', 'long', 'medium', 'short']:
@@ -41,13 +45,19 @@ def format_datetime_local(timestamp, format='short'):
     if isinstance(timestamp, datetime):
         return format_datetime(timestamp, locale='pt_BR', format=format, tzinfo=get_timezone('America/Sao_Paulo'))
 
+def format_date_local(date, format='short'):
+    if not format in ['full', 'long', 'medium', 'short']:
+        format = 'short'
+    if isinstance(date, d_date):
+        return format_date(date, locale='pt_BR', format=format)
+
 def days_elapsed(timestamp : datetime):
     '''
     Retornar os dias decorridos entre o ´timestamp´ e o tempo atual
     '''
     if isinstance(timestamp, datetime):
         timestamp = timestamp.replace(microsecond=0, tzinfo=None)
-        return (datetime.now() - timestamp).days
+        return (convert_datetime_to_local(datetime.utcnow()) - timestamp).days
 
 def get_list_max_len(l, max_value):
     '''
@@ -117,3 +127,40 @@ def order_dict(dictionary: dict, size:int =5, summarize=False,other_key:str='Out
 
 def format_number_as_thousand(number: int):
     return f'{number:,d}'.replace(',','.')
+
+
+def convert_datetime_to_local(timestamp):
+    to_zone = tz.gettz('America/Sao_Paulo')
+    from_zone = tz.gettz('UTC')
+    # if timestamp.tzinfo is None:
+    #     utctime = utc.localize(timestamp)
+    #     return localtz.normalize(utctime.astimezone(localtz))
+    # utctime = utc.localize(timestamp.replace(tzinfo=None))
+    # timestamp_utc = timestamp.replace(tzinfo=from_zone)
+    return timestamp.replace(tzinfo=from_zone).astimezone(to_zone)
+
+def convert_datetime_utc(timestamp):
+    to_zone = tz.gettz('UTC')
+    # utc = pytz.timezone('UTC')
+    # utctime = utc.localize(timestamp)
+    return timestamp.astimezone(to_zone) 
+
+
+def process_value(value : str, cls_query, route : str = ''):
+    while value.find('{:q:') > 0:
+        l_start = value.find('{:q:')
+        l_end = value.find('}', l_start)
+        number = int(value[l_start+4:l_end])
+        old_value = '{:q:' + str(number) +'}'
+        obj_query = cls_query.query.filter(cls_query.id == number).first()
+        if obj_query is None:
+            raise Exception(f'O objeto {number} não foi identificado.')
+        try:
+            if route and route != '':
+                link = url_for(route, id=number)
+            else:
+                link = url_for('question.view', id=number)
+        except Exception as e:
+            raise Exception(f'O valor {number} não foi encontrado')
+        value = value.replace(old_value, '[aqui]('+link+')')
+    return value

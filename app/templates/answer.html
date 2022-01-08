@@ -16,7 +16,7 @@
         {{ macros.render_field(form.question, style="height: 120px;", class='form-control')}}
         {{ macros.render_field(form.answer, size=256, class='form-control', placeholder='Reposta')}}
         {{ macros.render_field(form.tag, class='form-select', class='selectpicker', nolabel=true, multiple=true,
-        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
+        **{'data-style':"btn-primary", 'data-selected-text-format':"count", "data-live-search":"true", "data-size":"5", 'data-width':"auto"})}}
         <br>
         <br>
         {{ macros.render_field(form.topic, class='form-select', class='selectpicker', nolabel=true, multiple=true,
@@ -35,6 +35,9 @@
         {% elif approve is defined %}
         {{ form.approve(class='btn btn-success') }}
         {{ form.repprove(class='btn btn-danger') }}
+        <br> 
+        <br> 
+        {{ macros.render_field(form.answered_by, size=32, class='form-control', placeholder='Titulo') }}
         {% endif %}
 
     </form>

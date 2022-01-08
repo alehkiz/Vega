@@ -13,7 +13,7 @@ from sqlalchemy.dialects.postgresql import INET
 
 
 from app.core.db import db
-from app.utils.kernel import validate_password, format_elapsed_time
+from app.utils.kernel import validate_password, format_elapsed_time, convert_datetime_to_local
 
 from datetime import datetime
 
@@ -30,12 +30,12 @@ class User(UserMixin, db.Model):
     _password = db.Column(db.String(512), nullable=False)
     temp_password = db.Column(db.Boolean, nullable=False, default=True)
     about_me = db.Column(db.String(512))
-    last_seen = db.Column(db.DateTime, default=datetime.now)
+    last_seen = db.Column(db.DateTime, default=convert_datetime_to_local(datetime.utcnow()))
     location = db.Column(db.String(128), nullable=True)
     active = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.now)
+    created_at = db.Column(db.DateTime, default=convert_datetime_to_local(datetime.utcnow()))
     created_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
-    last_login_at = db.Column(db.DateTime, default=datetime.now)
+    last_login_at = db.Column(db.DateTime, default=convert_datetime_to_local(datetime.utcnow()))
     last_login_network_id = db.Column(db.Integer, db.ForeignKey('network.id'))
     current_login_at = db.Column(db.DateTime, nullable=True)
     current_login_network_id = db.Column(db.Integer, db.ForeignKey('network.id'))
@@ -222,7 +222,7 @@ class Role(RoleMixin, db.Model):
     
     @property
     def is_support(self):
-        if self.level == 4:
+        if self.level in [0, 1 ,2, 3, 4]:
             return True
         return False
     @property

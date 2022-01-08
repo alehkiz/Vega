@@ -9,6 +9,7 @@ from datetime import datetime
 from app.models.security import User
 from app.forms.login import LoginForm
 from app.forms.reset_password import ResetPassword
+from app.utils.kernel import convert_datetime_to_local
 from app.utils.routes import counter
 from app.core.db import db
 
@@ -39,8 +40,8 @@ def login():
             return redirect(url_for('auth.temp_password'))
         login_user(user, remember=login.remember_me.data)
         user.last_login_ip = request.remote_addr
-        user.last_login_at = datetime.now()
-        user.current_login_at = datetime.now()
+        user.last_login_at = convert_datetime_to_local(datetime.utcnow())
+        user.current_login_at = convert_datetime_to_local(datetime.utcnow())
         user.current_login_ip = request.remote_addr
         # user.login_count += 1
         try:

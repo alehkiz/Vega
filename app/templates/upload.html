@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% import "macros/form.html" as macros %} 
+
+{% block app_content %}
+{% if form is defined %}
+    <form action="{{request.path}}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="mb-3">
+            {{ macros.render_field(form.file, class='form-control') }}
+        </div>  
+        <div class="mb-3">
+            {{ macros.render_field(form.reference_date, class='form-control')}}
+        </div>
+        <div class="mb-3">
+            {{ macros.render_field(form.title, class='form-control')}}
+        </div>
+        <div class="mb-3">
+        {{ macros.render_field(form.type, class='form-select', nosize=true)}}
+        </div>
+        <br>
+        <div class="mb-3">
+            {{ macros.render_field(form.topic, class='selectpicker', nolabel=true, multiple=true,
+            **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
+            </div>
+            <br>
+        {% if form.approved is defined %}
+        <div class="mb-3">
+        {{ macros.render_field(form.approved)}}
+        <br>
+        {{ macros.render_field(form.active)}}
+    </div>
+        {% endif %}
+        {{form.submit()}}
+    </form>
+{% endif %}
+{% endblock %}

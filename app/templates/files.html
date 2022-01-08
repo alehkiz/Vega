@@ -1,0 +1,48 @@
+{% import "macros/main.html" as macros %}
+{% import "macros/form.html" as forms %}
+{% extends 'base.html' %}
+{% block app_content %}
+<div id="list" class="row">
+    {% if pagination is defined %}
+    <div class="col-md-6">
+        {% if title_name is defined %}
+        <h2>{{ title_name }}</h2>
+        
+        {% else %}
+        <h2>Arquivos</h2>
+        {% endif %}
+    </div>
+    <hr>
+    <div class="container-fluid border rounded p-3">
+        <div class="list-group">
+            {% for item in pagination.items %}
+            <a href="{{ url_for('file_pdf.view', id=item.id) }}" class="list-group-item list-group-item-action text-primary" aria-current="true">
+                <i class="fas fa-file-pdf"></i>
+                {{item.title}} 
+                <div class="float-end">
+                    Enviado em {{ item.get_reference_date}}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    
+    {% endif %}
+    {#<div class="container">
+        <div class="row">
+            <h6 class="text-muted fw-normal text-uppercase">Tópico</h6>
+            <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+                {% if 'topic' in request_args.keys() %}
+                {% set _rqa_topic = request_args %}
+                {% endif %}
+                {% for tp in _topic %}
+                <a href="{{ url_for(endpoint, topic=tp.name)}}" class='btn btn-primary border'>{{tp.name}}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>#}
+    {{ macros.render_table(cls_table, pagination, page_name, order_type=order_type, mode=mode, type=type,
+    user=current_user) }}
+    {{ macros.render_pagination(pagination, first_page, last_page, endpoint, url_args if url_args is defined else {})}}
+</div>
+{% endblock %}

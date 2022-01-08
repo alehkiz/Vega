@@ -7,7 +7,7 @@ from sqlalchemy.sql.expression import column, label
 from sqlalchemy import extract
 from sqlalchemy.sql.functions import now
 from app.models.app import Visit
-from app.models.search import SearchDateTime
+from app.models.search import Search, SearchDateTime
 from app.utils.kernel import format_number_as_thousand
 import datetime
 from re import template
@@ -163,16 +163,25 @@ def get_user_approve():
 def get_total_access():
     return Visit.query.filter(or_(Visit.user_id == 4, Visit.user_id == None)).count()
 
+def access_last_month():
+    lastmonth = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+    return QuestionView.query_by_month_year(lastmonth.year, lastmonth.month).count()
+def access_current_month():
+    return QuestionView.query_by_month_year(datetime.date.today().year, datetime.date.today().month).count()
+
+def get_total_search():
+    return SearchDateTime.query.filter(or_(SearchDateTime.search_user_id == 4, SearchDateTime.search_user_id == None)).count()
+
 def get_total_questions_views():
     return QuestionView.query.filter(or_(QuestionView.user_id == 4, QuestionView.user_id == None)).count()
 def get_questions_answered():
-    return Question.query.filter(Question.active == True, Question.answer != '', Question.answer_approved==True).count()
+    return Question.query.filter(Question.active == True, Question._answer != '', Question.answer_approved==True).count()
 
 def get_report_last_month():
     last_month = datetime.date.today().replace(days=1) - datetime.timedelta(days=1)
     return Question.query.filter(
         Question.active == True,
-        Question.answer != '',
+        Question._answer != '',
         Question.answer_approved == True
     ).filter(
         extract(
@@ -281,8 +290,12 @@ def dash_app(app=False):
         return [html.P([
             f"Já tivemos ", 
             html.B(format_number_as_thousand(get_total_access())),
-            " acessos!",
+            f" acessos totais!",
             html.Br(),
+            html.B(format_number_as_thousand(access_last_month())),
+            " foram acessados no mês passado",
+            html.Br(),
+            html.B(format_number_as_thousand(access_current_month())), ' acessos no mês atual.'
             ],className="lead", id='test'
         ),
         html.Hr(className="my-2"),
@@ -292,7 +305,15 @@ def dash_app(app=False):
             f" visualizações de  ",
             html.B(format_number_as_thousand(get_questions_answered())),
             " perguntas respondidas."
-        ], id='questions-anwsered'),]
+        ], id='questions-anwsered'),
+        html.Hr(className='my-2'),
+        html.P([
+            f'E ',
+            html.B(format_number_as_thousand(get_total_search())),
+            ' pesquisas'
+        ], id='searches')
+        
+        ]
         
         
          

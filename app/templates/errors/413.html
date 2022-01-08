@@ -1,0 +1,20 @@
+{% extends 'base.html' %} {% block app_content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="error-template">
+            <h1>
+                Oops!</h1>
+            <h2>
+                Erro no servidor</h2>
+            <div class="error-details">
+                O arquivo enviado está acima de 10MB
+            </div>
+            <div class="error-actions">
+                <a href="{{url_for('main.index')}}" class="btn btn-primary btn-lg">Página inicial</a>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

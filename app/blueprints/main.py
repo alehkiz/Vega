@@ -27,6 +27,7 @@ from app.models.app import Network, Page, Visit
 from app.models.security import User
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
+from app.utils.kernel import convert_datetime_to_local
 from app.utils.routes import counter
 # from app.core.extensions import cache
 
@@ -46,7 +47,7 @@ def before_request():
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
     if current_user.is_authenticated:
-        current_user.last_seen = datetime.now()
+        current_user.last_seen = convert_datetime_to_local(datetime.utcnow())
         try:
             db.session.commit()
         except Exception as e:
@@ -326,10 +327,17 @@ def autocomplete():
         jsonify(result=[])
 
     # return a query orded by most viewed question, where question has search and question is approved, active and answered
-    result = db.session.query(Question, func.count(QuestionView.id).label('views')).outerjoin(QuestionView).filter(
-        Question.answer != '', Question.answer_approved == True, Question.active == True).join(Question.topics).filter(Topic.id == g.topic.id).filter(func.to_tsvector('public.pt', Question.question).op(
-            '@@')(func.plainto_tsquery('public.pt', search))).group_by(Question).order_by(func.count(QuestionView.id).desc())
-    # result = result.filter(func.to_tsvector('public.pt', Question.question).op(
+
+    if current_user.is_authenticated:
+        result = db.session.query(Question, func.count(QuestionView.id).label('views')).outerjoin(QuestionView).filter(
+            Question.answer != '', Question.answer_approved == True, Question.active == True).filter(func.to_tsvector('public.pt', Question.question).op(
+                '@@')(func.plainto_tsquery('public.pt', search))).group_by(Question).order_by(func.count(QuestionView.id).desc())
+
+    else:
+        result = db.session.query(Question, func.count(QuestionView.id).label('views')).outerjoin(QuestionView).filter(
+            Question.answer != '', Question.answer_approved == True, Question.active == True).join(Question.topics).filter(Topic.id == g.topic.id).filter(func.to_tsvector('public.pt', Question.question).op(
+                '@@')(func.plainto_tsquery('public.pt', search))).group_by(Question).order_by(func.count(QuestionView.id).desc())
+        # result = result.filter(func.to_tsvector('public.pt', Question.question).op(
     # '@@')(func.plainto_tsquery('public.pt', search)))
     # result = [_[0] for _ in result.limit(10).all()]
     result = [{'link': url_for('question.view', id=_[0].id),
