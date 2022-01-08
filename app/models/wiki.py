@@ -878,6 +878,14 @@ class QuestionSave(db.Model):
     def saves_by_user(self, user_id: int):
         return self.query.filter(self.question_id == user_id).count()
 
+class QuestionChanges(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    create_at = db.Column(db.DateTime, index=False, default=datetime.utcnow)
+    change_user_id = db.Column(db.Integer, db.ForeignKey('user.ud'), nullable=False)
+    old_answer = db.Column(db.Text, index=False, nullable=False, unique=False)
+    new_answer = db.Column(db.Text, index=False, nullable=False, unique=False)
+    
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
