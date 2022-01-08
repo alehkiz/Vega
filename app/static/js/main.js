@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
 
     // like and unlike click
 
@@ -10,7 +10,7 @@ $(document).ready(function() {
     if ($("#delete-modal").length) {
         removeModal = new bootstrap.Modal($("#delete-modal")[0], {});
     }
-    $('.accordion-button').click(function(e) {
+    $('.accordion-button').click(function (e) {
         if (accordion_link === true) {
             return false;
         }
@@ -34,13 +34,13 @@ $(document).ready(function() {
             headers: {
                 'X-CSRFToken': $CSRF_TOKEN
             },
-            beforeSend: function() {
+            beforeSend: function () {
                 accordion_link = true;
             },
-            complete: function() {
+            complete: function () {
                 accordion_link = false;
             },
-            success: function(data) {
+            success: function (data) {
                 // console.log(data)
                 // console.log(id)
                 accordion_link = false;
@@ -93,14 +93,25 @@ $(document).ready(function() {
                 accordion_collapse.append(
                     '<div class="accordion-footer"></div>'
                 );
-
+                data.topics.forEach(function (element) {
+                    if (element.includes('Retaguarda')) {
+                        accordion_collapse.find('.accordion-footer').append('<span class="badge bg-primary ms-2 float-end">' + element + '</span>\n')
+                    }
+                    if (element.includes('SAC')) {
+                        accordion_collapse.find('.accordion-footer').append('<span class="badge bg-success ms-2 float-end">' + element + '</span>\n')
+                    }
+                    if (element.includes('Linha de Frente')) {
+                        accordion_collapse.find('.accordion-footer').append('<span class="badge ms-2 float-end" style="background-color: black;color: white;">' + element + '</span>\n')
+                    }
+                }
+                );
                 // $('.accordion-footer').append('<span class="badge bg-secondary">' +item+'</span>')
                 data.tags.forEach(item => accordion_collapse.find('.accordion-footer').append('<span class="badge bg-secondary">' + item + '</span>\n'))
 
                 $(target).collapse();
 
             },
-            error: function(data) {
+            error: function (data) {
                 if (data.status == 404) {
                     if (!button_accordion.hasClass('bg-danger')) {
                         button_accordion.addClass('bg-danger')
@@ -129,7 +140,7 @@ $(document).ready(function() {
 
 });
 
-$(document).on('click', ".like, .unlike", function(e) {
+$(document).on('click', ".like, .unlike", function (e) {
     if (like_link === true) {
         return false;
     }
@@ -161,18 +172,18 @@ $(document).on('click', ".like, .unlike", function(e) {
         headers: {
             "X-CSRFToken": $CSRF_TOKEN,
         },
-        beforeSend: function() {
+        beforeSend: function () {
             like_link = false;
         },
-        complete: function() {
+        complete: function () {
             like_link = false;
         },
-        success: function(data) {
+        success: function (data) {
             $("#" + id).removeClass(action);
             $("#" + id).addClass(invert);
             i = $('#' + id).children();
             like_link = false
-            i.toggleClass(function() {
+            i.toggleClass(function () {
 
                 if ($(this).hasClass('fas')) {
                     $(this).removeClass('fas')
@@ -183,7 +194,7 @@ $(document).on('click', ".like, .unlike", function(e) {
                 }
             });
         },
-        error: function(data) {
+        error: function (data) {
             // console.log('Erro');
             like_link = false;
         }
@@ -194,7 +205,7 @@ $(document).on('click', ".like, .unlike", function(e) {
 
 
 
-$(document).on('click', ".save, .unsave", function(e) {
+$(document).on('click', ".save, .unsave", function (e) {
     if (save_link === true) {
         return false;
     }
@@ -221,18 +232,18 @@ $(document).on('click', ".save, .unsave", function(e) {
         headers: {
             "X-CSRFToken": $CSRF_TOKEN,
         },
-        beforeSend: function() {
+        beforeSend: function () {
             save_link = true;
         },
-        complete: function() {
+        complete: function () {
             save_link = false;
         },
-        success: function(data) {
+        success: function (data) {
             $("#" + id).removeClass(action);
             $("#" + id).addClass(invert);
             i = $('#' + id).children();
             save_link = false;
-            i.toggleClass(function() {
+            i.toggleClass(function () {
 
                 if ($(this).hasClass('fas')) {
                     $(this).removeClass('fas')
@@ -243,7 +254,7 @@ $(document).on('click', ".save, .unsave", function(e) {
                 }
             });
         },
-        error: function(data) {
+        error: function (data) {
             // console.log('Erro');
             save_link = false;
         }
@@ -251,19 +262,18 @@ $(document).on('click', ".save, .unsave", function(e) {
     return false;
 });
 
-$(document).on('click', ".remove", function(e) {
+$(document).on('click', ".remove", function (e) {
 
     remove_link = true;
     var remove_href = $(this).attr('href');
     remove_confirm = $("#delete-modal").find('.delete')
-        // console.log(remove_confirm)
+    // console.log(remove_confirm)
     remove_confirm.attr('href', remove_href)
     removeModal.show();
 
-
 });
 
-$(document).on('click', "#confirm-delete", function(e) {
+$(document).on('click', "#confirm-delete", function (e) {
     bt_confirm_delete = $("#" + e.currentTarget.id)
     confirm_delete_href = bt_confirm_delete.attr('href')
 
@@ -275,15 +285,17 @@ $(document).on('click', "#confirm-delete", function(e) {
         headers: {
             "X-CSRFToken": $CSRF_TOKEN,
         },
-        success: function(data) {
+        success: function (data) {
             removeModal.toggle();
-            if (data.status === 'success') {}
+            if (data.status === 'success') {
+
+            }
         }
     });
 
 });
 
-$("#delete-modal").on("show.bs.modal", function(e) {
+$("#delete-modal").on("show.bs.modal", function (e) {
     var link = $(e.relatedTarget);
 
 });

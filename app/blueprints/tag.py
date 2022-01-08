@@ -54,7 +54,7 @@ def add():
     if form.validate_on_submit():
         tag = Tag.query.filter(Tag.name.ilike(form.name.data)).first()
         if not tag is None:
-            form.name.errors.append('Marcação já existte')
+            form.name.errors.append('Marcação já existe')
         if not form.errors:
             tag = Tag()
             tag.name = form.name.data
@@ -88,8 +88,8 @@ def view(id):
                                 last_page=last_page, 
                                 url_arguments=pagination_args)
 
-@bp.route('/remove/<int:id>', methods=['GET', 'POST'])
-def remove(id):
+@bp.route('/deactive/<int:id>', methods=['GET', 'POST'])
+def deactive(id):
     confirm = request.form.get('confirm', False)
     if confirm != 'true':
         return jsonify({
@@ -116,4 +116,4 @@ def remove(id):
         return jsonify({
             'status': 'error',
             'message': 'database error'
-        }), 404
+        }), 500

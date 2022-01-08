@@ -30,7 +30,7 @@ def edit(id):
             # question.sub_topics = form.sub_topic.data
             # question.sub_topic = form.sub_topic.data
             # question.updater = current_user
-            # question.update_at = datetime.now()
+            # question.update_at = convert_datetime_to_local(datetime.utcnow())
             db.session.commit()
             return redirect(url_for('admin.sub_topic'))
         except Exception as e:
@@ -55,7 +55,7 @@ def add():
     if form.validate_on_submit():
         sub_topic = Question.query.filter(SubTopic.name.ilike(form.name.data)).first()
         if not sub_topic is None:
-            form.name.errors.append('Marcação já existte')
+            form.name.errors.append('Marcação já existe')
         if not form.errors:
             sub_topic = SubTopic()
             sub_topic.name = form.name.data
@@ -89,6 +89,6 @@ def view(id):
                                 last_page=last_page, 
                                 url_arguments=pagination_args)
 
-@bp.route('/remove/<int:id>')
-def remove(id):
+@bp.route('/deactive/<int:id>')
+def deactive(id):
     return ''

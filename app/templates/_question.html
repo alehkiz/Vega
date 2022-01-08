@@ -4,29 +4,36 @@
     {% if mode == 'search' %}
     {% set question, pos = question %}
     {% endif %}
-
+    {#}
     {% if question.topics.filter_by(_name = 'Retaguarda').count() >= 1 %}
         {% set bg_color = 'text-info fw-bold' %}
     {% elif question.topics.filter_by(_name = 'SAC (Cidadão e Credenciados)').count() >= 1  %}
         {% set bg_color = 'text-success fw-bold' %}
-    {% endif %}
+
+    {% elif question.topics.filter_by(_name = 'Atendimento - Linha de Frente').count() >= 1 %}
+        {% set bg_color = 'text-dark fw-bold' %}
+    {% endif %}#}
     <div class="accordion-item">
         <h2 class="accordion-header" id="flush-heading_{{question.id}}">
-            <button id='button-accordion-{{question.id}}' class="accordion-button collapsed {{ 'text-secondary fw-bold' if question.is_support else bg_color }} rounded-2" type="button" data-bs-toggle="collapse"
+            <button id='button-accordion-{{question.id}}' class="accordion-button collapsed {{ 'text-secondary fw-bold' if question.is_support else 'text-success fw-bold' }} rounded-2" type="button" data-bs-toggle="collapse"
                 data-bs-target="#flush-collapse_{{question.id}}" aria-expanded="false" aria-labelledby="flush-heading_{{question.id}}"
                 aria-controls="flush-collapse_{{question.id}}" href="{{url_for('api.question', id=question.id)}}">
                 {{question.question}}
                 {% if question.is_support %}
-                <span class="badge bg-success mx-3 float-end">Suporte</span>
-                {% else %}
+                <span class="badge bg-success ms-2 float-end">Suporte</span>
+                {#{% else %}
                 {% for tp in question.topics %}
                 {% if tp.name == 'Retaguarda' %}
-                <span class="badge bg-secondary mx-3 float-end">{{tp.name}}</span>
+                <span class="badge bg-secondary float-end">{{tp.nickname}}</span>
                 {% endif %}
                 {% if 'SAC' in tp.name%}
-                <span class="badge bg-primary mx-3 float-end">{{tp.name}}</span>
+                <span class="badge bg-primary ms-2 float-end">{{tp.nickname}}</span>
                 {% endif %}
-                {% endfor %}
+                {% if 'Linha de Frente' in tp.name %}
+                <span class="badge ms-2 float-end" style="background-color: black;color: white;">{{tp.nickname}}</span>
+                
+                {% endif %}
+                {% endfor %}#}
                 {% endif %}
                 
 

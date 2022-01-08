@@ -1,19 +1,14 @@
-from logging import disable
-from typing import Type
-from flask_migrate import current
-from app.blueprints.admin import sub_topic
 from datetime import datetime
 from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify, session
 from flask.globals import current_app
-from flask_security import login_required, current_user
-from flask_security import roles_accepted
+from flask_security import login_required, current_user, roles_accepted
 from app.core.db import db
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, SubTopic, Tag, Topic
 from app.models.security import User
 from app.models.app import Network
 from app.models.search import Search
 from app.utils.sql import unaccent
-from app.utils.kernel import strip_accents
+from app.utils.kernel import convert_datetime_to_local, strip_accents
 from app.utils.html import process_html
 from app.forms.question import QuestionAnswerForm, CreateQuestion, QuestionApproveForm, QuestionEditAndApproveForm
 from app.utils.routes import counter
@@ -38,7 +33,10 @@ def index():
             return abort(404)
     topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
     search_form = QuestionSearchForm()
-    query = db.session.query(Question).filter(Question.answer_approved == True).join(Question.topics).filter(Topic.id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
+    if current_user.is_authenticated and current_user.is_support:
+        query = db.session.query(Question).filter(Question.answer_approved == True, Question.active == True).order_by(Question.create_at.desc())
+    else:
+        query = db.session.query(Question).filter(Question.answer_approved == True, Question.active == True).join(Question.topics).filter(Topic.id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
     # query = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
     if not sub_topic is False:
         paginate = query.filter(Question.sub_topic_id == sub_topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
@@ -73,13 +71,12 @@ def search():
     if g.question_search_form.validate():
         if not session.get('AccessType', False):
             return redirect(url_for('main.index'))
-        if current_user.is_authenticated and current_user.is_support:
-            topics = Topic.query.all()
-        else:
-            topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
+        topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
         sub_topics = g.question_search_form.filter.data
         if not sub_topics:
             sub_topics = SubTopic.query.all()
+        if current_user.is_authenticated and current_user.is_support:
+            topics = []
         q = Question.search(g.question_search_form.q.data, pagination=False, sub_topics=sub_topics, topics=topics).filter(Question.answer_approved==True).order_by(desc('similarity'))#.join(QuestionView.question, full=True).filter(Question.answer_approved==True).order_by(QuestionView.count_view.desc())
         
         paginate = q.paginate(per_page = app.config.get('QUESTIONS_PER_PAGE', 1), page = page)
@@ -159,7 +156,7 @@ def view(id=None):
         question = db.session.query(Question
         ).filter(Question.id == id
         ).join(Question.topics
-        ).filter(Topic.id == g.topic.id
+        ).filter(Topic.id == g.topic.id, Question.active == True
         ).first_or_404()
     else:
         question = Question.query.filter(Question.id == id).first_or_404()
@@ -236,18 +233,23 @@ def activate(id):
         db.session.rollback()
         return abort(404)
 
-@bp.route('remove/<int:id>', methods=['POST'])
+@bp.route('deactive/<int:id>', methods=['POST'])
 @login_required
 @roles_accepted("admin", "manager_content", 'support')
 @counter
-def remove(id):
+def deactive(id):
     confirm = request.form.get('confirm', False)
     if confirm != 'true':
         return jsonify({
             'status': 'error',
             'message': 'not confirmed'
         }), 404
-    q = Question.query.filter(Question.id == id).first_or_404()
+    q = Question.query.filter(Question.id == id).first()
+    if q is None:
+        return jsonify({
+            'status': 'error',
+            'message': 'not found'
+        }), 404
     id = q.id 
     try:
         q.active = False
@@ -258,10 +260,44 @@ def remove(id):
         app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
         app.logger.error(e)
         db.session.rollback()
-        return abort(404)
+        return jsonify({
+            'status': 'error',
+            'message': 'database error'
+        }), 500
     # return jsonify(q.to_dict())
     return jsonify({'status': 'error'})
 
+@bp.route('active/<int:id>', methods=['POST'])
+@login_required
+@roles_accepted("admin", "manager_content", 'support')
+@counter
+def active(id):
+    confirm = request.form.get('confirm', False)
+    if confirm != 'true':
+        return jsonify({
+            'status': 'error',
+            'message': 'not confirmed'
+        }), 404
+    q = Question.query.filter(Question.id == id).first()
+    if q is None: 
+        return jsonify({
+            'status': 'error',
+            'message': 'not found'
+        }), 404
+    q.active = True
+    try:
+        q.active = True
+        db.session.commit()
+        return jsonify({'id':q.id,
+                    'status': 'success'})
+    except Exception as e:
+        app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+        app.logger.error(e)
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': 'database error'
+        }), 500
 
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
@@ -298,15 +334,14 @@ def add():
             question.sub_topic_id = form.sub_topic.data.id
             question.tags = form.tag.data
             question.active = True
-            question.answer_at = datetime.now()
+            question.create_at = convert_datetime_to_local(datetime.utcnow())
+            question.answer_at = convert_datetime_to_local(datetime.utcnow())
             if current_user.is_admin:
                 if form.approved.data is True:
                     question.answer_approved = form.approved.data
-                    question.answer_approved_at = datetime.now()
+                    question.answer_approved_at = convert_datetime_to_local(datetime.utcnow())
                     question.answer_approve_user_id = current_user.id
-            print(question.answer_approved)
             try:
-                print(question.answer_approved)
                 db.session.add(question)
                 db.session.commit()
                 return redirect(url_for('question.view', id=question.id))
@@ -338,7 +373,7 @@ def answer(id: int):
         q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
         q.answer = form.answer.data
-        q.answer_at = datetime.now()
+        q.answer_at = convert_datetime_to_local(datetime.utcnow())
         q.tags = form.tag.data
         q.topics = form.topic.data
         q.sub_topic = form.sub_topic.data
@@ -381,7 +416,7 @@ def approve(id: int):
         if form.repprove.data is True:
             q.answer_approved = False
             flash('Questão reprovada.', category='success')
-            return redirect(url_for('admin.to_approve'))
+            return redirect(url_for('question.view', id=q.id))
         # q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
         q.answer = form.answer.data
@@ -392,11 +427,11 @@ def approve(id: int):
         q.answer_approved = form.approve.data
         q.answer_approve_user_id = current_user.id
         q.active = True
-        q.answer_approved_at = datetime.now()
+        q.answer_approved_at = convert_datetime_to_local(datetime.utcnow())
         try:
             db.session.commit()
             flash('Pergunta aprovada com sucesso', category='success')
-            return redirect(url_for('admin.to_approve'))
+            return redirect(url_for('question.view', id=q.id))
         except Exception as e:
             form.question.errors.append('Não foi possível atualizar')
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
@@ -413,6 +448,7 @@ def approve(id: int):
     form.topic.data = q.topics
     form.sub_topic.data = q.sub_topic
     form.approve.data = q.answer_approved
+    form.answered_by.data = q.answered_by.name
 
 
     return render_template('answer.html', form=form, approve=True)
@@ -649,8 +685,8 @@ def make_question():
             if topic is None:
                 app.logger.error(f"Tópico {g.selected_access} não existe")
                 return abort(500)  
-            print(topic)
-
+            # print(topic)
+            question.create_at = convert_datetime_to_local(datetime.utcnow())
             question.question = form.question.data
             question.topics.append(topic)
             question.sub_topic = form.sub_topic.data

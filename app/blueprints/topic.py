@@ -30,7 +30,7 @@ def edit(id):
             # question.topics = form.topic.data
             # question.topic = form.topic.data
             # question.updater = current_user
-            # question.update_at = datetime.now()
+            # question.update_at = convert_datetime_to_local(datetime.utcnow())
             topic.active = form.active.data
             topic.selectable = form.selectable.data
             db.session.commit()
@@ -59,7 +59,7 @@ def add():
     if form.validate_on_submit():
         topic = Question.query.filter(Topic.name.ilike(form.name.data)).first()
         if not topic is None:
-            form.name.errors.append('Marcação já existte')
+            form.name.errors.append('Marcação já existe')
         if not form.errors:
             topic = Topic()
             topic.name = form.name.data
@@ -95,6 +95,6 @@ def view(id):
                                 last_page=last_page, 
                                 url_arguments=pagination_args)
 
-@bp.route('/remove/<int:id>')
-def remove(id):
+@bp.route('/deactive/<int:id>')
+def deactive(id):
     return ''

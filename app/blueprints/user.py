@@ -125,10 +125,10 @@ def edit(id):
     return render_template('edit.html', form=form, title='Editar', user=True)
 
 
-@bp.route('/remove/<int:id>', methods=['POST'])
+@bp.route('/deactive/<int:id>', methods=['POST'])
 @login_required
 @roles_accepted('admin')
-def remove(id):
+def deactive(id):
     confirm = request.form.get('confirm', False)
     if confirm != 'true':
         abort(404)

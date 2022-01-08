@@ -3,7 +3,7 @@ from sqlalchemy.orm import backref
 from sqlalchemy_searchable import make_searchable
 
 from app.core.db import db
-from app.utils.kernel import format_datetime_local, format_elapsed_time
+from app.utils.kernel import format_datetime_local, format_elapsed_time, convert_datetime_to_local
 
 make_searchable(db.metadata, options={'regconfig': 'public.pt'})
 
@@ -15,7 +15,7 @@ class Notifier(db.Model):
     content = db.Column(db.String, index=True, nullable=False)
     status_id = db.Column(db.Integer, db.ForeignKey('notifier_status.id'), nullable=False)
     priority_id = db.Column(db.Integer, db.ForeignKey('notifier_priority.id'), nullable=False)
-    create_at = db.Column(db.DateTime, index=False, default=datetime.now)
+    create_at = db.Column(db.DateTime, index=False, default=convert_datetime_to_local(datetime.utcnow()))
     created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     created_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)

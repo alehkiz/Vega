@@ -4,7 +4,7 @@ from flask_security.decorators import roles_accepted
 from app.core.db import db
 from app.models.wiki import Article, Tag, Topic
 from app.forms.wiki import ArticleForm
-from app.utils.kernel import url_in_host
+from app.utils.kernel import convert_datetime_to_local, url_in_host
 from app.utils.routes import counter
 from datetime import datetime
 
@@ -71,7 +71,7 @@ def edit(id):
             article.title = form.title.data
             article.description = form.description.data
             article.text = form.text.data
-            article.update_at = datetime.now()
+            article.update_at = convert_datetime_to_local(datetime.utcnow())
             article.update_user_id = current_user.id
             db.session.commit()
             return redirect(url_for('article.view', id=article.id))
