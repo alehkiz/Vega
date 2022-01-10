@@ -1,7 +1,6 @@
 #Projetc
 *.db
 migrations/
-static/
 regras/
 .vscode/
 logs/
