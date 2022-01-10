@@ -9,7 +9,7 @@ import app
 
 class BaseConfig(object):
     PROJECT_NAME = 'Vega'
-    SITE_TITLE = 'AtenDetran'
+    SITE_TITLE = environ.get('PROJECT_NAME') or 'AtenDetran'
     SECRET_KEY = environ.get(
         'SERVER_KEY')
     APP_DIR = abspath(dirname(app.__file__))
