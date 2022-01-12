@@ -127,7 +127,6 @@ def search():
                     question.create_user_id = user.id
                     question.question_network_id = g.ip_id
                     question.active = False
-                    question.create_at = convert_datetime_to_local(datetime.utcnow())
                     db.session.add(question)
                     try:
                         db.session.commit()
@@ -189,7 +188,7 @@ def edit(id):
         question.topics = form.topic.data
         question.sub_topic = form.sub_topic.data
         question.update_user_id = current_user.id
-        question.update_at = datetime.now()
+        question.update_at = convert_datetime_to_local(datetime.now())
         # question.answer_user_id = current_user.id
         question.answer = process_html(form.answer.data).text
 
@@ -672,10 +671,11 @@ def make_question():
                 db.session.add(ip)
                 try:
                     db.session.commit()
-                    flash('Erro ao cadastrar o seu IP', category='success')
+                    
                     return redirect(url_for('question.index'))
                 except Exception as e:
                     db.session.rollback()
+                    flash('Erro ao cadastrar o seu IP', category='success')
                     app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
                     app.logger.error(e)
                     return abort(500)
@@ -697,7 +697,7 @@ def make_question():
             db.session.add(question)
             try:
                 db.session.commit()
-                flash('Dúvida cadastrada com sucesso!', category='success')
+                flash(f'Dúvida cadastrada com sucesso! ID: {question.id}', category='success')
                 return redirect(url_for('question.index'))
             except Exception as e:
                 db.session.rollback()
