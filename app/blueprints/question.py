@@ -127,6 +127,7 @@ def search():
                     question.create_user_id = user.id
                     question.question_network_id = g.ip_id
                     question.active = False
+                    question.create_at = convert_datetime_to_local(datetime.utcnow())
                     db.session.add(question)
                     try:
                         db.session.commit()
