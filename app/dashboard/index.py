@@ -19,6 +19,8 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from dash_table import DataTable
 
+from flask import current_app as app
+
 import dash_bootstrap_components as dbc
 from flask.templating import render_template
 import plotly.express as px
@@ -208,7 +210,7 @@ def dash_app(app=False):
             dcc.Store(id='store'),
             dbc.Jumbotron(
     [
-        html.H1("Dashboard AtenDetran", className="display-5"),
+        html.H1(f"Dashboard {app.config['SITE_TITLE']}", className="display-5"),
         html.Div(id='updater_values')
         
         # html.P(dbc.Button("Learn more", color="primary"), className="lead"),

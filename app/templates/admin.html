@@ -33,19 +33,6 @@
     <hr>
     </form>
     {% endif %}
-    {#<div class="container">
-        <div class="row">
-            <h6 class="text-muted fw-normal text-uppercase">Tópico</h6>
-            <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
-                {% if 'topic' in request_args.keys() %}
-                {% set _rqa_topic = request_args %}
-                {% endif %}
-                {% for tp in _topic %}
-                <a href="{{ url_for(endpoint, topic=tp.name)}}" class='btn btn-primary border'>{{tp.name}}</a>
-                {% endfor %}
-            </div>
-        </div>
-    </div>#}
     {{ macros.render_table(cls_table, pagination, page_name, order_type=order_type, mode=mode, type=type,
     user=current_user, no_view=true) }}
     {{ macros.render_pagination(pagination, first_page, last_page, endpoint, url_args if url_args is defined else {})}}
