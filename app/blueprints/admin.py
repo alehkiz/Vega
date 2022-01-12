@@ -17,7 +17,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import relationship
 
-from sqlalchemy import inspect, desc, asc
+from sqlalchemy import inspect, desc, asc, func
 
 from app.models.wiki import Article, Topic, User, Question, Tag, SubTopic
 from app.forms.wiki import ArticleForm
@@ -113,12 +113,12 @@ def answers():
     order_dict = {'desc': desc, 'asc': asc}
     topic = request.args.get('topic', False)
     form = QuestionFilter(request.args, meta={'csrf': False})
+    search = request.args.get('search', False)
     request_args = request.args
     if topic != False:
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
     if not order_type in order_dict.keys():
         order_type = 'desc'
-    print(order)
     if not order is False or not order_type is False:
         try:
             column = getattr(Question, order)
@@ -133,11 +133,7 @@ def answers():
     # TODO Incluir a odernação por relacionamento de acordo com a seleção do usuário
     relations = inspect(Question).relationships
     if hasattr(column.property, 'target'):
-        print(column.property.target.name)
-        # print(relations.all())
-        print(column.property.backref[0])
         if column.property.key in relations:
-            print('aqui')
             relationship = getattr(relations, str(
                 column.property.key), False)
             if relationship is False:
@@ -159,6 +155,12 @@ def answers():
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
+    if search != False:
+        q = q.filter((
+            func.ts_rank_cd(
+                Question.search_vector, func.plainto_tsquery(
+                    'public.pt', search))) > 0)
+
     paginate = q.paginate(page, app.config.get(
         "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
@@ -198,14 +200,16 @@ def questions():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
-    topic = request.args.get("topic", None)
+    topic = request.args.get("topic", False)
     form = QuestionFilter(request.args, meta={'csrf': False})
+    search = request.args.get('search', False)
     request_args = request.args
-    if topic != None and not topic.isnumeric():
+    if topic != False and not topic.isnumeric():
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
-    elif topic != None and topic.isnumeric():
+    elif topic != False and topic.isnumeric():
         topic = Topic.query.filter(Topic.id == int(topic)).first()
-    print(topic)
+    
+
     if not order is False or not order_type is False:
         try:
             column = getattr(Question, order)
@@ -261,7 +265,7 @@ def questions():
         #     q = Question.query.filter(Question.answer == None).order_by(
         #         Question.create_at.asc()
         #     )
-        if topic != None:
+        if topic != False:
             q = db.session.query(Question).filter(
                 Question.answer == None).join(Question.topics).filter(Topic.id == topic.id).order_by(column_type())
             # q = Question.query.filter(
@@ -273,6 +277,7 @@ def questions():
             # Question.query.filter(Question.answer == None).order_by(
             #     column_type()
             # )
+    
     if form.validate():
         if len(form.topic.data) > 0:
             q = q.join(Question.topics).filter(Topic.id.in_(
@@ -283,6 +288,12 @@ def questions():
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
+    
+    if search != False:
+        q = q.filter((
+            func.ts_rank_cd(
+                Question.search_vector, func.plainto_tsquery(
+                    'public.pt', search))) > 0)
     paginate = q.paginate(page, app.config.get(
         "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
@@ -323,12 +334,13 @@ def to_approve():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
-    topic = request.args.get("topic", None)
+    topic = request.args.get("topic", False)
     form = QuestionFilter(request.args, meta={'csrf': False})
+    search = request.args.get('search', False)
     request_args = request.args
-    if topic != None and not topic.isnumeric():
+    if topic != False and not topic.isnumeric():
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
-    elif topic != None and topic.isnumeric():
+    elif topic != False and topic.isnumeric():
         topic = Topic.query.filter(Topic.id == int(topic)).first()
 
     if not order is False or not order_type is False:
@@ -379,7 +391,7 @@ def to_approve():
                     .order_by(relationship_type_order())
                 )
     else:
-        if topic != None:
+        if topic != False:
             q = db.session.query(Question).filter(Question.answer != None, Question.answer_approved == False).join(
                 Question.topics).filter(Topic.id == topic.id).order_by(Question.create_at.asc())
             # Question.query.filter(
@@ -397,13 +409,17 @@ def to_approve():
         if len(form.topic.data) > 0:
             q = q.filter(Topic.id.in_(
                 [_.id for _ in form.topic.data]))
-            print(form.topic.data)
         if len(form.sub_topic.data) > 0:
             q = q.filter(Question.sub_topic_id.in_(
                 [_.id for _ in form.sub_topic.data]))
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
+    if search != False:
+        q = q.filter((
+            func.ts_rank_cd(
+                Question.search_vector, func.plainto_tsquery(
+                    'public.pt', search))) > 0)
     paginate = q.paginate(page, app.config.get(
         "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (

@@ -79,4 +79,5 @@ class QuestionFilter(FlaskForm):
     sub_topic = QuerySelectMultipleField('Sub-tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name')
     tag = QuerySelectMultipleField('Marcações', allow_blank=True, query_factory= lambda : Tag.query.order_by(Tag.name.asc()), get_label= 'name')
     active = BooleanField('Ativa')
+    search = StringField('Busca')
     submit = SubmitField('Filtrar')
