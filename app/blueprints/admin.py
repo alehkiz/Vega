@@ -222,7 +222,7 @@ def questions():
         column_type = column.asc
     if order:
         if order in Question.__table__.columns:
-            if topic != None:
+            if topic != False:
                 q = db.session.query(Question).filter(
                     Question.answer == None).join(Question.topics).filter(Topic.id == topic.id).order_by(column_type())
                 # q = Question.query.filter(
@@ -240,7 +240,7 @@ def questions():
             relationship_type = getattr(Question, order)
             relationship_type_order = getattr(
                 relationship_class.name, order_type)
-            if topic != None:
+            if topic != False:
                 q = (
                     db.session.query(Question)
                     .filter(Question.answer == None)
@@ -257,7 +257,7 @@ def questions():
                     .order_by(relationship_type_order())
                 )
     else:
-        # if topic != None:
+        # if topic != False:
         #     q = Question.query.filter(
         #         Question.answer == None, Question.topic_id == topic.id
         #     ).order_by(Question.create_at.asc())
@@ -289,7 +289,7 @@ def questions():
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
     
-    if search != False:
+    if search != False and search != '' and search != None:
         q = q.filter((
             func.ts_rank_cd(
                 Question.search_vector, func.plainto_tsquery(
@@ -372,7 +372,7 @@ def to_approve():
             relationship_type = getattr(Question, order)
             relationship_type_order = getattr(
                 relationship_class.name, order_type)
-            if topic != None:
+            if topic != False:
                 q = (
                     db.session.query(Question)
                     .filter(
@@ -693,9 +693,9 @@ def file():
     topic = request.args.get("topic", None)
     # form = QuestionFilter(request.args, meta={'csrf': False})
     request_args = request.args
-    if topic != None and not topic.isnumeric():
+    if topic != False and not topic.isnumeric():
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
-    elif topic != None and topic.isnumeric():
+    elif topic != False and topic.isnumeric():
         topic = Topic.query.filter(Topic.id == int(topic)).first()
     if not order is False or not order_type is False:
         try:
@@ -709,7 +709,7 @@ def file():
         column_type = column.asc
     if order:
         if order in FilePDF.__table__.columns:
-            if topic != None:
+            if topic != False:
                 q = db.session.query(FilePDF).join(FilePDF.topics).filter(Topic.id == topic.id).order_by(column_type())
                 # q = Question.query.filter(
                 #     Question.answer == None, Question.topic_id == topic.id
@@ -725,7 +725,7 @@ def file():
             relationship_type = getattr(FilePDF, order)
             relationship_type_order = getattr(
                 relationship_class.name, order_type)
-            if topic != None:
+            if topic != False:
                 q = (
                     db.session.query(FilePDF)
                     .join(Question.topics)
@@ -740,7 +740,7 @@ def file():
                     .order_by(relationship_type_order())
                 )
     else:
-        # if topic != None:
+        # if topic != False:
         #     q = Question.query.filter(
         #         Question.answer == None, Question.topic_id == topic.id
         #     ).order_by(Question.create_at.asc())
@@ -748,7 +748,7 @@ def file():
         #     q = Question.query.filter(Question.answer == None).order_by(
         #         Question.create_at.asc()
         #     )
-        if topic != None:
+        if topic != False:
             q = db.session.query(FilePDF).join(FilePDF.topics).filter(Topic.id == topic.id).order_by(column_type())
             # q = Question.query.filter(
             #     Question.answer == None, Question.topic_id == topic.id
