@@ -344,7 +344,6 @@ def autocomplete():
     if s is None:
         s = Search()
         s.text = search
-        s.add_search(current_user.id)
         db.session.add(s)
         try:
             db.session.commit()
@@ -360,9 +359,9 @@ def autocomplete():
             return {'error_cod': 500, 'error': 'Erro interno'}, 500
     else:
         if current_user.is_authenticated:
-            search.add_search(current_user.id)
+            s.add_search(current_user.id)
         else:
-            search.add_search()
+            s.add_search()
     result = [{'link': url_for('question.view', id=_[0].id),
                'label': _[0].question}
               for _ in result.limit(10).all()]
