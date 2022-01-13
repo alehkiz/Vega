@@ -340,6 +340,29 @@ def autocomplete():
         # result = result.filter(func.to_tsvector('public.pt', Question.question).op(
     # '@@')(func.plainto_tsquery('public.pt', search)))
     # result = [_[0] for _ in result.limit(10).all()]
+    s = Search.query.filter(Search.text.ilike(search)).first()
+    if s is None:
+        s = Search()
+        s.text = search
+        s.add_search(current_user.id)
+        db.session.add(s)
+        try:
+            db.session.commit()
+            if current_user.is_authenticated:
+                s.add_search(current_user.id)
+            else:
+                s.add_search()
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(app.config.get(
+                    "_ERRORS").get("DB_COMMIT_ERROR"))
+            app.logger.error(e)
+            return {'error_cod': 500, 'error': 'Erro interno'}, 500
+    else:
+        if current_user.is_authenticated:
+            search.add_search(current_user.id)
+        else:
+            search.add_search()
     result = [{'link': url_for('question.view', id=_[0].id),
                'label': _[0].question}
               for _ in result.limit(10).all()]
