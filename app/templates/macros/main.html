@@ -1,9 +1,16 @@
 {% macro render_pagination(pagination, first_page, last_page, endpoint, url_arguments = {}) %}
+{% if url_arguments['order'] is defined %}
+{% set order = url_arguments['order']%}
+
+{% endif %}
+
 <nav aria-label="pagination">
     <ul class="pagination justify-content-end">
         {%- if first_page != pagination.page and not first_page is none%}
         <li class='page-item'>
-            <a class="page-link" href="{{url_for(endpoint, page=first_page, **url_arguments)}} " aria-label='First'>
+            <a class="page-link"
+                href="{{url_for(endpoint, page=first_page, order=kwargs['order'], order_type=kwargs['order_type'], **url_arguments)}} "
+                aria-label='First'>
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
@@ -15,26 +22,34 @@
         </li>
         {%- endif %} {%- for page in pagination.iter_pages() %} {% if page %} {% if page != pagination.page %}
         <li class="page-item">
-            <a class="page-link" href="{{url_for(endpoint, page=page, **url_arguments)}}">{{page}}</a>
+            <a class="page-link"
+                href="{{url_for(endpoint, page=page, order=kwargs['order'], order_type=kwargs['order_type'], **url_arguments)}}">{{page}}</a>
         </li>
 
         {% else %}
 
         <li class="page-item disabled">
             <!-- {{url_arguments}} -->
-            <a class="page-link active" href="{{ url_for(endpoint, page=page, **url_arguments) }}" aria-current="page">
+            <a class="page-link active"
+                href="{{ url_for(endpoint, page=page, order=kwargs['order'], order_type=kwargs['order_type'], **url_arguments) }}"
+                aria-current="page">
                 {{page}}
             </a>
         </li>
-        {% endif %} {% else %}
+        {% endif %}
+        {% else %}
         <li class='page-item disabled'>
             <a class="page-link" href="#" aria-label='Last'>
                 <span aria-hidden="true">...</span>
             </a>
         </li>
-        {% endif %} {%- endfor %} {%- if last_page != pagination.page and not last_page is none %}
+        {% endif %}
+        {%- endfor %}
+        {%- if last_page != pagination.page and not last_page is none %}
         <li class='page-item'>
-            <a class="page-link" href="{{ url_for(endpoint, page=last_page, **url_arguments)}}" aria-label='Last'>
+            <a class="page-link"
+                href="{{ url_for(endpoint, page=last_page, order=kwargs['order'], order_type=kwargs['order_type'], **url_arguments)}}"
+                aria-label='Last'>
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>
@@ -51,7 +66,9 @@
 {% endmacro %}
 
 
-{% macro render_table(cls_table, pagination, page_name, user = current_user) %}
+{% macro render_table(cls_table, pagination, page_name, url_arguments = {}, user = current_user) %}
+
+
 {% if cls_table %}
 {% if config['TABULATE'].get(cls_table.__tablename__) %}
 
@@ -78,15 +95,31 @@
     <table class="table table-striped table-hover table-bordered" cellspacing="0" cellpadding="0">
         <thead class="table-dark">
             <tr>
-                {% for key, value in config['TABULATE'].get(cls_table.__tablename__).items() %} {% if request_args is
-                defined %}
+                {% for key, value in config['TABULATE'].get(cls_table.__tablename__).items() %}
+                {# apagar #}
+                {% if request_args is defined %}
+                {% if order == key %}
+
                 <th><a
-                        href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type'], ** request_args)}}">{{value['name'].capitalize()}}</a>
+                        href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type_inverse'], **url_arguments)}}">{{value['name'].capitalize()}}</a>
+                </th>
+                {% else %}
+                <th><a
+                        href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type'], **url_arguments)}}">{{value['name'].capitalize()}}</a>
                 </th>
                 {% endif %}
-                <th><a
-                        href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type'])}}">{{value['name'].capitalize()}}</a>
+                {% endif %}
+<th><a
+                        href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type_inverse'], **url_arguments)}}">{{value['name'].capitalize()}}</a>
                 </th>
+
+                {% if order == key %}
+                <th><a
+                    href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type'], **url_arguments)}}">{{value['name'].capitalize()}}</a>
+            </th>
+                {% else %}
+                
+                {% endif %}
                 {% endfor %}
                 <th class="actions">Ações</th>
             </tr>
@@ -141,9 +174,9 @@
                             href="{{ url_for(cls_table.__tablename__+'.activate', id=item.id)}}"
                             data-bs-toggle="tooltip" title="Ativar">
                             <i class="fas fa-plus"></i>
-                        </button> 
-                        {% endif %} 
-                        {% endif %} 
+                        </button>
+                        {% endif %}
+                        {% endif %}
                         {% else %}
                         {% if not kwargs.get('no_view', none) is defined %}
                         <a class="btn btn-outline-primary btn-sm"
@@ -160,7 +193,7 @@
                             href="{{ url_for(cls_table.__tablename__+'.deactive', id=item.id)}}"
                             data-bs-toggle="tooltip" title="Desativar">
                             <i class="fas fa-trash-alt"></i>
-                        </button> 
+                        </button>
                         {% endif %}
                     </div>
                 </td>
@@ -186,9 +219,15 @@
                     </div>
                 </div>
             </div>
-            {% endfor %} {% endif %}
+            {% endfor %}
+            {% endif %}
 
         </tbody>
     </table>
 </div>
-{% endif %} {% endif %} {% endmacro %} {% macro render_view(obj) %} {% endmacro %}
+{% endif %}
+{% endif %}
+{% endmacro %}
+{% macro render_view(obj) %}
+
+{% endmacro %}

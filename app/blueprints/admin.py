@@ -155,7 +155,7 @@ def answers():
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
-    if search != False:
+    if search != False and search != '' and search != None:
         q = q.filter((
             func.ts_rank_cd(
                 Question.search_vector, func.plainto_tsquery(
@@ -415,7 +415,7 @@ def to_approve():
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
-    if search != False:
+    if search != False and search != '' and search != None:
         q = q.filter((
             func.ts_rank_cd(
                 Question.search_vector, func.plainto_tsquery(
@@ -428,8 +428,13 @@ def to_approve():
         else None
     )
     last_page = paginate.pages
-    order_type = "asc" if order_type == "desc" else "desc"
+    order_type_inverse = "asc" if order_type == "desc" else "desc"
+    order = request.args.get('order', False)
     url_args = dict(request.args)
+    print(order)
+    url_args.pop('order_type', None)
+    url_args.pop('order', None)
+    print(order)
     url_args.pop('page') if 'page' in url_args.keys() else None
     return render_template(
         "admin.html",
@@ -441,10 +446,12 @@ def to_approve():
         list=True,
         page_name="Dúvidas",
         order_type=order_type,
+        order=order,
         mode="question",
         type="aprovar",
         form=form,
-        url_args=url_args
+        url_args=url_args,
+        order_type_inverse = order_type_inverse
     )
 
 
