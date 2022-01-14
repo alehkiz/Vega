@@ -48,6 +48,7 @@ def question(id):
             to_dict['save_action'] = 'save'
         to_dict['url_like'] = url_for('question.like_action', question_id=id)
         to_dict['url_save'] = url_for('question.save_action', question_id=id)
+        to_dict['url_view'] = url_for('question.view', id=id)
         if current_user.can_edit:
             to_dict['url_edit'] = url_for('question.edit', id=id)
     else:
