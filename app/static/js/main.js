@@ -86,6 +86,12 @@ $(document).ready(function () {
                     );
                 }
 
+                accordion_buttons.append(
+                    '<a class="save-button" id="view_' + question_id + '"' +
+                    'href="' + data.url_view + '" target="_blank">' +
+                    '<i class="fas fa-eye"></i></a>\n'
+                )
+
 
                 accordion_collapse.append(
                     '<div class="accordion-body">' + data.answer + '</div>'
