@@ -170,9 +170,11 @@ def answers():
     )
 
     last_page = paginate.pages
-    order_type = "asc" if order_type == "desc" else "desc"
-
+    order_type_inverse = "asc" if order_type == "desc" else "desc"
+    order = request.args.get('order', False)
     url_args = dict(request.args)
+    url_args.pop('order_type', None)
+    url_args.pop('order', None)
     url_args.pop('page') if 'page' in url_args.keys() else None
 
     return render_template(
@@ -189,7 +191,8 @@ def answers():
         _topic=Topic.query.filter(Topic.selectable == True),
         _sub_topic=SubTopic.query,
         form=form,
-        url_args=url_args
+        url_args=url_args,
+        order_type_inverse = order_type_inverse
     )
 
 
@@ -323,7 +326,8 @@ def questions():
         _sub_topic=SubTopic.query,
         request_args=request_args,
         form=form,
-        url_args=url_args
+        url_args=url_args,
+        order_type_inverse = order_type_inverse
     )
 
 
@@ -431,10 +435,8 @@ def to_approve():
     order_type_inverse = "asc" if order_type == "desc" else "desc"
     order = request.args.get('order', False)
     url_args = dict(request.args)
-    print(order)
     url_args.pop('order_type', None)
     url_args.pop('order', None)
-    print(order)
     url_args.pop('page') if 'page' in url_args.keys() else None
     return render_template(
         "admin.html",
