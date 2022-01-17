@@ -305,9 +305,11 @@ def questions():
         else None
     )
     last_page = paginate.pages
-    order_type = "asc" if order_type == "desc" else "desc"
-
+    order_type_inverse = "asc" if order_type == "desc" else "desc"
+    order = request.args.get('order', False)
     url_args = dict(request.args)
+    url_args.pop('order_type', None)
+    url_args.pop('order', None)
     url_args.pop('page') if 'page' in url_args.keys() else None
 
     return render_template(
