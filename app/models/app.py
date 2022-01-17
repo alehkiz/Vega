@@ -26,7 +26,7 @@ class Page(db.Model):
     visit = db.relationship('Visit', cascade='all, delete-orphan',
                             single_parent=True, backref='page', lazy='dynamic')
 
-    def add_view(self, user_id, network_id):
+    def add_view(self, user_id, network_id, topic_id):
         
         
         user = User.query.filter(User.id == user_id).first()
@@ -36,6 +36,7 @@ class Page(db.Model):
         visit.page_id = self.id
         visit.user_id = user.id
         visit.network_id = network_id
+        visit.topic_id = topic_id
         visit.datetime = convert_datetime_to_local(datetime.utcnow())
         db.session.add(visit)
         try:
@@ -55,6 +56,7 @@ class Visit(db.Model):
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=True)
     datetime = db.Column(db.DateTime(timezone=True), nullable=False, default=convert_datetime_to_local(datetime.utcnow()))
     network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
+    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
 
     @staticmethod
     def query_by_month_year(year: int, month: int):

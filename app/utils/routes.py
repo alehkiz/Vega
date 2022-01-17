@@ -1,4 +1,4 @@
-from flask import current_app as app, request, abort, g
+from flask import current_app as app, request, abort, g, redirect, url_for
 from flask_security import current_user
 from app.models.app import Page, Visit
 from app.models.security import User
@@ -9,14 +9,19 @@ from functools import wraps
 def counter(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # print(args)
+        # print(kwargs)
+        # print(request.url_rule.rule)
         if current_user.is_authenticated:
             user = current_user
         else:
             user = User.query.filter(User.id == app.config.get('USER_ANON_ID')).first()
             if user is None:
                 app.logger.error('Usuário anonimo não encontrado')
-                
                 return abort(500)
+        # print(g.get('topic_id'))
+        if g.get('topic_id') is None:
+            return redirect(url_for("main.select_access"))
         page = Page.query.filter(Page.endpoint == request.endpoint).first()
         if not hasattr(g, 'ip_id'):
             ip = Network.query.filter(Network.ip == request.remote_addr).first()
@@ -40,7 +45,7 @@ def counter(f):
             db.session.add(page)
         try:
             db.session.commit()
-            page.add_view(user.id, g.ip_id)
+            page.add_view(user.id, g.ip_id, g.get('topic_id'))
         except Exception as e:
             db.session.rollback()
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
