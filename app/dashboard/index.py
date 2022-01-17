@@ -207,7 +207,7 @@ def access_last_month():
     return QuestionView.query_by_month_year(lastmonth.year, lastmonth.month).count()
 
 
-def get_visit_current_month():
+def get_question_view_current_month():
     return QuestionView.query_by_month_year(datetime.date.today().year, datetime.date.today().month).count()
 
 
@@ -249,6 +249,14 @@ def get_mean_visit_by_bussiness_day():
     days_count = query.count()
     days_sum = sum([_[0] for _ in query])
     return int(round(days_sum / days_count, 0))
+
+def get_total_visit_by_bussiness_day_in_current_month():
+    query = db.session.query(func.count(Visit.id).label('Total')).filter(
+        extract('month', Visit.datetime) == datetime.date.today().month,
+        extract('year', Visit.datetime) == datetime.date.today().year,
+        extract('isodow', Visit.datetime) < 7
+    )
+    return query.all()[0].Total
 
 def get_mean_visit_by_bussiness_day_month():
     query = db.session.query(
@@ -374,13 +382,13 @@ def dash_app(app=False):
             f" acessos totais!",
             html.Br(),
             html.B(format_number_as_thousand(access_last_month())),
-            " foram acessados no mês passado",
+            " acessos no mês passado",
             html.Br(),
             f"A média mensal de acessos é de ", 
             html.B(format_number_as_thousand(get_mean_visit_by_bussiness_day_month())), 
-            ", no mês atual tivemos ", html.B(format_number_as_thousand(get_visit_current_month())),
+            ", no mês atual tivemos ", html.B(format_number_as_thousand(get_total_visit_by_bussiness_day_in_current_month())),
             ' acessos, que representa ',
-            html.B(round((get_visit_current_month() / get_mean_visit_by_bussiness_day_month()) *100 , 2)),
+            html.B(round((get_total_visit_by_bussiness_day_in_current_month() / get_mean_visit_by_bussiness_day_month()) *100 , 2)),
             '%',
             html.Br(),
             html.B(format_number_as_thousand(get_mean_visit_by_bussiness_day())), f' é a média de acessos diários, hoje alcançamos ', html.B(round((get_visits_today() / get_mean_visit_by_bussiness_day()) * 100, 2)), f'%, totalizando {format_number_as_thousand(get_visits_today())} acessos'
