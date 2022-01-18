@@ -152,10 +152,11 @@ def view(id=None):
     if not id is None:
         file = FilePDF.query.filter(FilePDF.id == id, FilePDF.active == True, FilePDF.approved == True).first_or_404()
         if current_user.is_authenticated:
-            file.add_view(current_user.id, g.ip_id)
+            file.add_view(current_user.id, g.ip_id, g.topic_id)
         else:
-            file.add_view(app.config.get('USER_ANON_ID'), g.ip_id)
-            
+            file.add_view(app.config.get('USER_ANON_ID'), g.ip_id, g.topic_id)
+        if not isfile(join(app.config['UPLOAD_FOLDER'], file.file_name)):
+            return abort(404)
         # binary_pdf = file.path
         response = make_response(send_from_directory(app.config['UPLOAD_FOLDER'], file.file_name))
         response.headers['Content-Type'] = 'application/pdf'

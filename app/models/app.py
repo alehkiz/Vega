@@ -171,7 +171,7 @@ class FilePDF(db.Model):
     @property
     def topic_name(self):
         return ', '.join([_.name for _ in self.topics])
-    def add_view(self, user_id, network_id):
+    def add_view(self, user_id, network_id, topic_id):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
             raise Exception('Usuário informado não existe')
@@ -181,6 +181,7 @@ class FilePDF(db.Model):
         fv.file_pdf_id = self.id
         fv.user_id = user_id
         fv.network_id = network_id
+        fv.topic_id = topic_id
         db.session.add(fv)
         try:
             db.session.commit()
@@ -204,6 +205,7 @@ class FileView(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', onupdate='CASCADE', ondelete='CASCADE'))
     file_pdf_id = db.Column(db.Integer, db.ForeignKey('file_pdf.id'), nullable=False)
+    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
     datetime = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
     network_id = db.Column(db.Integer, db.ForeignKey(
         'network.id'), nullable=False)

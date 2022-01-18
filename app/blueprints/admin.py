@@ -701,7 +701,7 @@ def file():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
-    topic = request.args.get("topic", None)
+    topic = request.args.get("topic", False)
     # form = QuestionFilter(request.args, meta={'csrf': False})
     request_args = request.args
     if topic != False and not topic.isnumeric():

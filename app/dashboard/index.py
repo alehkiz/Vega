@@ -16,6 +16,7 @@ from dash_core_components.Checklist import Checklist
 from dash import Dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from dash_table import DataTable
 
@@ -130,15 +131,21 @@ def get_graph_search_by_date():
 
 def get_graph_access_by_date():
     df = pd.read_sql(
-        db.session.query(func.count(Visit.id).label('Total'),
-                         func.date_trunc(
-            'day', Visit.datetime).label('Data')).filter(
+        db.session.query(
+            func.count(Visit.id).label('Total'),
+            func.date_trunc('day', Visit.datetime).label('Data'),
+            Topic.name.label('Topico')
+            ).outerjoin(
+                Topic
+            ).filter(
             or_(Visit.user_id == 4, Visit.user_id == None)).filter(
             extract('isodow', Visit.datetime) < 7
-        ).group_by('Data').order_by(
+        ).group_by('Data', 'Topico').order_by(
             asc('Data')).statement, con=db.session.bind)
     df.Data = df.Data.dt.date
-    graph = px.line(df, x='Data', y='Total', title='Acessos por dia')
+    df.Topico.replace([None], 'Nenhum', inplace=True)
+    # print(df.columns)
+    graph = px.line(df, x='Data', y='Total', color='Topico', title='Acessos por dia')
     return graph
 
 
@@ -376,7 +383,54 @@ def dash_app(app=False):
         Input('interval-component', 'n_intervals'))
     def updater(n):
         # print(n)
-        return [html.P([
+        return [dbc.Row([
+        html.Div(
+            dbc.Toast(
+                [html.P(html.B(format_number_as_thousand(get_total_access())), className="mb-2")],
+                header="Total de acessos",
+                style={"width": 150, 'height': 150},
+            ), className='lead col-md-2 mb-2'
+        ),
+        html.Div(
+            dbc.Toast(
+                [html.P(html.B(format_number_as_thousand(access_last_month())), className="mb-2")],
+                header="Acessos no último mês",
+                style={"width": 150, 'height': 150},
+            ), className='lead col-md-2 mb-2'
+        ),
+        html.Div(
+            dbc.Toast(
+                [html.P(html.B(format_number_as_thousand(get_mean_visit_by_bussiness_day_month())), className="mb-2")],
+                header="Média mensal de acessos",
+                style={"width": 150, 'height': 150},
+            ), className='lead col-md-2 mb-2'
+        ),
+        html.Div(
+            dbc.Toast(
+                [html.P(html.B(format_number_as_thousand(access_last_month())), className="mb-2"),
+                html.Hr(),
+                html.P([f'Acessos no mês: ', html.B(format_number_as_thousand(get_total_visit_by_bussiness_day_in_current_month()))])
+                ],
+                header="Acessos diários",
+                style={"width": 150, 'height': 150},
+            ), className='lead col-md-2 mb-2'
+        ),
+        html.Div(
+            dbc.Toast(
+                [html.P(html.B(format_number_as_thousand(access_last_month())), className="mb-2")],
+                header="Quantidade total de acessos",
+                style={"width": 150, 'height': 150},
+            ), className='lead col-md-2 mb-2'
+        ),
+        html.Div(
+            dbc.Toast(
+                [html.P(html.B(format_number_as_thousand(access_last_month())), className="mb-2")],
+                header="Quantidade total de acessos",
+                style={"width": 150, 'height': 150},
+            ), className='lead col-md-2 mb-2'
+        )
+        ]),
+            html.P([
             f"Já tivemos ",
             html.B(format_number_as_thousand(get_total_access())),
             f" acessos totais!",
