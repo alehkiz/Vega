@@ -409,7 +409,7 @@ def dash_app(app=False):
             dbc.Toast(
                 [html.P(html.B(format_number_as_thousand(access_last_month())), className="mb-2"),
                 html.Hr(),
-                html.P([f'Acessos no mês: ', html.B(format_number_as_thousand(get_total_visit_by_bussiness_day_in_current_month()))])
+                html.P([f'Acessos hoje: ', html.B(format_number_as_thousand(get_visits_today()))])
                 ],
                 header="Acessos diários",
                 style={"width": 150, 'height': 150},
@@ -417,7 +417,7 @@ def dash_app(app=False):
         ),
         html.Div(
             dbc.Toast(
-                [html.P(html.B(format_number_as_thousand(access_last_month())), className="mb-2")],
+                [html.P(html.B(format_number_as_thousand(get_visits_today())), className="mb-2")],
                 header="Quantidade total de acessos",
                 style={"width": 150, 'height': 150},
             ), className='lead col-md-2 mb-2'
