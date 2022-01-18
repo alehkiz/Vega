@@ -252,7 +252,8 @@ class Topic(db.Model):
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
     # questions_old = db.relationship('Question', backref='topic', lazy='dynamic', foreign_keys='[Question.topic_id]')
     notices = db.relationship('Notifier', backref='topic', lazy='dynamic')
-
+    visit = db.relationship('Visit', cascade='all, delete-orphan',
+                            single_parent=True, backref='topic', lazy='dynamic')
     @hybrid_property
     def name(self):
         return self._name
