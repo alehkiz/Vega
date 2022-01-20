@@ -171,7 +171,7 @@ def answers():
 
     last_page = paginate.pages
     order_type_inverse = "asc" if order_type == "desc" else "desc"
-    order = request.args.get('order', False)
+    order = request.args.get('order', None)
     url_args = dict(request.args)
     url_args.pop('order_type', None)
     url_args.pop('order', None)
@@ -192,7 +192,8 @@ def answers():
         _sub_topic=SubTopic.query,
         form=form,
         url_args=url_args,
-        order_type_inverse = order_type_inverse
+        order_type_inverse = order_type_inverse,
+        order=order
     )
 
 
@@ -223,7 +224,7 @@ def questions():
     else:
         column = Question.create_at
         column_type = column.asc
-    if order:
+    if not order is False:
         if order in Question.__table__.columns:
             if topic != False:
                 q = db.session.query(Question).filter(
@@ -306,7 +307,7 @@ def questions():
     )
     last_page = paginate.pages
     order_type_inverse = "asc" if order_type == "desc" else "desc"
-    order = request.args.get('order', False)
+    order = request.args.get('order', None)
     url_args = dict(request.args)
     url_args.pop('order_type', None)
     url_args.pop('order', None)
@@ -329,7 +330,8 @@ def questions():
         request_args=request_args,
         form=form,
         url_args=url_args,
-        order_type_inverse = order_type_inverse
+        order_type_inverse = order_type_inverse,
+        order=order
     )
 
 
@@ -435,7 +437,7 @@ def to_approve():
     )
     last_page = paginate.pages
     order_type_inverse = "asc" if order_type == "desc" else "desc"
-    order = request.args.get('order', False)
+    order = request.args.get('order', None)
     url_args = dict(request.args)
     url_args.pop('order_type', None)
     url_args.pop('order', None)
