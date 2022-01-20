@@ -16,6 +16,7 @@ from dash_core_components.Checklist import Checklist
 from dash import Dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from dash_table import DataTable
 
@@ -130,15 +131,21 @@ def get_graph_search_by_date():
 
 def get_graph_access_by_date():
     df = pd.read_sql(
-        db.session.query(func.count(Visit.id).label('Total'),
-                         func.date_trunc(
-            'day', Visit.datetime).label('Data')).filter(
+        db.session.query(
+            func.count(Visit.id).label('Total'),
+            func.date_trunc('day', Visit.datetime).label('Data'),
+            Topic.name.label('Topico')
+            ).outerjoin(
+                Topic
+            ).filter(
             or_(Visit.user_id == 4, Visit.user_id == None)).filter(
             extract('isodow', Visit.datetime) < 7
-        ).group_by('Data').order_by(
+        ).group_by('Data', 'Topico').order_by(
             asc('Data')).statement, con=db.session.bind)
     df.Data = df.Data.dt.date
-    graph = px.line(df, x='Data', y='Total', title='Acessos por dia')
+    df.Topico.replace([None], 'Nenhum', inplace=True)
+    # print(df.columns)
+    graph = px.line(df, x='Data', y='Total', color='Topico', title='Acessos por dia')
     return graph
 
 
@@ -214,6 +221,11 @@ def get_question_view_current_month():
 def get_total_search():
     return SearchDateTime.query.filter(or_(SearchDateTime.search_user_id == 4, SearchDateTime.search_user_id == None)).count()
 
+def get_search_today():
+    return SearchDateTime.query.filter(or_(SearchDateTime.search_user_id == 4, SearchDateTime.search_user_id == None)).filter(func.date_trunc('day', SearchDateTime.search_datetime) == datetime.date.today()).count()
+
+def get_question_views_today():
+    return QuestionView.query.filter(or_(QuestionView.user_id == 4, QuestionView.user_id == None)).filter(func.date_trunc('day', QuestionView.datetime) == datetime.date.today()).count()
 
 def get_total_questions_views():
     return QuestionView.query.filter(or_(QuestionView.user_id == 4, QuestionView.user_id == None)).count()
@@ -238,6 +250,18 @@ def get_report_last_month():
             'month',
             Question.answer_approved_at) == last_month.month
     )
+
+
+def get_mean_question_view_by_bussiness_day():
+    query = db.session.query(
+        func.count(QuestionView.id).label('Total'),
+        func.date_trunc('day', QuestionView.datetime).label('Date')).filter(
+            extract('isodow', QuestionView.datetime) < 7).group_by(
+                'Date'
+            )
+    days_count = query.count()
+    days_sum = sum([_[0] for _ in query])
+    return int(round(days_sum / days_count, 0))
 
 def get_mean_visit_by_bussiness_day():
     query = db.session.query(
@@ -376,7 +400,158 @@ def dash_app(app=False):
         Input('interval-component', 'n_intervals'))
     def updater(n):
         # print(n)
-        return [html.P([
+
+        perc_comp_last_month = round((get_total_visit_by_bussiness_day_in_current_month() / get_mean_visit_by_bussiness_day_month()) *100 , 2)
+        perc_comp_today = round((get_visits_today() / get_mean_visit_by_bussiness_day()) * 100, 2)
+        perc_comp_question_today = round((get_question_views_today() / get_mean_question_view_by_bussiness_day()) * 100, 2)
+        if perc_comp_last_month >= 100:
+            current_month_color_symbol='fas fa-arrow-up'
+            color_current_month = 'text-success'
+        else:
+            current_month_color_symbol='fas fa-arrow-down'
+            color_current_month = 'text-danger'
+        if perc_comp_today >= 100:
+            current_day_color_symbol='fas fa-arrow-up'
+            color_current_day = 'text-success'
+        else:
+            current_day_color_symbol='fas fa-arrow-down'
+            color_current_day = 'text-danger'
+        if perc_comp_question_today >= 100:
+            question_view_color_symbol='fas fa-arrow-up'
+            color_question_view = 'text-success'
+        else:
+            question_view_color_symbol='fas fa-arrow-down'
+            color_question_view = 'text-danger'
+
+
+        return [
+            dbc.Row(
+            # html.Div([
+                html.Div([
+                html.Div([
+                html.Div('Acessos Totais', className='card-header'),
+                html.Div([
+                    html.B(format_number_as_thousand(get_total_access()))
+                    ], className='card-body')], className='card mx-1 mb-2'),
+                html.Div([
+                html.Div('Acessos Mês Anterior', className='card-header'),
+                html.Div([
+                    html.B(format_number_as_thousand(access_last_month()))
+                    ], className='card-body')], className='card mx-1 mb-2'),
+                html.Div([
+                    html.Div('Acessos Mês Atual', className='card-header'),
+                    html.Div([
+                    html.B(format_number_as_thousand(get_total_visit_by_bussiness_day_in_current_month())),
+                    html.Hr(), 
+                    html.P([
+                        html.I(className=current_month_color_symbol + ' ' + color_current_month),
+                        html.B(perc_comp_last_month, className=color_current_month),
+                        html.P('% comparado com a média mensal', className='card-text d-inline fw-light')], className='d-inline')
+                    ], className='card-body')], className='card mx-1 mb-2'),
+                
+                html.Div([
+                    html.Div('Acessos Hoje', className='card-header'),
+                    html.Div([
+                    html.B(format_number_as_thousand(get_visits_today())),
+                    html.Hr(), 
+                    html.P([
+                        html.I(className=current_day_color_symbol + ' ' + color_current_day),
+                        html.B(perc_comp_today, className=color_current_day),
+                        html.P('% comparado com a média diária', className='card-text d-inline fw-light')], className='d-inline')
+                    ], className='card-body')], className='card mx-1 mb-2'),
+                ], className='card-group')
+                # ], className='col-sm-4'), className='p-2'
+        ),
+        html.Hr(),
+        dbc.Row(
+            html.Div(
+                html.Div([
+                    html.Div([
+                    html.Div('Perguntas Respondidas', className='card-header'),
+                    html.Div([
+                        html.B(format_number_as_thousand(get_questions_answered()))
+                        ], className='card-body')], className='card mx-1 mb-2'),
+                html.Div([
+                    html.Div('Perguntas visualizadas', className='card-header'),
+                    html.Div([
+                    html.B(format_number_as_thousand(get_total_questions_views()))
+                    ], className='card-body')], className='card mx-1 mb-2'),
+                html.Div([
+                    html.Div('Perguntas visualizadas hoje', className='card-header'),
+                    html.Div([
+                    html.B(format_number_as_thousand(get_question_views_today())),
+                    html.Hr(), 
+                    html.P([
+                        html.I(className=question_view_color_symbol + ' ' + color_question_view),
+                        html.B([perc_comp_question_today, '% '], className=color_question_view),
+                        html.P('comparado com a média diária', className='card-text d-inline fw-light')], className='d-inline')
+                    ], className='card-body')], className='card mx-1 mb-2'),
+                html.Div([
+                    html.Div('Pesquisas', className='card-header'),
+                    html.Div([
+                    html.B(format_number_as_thousand(get_total_search())),
+                    html.Hr(), 
+                    html.P([
+                        html.P([html.B('Hoje: '), get_search_today()], className='d-inline'),
+                        # html.I(className=question_view_color_symbol + ' ' + color_question_view),
+                        # html.B([perc_comp_question_today, '% '], className=color_question_view),
+                        # html.P('comparado com a média diária', className='card-text d-inline fw-light')
+                        ], className='d-inline')
+                    ], className='card-body')], className='card mx-1 mb-2')
+                ], className='card-group')
+            )
+        ),
+        ]
+        '''
+
+            dbc.Row([
+        html.Div(
+            dbc.Toast(
+                [html.P(html.B(format_number_as_thousand(get_total_access())), className="mb-2")],
+                header="Total de acessos",
+                style={"width": 150, 'height': 150},
+            ), className='lead col-md-2 mb-2'
+        ),
+        html.Div(
+            dbc.Toast(
+                [html.P(html.B(format_number_as_thousand(access_last_month())), className="mb-2")],
+                header="Acessos no último mês",
+                style={"width": 150, 'height': 150},
+            ), className='lead col-md-2 mb-2'
+        ),
+        html.Div(
+            dbc.Toast(
+                [html.P(html.B(format_number_as_thousand(get_mean_visit_by_bussiness_day_month())), className="mb-2")],
+                header="Média mensal de acessos",
+                style={"width": 150, 'height': 150},
+            ), className='lead col-md-2 mb-2'
+        ),
+        html.Div(
+            dbc.Toast(
+                [html.P(html.B(format_number_as_thousand(access_last_month())), className="mb-2"),
+                html.Hr(),
+                html.P([f'Acessos hoje: ', html.B(format_number_as_thousand(get_visits_today()))])
+                ],
+                header="Acessos diários",
+                style={"width": 150, 'height': 150},
+            ), className='lead col-md-2 mb-2'
+        ),
+        html.Div(
+            dbc.Toast(
+                [html.P(html.B(format_number_as_thousand(get_visits_today())), className="mb-2")],
+                header="Quantidade total de acessos",
+                style={"width": 150, 'height': 150},
+            ), className='lead col-md-2 mb-2'
+        ),
+        html.Div(
+            dbc.Toast(
+                [html.P(html.B(format_number_as_thousand(access_last_month())), className="mb-2")],
+                header="Quantidade total de acessos",
+                style={"width": 150, 'height': 150},
+            ), className='lead col-md-2 mb-2'
+        )
+        ]),
+            html.P([
             f"Já tivemos ",
             html.B(format_number_as_thousand(get_total_access())),
             f" acessos totais!",
@@ -408,8 +583,7 @@ def dash_app(app=False):
                 html.B(format_number_as_thousand(get_total_search())),
                 ' pesquisas'
             ], id='searches')
-
-        ]
+'''
 
     # @dash_app.callback(
     #     Output('tab_content', 'children'),

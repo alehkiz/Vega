@@ -94,6 +94,7 @@ def before_request():
         g.tags = Tag.query.all()
         g.topic = Topic.query.filter(
             Topic.selectable == True, Topic.name == g.selected_access).first()
+        g.topic_id = g.topic.id
         if not g.topic is None:
 
             g.questions_most_viewed = Question.most_viewed(
