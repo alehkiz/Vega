@@ -358,7 +358,7 @@ def dash_app(app=False):
             ], id='tabs', active_tab='diary'),
             html.Div(id='tab_content', className='p-4'),
             dcc.Interval(id='interval-component',
-                         interval=5000,  # 5 segundos
+                         interval=30000,  # 25 segundos
                          n_intervals=0)  # contador para atualização
         ])
 
