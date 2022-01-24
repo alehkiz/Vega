@@ -8,11 +8,16 @@
     <ul class="pagination justify-content-end">
         {%- if first_page != pagination.page and not first_page is none%}
         <li class='page-item'>
+            {% if kwargs.get('order', false) is false%}
+            <a class="page-link"
+                href="{{url_for(endpoint, page=first_page, **url_arguments)}}">&laquo;</a>
+            {% else %}
             <a class="page-link"
                 href="{{url_for(endpoint, page=first_page, order=kwargs['order'], order_type=kwargs['order_type'], **url_arguments)}} "
                 aria-label='First'>
                 <span aria-hidden="true">&laquo;</span>
             </a>
+            {% endif %}
         </li>
         {%- else %}
         <li class='page-item disabled'>
@@ -22,19 +27,29 @@
         </li>
         {%- endif %} {%- for page in pagination.iter_pages() %} {% if page %} {% if page != pagination.page %}
         <li class="page-item">
+            {% if kwargs.get('order', false) is false%}
+            <a class="page-link"
+                href="{{url_for(endpoint, page=page, **url_arguments)}}">{{page}}</a>
+            {% else %}
             <a class="page-link"
                 href="{{url_for(endpoint, page=page, order=kwargs['order'], order_type=kwargs['order_type'], **url_arguments)}}">{{page}}</a>
+            {% endif %}
         </li>
 
         {% else %}
 
         <li class="page-item disabled">
             <!-- {{url_arguments}} -->
+            {% if kwargs.get('order', false) is false%}
+            <a class="page-link"
+                href="{{url_for(endpoint, page=page, **url_arguments)}}">{{page}}</a>
+            {% else %}
             <a class="page-link active"
                 href="{{ url_for(endpoint, page=page, order=kwargs['order'], order_type=kwargs['order_type'], **url_arguments) }}"
                 aria-current="page">
                 {{page}}
             </a>
+            {% endif %}
         </li>
         {% endif %}
         {% else %}
@@ -47,11 +62,16 @@
         {%- endfor %}
         {%- if last_page != pagination.page and not last_page is none %}
         <li class='page-item'>
+            {% if kwargs.get('order', false) is false%}
+            <a class="page-link"
+                href="{{url_for(endpoint, page=last_page, **url_arguments)}}">&raquo;</a>
+            {% else %}
             <a class="page-link"
                 href="{{ url_for(endpoint, page=last_page, order=kwargs['order'], order_type=kwargs['order_type'], **url_arguments)}}"
                 aria-label='Last'>
                 <span aria-hidden="true">&raquo;</span>
             </a>
+            {% endif %}
         </li>
         {%- else %}
         <li class='page-item disabled'>
