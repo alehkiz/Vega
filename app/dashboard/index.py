@@ -206,11 +206,19 @@ def get_user_approve():
 
 
 def get_total_access():
-    return Visit.query.filter(or_(Visit.user_id == 4, Visit.user_id == None)).count()
+    return Visit.query.filter(
+        or_(Visit.user_id == 4, Visit.user_id == None),
+        extract('isodow', Visit.datetime) < 7).count()
 
 
 def access_last_month():
     lastmonth = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+    query = db.session.query(func.count(Visit.id).label('Total')).filter(
+        extract('month', Visit.datetime) == lastmonth.month,
+        extract('year', Visit.datetime) == lastmonth.year,
+        extract('isodow', Visit.datetime) < 7)
+    return query.all()[0].Total
+
     return QuestionView.query_by_month_year(lastmonth.year, lastmonth.month).count()
 
 
@@ -298,7 +306,9 @@ def get_visits_today():
         func.count(Visit.id).label('Total'),
         # func.date_trunc('day', Visit.datetime).label('Date')
         ).filter(
-            func.date_trunc('day', Visit.datetime) == datetime.date.today()
+            or_(Visit.user_id == 4, Visit.user_id == None),
+            func.date_trunc('day', Visit.datetime) == datetime.date.today(),
+            extract('isodow', Visit.datetime) < 7
         )#.group_by(
             # 'Date'
         # )
@@ -616,3 +626,23 @@ def dash_app(app=False):
     def dashboard():
         return render_template('dashboard.html', dash=dash_app.index())
     return dash_app.server
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Visistas ultimo mês
+# lastmonth = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+# Visit.query.filter(or_(Visit.user_id == 4, Visit.user_id == None),extract('isodow', Visit.datetime) < 7, Visit.datetime <= lastmonth).count()
+
+# db.session.query(Question).filter(
+#     Question.answer_approved_at <= lastmonth,
+#     Question.answer_approved== True).count()
