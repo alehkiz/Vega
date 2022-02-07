@@ -7,6 +7,7 @@ services:
     # command: python manage.py run -h 0.0.0.0
     volumes:
       - ./:/usr/src/app/
+      - upload_files:/usr/src/app/app/upload/
     ports:
       - 80:80
     env_file:
@@ -31,3 +32,4 @@ networks:
         - subnet: 10.5.0.0/16
 volumes:
   postgres_data:
+  upload_files:
