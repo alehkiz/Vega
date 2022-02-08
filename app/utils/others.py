@@ -2,6 +2,9 @@ import random
 import time
 from datetime import datetime
 from dateutil import tz
+from app.models.wiki import Question
+from app.models.security import User
+from app.core.db import db
 
 def str_time_prop(start, end, format='%d-%m-%Y %H:%M:%S', prop=0):
     """Get a time at a proportion of a range of two formatted times.
@@ -31,3 +34,44 @@ def convert_from_utc_to_local(utc):
         return None     
 
     return utc.replace(tzinfo=from_zone).astimezone(to_zone)
+
+def remove_answer(id:int):
+    q = Question.query.filter(Question.id == id).first()
+    if q is None:
+        return False
+    print(f'Pergunta: {q.question}')
+    print(f'Respondido por: {User.query.filter(User.id == q.answer_user_id).first().name}')
+    print(f'Resposta: {q.answer}')
+    answer = input('Tem certeza que deseja excluir a resposta? s(Sim) n(Não):')
+    if answer == 's':
+        if not q.was_approved:
+            q.answer = None
+            q.answer_at = None
+            q.answer_network_id = None
+            q.answer_user_id = None
+            db.session.commit()
+            print(f'Removida a resposta da pergunta {q.id}')
+        else:
+            print('Pergunta já aprovada, não é possível remover a resposta.')
+
+    elif answer == 'n':
+        print(f'Nenhuma atualização para a pergunta {q.id}')
+
+def remove_question(id:int):
+    q = Question.query.filter(Question.id == id).first()
+    if q is None:
+        return False
+    print(f'Pergunta: {q.question}')
+    print(f'Respondido por: {User.query.filter(User.id == q.answer_user_id).first().name}')
+    print(f'Resposta: {q.answer}')
+    answer = input('Tem certeza que deseja excluir a pergunta? s(Sim) n(Não):')
+    if answer == 's':
+        if not q.was_approved:
+            db.session.delete(q)
+            db.session.commit()
+            print(f'Removida a pergunta {q.id}')
+        else:
+            print('Pergunta já aprovada, não é possível remover a pergunta.')
+
+    elif answer == 'n':
+        print(f'Nenhuma atualização para a pergunta {q.id}')
