@@ -62,7 +62,9 @@ def remove_question(id:int):
     if q is None:
         return False
     print(f'Pergunta: {q.question}')
-    print(f'Respondido por: {User.query.filter(User.id == q.answer_user_id).first().name}')
+    u = User.query.filter(User.id == q.answer_user_id).first()
+    if not u is None:
+        print(f'Respondido por: {u.name}')
     print(f'Resposta: {q.answer}')
     answer = input('Tem certeza que deseja excluir a pergunta? s(Sim) n(Não):')
     if answer == 's':
