@@ -161,7 +161,8 @@ def view(id=None):
         response = make_response(send_from_directory(app.config['UPLOAD_FOLDER'], file.file_name))
         response.headers['Content-Type'] = 'application/pdf'
         response.headers['Content-Disposition'] = \
-            'inline; filename=%s' % f'{file.file_name}'
+            f'inline; filename="{file.file_name}";name="{file.file_name}"'
+        print(file.file_name)
         return response
 
 @bp.route('/deactive/<int:id>')
