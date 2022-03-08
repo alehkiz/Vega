@@ -153,7 +153,10 @@ def get_user_answers():
     df = pd.read_sql(
         db.session.query(
             User.name.label('Nome'),
-            func.count(Question.id).label('Total')).outerjoin(Question.answered_by).group_by(User).order_by(func.count(Question.id).desc()).statement, con=db.session.bind
+            func.count(
+                Question.id).label('Total')).outerjoin(
+                    Question.answered_by).group_by(User).filter(Question.answer_approved==True).order_by(
+                        func.count(Question.id).desc()).statement, con=db.session.bind
     )
     df['%'] = df.Total.apply(lambda x: float((x / df.Total.sum()) * 100))
     df['%'] = df['%'].round(decimals=2)
