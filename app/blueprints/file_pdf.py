@@ -159,7 +159,10 @@ def view(id=None):
             return abort(404)
         # binary_pdf = file.path
         response = make_response(send_from_directory(app.config['UPLOAD_FOLDER'], file.file_name))
-        response.headers['Content-Type'] = 'application/pdf'
+        if file.mimetype == 'application/pdf':
+            response.headers['Content-Type'] = 'application/pdf'
+        else:
+            response.headers['Content-Type'] = 'application/octet-stream'
         response.headers['Content-Disposition'] = \
             f'inline; filename="{file.file_name}";name="{file.file_name}"'
         print(file.file_name)
