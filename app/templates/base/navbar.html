@@ -34,6 +34,7 @@
                             {% if current_user.is_authenticated %}
                             <li><a class="dropdown-item" href="{{url_for('file_pdf.atas')}}">Atas</a></li>
                             {% endif %}
+                            <li><a class="dropdown-item" href="{{url_for('file_pdf.doc_req')}}">Documentos e Requerimentos</a></li>
                             <li><a class="dropdown-item" href="{{url_for('file_pdf.manuais')}}">Manuais</a></li>
                             <!-- <li><a class="dropdown-item" href="#">Second level</a></li> -->
                             </ul>

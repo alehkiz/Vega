@@ -35,6 +35,22 @@ def atas():
     print(paginate.items)
     return render_template('files.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint)
 
+@bp.route('/doc_req')
+def doc_req():
+    page = request.args.get("page", 1, type=int)
+    topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
+    paginate = db.session.query(FilePDF).filter(FilePDF.active == True, FilePDF.approved == True).join(FilePDFType.files).filter(FilePDFType.name == 'Documentos e Requerimentos').join(FilePDF.topics).filter(Topic.id.in_([_.id for _ in topics])).paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
+    # paginate = files.paginate(page, app.config.get( "TABLE_ITEMS_PER_PAGE", 10), False)
+    first_page = (
+        list(paginate.iter_pages())[0]
+        if len(list(paginate.iter_pages())) >= 1
+        else None
+    )
+    last_page = paginate.pages
+    print(paginate.items)
+    return render_template('files.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint)
+
 @bp.route('/')
 @bp.route('/manuais')
 def manuais():
