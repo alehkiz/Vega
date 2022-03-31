@@ -268,7 +268,7 @@ class BaseConfig(object):
     }
     USER_ANON_ID = 4
     UPLOAD_FOLDER = join(APP_DIR, 'upload')
-    MAX_CONTENT_LENGTH = 10485760 #20MB
+    MAX_CONTENT_LENGTH = 31457280 #20MB
     UPLOAD_EXTENSIONS = ['pdf', 'doc', 'docx']
 
 class DevelopmentConfig(BaseConfig):
