@@ -646,6 +646,4 @@ def dash_app(app=False):
 # lastmonth = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
 # Visit.query.filter(or_(Visit.user_id == 4, Visit.user_id == None),extract('isodow', Visit.datetime) < 7, Visit.datetime <= lastmonth).count()
 
-# db.session.query(Question).filter(
-#     Question.answer_approved_at <= lastmonth,
-#     Question.answer_approved== True).count()
+# db.session.query(Question).filter(Question.answer_approved_at <= lastmonth, Question.answer_approved== True).count()
