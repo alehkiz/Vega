@@ -27,17 +27,17 @@
                         Menu
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton1">
-                        
+                        {% if g.upload_urls %}
                         <li class="dropdown-submenu dropdown-item">
+                            
                             <a class="dropdown-item" href="#">Arquivos</a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                            {% if current_user.is_authenticated %}
-                            <li><a class="dropdown-item" href="{{url_for('file_pdf.atas')}}">Atas</a></li>
-                            {% endif %}
-                            <li><a class="dropdown-item" href="{{url_for('file_pdf.doc_req')}}">Documentos e Requerimentos</a></li>
-                            <li><a class="dropdown-item" href="{{url_for('file_pdf.manuais')}}">Manuais</a></li>
+                                {% for item in g.upload_urls.items() %}
+                            <li><a class="dropdown-item" href="{{url_for('file_pdf.files', file_type= item[1])}}">{{item[0]}}</a></li>
+                                {% endfor %}
                             <!-- <li><a class="dropdown-item" href="#">Second level</a></li> -->
                             </ul>
+                            {% endif %}
                         </li>
                         {% if current_user.is_authenticated %}
                         {% if current_user.is_support %}
