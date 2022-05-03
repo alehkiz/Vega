@@ -642,6 +642,8 @@ def dash_app(app=False):
 
 
 
+from sqlalchemy import extract, or_
+import datetime
 ## Visistas ultimo mês
 # lastmonth = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
 # Visit.query.filter(or_(Visit.user_id == 4, Visit.user_id == None),extract('isodow', Visit.datetime) < 7, Visit.datetime <= lastmonth).count()

@@ -2,6 +2,7 @@
 from enum import unique
 from os import stat
 from flask import Markup, escape, current_app as app, abort, flash
+from flask_login import login_required
 from sqlalchemy import func, text, Index, cast, desc, extract, Date, asc
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import date, datetime
@@ -199,6 +200,8 @@ class FilePDFType(db.Model):
     create_at = db.Column(db.DateTime(timezone=True), default=convert_datetime_to_local(datetime.utcnow()))
     create_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     active = db.Column(db.Boolean, default=False)
+    url_route = db.Column(db.Text)
+    login_required = db.Column(db.Boolean, default=False)
     files = db.relationship('FilePDF', backref='type', lazy='dynamic')
 
 class FileView(db.Model):

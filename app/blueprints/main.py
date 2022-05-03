@@ -1,4 +1,6 @@
+from argparse import FileType
 from app.models.search import Search
+from app.models.app import FilePDFType
 from flask import (
     current_app as app,
     Blueprint,
@@ -46,8 +48,10 @@ def before_first_request():
 def before_request():
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
+    
     if current_user.is_authenticated:
         current_user.last_seen = convert_datetime_to_local(datetime.utcnow())
+        g.upload_urls = {file.name:file.url_route for file in FilePDFType.query.filter(FilePDFType.active==True)}
         try:
             db.session.commit()
         except Exception as e:
@@ -55,7 +59,9 @@ def before_request():
                 "Não foi possível salvar ultima visualização do usuário")
             app.logger.error(e)
             return abort(500)
-
+        
+    else:
+        g.upload_urls = {file.name:file.url_route for file in FilePDFType.query.filter(FilePDFType.active==True, FilePDFType.login_required == False)}
     if not session.get("AccessType", False):
         current_rule = request.url_rule
         if Topic.query.filter(Topic.selectable == True).count() > 1:
