@@ -144,6 +144,12 @@ def get_graph_access_by_date():
             asc('Data')).statement, con=db.session.bind)
     df.Data = df.Data.dt.date
     df.Topico.replace([None], 'Nenhum', inplace=True)
+    ndf = pd.DataFrame(df.groupby(['Data'], as_index=False).Total.sum())#.rolling(7, min_periods=1).mean()
+
+    ndf['Topico'] = "Media Móvel (7 dias)"
+    ndf['Total'] = ndf.rolling(7, min_periods=1).mean().round(0)
+    # ndf['MM'] = ndf
+    df = pd.concat([df, ndf])
     # print(df.columns)
     graph = px.line(df, x='Data', y='Total', color='Topico', title='Acessos por dia')
     return graph
