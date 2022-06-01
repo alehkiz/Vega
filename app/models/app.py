@@ -143,6 +143,7 @@ class FilePDF(db.Model):
     size = db.Column(db.Float, nullable=False)
     reference_date = db.Column(db.Date, nullable=True)
     title = db.Column(db.Text, nullable=False)
+    update_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     type_id = db.Column(db.Integer, db.ForeignKey("file_pdf_type.id"), nullable=False)
     sub_topic_id = db.Column(db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
     topics = db.relationship('Topic', secondary=file_topic, 

@@ -698,7 +698,7 @@ def notifier():
 
 @bp.route('/file')
 @login_required
-@roles_accepted('admin', 'suporte')
+@roles_accepted('admin', 'support')
 def file():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
