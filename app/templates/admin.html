@@ -35,7 +35,7 @@
     {% endif %}
     <!-- {{current_user}} -->
     {{ macros.render_table(cls_table, pagination, page_name, url_arguments = url_args if url_args is defined else {}, order_type=order_type, order=order, mode=mode, type=type,
-    user = current_user, no_view=true, order_type_inverse=order_type_inverse) }}
+    user = current_user, no_view=false, order_type_inverse=order_type_inverse) }}
     {{ macros.render_pagination(pagination, first_page, last_page, endpoint, url_arguments = url_args if url_args is defined else {}, order=order, order_type=order_type, order_type_inverse=order_type_inverse)}}
     
 </div>

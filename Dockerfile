@@ -17,7 +17,8 @@ COPY ./requirements.txt /usr/src/app/requirements.txt
 RUN pip3 install -r requirements.txt
 COPY ./sql/init.sql /docker-entrypoint-initdb.d/
 COPY . /usr/src/app/
-RUN touch /usr/src/app/logs/errors.log /usr/src/app/logs/logs.log 
+RUN touch /usr/src/app/logs/errors.log /usr/src/app/logs/logs.log
+RUN apt-get update 
 RUN apt-get -y install locales
 # Set the locale
 # RUN sed -i '/pt_BR.UTF-8/s/^# //g' /etc/locale.gen && \
