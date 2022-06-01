@@ -171,11 +171,14 @@ def edit(id):
                 return render_template('upload.html', form=form)
             old_file_path = join(app.config['OLD_UPLOAD_FOLDER'], file.file_name)
             # new_file_path = join(app.config['UPLOAD_FOLDER'], file.file_name)
-            if file.file_name == file_uploaded.filename:
-                if not isdir(app.config['OLD_UPLOAD_FOLDER']):
-                    mkdir(app.config['OLD_UPLOAD_FOLDER'])
+            # if file.file_name == file_uploaded.filename:
+            if not isdir(app.config['OLD_UPLOAD_FOLDER']):
+                mkdir(app.config['OLD_UPLOAD_FOLDER'])
+            if isfile(file.path):
                 rename(file.path, old_file_path)
-                app.logger.error(f"Arquivo {file.path} movido para {old_file_path}")
+            else:
+                flash('O arquivo não existe no diretório, foi utilizado o novo arquivo enviado.', category='danger')
+            app.logger.info(f"Arquivo {file.path} movido para {old_file_path}")
             file_uploaded.save(file.path)
         file.reference_date = form.reference_date.data
         file.type = form.type.data

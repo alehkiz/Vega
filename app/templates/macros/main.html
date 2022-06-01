@@ -198,7 +198,7 @@
                         {% endif %}
                         {% endif %}
                         {% else %}
-                        {% if not kwargs.get('no_view', none) is defined %}
+                        {% if not kwargs.get('no_view', false) is true %}
                         <a class="btn btn-outline-primary btn-sm"
                             href="{{ url_for(cls_table.__tablename__+'.view', id=item.id)}}" data-bs-toggle="tooltip"
                             title="Visualizar">
