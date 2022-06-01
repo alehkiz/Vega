@@ -7,8 +7,8 @@ from flask_security import login_required, current_user, roles_accepted
 from werkzeug.utils import redirect
 from app.core.db import db
 from app.forms.file import EditFileForm, SendFileForm
-from os.path import splitext, join, isfile
-from os import stat, remove
+from os.path import splitext, join, isfile, isdir
+from os import stat, remove, mkdir, rename
 
 bp = Blueprint('file_pdf', __name__, url_prefix='/files/')
 
@@ -84,7 +84,7 @@ def manuais():
         else None
     )
     last_page = paginate.pages
-    print(paginate.items)
+    # print(paginate.items)
     return render_template('files.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint, title_name='Manuais')
 
 @bp.route('/add', methods=['POST', 'GET'])
@@ -98,7 +98,7 @@ def add():
             # file_ext = splitext(file_uploaded.filename)[1].lower()
             # print(file_ext)
             if file_uploaded.filename.rsplit('.', 1)[1].lower() not in app.config['UPLOAD_EXTENSIONS']:
-                form.file.errors.append('Arquivo não aceito, envie apenas arquivos no formato PDF')
+                form.file.errors.append(f"Arquivo não aceito, envie apenas arquivos no formato {', '.join(app.config['UPLOAD_EXTENSIONS'])}")
                 return render_template('upload.html', form=form)
             
             file = FilePDF()
@@ -158,28 +158,57 @@ def edit(id):
     file = FilePDF.query.filter(FilePDF.id == id).first_or_404()
     form = EditFileForm()
     if form.validate_on_submit():
-        # file.file_name = form.file.data
+        file_uploaded = form.file.data
+        print(form.file_update.data)
+        if form.file_update.data is True:
+            if file_uploaded != '' and file_uploaded != None:
+                print(file_uploaded)
+                if file_uploaded.filename.rsplit('.', 1)[1].lower() not in app.config['UPLOAD_EXTENSIONS']:
+                    form.file.errors.append(f"Arquivo não aceito, envie apenas arquivos no formato {', '.join(app.config['UPLOAD_EXTENSIONS'])}")
+                    return render_template('upload.html', form=form)
+            else:
+                form.file.errors.append(f"Nenhum arquivo enviado e o botão 'Atualizar arquivo?' não foi selecionado")
+                return render_template('upload.html', form=form)
+            old_file_path = join(app.config['OLD_UPLOAD_FOLDER'], file.file_name)
+            # new_file_path = join(app.config['UPLOAD_FOLDER'], file.file_name)
+            if file.file_name == file_uploaded.filename:
+                if not isdir(app.config['OLD_UPLOAD_FOLDER']):
+                    mkdir(app.config['OLD_UPLOAD_FOLDER'])
+                rename(file.path, old_file_path)
+                app.logger.error(f"Arquivo {file.path} movido para {old_file_path}")
+            file_uploaded.save(file.path)
         file.reference_date = form.reference_date.data
         file.type = form.type.data
-        file.approved = form.approved.data
-        file.active = form.active.data
         file.title = form.title.data
         file.topics = form.topic.data
+        file.update_user_id = current_user.id
+        if current_user.is_admin:
+            if form.approved.data is True:
+                file.approved = form.approved.data
+                file.active = form.active.data
+        
+        if not isfile(file.path):
+                flash('Não foi possível salvar o arquivo', category='warning')
+                return redirect(url_for('file_pdf.edit', id=file.id))
         try:
             db.session.commit()
             flash('Edição salva com sucesso', category='success')
             return redirect(url_for('admin.file'))
         except Exception as e:
+            rename(old_file_path, file.path)
             db.session.rollback()
             app.logger.error(f"Erro ao salvar no banco de dados: {e}")
             return abort(500)
-    form.file.data = file.file_name
+    # form.file.data = file.file_name
     form.reference_date.data = file.reference_date
     form.type.data = file.type
+    
+            
     form.approved.data = file.approved
     form.active.data = file.active
     form.title.data = file.title
     form.topic.data = file.topics
+
     return render_template('upload.html', form=form)
 
 @bp.route('/view/<int:id>')
