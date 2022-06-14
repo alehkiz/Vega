@@ -350,7 +350,6 @@ def to_approve():
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
     elif topic != False and topic.isnumeric():
         topic = Topic.query.filter(Topic.id == int(topic)).first()
-
     if not order is False or not order_type is False:
         try:
             column = getattr(Question, order)
@@ -402,11 +401,6 @@ def to_approve():
         if topic != False:
             q = db.session.query(Question).filter(Question.answer != None, Question.answer_approved == False).join(
                 Question.topics).filter(Topic.id == topic.id).order_by(Question.create_at.asc())
-            # Question.query.filter(
-            #     Question.answer != None,
-            #     Question.answer_approved == False,
-            #     Question.topic_id == topic.id,
-            # ).order_by(Question.create_at.asc())
         else:
             q = Question.query.filter(
                 Question.answer != None, Question.answer_approved == False
@@ -423,6 +417,8 @@ def to_approve():
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
+        if len(form.who_answer.data) > 0:
+            q = q.filter(Question.answer_user_id.in_([_.id for _ in form.who_answer.data]))
     if search != False and search != '' and search != None:
         q = q.filter((
             func.ts_rank_cd(
