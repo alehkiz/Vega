@@ -172,6 +172,9 @@ def edit(id):
             old_file_path = join(app.config['OLD_UPLOAD_FOLDER'], file.file_name)
             # new_file_path = join(app.config['UPLOAD_FOLDER'], file.file_name)
             # if file.file_name == file_uploaded.filename:
+            file.mimetype = file_uploaded.content_type
+            file.path = join(app.config['UPLOAD_FOLDER'], file_uploaded.filename)
+            file.file_name = file_uploaded.filename
             if not isdir(app.config['OLD_UPLOAD_FOLDER']):
                 mkdir(app.config['OLD_UPLOAD_FOLDER'])
             if isfile(file.path):
@@ -185,9 +188,8 @@ def edit(id):
         file.title = form.title.data
         file.topics = form.topic.data
         file.update_user_id = current_user.id
-        file.mimetype = file_uploaded.content_type
-        file.path = join(app.config['UPLOAD_FOLDER'], file_uploaded.filename)
-        file.file_name = file_uploaded.filename
+
+        
         
         if current_user.is_admin:
             if form.approved.data is True:
