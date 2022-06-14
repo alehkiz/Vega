@@ -4,6 +4,7 @@ from wtforms import TextAreaField, StringField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length
 from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
 from app.models.wiki import SubTopic, Topic, Tag
+from app.models.security import User
 from flask import request
 
 class QuestionEditForm(FlaskForm):
@@ -78,6 +79,7 @@ class QuestionFilter(FlaskForm):
     topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.active==True, Topic.selectable==True), get_label='name')
     sub_topic = QuerySelectMultipleField('Sub-tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name')
     tag = QuerySelectMultipleField('Marcações', allow_blank=True, query_factory= lambda : Tag.query.order_by(Tag.name.asc()), get_label= 'name')
+    who_answer = QuerySelectMultipleField('Quem', allow_blank=True, query_factory= lambda : User.query.order_by(User.name.asc()), get_label= 'name')
     active = BooleanField('Ativa')
     search = StringField('Busca')
     submit = SubmitField('Filtrar')

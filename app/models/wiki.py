@@ -687,7 +687,7 @@ class Question(db.Model):
 
     @property
     def was_approved(self):
-        return self.answer_approved == True
+        return self.answer_approved == True and self.active == True
 
     @property
     def was_answered(self):

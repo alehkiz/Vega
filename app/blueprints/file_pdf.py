@@ -185,6 +185,10 @@ def edit(id):
         file.title = form.title.data
         file.topics = form.topic.data
         file.update_user_id = current_user.id
+        file.mimetype = file_uploaded.content_type
+        file.path = join(app.config['UPLOAD_FOLDER'], file_uploaded.filename)
+        file.file_name = file_uploaded.filename
+        
         if current_user.is_admin:
             if form.approved.data is True:
                 file.approved = form.approved.data
