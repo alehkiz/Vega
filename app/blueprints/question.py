@@ -160,11 +160,12 @@ def view(id=None):
         ).first_or_404()
     else:
         question = Question.query.filter(Question.id == id).first_or_404()
-    if not question.was_answered:
-        return redirect(url_for('question.index'))
+    
     if current_user.is_authenticated:
         user_id = current_user.id
     else:
+        if not question.was_answered or not question.was_approved:
+            return redirect(url_for('question.index'))
         user = User.query.filter(User.name == 'ANON').first()
         if user is None:
             raise Exception('Usuário anônimo não criado')

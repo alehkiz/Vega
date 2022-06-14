@@ -111,7 +111,21 @@ class Visit(db.Model):
             extract('year', Visit.datetime) == year,
             extract('month', Visit.datetime) == month
         ).group_by('date')
+    @staticmethod
+    def visits_by_ip(ips : list = None):
+        """Return a query object with a lista of network in ips and the count of access
 
+        Args:
+            ips (list, optional): IPs. Defaults to None.
+
+        Returns:
+            BaseQuery: A BaseQuery with number of access for each IP
+        """        
+        if list is None:
+            query = db.session.query(Network, func.count(Network.id).label('views')).join(Visit.network).group_by(Network)
+        else:
+            query = db.session.query(Network, func.count(Network.id).label('views')).join(Visit.network).filter(Network.ip.in_(ips)).group_by(Network)
+        return query
 class Network(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ip = db.Column(INET, nullable=False)
@@ -126,6 +140,7 @@ class Network(db.Model):
     current_login_user = db.relationship('User', backref='current_login_network', lazy='dynamic', foreign_keys='[User.current_login_network_id]')
     confirmed_user = db.relationship('User', backref='confirmed_network', lazy='dynamic', foreign_keys='[User.confirmed_network_id]')
     notifiers = db.relationship('Notifier', backref='network', lazy='dynamic', single_parent=True)
+    visits = db.relationship('Visit', backref='network', lazy='dynamic', single_parent=True)
     # created_citizen = db.relationship('Citizen', backref='created_network', lazy='dynamic', foreign_keys='[Citizen.created_network_id]')
 
 
