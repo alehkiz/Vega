@@ -419,6 +419,9 @@ def to_approve():
                 Tag.id.in_([_.id for _ in form.tag.data])))
         if len(form.who_answer.data) > 0:
             q = q.filter(Question.answer_user_id.in_([_.id for _ in form.who_answer.data]))
+        if form.active.data is True:
+            print('teste')
+            q = q.filter(Question.active == True)
     if search != False and search != '' and search != None:
         q = q.filter((
             func.ts_rank_cd(
