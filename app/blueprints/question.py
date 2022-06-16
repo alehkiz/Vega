@@ -439,10 +439,7 @@ def approve(id: int):
             app.logger.error(e)
             db.session.rollback()
             return render_template('answer.html', form=form, approve=True)
-        
-        
-        return 'ok'
-    
+                
     form.question.data = q.question
     form.answer.data = q.answer
     form.tag.data = q.tags
