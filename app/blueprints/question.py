@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify, session
 from flask.globals import current_app
 from flask_security import login_required, current_user, roles_accepted
+from app.blueprints.admin import sub_topic
 from app.core.db import db
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, SubTopic, Tag, Topic
 from app.models.security import User
@@ -655,8 +656,11 @@ def make_question():
     form = CreateQuestion()
     if form.validate_on_submit():
         question = Question.query.filter(Question.question.ilike(form.question.data)).first()
-        if not question is None:
-            form.question.errors.append('Dúvida já cadastrada')
+        sub_topic = SubTopic.query.all()
+        question = Question.search(form.question.data, sub_topics=sub_topic)
+        if question.count() > 0:
+            flash('Já temos perguntas cadastras sobre o assunto pesquisado!!', category='warning')
+            return redirect(url_for('question.search', q=form.question.data))
         if not form.errors:
             if current_user.is_authenticated:
                 user = current_user
@@ -669,7 +673,6 @@ def make_question():
                 db.session.add(ip)
                 try:
                     db.session.commit()
-                    
                     return redirect(url_for('question.index'))
                 except Exception as e:
                     db.session.rollback()
