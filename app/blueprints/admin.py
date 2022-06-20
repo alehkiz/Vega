@@ -261,27 +261,12 @@ def questions():
                     .order_by(relationship_type_order())
                 )
     else:
-        # if topic != False:
-        #     q = Question.query.filter(
-        #         Question.answer == None, Question.topic_id == topic.id
-        #     ).order_by(Question.create_at.asc())
-        # else:
-        #     q = Question.query.filter(Question.answer == None).order_by(
-        #         Question.create_at.asc()
-        #     )
         if topic != False:
             q = db.session.query(Question).filter(
                 Question.answer == None).join(Question.topics).filter(Topic.id == topic.id).order_by(column_type())
-            # q = Question.query.filter(
-            #     Question.answer == None, Question.topic_id == topic.id
-            # ).order_by(column_type())
         else:
             q = db.session.query(Question).filter(
-                Question.answer == None).order_by(column_type())
-            # Question.query.filter(Question.answer == None).order_by(
-            #     column_type()
-            # )
-    
+                Question.answer == None).order_by(column_type())    
     if form.validate():
         if len(form.topic.data) > 0:
             q = q.join(Question.topics).filter(Topic.id.in_(
@@ -292,7 +277,8 @@ def questions():
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
-    
+        if form.active.data is True:
+            q = q.filter(Question.active == True)
     if search != False and search != '' and search != None:
         q = q.filter((
             func.ts_rank_cd(

@@ -480,7 +480,7 @@ def tag(name):
                                 last_page=last_page, 
                                 url_args=url_args)
 
-
+#TODO: REMOVER
 @bp.route('/topic/<string:name>/<string:type>/')
 @counter
 def topic(name, type):
