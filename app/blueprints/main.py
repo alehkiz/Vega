@@ -24,7 +24,7 @@ from datetime import datetime
 from sqlalchemy import func
 
 from app.core.db import db
-from app.models.wiki import Article, Question, QuestionView, Tag, Topic
+from app.models.wiki import Article, Question, QuestionView, SubTopic, Tag, Topic
 from app.models.app import Network, Page, Visit
 from app.models.security import User
 from app.forms.question import QuestionSearchForm
@@ -206,6 +206,29 @@ def index():
             Topic.name.ilike(session.get("AccessType", False))
         ).first_or_404()
 
+        sub_topics = db.session.query(Question).join(Topic.questions, SubTopic).filter(Topic.id == topic.id)
+        sub_topics_questions = [
+            {
+                "id": _.id,
+                "name": _.name,
+                "values": [
+                    {
+                        "title": "Aprovadas",
+                        "count": _.questions.filter(
+                            Question.answer_approved == True,
+                            Question.active == True
+                        ).count(),
+                        "bt_name": "Visualizar",
+                        "bt_route": url_for(
+                            "main.index", name=_.name, type="aprovada"
+                        ),
+                        "card_style": "bg-primary bg-gradient text-dark",
+                    }
+                ],
+            }
+            for _ in SubTopic.query.all()
+        ]
+
         topic_question = [
             {
                 "id": topic.id,
@@ -225,6 +248,7 @@ def index():
                 ],
             }
         ]
+        print(sub_topics_questions)
 
         tags = db.session.query(Tag).join(Question.tags)
 
@@ -238,7 +262,7 @@ def index():
             'card_style': 'bg-success br.gradient text-dark'
         } for _ in tags]}]
 
-        return render_template("index.html", topics=topic_question, tags=tags_question)
+        return render_template("index.html", sub_topics=sub_topics_questions, topic=topic, mode='index',tags=tags_question)#
     page = request.args.get("page", 1, type=int)
     if not session.get("AccessType", False):
         return redirect(url_for("main.index"))
