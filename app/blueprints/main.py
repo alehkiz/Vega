@@ -29,7 +29,7 @@ from app.models.app import Network, Page, Visit
 from app.models.security import User
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
-from app.utils.kernel import convert_datetime_to_local
+from app.utils.kernel import convert_datetime_to_local, breadcrumb
 from app.utils.routes import counter
 # from app.core.extensions import cache
 
@@ -161,8 +161,11 @@ def teardown_request(exception):
 
 @bp.route("/")
 @bp.route("/index")
+@bp.route('/index/<string:sub_topic>')
+@bp.route('/index/<string:sub_topic>/<string:tag>')
+@breadcrumb(app)
 @counter
-def index():
+def index(sub_topic=None, tag=None):
     if current_user.is_authenticated and current_user.has_support:
         topics = [
             {
@@ -206,27 +209,28 @@ def index():
             Topic.name.ilike(session.get("AccessType", False))
         ).first_or_404()
 
-        sub_topics = db.session.query(Question).join(Topic.questions, SubTopic).filter(Topic.id == topic.id)
+        # sub_topics = db.session.query(Question).join(Topic.questions, SubTopic).filter(Topic.id == topic.id)
         sub_topics_questions = [
             {
-                "id": _.id,
-                "name": _.name,
+                "id": topic.id,
+                "name": topic.name,
                 "values": [
                     {
-                        "title": "Aprovadas",
-                        "count": _.questions.filter(
+                        "title": _.name,
+                        "count": _.questions.join(Topic.questions).filter(
                             Question.answer_approved == True,
-                            Question.active == True
+                            Question.active == True,
+                            Topic.id == topic.id
                         ).count(),
                         "bt_name": "Visualizar",
                         "bt_route": url_for(
-                            "main.index", name=_.name, type="aprovada"
+                            "main.index", sub_topic=_.name
                         ),
                         "card_style": "bg-primary bg-gradient text-dark",
-                    }
+                    } for _ in SubTopic.query.all()
                 ],
             }
-            for _ in SubTopic.query.all()
+           
         ]
 
         topic_question = [
@@ -235,7 +239,7 @@ def index():
                 "name": topic.name,
                 "values": [
                     {
-                        "title": "Aprovadas",
+                        "title": _.name,
                         "count": topic.questions.filter(
                             Question.answer_approved == True
                         ).count(),
@@ -244,11 +248,11 @@ def index():
                             "question.topic", name=topic.name, type="aprovada"
                         ),
                         "card_style": "bg-primary bg-gradient text-dark",
-                    }
+                    } for _ in SubTopic.query.all()
                 ],
             }
         ]
-        print(sub_topics_questions)
+        # print(sub_topics_questions)
 
         tags = db.session.query(Tag).join(Question.tags)
 
