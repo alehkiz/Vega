@@ -1,5 +1,7 @@
 from flask import current_app as app, request, abort, g, redirect, url_for
 from flask_security import current_user
+from werkzeug.exceptions import MethodNotAllowed, NotFound
+from werkzeug.routing import RequestRedirect
 from app.models.app import Page, Visit
 from app.models.security import User
 from app.models.app import Network
@@ -53,3 +55,27 @@ def counter(f):
             return abort(500)
         return f(*args, **kwargs)
     return decorated_function
+
+
+def route_exists(path, method='GET', query_args=None):
+    """Check if the PATH exists for the application.
+
+    Args:
+        path (_type_): _description_
+        method (str, optional): _description_. Defaults to 'GET'.
+        query_args (_type_, optional): _description_. Defaults to None.
+    Returns:
+        True: Exists
+        False: Not found
+    """
+
+    adapter = app.create_url_adapter(None)
+
+    if adapter is None:
+        raise Exception('Configure a SERVER_NAME for app')
+    
+    try:
+        adapter.match(path, method, query_args)
+    except (MethodNotAllowed, NotFound):
+        return False
+    return True

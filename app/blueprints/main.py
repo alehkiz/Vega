@@ -29,7 +29,7 @@ from app.models.app import Network, Page, Visit
 from app.models.security import User
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
-from app.utils.kernel import convert_datetime_to_local, breadcrumb
+from app.utils.kernel import convert_datetime_to_local, breadcrumb, route_from
 from app.utils.routes import counter
 # from app.core.extensions import cache
 
@@ -209,6 +209,12 @@ def index(sub_topic=None, tag=None):
             Topic.name.ilike(session.get("AccessType", False))
         ).first_or_404()
 
+        if sub_topic != None:
+            _sub_topic = SubTopic.query.filter(SubTopic.name == sub_topic).first_or_404()
+        if tag != None:
+            _tag = Tag.query.filter(Tag.name == tag).first_or_404()
+
+
         # sub_topics = db.session.query(Question).join(Topic.questions, SubTopic).filter(Topic.id == topic.id)
         sub_topics_questions = [
             {
@@ -230,43 +236,82 @@ def index(sub_topic=None, tag=None):
                     } for _ in SubTopic.query.all()
                 ],
             }
-           
         ]
+        # topic_question = [
+        #     {
+        #         "id": topic.id,
+        #         "name": topic.name,
+        #         "values": [
+        #             {
+        #                 "title": _.name,
+        #                 "count": topic.questions.filter(
+        #                     Question.answer_approved == True
+        #                 ).count(),
+        #                 "bt_name": "Visualizar",
+        #                 "bt_route": url_for(
+        #                     "main.index", sub_topic=_.name
+        #                 ),
+        #                 "card_style": "bg-primary bg-gradient text-dark",
+        #             } for _ in SubTopic.query.all()
+        #         ],
+        #     }
+        # ]
+        # breadcrumb
+        paths = [_ for _ in request.path.split('/') if _ != '']
+        if not paths:
+            paths.append('index')
+        breadcrumbs = {v if v != 'index' else 'Home' : '/'+'/'.join(paths[0:i+1]) if i < len(paths)-1 else None for i, v in enumerate(paths)}
 
-        topic_question = [
-            {
-                "id": topic.id,
-                "name": topic.name,
-                "values": [
-                    {
-                        "title": _.name,
-                        "count": topic.questions.filter(
-                            Question.answer_approved == True
-                        ).count(),
-                        "bt_name": "Visualizar",
-                        "bt_route": url_for(
-                            "question.topic", name=topic.name, type="aprovada"
-                        ),
-                        "card_style": "bg-primary bg-gradient text-dark",
-                    } for _ in SubTopic.query.all()
-                ],
-            }
-        ]
-        # print(sub_topics_questions)
+        if sub_topic != None and tag is None:
+            print(sub_topic)
+            tags = _sub_topic.questions.join(Topic.questions).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
+            tags = db.session.query(Tag).join(Topic.questions).join(SubTopic).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
 
-        tags = db.session.query(Tag).join(Question.tags)
+            tags.group_by(Tag).order_by(func.count(Question.id).desc())
 
-        tags.group_by(Tag).order_by(func.count(Question.id).desc())
+            tags_question = [{"name": 'Marcações', "values": [{
+                'title': _.name,
+                'count': _.questions.join(Topic.questions).join(SubTopic).filter(Question.answer_approved == True, Question.active == True, SubTopic.id == _sub_topic.id, Topic.id == topic.id).count(),
+                'bt_name': 'Visualizar',
+                'bt_route': url_for('main.index', sub_topic=_sub_topic.name, tag=_.name),
+                'card_style': 'bg-success br.gradient text-dark'
+            } for _ in tags]}]
 
-        tags_question = [{"name": 'Marcações', "values": [{
-            'title': _.name,
-            'count': _.questions_approved(g.topic).count(),
-            'bt_name': 'Visualizar',
-            'bt_route': url_for('question.tag', name=_.name, type='aprovada'),
-            'card_style': 'bg-success br.gradient text-dark'
-        } for _ in tags]}]
+            return render_template("index.html", mode='index',tags=tags_question, breadcrumbs=breadcrumbs)#
+        if tag != None:
+            print('Tags!')
+            page = request.args.get('page', 1, type=int)
+            
+            
+            
+            query = _tag.questions.join(Topic.questions).join(SubTopic).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
 
-        return render_template("index.html", sub_topics=sub_topics_questions, topic=topic, mode='index',tags=tags_question)#
+            # db.session.query(Tag).join(Topic.questions).join(SubTopic).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
+            paginate = query.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+            iter_pages = list(paginate.iter_pages())
+            first_page = iter_pages[0] if len(iter_pages) >= 1 else None
+            last_page = paginate.pages if paginate.pages > 0 else None
+
+            url_args = dict(request.args)
+            url_args.pop('page') if 'page' in url_args.keys() else None
+            print(url_args)
+            print(request.url_rule)
+            print(request.url)
+            route, args = route_from(request.path)
+            url_args = dict(url_args, **args)
+            return render_template(
+                'index.html', 
+                pagination=paginate, 
+                cls_question=Question, 
+                first_page=first_page, 
+                last_page=last_page, 
+                sub_topics=SubTopic.query,
+                url_args=url_args,
+                breadcrumbs=breadcrumbs,
+                route=route
+                )
+
+        return render_template("index.html", sub_topics=sub_topics_questions, topic=topic, mode='index',breadcrumbs=breadcrumbs)#
     page = request.args.get("page", 1, type=int)
     if not session.get("AccessType", False):
         return redirect(url_for("main.index"))
