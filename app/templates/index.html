@@ -1,30 +1,38 @@
 {% extends 'base_question.html' %}
-
-
-
 {% from "macros/form.html" import render_field %}
 {% from "macros/main.html" import render_pagination %}
 
 {% block app_content %}
 
 <div class="container">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item"><a href="#">Library</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Data</li>
-        </ol>
-    </nav>
-    <p>Breadcrumbs:
+    
+    <!-- <p>Breadcrumbs:
         {% for crumb in g.breadcrumbs %}
             <a href="{{ crumb.path }}">{{ crumb.title }}</a>
             {% if not loop.last %}&raquo;{% endif %}
-        {% endfor %}
+        {% endfor %} -->
 
 
     <div class="row border border-primary p-3 rounded">
         <a href="{{ url_for('question.make_question')}}" class="btn btn-primary btn-lg btn-block">Perguntar</a>
     </div>
+    <br>
+
+    {% if breadcrumbs is defined %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            {% for breadcrumb in breadcrumbs.items() %}
+            {% if breadcrumb[1] == none %}
+            <li class="breadcrumb-item">{{breadcrumb[0]}}</li>
+            {% else %}
+            <li class="breadcrumb-item"><a href="{{breadcrumb[1]}}">{{breadcrumb[0]}}</a></li>
+            {% endif %}
+            <!-- <li class="breadcrumb-item"><a href="#">Library</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Data</li> -->
+            {% endfor %}
+        </ol>
+    </nav>
+    {% endif %}
     {% if topics is defined %}
     {% for topic in topics %}
 
@@ -131,6 +139,24 @@
 </div>
 {% endfor %}
 {% endif %}
+
+{% if pagination is defined %}
+<div class="btn-group btn-group-lg" role="group" aria-label="...">
+    {#{% for sub_topic in sub_topics %}
+    <a href='{{ url_for(".index",  sub_topic=sub_topic.name)}}'
+        class="btn btn-primary rouded border">{{sub_topic.name}}</a> {% endfor %}#}
+</div>
+
+<!-- {{route}}
+{{url_args}} -->
+{% include '_question.html' %}
+{{ render_pagination(pagination, first_page, last_page, route,url_args if url_args is defined else
+{})}} 
+
+{% endif %}
+
+
+
 </div>
 
 {% endblock %}

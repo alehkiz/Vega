@@ -184,8 +184,16 @@ def breadcrumb(app):
 
             for path, title in session_crumbs:
                 g.breadcrumbs.add(BreadCrumb(path, title))
-            print(args)
-            print(kwargs)
+            # print(args)
+            # print(kwargs)
+
+            paths = [_ for _ in request.path.split('/') if _ != '']
+            if not paths:
+                paths.append('index')
+            dict_paths = {v: '/'.join(paths[0:i+1]) for i, v in enumerate(paths)}
+
+            
+
             print('path', request.path)
 
             print(f'route_from: {route_from(request.path)}')
@@ -203,19 +211,19 @@ def breadcrumb(app):
 
 
 def route_from(url, method=None):
-    app_ctx = _app_ctx_stack
-    req_ctx = _request_ctx_stack
+    app_ctx = _app_ctx_stack.top
+    req_ctx = _request_ctx_stack.top
 
     if app_ctx is None:
         raise RuntimeError('Não existe contexto para a aplicação, somente é possível identificar a URL quando estiver com um contexto')
     if req_ctx is not None:
-        url_parse = req_ctx.url_adapter
+        url_adapter = req_ctx.url_adapter
     else:
         url_adapter = app_ctx.url_adapter
         if url_adapter is None:
             raise RuntimeError('A aplicação não está disponível para criar uma url')
     parsed_url = url_parse(url)
 
-    if parsed_url.netloc is not '' and parsed_url.netloc != url_adapter.server_name:
+    if parsed_url.netloc != '' and parsed_url.netloc != url_adapter.server_name:
         raise RuntimeError('Not Found')
     return url_adapter.match(parsed_url.path, method)
