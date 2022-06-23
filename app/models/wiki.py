@@ -356,8 +356,8 @@ class Question(db.Model):
     answer_at = db.Column(db.DateTime(timezone=True))
     # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
     # topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
-    sub_topic_id = db.Column(
-        db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
+    # sub_topic_id = db.Column(
+    #     db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
     question_network_id = db.Column(
         db.Integer, db.ForeignKey('network.id'), nullable=False)
     answer_network_id = db.Column(
@@ -366,8 +366,7 @@ class Question(db.Model):
     sub_topics = db.relationship('SubTopic', 
                                 secondary=question_sub_topic, 
                                 backref=db.backref('questions', 
-                                                    lazy='dynamic', cascade='save-update', single_parent=True),
-                                lazy='dynamic')
+                                                    lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
     topics = db.relationship('Topic',
                              secondary=question_topic,
                              backref=db.backref('questions',
@@ -376,7 +375,7 @@ class Question(db.Model):
     tags = db.relationship('Tag',
                            secondary=question_tag,
                            backref=db.backref('questions',
-                                              lazy='dynamic', cascade='all, delete-orphan', single_parent=True,),
+                                              lazy='dynamic', cascade='save-update', single_parent=True,),
                            lazy='dynamic')
     search_vector = db.Column(TSVectorType(
         'question', 'answer', regconfig='public.pt', cache_ok=False))  # regconfig='public.pt'))
@@ -519,12 +518,12 @@ class Question(db.Model):
                       # desc('similarity'))
                       )
         if not topics:
-            result = result.filter(Question.sub_topic_id.in_(
-                [_.id for _ in sub_topics]))
+            result = result.join(SubTopic.questions).filter(SubTopic.id.in_(
+                [_.id for _ in sub_topics])).group_by(Question)
         else:
-            result = result.filter(Question.sub_topic_id.in_(
+            result = result.join(SubTopic.questions).filter(SubTopic.id.in_(
                 [_.id for _ in sub_topics])).join(Question.topics).filter(
-                    Topic.id.in_([_.id for _ in topics]))
+                    Topic.id.in_([_.id for _ in topics])).group_by(Question)
         if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result

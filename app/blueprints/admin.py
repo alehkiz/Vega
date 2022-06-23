@@ -150,8 +150,8 @@ def answers():
             q = q.join(Question.topics).filter(Topic.id.in_(
                 [_.id for _ in form.topic.data]))
         if len(form.sub_topic.data) > 0:
-            q = q.filter(Question.sub_topic_id.in_(
-                [_.id for _ in form.sub_topic.data]))
+            q = q.filter(Question.sub_topics.any(
+                SubTopic.id.in_([_.id for _ in form.sub_topic.data])))
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
@@ -272,8 +272,8 @@ def questions():
             q = q.join(Question.topics).filter(Topic.id.in_(
                 [_.id for _ in form.topic.data]))
         if len(form.sub_topic.data) > 0:
-            q = q.filter(Question.sub_topic_id.in_(
-                [_.id for _ in form.sub_topic.data]))
+            q = q.filter(Question.sub_topics.any(
+                SubTopic.id.in_([_.id for _ in form.sub_topic.data])))
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
@@ -398,8 +398,8 @@ def to_approve():
             q = q.filter(Topic.id.in_(
                 [_.id for _ in form.topic.data]))
         if len(form.sub_topic.data) > 0:
-            q = q.filter(Question.sub_topic_id.in_(
-                [_.id for _ in form.sub_topic.data]))
+            q = q.filter(Question.sub_topics.any(
+                SubTopic.id.in_([_.id for _ in form.sub_topic.data])))
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
