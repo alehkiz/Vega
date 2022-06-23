@@ -124,7 +124,7 @@ def search():
                     question = Question()
                     question.question = form.question.data
                     question.topics.append(topic)
-                    question.sub_topic = form.sub_topic.data
+                    question.sub_topics.append(form.sub_topic.data)
                     question.create_user_id = user.id
                     question.question_network_id = g.ip_id
                     question.active = False
@@ -188,7 +188,7 @@ def edit(id):
         question.question = process_html(form.question.data).text
         question.tags = form.tag.data
         question.topics = form.topic.data
-        question.sub_topic = form.sub_topic.data
+        question.sub_topics = form.sub_topic.data
         question.update_user_id = current_user.id
         question.update_at = convert_datetime_to_local(datetime.now())
         # question.answer_user_id = current_user.id
@@ -333,7 +333,7 @@ def add():
             question.question_network_id = g.ip_id
             question.create_user_id = current_user.id
             question.topics.extend(form.topic.data)
-            question.sub_topic_id = form.sub_topic.data.id
+            question.sub_topics.extend(form.sub_topic.data)
             question.tags = form.tag.data
             question.active = True
             question.create_at = convert_datetime_to_local(datetime.utcnow())

@@ -223,11 +223,12 @@ def index(sub_topic=None, tag=None):
                 "values": [
                     {
                         "title": _.name,
-                        "count": _.questions.join(Topic.questions).filter(
+                        "count": db.session.query(Question).filter(
                             Question.answer_approved == True,
                             Question.active == True,
-                            Topic.id == topic.id
-                        ).count(),
+                            Question.sub_topics.contains(_),
+                            Question.topics.contains(topic)
+                        ).group_by(Question).count(),
                         "bt_name": "Visualizar",
                         "bt_route": url_for(
                             "main.index", sub_topic=_.name
@@ -264,7 +265,7 @@ def index(sub_topic=None, tag=None):
 
         if sub_topic != None and tag is None:
             print(sub_topic)
-            tags = _sub_topic.questions.join(Topic.questions).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
+            # tags = _sub_topic.questions.join(Topic.questions).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
             tags = db.session.query(Tag).join(Question.tags).filter(
                         Question.answer_approved == True, 
                         Question.active == True, 
@@ -279,7 +280,11 @@ def index(sub_topic=None, tag=None):
 
             tags_question = [{"name": 'Marcações', "values": [{
                 'title': _.name,
-                'count': _.questions.join(Topic.questions).join(SubTopic).filter(Question.answer_approved == True, Question.active == True, SubTopic.id == _sub_topic.id, Topic.id == topic.id).count(),
+                'count': _.questions.join(Topic.questions).filter(
+                    Question.answer_approved == True, 
+                    Question.active == True,
+                    Question.topics.contains(topic), 
+                    Question.sub_topics.contains(_sub_topic)).group_by(Question).count(),
                 'bt_name': 'Visualizar',
                 'bt_route': url_for('main.index', sub_topic=_sub_topic.name, tag=_.name),
                 'card_style': 'bg-success br.gradient text-dark'
@@ -292,7 +297,11 @@ def index(sub_topic=None, tag=None):
             
             
             
-            query = _tag.questions.join(Topic.questions).join(SubTopic).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
+            query = _tag.questions.filter(
+                Question.answer_approved == True, 
+                Question.active == True,
+                Question.topics.contains(topic), 
+                Question.sub_topics.contains(_sub_topic)).group_by(Question)
 
             # db.session.query(Tag).join(Topic.questions).join(SubTopic).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
             paginate = query.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)

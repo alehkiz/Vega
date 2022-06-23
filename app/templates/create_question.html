@@ -1,7 +1,9 @@
 {% import "macros/form.html" as macros %} {% if form %}
 
 <form action="" method="POST">
-    {{ form.csrf_token }} {{ macros.render_field(form.question, size=64, class='form-control', placeholder='Dúvida', maxlength=256)}} {{ macros.render_field(form.sub_topic, class='form-select', nosize=True)}}
+    {{ form.csrf_token }} {{ macros.render_field(form.question, size=64, class='form-control', placeholder='Dúvida',
+    maxlength=256)}}
+    {{ macros.render_field(form.sub_topic, class='form-select', nosize=True)}}
     <br> {{ form.submit }}
 </form>
 
@@ -13,10 +15,12 @@
         <h5>Faça perguntas objetivas</h5>
     </li>
     <li class="list-group-item">
-        <h5>Não inclua identificadores como: <strong>CPF</strong>, <strong>PLACA</strong>, <strong>RENAVAM</strong>, <strong>CHASSI</strong> e etc.</h5>
+        <h5>Não inclua identificadores como: <strong>CPF</strong>, <strong>PLACA</strong>, <strong>RENAVAM</strong>,
+            <strong>CHASSI</strong> e etc.</h5>
     </li>
     <li class="list-group-item">
-        <h5>Serão respondidas apenas dúvidas operacionais sobre <strong><u>Habilitação</u></strong> e <strong><u>Veículos</u></strong></h5>
+        <h5>Serão respondidas apenas dúvidas operacionais sobre <strong><u>Habilitação</u></strong> e
+            <strong><u>Veículos</u></strong></h5>
     </li>
     <!-- <li class="list-group-item"></li>
     <li class="list-group-item"></li>
