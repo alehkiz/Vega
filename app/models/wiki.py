@@ -40,6 +40,11 @@ question_topic = db.Table('question_topic',
                                     db.ForeignKey('question.id')),
                           db.Column('topic_id', db.Integer, db.ForeignKey('topic.id')))
 
+question_sub_topic = db.Table('question_sub_topic',
+                        db.Column('question_id', db.Integer, 
+                                    db.ForeignKey('question.id')),
+                        db.Column('sub_topic_id', db.Integer, db.ForeignKey('sub_topic.id'))
+                        )
 
 class ArticleView(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -274,8 +279,8 @@ class SubTopic(db.Model):
                             nullable=True, unique=True)
     create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
     # articles = db.relationship('Article', backref='topic', lazy='dynamic')
-    questions = db.relationship('Question', backref='sub_topic',
-                                lazy='dynamic', foreign_keys='[Question.sub_topic_id]')
+    # questions = db.relationship('Question', backref='sub_topic',
+    #                             lazy='dynamic', foreign_keys='[Question.sub_topic_id]')
 
     @hybrid_property
     def name(self):
@@ -358,6 +363,11 @@ class Question(db.Model):
     answer_network_id = db.Column(
         db.Integer, db.ForeignKey('network.id'), nullable=True)
     active = db.Column(db.Boolean, nullable=False)
+    sub_topics = db.relationship('SubTopic', 
+                                secondary=question_sub_topic, 
+                                backref=db.backref('questions', 
+                                                    lazy='dynamic', cascade='save-update', single_parent=True),
+                                lazy='dynamic')
     topics = db.relationship('Topic',
                              secondary=question_topic,
                              backref=db.backref('questions',

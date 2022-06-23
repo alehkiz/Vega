@@ -265,9 +265,17 @@ def index(sub_topic=None, tag=None):
         if sub_topic != None and tag is None:
             print(sub_topic)
             tags = _sub_topic.questions.join(Topic.questions).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
-            tags = db.session.query(Tag).join(Topic.questions).join(SubTopic).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id, SubTopic.id == _sub_topic.id)
+            tags = db.session.query(Tag).join(Question.tags).filter(
+                        Question.answer_approved == True, 
+                        Question.active == True, 
+                        Question.topics.contains(topic), 
+                        Question.sub_topics.contains(_sub_topic)).group_by(
+                            Tag).order_by(
+                                func.count(
+                                    Question.id).desc()).having(
+                                        func.count(Question.id) > 0)
 
-            tags = tags.group_by(Tag).order_by(func.count(Question.id).desc()).having(func.count(Question.id) > 0)
+            # tags = tags.group_by(Tag).order_by(func.count(Question.id).desc()).having(func.count(Question.id) > 0)
 
             tags_question = [{"name": 'Marcações', "values": [{
                 'title': _.name,

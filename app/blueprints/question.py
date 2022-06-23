@@ -207,7 +207,7 @@ def edit(id):
     form.tag.data = question.tags
     form.topic.data = question.topics
     form.answer.data = question.answer
-    form.sub_topic.data = question.sub_topic
+    form.sub_topic.data = question.sub_topics
     if current_user.is_admin:
         form.approved.data = question.answer_approved
     return render_template('edit.html',form=form, title='Editar', question=True)
@@ -378,7 +378,7 @@ def answer(id: int):
         q.answer_at = convert_datetime_to_local(datetime.utcnow())
         q.tags = form.tag.data
         q.topics = form.topic.data
-        q.sub_topic = form.sub_topic.data
+        q.sub_topics = form.sub_topic.data
         q.question = form.question.data
         try:
             db.session.commit()
@@ -392,7 +392,7 @@ def answer(id: int):
     
     form.question.data = q.question
     form.topic.data = q.topics
-    form.sub_topic.data = q.sub_topic
+    form.sub_topic.data = q.sub_topics
 
 
     return render_template('answer.html', form=form, answer=True)
@@ -425,7 +425,7 @@ def approve(id: int):
         # q.answer_at = datetime.now()
         q.tags = form.tag.data
         q.topics = form.topic.data
-        q.sub_topic = form.sub_topic.data
+        q.sub_topics = form.sub_topic.data
         q.answer_approved = form.approve.data
         q.answer_approve_user_id = current_user.id
         q.active = True
@@ -445,7 +445,7 @@ def approve(id: int):
     form.answer.data = q.answer
     form.tag.data = q.tags
     form.topic.data = q.topics
-    form.sub_topic.data = q.sub_topic
+    form.sub_topic.data = q.sub_topics
     form.approve.data = q.answer_approved
     form.answered_by.data = q.answered_by.name
 
