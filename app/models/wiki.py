@@ -439,9 +439,10 @@ class Question(db.Model):
     def topic_name(self):
         return ', '.join([_.name for _ in self.topics])
 
+
     @property
     def sub_topic_name(self):
-        return self.sub_topic.name
+        return ', '.join([_.name for _ in self.sub_topics])
 
     @property
     def is_support(self):
