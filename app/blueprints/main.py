@@ -176,7 +176,7 @@ def index(sub_topic=None, tag=None):
                         "title": "Perguntas pendentes",
                         "count": _.questions.filter(Question.answer == None).count(),
                         "bt_name": "Responder",
-                        "bt_route": url_for("admin.questions", topic=_.name),
+                        "bt_route": url_for("admin.questions", topic=_.id),
                         "card_style": "bg-danger bg-gradient text-white",
                     },
                     {
@@ -185,7 +185,7 @@ def index(sub_topic=None, tag=None):
                             Question.answer != None, Question.answer_approved == False
                         ).count(),
                         "bt_name": "Aprovar",
-                        "bt_route": url_for("admin.to_approve", topic=_.name),
+                        "bt_route": url_for("admin.to_approve", topic=_.id),
                         "card_style": "bg-warning bg-gradient text-dark",
                     },
                     {
@@ -195,7 +195,7 @@ def index(sub_topic=None, tag=None):
                         ).count(),
                         "bt_name": "Acessar",
                         "bt_route": url_for(
-                            "question.topic", name=_.name, type="aprovada"
+                            "question.topic", name=_.id, type="aprovada"
                         ),
                         "card_style": "bg-primary bg-gradient text-white",
                     },
