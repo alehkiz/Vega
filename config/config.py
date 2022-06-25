@@ -102,7 +102,7 @@ class BaseConfig(object):
                 'name' : 'Tópicos',
                 'attr' : 'topic_name'
             },
-            'sub_topic' :{
+            'sub_topics' :{
                 'name' : 'Sub Tópico',
                 'attr' : 'sub_topic_name'
             },
