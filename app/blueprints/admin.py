@@ -1,3 +1,5 @@
+from argparse import FileType
+from app.forms.file_pdf_type import FilePDFTypeFilter
 from app.models.app import FilePDF, FilePDFType
 from app.models.notifier import Notifier
 from flask import (
@@ -423,6 +425,7 @@ def to_approve():
     last_page = paginate.pages
     order_type_inverse = "asc" if order_type == "desc" else "desc"
     order = request.args.get('order', None)
+    order_type = "asc" if order_type == "desc" else "desc"
     url_args = dict(request.args)
     url_args.pop('order_type', None)
     url_args.pop('order', None)
@@ -532,6 +535,8 @@ def file_pdf_type():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
+    
+    request_args = request.args
     if not order is False or not order_type is False:
         try:
             column = getattr(FilePDFType, order)
@@ -542,8 +547,14 @@ def file_pdf_type():
     else:
         column = FilePDFType.id
         column_type = column.desc
-    t = FilePDFType.query.order_by(column_type())
-    paginate = t.paginate(page, app.config.get(
+
+    # if order:
+
+
+
+
+    file_type = FilePDFType.query.order_by(column_type())
+    paginate = file_type.paginate(page, app.config.get(
         "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
@@ -551,7 +562,16 @@ def file_pdf_type():
         else None
     )
     last_page = paginate.pages
+    print(order_type)
     order_type = "asc" if order_type == "desc" else "desc"
+
+    order_type_inverse = "asc" if order_type == "desc" else "desc"
+    order = request.args.get('order', None)
+    url_args = dict(request.args)
+    url_args.pop('order_type', None)
+    url_args.pop('order', None)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
     return render_template(
         "admin.html",
         pagination=paginate,
@@ -562,7 +582,8 @@ def file_pdf_type():
         list=True,
         page_name="FilePDFType",
         order_type=order_type,
-        no_view=False
+        no_view=False,
+        order_type_inverse=order_type_inverse
     )
 
 @bp.route("/tag")
@@ -689,7 +710,8 @@ def file():
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
     topic = request.args.get("topic", False)
-    # form = QuestionFilter(request.args, meta={'csrf': False})
+    
+    form = FilePDFTypeFilter(request.args, meta={'csrf': False})
     request_args = request.args
     if topic != False and not topic.isnumeric():
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
@@ -738,34 +760,22 @@ def file():
                     .order_by(relationship_type_order())
                 )
     else:
-        # if topic != False:
-        #     q = Question.query.filter(
-        #         Question.answer == None, Question.topic_id == topic.id
-        #     ).order_by(Question.create_at.asc())
-        # else:
-        #     q = Question.query.filter(Question.answer == None).order_by(
-        #         Question.create_at.asc()
-        #     )
+
         if topic != False:
             q = db.session.query(FilePDF).join(FilePDF.topics).filter(Topic.id == topic.id).order_by(column_type())
-            # q = Question.query.filter(
-            #     Question.answer == None, Question.topic_id == topic.id
-            # ).order_by(column_type())
+
         else:
             q = db.session.query(FilePDF).order_by(column_type())
-            # Question.query.filter(Question.answer == None).order_by(
-            #     column_type()
-            # )
-    # if form.validate():
-    #     if len(form.topic.data) > 0:
-    #         q = q.join(Question.topics).filter(Topic.id.in_(
-    #             [_.id for _ in form.topic.data]))
-    #     if len(form.sub_topic.data) > 0:
-    #         q = q.filter(Question.sub_topic_id.in_(
-    #             [_.id for _ in form.sub_topic.data]))
-    #     if len(form.tag.data) > 0:
-    #         q = q.filter(Question.tags.any(
-    #             Tag.id.in_([_.id for _ in form.tag.data])))
+    # q = q.join(FilePDFType)
+    if form.validate():
+        if len(form.type.data) > 0:
+            q = q.filter(FilePDFType.id.in_([_.id for _ in form.type.data]))
+        if len(form.topic.data) > 0:
+            q = q.filter(Topic.id.in_([_.id for _ in form.topic.data]))
+        if form.approved.data is True:
+            q  = q.filter(FilePDF.approved == True)
+            
+
     paginate = q.paginate(page, app.config.get(
         "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
@@ -774,8 +784,10 @@ def file():
         else None
     )
     last_page = paginate.pages
-    order_type = "asc" if order_type == "desc" else "desc"
     order_type_inverse = "asc" if order_type == "desc" else "desc"
+    order_type = "asc" if order_type == "desc" else "desc"
+    print(order_type)
+    
     order = request.args.get('order', None)
     url_args = dict(request.args)
     url_args.pop('order_type', None)
@@ -793,10 +805,11 @@ def file():
         page_name="Arquivos",
         order_type=order_type,
         type='aprovar',
+        form=form,
         _topic=Topic.query.filter(Topic.selectable == True),
         _sub_topic=SubTopic.query,
         request_args=request_args,
         url_args=url_args,
         order_type_inverse = order_type_inverse,
-        order=order
+        # order=order
     )

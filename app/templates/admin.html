@@ -6,32 +6,60 @@
     {% if form is defined %}
     <form action="" method="GET" role="form">
         <div class='form-group'>
+            {% if form.search is defined %}
             <div class="col-md-2">
             {{ forms.render_field(form.search, size=5, class='form-select',
             placeholder='Buscar...', nolabel=true, type='search', **{'aria-label':"Buscar",
             'aria-describedby':"submit"})}}
             </div>
+            {% endif %}
             <br>
+            {% if form.topic is defined %}
             {{ forms.render_field(form.topic, class='form-select', class='selectpicker', nolabel=true,
             multiple=true,
             title='Selecionar Tópico', **{'data-actions-box':"true", 'data-style':"btn-primary",
             'data-selected-text-format':"count"})}}
+            {% endif %}
+            {% if form.sub_topic is defined %}
             {{ forms.render_field(form.sub_topic, class='form-select', class='selectpicker', nolabel=true,
             multiple=true,
             title='Selecionar Sub-Tópico', **{'data-actions-box':"true", 'data-style':"btn-primary",
             'data-selected-text-format':"count"})}}
+            {% endif %}
+
+            {% if form.tag is defined %}
             {{ forms.render_field(form.tag, class='form-select', class='selectpicker', nolabel=true, multiple=true,
             title='Selecionar Marcação', **{'data-actions-box':"true", 'data-style':"btn-primary",
             'data-selected-text-format':"count"})}}
+            {% endif %}
+            {% if form.who_answer is defined %}
             {{ forms.render_field(form.who_answer, class='form-select', class='selectpicker', nolabel=true, multiple=true,
             title='Selecionar Marcação', **{'data-actions-box':"true", 'data-style':"btn-primary",
             'data-selected-text-format':"count"})}}
+            {% endif %}
+            
+            {% if form.active is defined %}
             <br>
             {{ forms.render_field(form.active, class='form-select', class='selectpicker',
             title='Selecionar Marcação', **{'data-actions-box':"true", 'data-style':"btn-primary",
             'data-selected-text-format':"count"})}}
+            {% endif %}
             <br>
-            <!-- {{ forms.render_field(form.active)}} -->
+
+            {% if form.type is defined %}
+            <br>
+            {{ forms.render_field(form.type, class='form-select', class='selectpicker',
+            title='Selecionar Marcação', **{'data-actions-box':"true", 'data-style':"btn-primary",
+            'data-selected-text-format':"count"})}}
+            {% endif %}
+
+            {% if form.approved is defined %}
+            <br>
+            {{ forms.render_field(form.approved, class='form-select', class='selectpicker',
+            title='Selecionar Marcação', **{'data-actions-box':"true", 'data-style':"btn-primary",
+            'data-selected-text-format':"count"})}}
+            {% endif %}
+
             <br>
             {{ form.submit(class='btn btn-success') }}
         </div>
