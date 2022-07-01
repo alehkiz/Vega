@@ -292,16 +292,15 @@ def index(sub_topic=None, tag=None):
 
             return render_template("index.html", mode='index',tags=tags_question, breadcrumbs=breadcrumbs)#
         if tag != None:
-            print('Tags!')
             page = request.args.get('page', 1, type=int)
             
-            
-            
-            query = _tag.questions.filter(
+            query = _tag.questions.join(Question.view).filter(
                 Question.answer_approved == True, 
                 Question.active == True,
                 Question.topics.contains(topic), 
-                Question.sub_topics.contains(_sub_topic)).group_by(Question)
+                Question.sub_topics.contains(_sub_topic)).group_by(
+                    Question).order_by(
+                        func.count(QuestionView.id).desc())
 
             # db.session.query(Tag).join(Topic.questions).join(SubTopic).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
             paginate = query.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
