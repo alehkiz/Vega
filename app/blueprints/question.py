@@ -13,7 +13,7 @@ from app.utils.kernel import convert_datetime_to_local, strip_accents
 from app.utils.html import process_html
 from app.forms.question import QuestionAnswerForm, CreateQuestion, QuestionApproveForm, QuestionEditAndApproveForm
 from app.utils.routes import counter
-from sqlalchemy import desc, nullslast
+from sqlalchemy import desc, func, nullslast
 
 
 
@@ -35,14 +35,16 @@ def index():
     topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
     search_form = QuestionSearchForm()
     if current_user.is_authenticated and current_user.is_support:
-        query = db.session.query(Question).filter(Question.answer_approved == True, Question.active == True).order_by(Question.create_at.desc())
+        query = db.session.query(Question).filter(Question.answer_approved == True, Question.active == True)#.order_by(Question.create_at.desc())
     else:
-        query = db.session.query(Question).filter(Question.answer_approved == True, Question.active == True).join(Question.topics).filter(Topic.id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
+        query = db.session.query(Question).join(Question.view).filter(Question.answer_approved == True, Question.active == True).join(Question.topics).join(Question.view).filter(Topic.id.in_([_.id for _ in topics]))#.order_by(Question.create_at.desc())
     # query = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
     if not sub_topic is False:
-        paginate = query.filter(Question.sub_topic_id == sub_topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+        paginate = query.group_by(Question).order_by(func.count(QuestionView.id).desc()).filter(
+            Question.sub_topics.contains(sub_topic)).paginate(
+                per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     else:
-        paginate = query.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+        paginate = query.group_by(Question).order_by(func.count(QuestionView.id).desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
