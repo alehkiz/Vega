@@ -772,6 +772,7 @@ def file():
             q = q.filter(FilePDFType.id.in_([_.id for _ in form.type.data]))
         if len(form.topic.data) > 0:
             q = q.filter(Topic.id.in_([_.id for _ in form.topic.data]))
+            print('Topicos!')
         if form.approved.data is True:
             q  = q.filter(FilePDF.approved == True)
             
