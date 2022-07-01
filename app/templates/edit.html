@@ -72,6 +72,8 @@
         {% elif edit is defined %}
         {{ form.csrf_token}}
         {{ macros.render_field(form.name, size=256, class='form-control', placeholder='Tag')}}
+        {{ macros.render_field(form.url_route, size=256, class='form-control', placeholder='Rota URL')}}
+        {{ macros.render_field(form.active)}}
         <br>
         {{ form.submit }}
 

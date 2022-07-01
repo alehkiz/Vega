@@ -188,7 +188,7 @@ def edit(id):
         file.title = form.title.data
         file.topics = form.topic.data
         file.update_user_id = current_user.id
-
+        file.approved = form.approved.data
         
         
         if current_user.is_admin:

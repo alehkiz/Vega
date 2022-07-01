@@ -226,9 +226,9 @@ class BaseConfig(object):
                 'name': 'title',
                 'attr': None
             },
-            'create_at':{
+            'reference_date':{
                 'name': 'Criado em',
-                'attr': 'get_create_datetime'
+                'attr': 'get_reference_date'
             },
             'approved': {
                 'name': "Aprovado",
