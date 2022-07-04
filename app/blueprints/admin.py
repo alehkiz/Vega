@@ -762,17 +762,16 @@ def file():
     else:
 
         if topic != False:
-            q = db.session.query(FilePDF).join(FilePDF.topics).filter(Topic.id == topic.id).order_by(column_type())
+            q = db.session.query(FilePDF).join(FilePDF.topics).join(FilePDF.type).filter(Topic.id == topic.id).order_by(column_type())
 
         else:
-            q = db.session.query(FilePDF).order_by(column_type())
+            q = db.session.query(FilePDF).join(FilePDF.topics).join(FilePDF.type).order_by(column_type())
     # q = q.join(FilePDFType)
     if form.validate():
         if len(form.type.data) > 0:
             q = q.filter(FilePDFType.id.in_([_.id for _ in form.type.data]))
         if len(form.topic.data) > 0:
             q = q.filter(Topic.id.in_([_.id for _ in form.topic.data]))
-            print('Topicos!')
         if form.approved.data is True:
             q  = q.filter(FilePDF.approved == True)
             
