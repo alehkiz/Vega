@@ -107,12 +107,7 @@ def before_request():
                 app.config.get("ITEMS_PER_PAGE", 5), g.topic)
             g.questions_most_recent = db.session.query(Question).filter(Question.answer_approved == True).join(
                 Topic, Question.topics).filter(Topic.id == g.topic.id).order_by(Question.create_at.desc()).limit(app.config.get("ITEMS_PER_PAGE", 5)).all()
-            # (
-            #     Question.query.order_by(Question.create_at.desc())
-            #     .filter(Question.answer_approved == True, Question.topic_id == g.topic.id)
-            #     .limit(app.config.get("ITEMS_PER_PAGE", 5))
-            #     .all()
-            # )
+
             g.questions_most_liked = Question.most_liked(
                 app.config.get("ITEMS_PER_PAGE", 5), topic=g.topic, classification=False
             )
