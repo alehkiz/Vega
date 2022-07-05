@@ -251,9 +251,18 @@ def get_total_questions_views():
 def get_questions_answered():
     return Question.query.filter(Question.active == True, Question._answer != '', Question.answer_approved == True).count()
 
+def get_questions_answered_until_last_month():
+    last_month = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+    return Question.query.filter(
+        Question.active == True, 
+        Question.was_answered == True, 
+        Question.answer_approved == True).filter(
+            extract('year', Question.answer_approved_at) == last_month.year,
+            extract('year', Question.answer_approved_at) == last_month.month
+        ).count()
 
 def get_report_last_month():
-    last_month = datetime.date.today().replace(days=1) - datetime.timedelta(days=1)
+    last_month = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
     return Question.query.filter(
         Question.active == True,
         Question._answer != '',
@@ -488,7 +497,9 @@ def dash_app(app=False):
                     html.Div([
                     html.Div('Perguntas Respondidas', className='card-header'),
                     html.Div([
-                        html.B(format_number_as_thousand(get_questions_answered()))
+                        html.B(format_number_as_thousand(get_questions_answered())),
+                        html.Hr(),
+                        html.P([html.B('Até o mês anterior: '), format_number_as_thousand(get_questions_answered_until_last_month())])
                         ], className='card-body')], className='card mx-1 mb-2'),
                 html.Div([
                     html.Div('Perguntas visualizadas', className='card-header'),
