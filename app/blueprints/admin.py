@@ -21,7 +21,7 @@ from sqlalchemy.orm import relationship
 
 from sqlalchemy import inspect, desc, asc, func
 
-from app.models.wiki import Article, Topic, User, Question, Tag, SubTopic
+from app.models.wiki import Article, Topic, Transaction, User, Question, Tag, SubTopic
 from app.forms.wiki import ArticleForm
 from app.forms.question import QuestionFilter
 from app.core.db import db
@@ -813,3 +813,47 @@ def file():
         order_type_inverse = order_type_inverse,
         # order=order
     )
+
+@bp.route('/transaction')
+@login_required
+@roles_accepted('admin', 'support')
+def transaction():
+    page = request.args.get('page', 1, type=int)
+    order = request.args.get('order', False)
+    order_type = request.args.get('order_type', 'desc')
+    
+    if not order is False or not order_type is False:
+        try:
+            column = getattr(FilePDF, order)
+            column_type = getattr(column, order_type)
+        except Exception as e:
+            column = FilePDF.uploaded_at
+            column_type = FilePDF.uploaded_at.asc
+    else:
+        column = FilePDF.uploaded_a
+    if order:
+        if order in Transaction.__table__.columns:
+            if topic != False:
+                q= db.session.query(Transaction).join(Transaction.topics).filter(Topic.id == topic.id).order_by(column_type())
+            else:
+                q=db.session.query(Transaction).join(Transaction.topics).order_by(column_type())
+        else:
+            relationship_class = getattr(
+                Transaction, order).property.mapper.class_
+            relationship_type = getattr(Transaction, order)
+            relationship_type_order = getattr(
+                relationship_class.name, order_type)
+            if topic != False:
+                q = (
+                    db.session.query(Transaction)
+                    .join(Transaction.topics)
+                    .filter(Topic.id == topic.id)
+                    .join(relationship_class, relationship_type)
+                    .order_by(relationship_type_order())
+                )
+            else:
+                q = (
+                    db.session.query(Transaction)
+                    .join(relationship_class, relationship_type)
+                    .order_by(relationship_type_order())
+                )
