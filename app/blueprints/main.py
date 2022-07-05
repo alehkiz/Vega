@@ -158,7 +158,7 @@ def teardown_request(exception):
 @bp.route("/index")
 @bp.route('/index/<string:sub_topic>')
 @bp.route('/index/<string:sub_topic>/<string:tag>')
-@breadcrumb(app)
+# @breadcrumb(app)
 @counter
 def index(sub_topic=None, tag=None):
     if current_user.is_authenticated and current_user.has_support:
