@@ -528,11 +528,12 @@ class Question(db.Model):
                       )
         if not topics:
             result = result.join(SubTopic.questions).filter(SubTopic.id.in_(
-                [_.id for _ in sub_topics])).group_by(Question)
+                [_.id for _ in sub_topics]))
         else:
             result = result.join(SubTopic.questions).filter(SubTopic.id.in_(
                 [_.id for _ in sub_topics])).join(Question.topics).filter(
-                    Topic.id.in_([_.id for _ in topics])).group_by(Question)
+                    Topic.id.in_([_.id for _ in topics]))
+        result = result.join(QuestionView).group_by(Question).order_by(func.count(QuestionView.id).desc())
         if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
