@@ -35,7 +35,7 @@ def index():
     topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
     search_form = QuestionSearchForm()
     if current_user.is_authenticated and current_user.is_support:
-        query = db.session.query(Question).filter(Question.answer_approved == True, Question.active == True)#.order_by(Question.create_at.desc())
+        query = db.session.query(Question).join(Question.view).filter(Question.answer_approved == True, Question.active == True)#.order_by(Question.create_at.desc())
     else:
         query = db.session.query(Question).join(Question.view).filter(Question.answer_approved == True, Question.active == True).join(Question.topics).join(Question.view).filter(Topic.id.in_([_.id for _ in topics]))#.order_by(Question.create_at.desc())
     # query = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())

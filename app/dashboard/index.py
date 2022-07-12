@@ -257,8 +257,8 @@ def get_questions_answered_until_last_month():
         Question.active == True, 
         Question.was_answered == True, 
         Question.answer_approved == True).filter(
-            extract('year', Question.answer_approved_at) == last_month.year,
-            extract('year', Question.answer_approved_at) == last_month.month
+            extract('year', Question.answer_approved_at) <= last_month.year,
+            extract('year', Question.answer_approved_at) <= last_month.month
         ).count()
 
 def get_report_last_month():
