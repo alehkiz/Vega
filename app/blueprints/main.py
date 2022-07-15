@@ -171,7 +171,7 @@ def index(sub_topic=None, tag=None):
                         "title": "Perguntas pendentes",
                         "count": _.questions.filter(Question.answer == None).count(),
                         "bt_name": "Responder",
-                        "bt_route": url_for("admin.questions", topic=_.id),
+                        "bt_route": url_for("admin.questions", topic=_.name),
                         "card_style": "bg-danger bg-gradient text-white",
                     },
                     {
@@ -180,7 +180,7 @@ def index(sub_topic=None, tag=None):
                             Question.answer != None, Question.answer_approved == False
                         ).count(),
                         "bt_name": "Aprovar",
-                        "bt_route": url_for("admin.to_approve", topic=_.id),
+                        "bt_route": url_for("admin.to_approve", topic=_.name),
                         "card_style": "bg-warning bg-gradient text-dark",
                     },
                     {
@@ -190,7 +190,7 @@ def index(sub_topic=None, tag=None):
                         ).count(),
                         "bt_name": "Acessar",
                         "bt_route": url_for(
-                            "question.topic", name=_.id, type="aprovada"
+                            "question.topic", name=_.name, type="aprovada"
                         ),
                         "card_style": "bg-primary bg-gradient text-white",
                     },
@@ -233,26 +233,6 @@ def index(sub_topic=None, tag=None):
                 ],
             }
         ]
-        # topic_question = [
-        #     {
-        #         "id": topic.id,
-        #         "name": topic.name,
-        #         "values": [
-        #             {
-        #                 "title": _.name,
-        #                 "count": topic.questions.filter(
-        #                     Question.answer_approved == True
-        #                 ).count(),
-        #                 "bt_name": "Visualizar",
-        #                 "bt_route": url_for(
-        #                     "main.index", sub_topic=_.name
-        #                 ),
-        #                 "card_style": "bg-primary bg-gradient text-dark",
-        #             } for _ in SubTopic.query.all()
-        #         ],
-        #     }
-        # ]
-        # breadcrumb
         paths = [_ for _ in request.path.split('/') if _ != '']
         if not paths:
             paths.append('index')
@@ -305,9 +285,6 @@ def index(sub_topic=None, tag=None):
 
             url_args = dict(request.args)
             url_args.pop('page') if 'page' in url_args.keys() else None
-            print(url_args)
-            print(request.url_rule)
-            print(request.url)
             route, args = route_from(request.path)
             url_args = dict(url_args, **args)
             return render_template(
