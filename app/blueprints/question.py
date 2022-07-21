@@ -376,7 +376,7 @@ def answer(id: int):
                 return render_template('answer.html', form=form, answer=True)
         q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
-        q.answer = form.answer.data
+        q.answer = process_html(form.answer.data).text
         q.answer_at = convert_datetime_to_local(datetime.utcnow())
         q.tags = form.tag.data
         q.topics = form.topic.data
