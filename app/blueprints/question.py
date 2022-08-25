@@ -155,12 +155,21 @@ def search():
 @bp.route('/view/<int:id>')
 @counter
 def view(id=None):
+    # TODO
     if current_user.is_anonymous:
+        # question = db.session.query(Question
+        # ).filter(Question.id == id
+        # ).join(Question.topics
+        # ).filter(Topic.id == g.topic.id, Question.active == True
+        # ).first_or_404()
         question = db.session.query(Question
-        ).filter(Question.id == id
-        ).join(Question.topics
-        ).filter(Topic.id == g.topic.id, Question.active == True
+        ).filter(Question.id == id, Question.active == True
         ).first_or_404()
+        if not question.has_topic(g.topic):
+            # _topic_name = f'<p class="font-weight-bold">{question.topic_name}</p>'
+            flash(Markup(f'A pergunta que você tentou acessar está disponível para {question.topic_name}, assim, selecione abaixo e tente acessar a pergunta novamente.'), category='danger')
+            return redirect(url_for('main.select_access'))
+
     else:
         question = Question.query.filter(Question.id == id).first_or_404()
     

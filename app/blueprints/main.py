@@ -329,6 +329,7 @@ def select_access(topic=None):
 
 @bp.route("/access/<string:topic>")
 def selected_access(topic=None):
+    #TODO permitir que uma url ou rota seja enviada para o redirecionamento.
     if topic is None:
         return redirect(url_for("main.select_access"))
 
