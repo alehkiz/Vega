@@ -483,6 +483,13 @@ class Question(db.Model):
         return self._answer
         # return self._answer
 
+    def has_topic(self, topic : Topic = None):
+        # TODO
+        if topic is None:
+            raise Exception('Topico não pode ser vazio')
+        return topic in self.topics.all()
+
+
     @answer.setter
     def answer(self, answer):
         self._answer = answer
