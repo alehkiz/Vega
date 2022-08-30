@@ -659,10 +659,17 @@ def dash_app(app=False):
 
 
 
-from sqlalchemy import extract, or_
+from sqlalchemy import extract, or_, and_
 import datetime
 ## Visistas ultimo mês
 # lastmonth = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
 # Visit.query.filter(or_(Visit.user_id == 4, Visit.user_id == None),extract('isodow', Visit.datetime) < 7, Visit.datetime <= lastmonth).count()
 
 # db.session.query(Question).filter(Question.answer_approved_at <= lastmonth, Question.answer_approved== True).count()
+
+
+# Visit.query.filter(or_(Visit.user_id == 4, Visit.user_id == None),and_(extract('year', Visit.datetime) == 2021).count()
+
+
+
+# db.session.query(Question).filter(extract('year', Question.answer_approved_at) == 2021, Question.answer_approved== True).count()
