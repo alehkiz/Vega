@@ -7,11 +7,11 @@
 <div class="btn-group pt-5" role="group" aria-label="Basic example">
   {% for topic in topics %}
     {% if loop.index == 1 %}
-    <a type="button" class="btn btn-primary btn-lg" href="{{url_for('main.select_access', topic=topic.name)}}">{{topic.name}}</a>
+    <a type="button" class="btn btn-primary btn-lg" href="{{url_for('main.select_access', topic=topic.name, next=next_page)}}">{{topic.name}}</a>
     {% elif loop.index == 2 %}
-    <a type="button" class="btn btn-success btn-lg" href="{{url_for('main.select_access', topic=topic.name)}}">{{topic.name}}</a>
+    <a type="button" class="btn btn-success btn-lg" href="{{url_for('main.select_access', topic=topic.name, next=next_page)}}">{{topic.name}}</a>
     {% elif loop.index == 3 %}
-    <a type="button" class="btn btn-lg" href="{{url_for('main.select_access', topic=topic.name)}}" style="background-color: black;color: white;">{{topic.name}}</a>
+    <a type="button" class="btn btn-lg" href="{{url_for('main.select_access', topic=topic.name, next=next_page)}}" style="background-color: black;color: white;">{{topic.name}}</a>
     {% endif %}
     
   {% endfor  %}
