@@ -22,6 +22,7 @@ from flask import (
 from flask_security import login_required, current_user
 from datetime import datetime
 from sqlalchemy import func
+from werkzeug.urls import url_parse
 
 from app.core.db import db
 from app.models.wiki import Article, Question, QuestionView, SubTopic, Tag, Topic
@@ -48,7 +49,6 @@ def before_first_request():
 def before_request():
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
-    
     if current_user.is_authenticated:
         current_user.last_seen = convert_datetime_to_local(datetime.utcnow())
         g.upload_urls = {file.name:file.url_route for file in FilePDFType.query.filter(FilePDFType.active==True)}
@@ -59,7 +59,6 @@ def before_request():
                 "Não foi possível salvar ultima visualização do usuário")
             app.logger.error(e)
             return abort(500)
-        
     else:
         g.upload_urls = {file.name:file.url_route for file in FilePDFType.query.filter(FilePDFType.active==True, FilePDFType.login_required == False)}
     if not session.get("AccessType", False):
@@ -69,7 +68,8 @@ def before_request():
                 "main.select_access",
                 "static",
             ]:
-                return redirect(url_for("main.select_access"))
+                
+                return redirect(url_for("main.select_access", next=request.path))
         else:
             topic = Topic.query.filter(Topic.selectable == True).first()
             response = make_response(redirect(url_for(current_rule.endpoint)))
@@ -316,12 +316,17 @@ def index(sub_topic=None, tag=None):
 @bp.route("/select_access/")
 @bp.route("/select_access/<string:topic>")
 def select_access(topic=None):
+    next_page = request.args.get('next')
+    
+    if not next_page or url_parse(next_page).netloc != '':
+        next_page = url_for('main.index')  
     if topic is None:
         topics = Topic.query.filter(Topic.selectable == True).all()
-        return render_template("select_access.html", topics=topics)
+        return render_template("select_access.html", topics=topics, next_page=next_page)
     obj_topic = Topic.query.filter(
         Topic.name.ilike(topic.lower())).first_or_404()
-    response = make_response(redirect(url_for("main.index")))
+    response = make_response(redirect(next_page))
+    # response = make_response(redirect(url_for("main.index")))
     response.set_cookie(key="AccessType", value=obj_topic.name)
     session["AccessType"] = obj_topic.name
     return response
