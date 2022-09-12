@@ -85,7 +85,7 @@
                 <div class="col col-lg">
                     <div class="card border-dark {{sub_item['card_style']}}">
                         <div class="card-header">
-                            <h6 class="fw-normal mt-0 fs-4">{{ sub_item['title']}} <span class="badge bg-warning text-dark">Novo!</span></h6>
+                            <h6 class="fw-normal mt-0 fs-4">{{ sub_item['title']}} {#<span class="badge bg-warning text-dark">Novo!</span>#}</h6>
                         </div>
                         <div class="card-body">
                             <h3 class="pt-3 pb-3"> {{ sub_item['count']}}
@@ -102,7 +102,42 @@
 
 
 
+
+
+
+
+    <hr>
+
+    {# recents#}
+
+    <div class="row border border-primary pb-3 rounded my-3">
+        <div class="row">
+            <div class="col ">
+                <h2 class="text-muted fw-normal text-uppercase">Recentes em {{topic['name']}}</h2>
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="col col-lg">
+                    <div class="card border-dark bg-success bg-gradient text-dark">
+                        <div class="card-header">
+                            <h6 class="fw-normal mt-0 fs-4">Perguntas aprovadas nos últimos 30 dias<span class="badge bg-warning text-dark">Novo!</span></h6>
+                        </div>
+                        <div class="card-body">
+                            <h3 class="pt-3 pb-3">
+                                <a class="btn btn-primary float-end" href="{{url_for('main.recents')}}">Recentes</a>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
     </div>
+</div>
 </div>
 
 {% endif %}

@@ -219,6 +219,12 @@ def get_total_access():
         or_(Visit.user_id == 4, Visit.user_id == None),
         extract('isodow', Visit.datetime) < 7).count()
 
+def get_total_access_until_last_month():
+    lastmonth = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+    return Visit.query.filter(
+        or_(Visit.user_id == 4, Visit.user_id == None),
+        extract('isodow', Visit.datetime) < 7,
+        Visit.datetime <= lastmonth).count()
 
 def access_last_month():
     lastmonth = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
@@ -255,10 +261,9 @@ def get_questions_answered_until_last_month():
     last_month = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
     return Question.query.filter(
         Question.active == True, 
-        Question.was_answered == True, 
-        Question.answer_approved == True).filter(
-            extract('year', Question.answer_approved_at) <= last_month.year,
-            extract('year', Question.answer_approved_at) <= last_month.month
+        Question.answer_approved == True).filter(Question.answer_approved_at <= last_month
+            # extract('year', Question.answer_approved_at) <= last_month.year,
+            # extract('month', Question.answer_approved_at) <= last_month.month
         ).count()
 
 def get_report_last_month():
@@ -459,7 +464,9 @@ def dash_app(app=False):
                 html.Div([
                 html.Div('Acessos Totais', className='card-header'),
                 html.Div([
-                    html.B(format_number_as_thousand(get_total_access()))
+                    html.B(format_number_as_thousand(get_total_access())),
+                    html.Hr(),
+                    html.P([html.B('Até o mês anterior: '), format_number_as_thousand(get_total_access_until_last_month())])
                     ], className='card-body')], className='card mx-1 mb-2'),
                 html.Div([
                 html.Div('Acessos Mês Anterior', className='card-header'),
