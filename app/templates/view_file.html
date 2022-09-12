@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block app_content %}
+{% if file.mimetype.startswith('image') %}
+<img src="{{url_for('file_pdf.view', id=file.id)}}">
+{% else %}
+<embed src="{{url_for('file_pdf.view', id=file.id)}}" width="800px" height="2100px" />
+{% endif %}
+{% endblock %}

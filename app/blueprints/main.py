@@ -21,6 +21,7 @@ from flask import (
 )
 from flask_security import login_required, current_user
 from datetime import datetime
+from datetime import timedelta
 from sqlalchemy import func
 from werkzeug.urls import url_parse
 
@@ -312,6 +313,40 @@ def index(sub_topic=None, tag=None):
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
 
+
+@bp.route('/recents')
+def recents(days:int=30):
+    page = request.args.get('page', 1, type=int)
+    today = datetime.today()
+    last_days = today - timedelta(days=days)
+    topic = Topic.query.filter(
+            Topic.name.ilike(session.get("AccessType", False))
+        ).first_or_404()
+    query = Question.query.filter(
+                Question.answer_approved == True, 
+                Question.active == True,
+                Question.topics.contains(topic)).filter(Question.answer_approved_at >= last_days).order_by(Question.answer_approved_at.desc())
+
+    paginate = query.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    iter_pages = list(paginate.iter_pages())
+    first_page = iter_pages[0] if len(iter_pages) >= 1 else None
+    last_page = paginate.pages if paginate.pages > 0 else None
+
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+    route, args = route_from(request.path)
+    url_args = dict(url_args, **args)
+    return render_template(
+        'index.html', 
+        pagination=paginate, 
+        cls_question=Question, 
+        first_page=first_page, 
+        last_page=last_page, 
+        sub_topics=SubTopic.query,
+        url_args=url_args,
+        # breadcrumbs=breadcrumbs,
+        route=route
+        )
 
 @bp.route("/select_access/")
 @bp.route("/select_access/<string:topic>")

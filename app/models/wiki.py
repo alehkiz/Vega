@@ -416,8 +416,8 @@ class Question(db.Model):
         return format_datetime_local(self.update_at)
 
     @property
-    def get_answer_time_elapsed(self):
-        return format_elapsed_time(self.answer_at)
+    def get_answer_approved_time_elapsed(self):
+        return format_elapsed_time(self.answer_approved_at)
 
     @property
     def get_answer_datetime(self):
@@ -800,7 +800,7 @@ class Question(db.Model):
                 # 'updater': self.updater.name if self.was_updated() else None,
                 'answer': self.get_body_html() if self.was_answered else None,
                 # 'answered_by': self.answered_by.name if self.was_answered else None,
-                'answered_at': self.get_answer_time_elapsed if self.was_answered else None,
+                'answered_at': self.get_answer_approved_time_elapsed if self.was_answered else None,
                 'topics': [x.name for x in self.topics], #self.topic.name if not self.topic is None else None,
                 'tags': [x.name for x in self.tags],
                 'views': self.views

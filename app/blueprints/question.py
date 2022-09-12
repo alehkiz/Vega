@@ -167,8 +167,8 @@ def view(id=None):
         ).first_or_404()
         if not question.has_topic(g.topic):
             # _topic_name = f'<p class="font-weight-bold">{question.topic_name}</p>'
-            flash(Markup(f'A pergunta que você tentou acessar está disponível para {question.topic_name}, assim, selecione abaixo e tente acessar a pergunta novamente.'), category='danger')
-            return redirect(url_for('main.select_access'))
+            flash(Markup(f'A pergunta que você tentou acessar está disponível para <b>{question.topic_name}</b>, selecione o módulo correto para acessar a perrgunta.'), category='danger')
+            return redirect(url_for('main.select_access', next=request.path))
 
     else:
         question = Question.query.filter(Question.id == id).first_or_404()

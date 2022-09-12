@@ -131,6 +131,8 @@ def add():
                 db.session.add(file)
                 db.session.commit()
                 flash('Arquivo enviado com sucesso', category='success')
+                if current_user.is_admin:
+                    return redirect(url_for('file_pdf.edit', id=file.id))
                 return redirect(url_for('file_pdf.add'))
             except Exception as e:
                 db.session.rollback()
@@ -202,7 +204,7 @@ def edit(id):
         try:
             db.session.commit()
             flash('Edição salva com sucesso', category='success')
-            return redirect(url_for('admin.file'))
+            return redirect(url_for('file_pdf.viewer', id=file.id))
         except Exception as e:
             rename(old_file_path, file.path)
             db.session.rollback()
@@ -220,14 +222,33 @@ def edit(id):
 
     return render_template('upload.html', form=form)
 
+@bp.route('/viewer/<int:id>')
+def viewer(id=None):
+    if not id is None:
+        file = FilePDF.query.filter(FilePDF.id == id).first_or_404()
+        if current_user.is_authenticated:
+            return render_template('view_file.html', file=file)
+        else:
+            if file.active and file.approved:
+                return render_template('view_file.html', file=file)
+            else:
+                return abort(404)
+        return abort(404)
+        #FilePDF.active == True, FilePDF.approved == True
+        # return render_template('view_file.html', file=file.id)
+    else:
+        return abort(404)
 @bp.route('/view/<int:id>')
 def view(id=None):
     if not id is None:
-        file = FilePDF.query.filter(FilePDF.id == id, FilePDF.active == True, FilePDF.approved == True).first_or_404()
+        file = FilePDF.query.filter(FilePDF.id == id).first_or_404()
         if current_user.is_authenticated:
             file.add_view(current_user.id, g.ip_id, g.topic_id)
         else:
-            file.add_view(app.config.get('USER_ANON_ID'), g.ip_id, g.topic_id)
+            if file.active and file.approved:
+                file.add_view(app.config.get('USER_ANON_ID'), g.ip_id, g.topic_id)
+            else:
+                return abort(404)
         if not isfile(join(app.config['UPLOAD_FOLDER'], file.file_name)):
             return abort(404)
         # binary_pdf = file.path
@@ -238,7 +259,7 @@ def view(id=None):
             response.headers['Content-Type'] = 'application/octet-stream'
         response.headers['Content-Disposition'] = \
             f'inline; filename="{file.file_name}";name="{file.file_name}"'
-        print(file.file_name)
+        # print(file.file_name)
         return response
 
 @bp.route('/deactive/<int:id>')
