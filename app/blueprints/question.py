@@ -266,6 +266,7 @@ def deactive(id):
     id = q.id 
     try:
         q.active = False
+        q.update_user_id = current_user.id
         db.session.commit()
         return jsonify({'id':id,
                     'status': 'success'})
@@ -300,6 +301,7 @@ def active(id):
     q.active = True
     try:
         q.active = True
+        q.update_user_id = current_user.id
         db.session.commit()
         return jsonify({'id':q.id,
                     'status': 'success'})
