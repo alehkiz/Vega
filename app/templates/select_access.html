@@ -2,8 +2,9 @@
 {% block app_content %}
 {% if topics is defined %}
 <div class="row justify-content-md-center">
-    <h1 class="display-4"><strong>Selecione um módulo: </strong></h1>
+    <div class="h2 p-3 bg-white text-danger">Selecione um módulo para acessar: </div>
     <br><br>
+    
 <div class="btn-group pt-5" role="group" aria-label="Basic example">
   {% for topic in topics %}
     {% if loop.index == 1 %}
