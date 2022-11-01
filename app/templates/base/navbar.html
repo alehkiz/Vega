@@ -20,7 +20,7 @@
                     <a class="btn btn-sm btn-outline-secondary me-2" type="button" href="{{ url_for('question.index')}}"
                         class='nav-link'>Dúvidas</a>
                 </li>
-                
+
                 <div class="dropdown nav-item">
                     <button class="btn btn-outline-success dropdown-toggle" type="button" id="dropdownMenuButton1"
                         data-bs-toggle="dropdown" aria-expanded="false">
@@ -29,13 +29,14 @@
                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton1">
                         {% if g.upload_urls %}
                         <li class="dropdown-submenu dropdown-item">
-                            
+
                             <a class="dropdown-item" href="#">Arquivos</a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 {% for item in g.upload_urls.items() %}
-                            <li><a class="dropdown-item" href="{{url_for('file_pdf.files', file_type= item[1])}}">{{item[0]}}</a></li>
+                                <li><a class="dropdown-item"
+                                        href="{{url_for('file_pdf.files', file_type= item[1])}}">{{item[0]}}</a></li>
                                 {% endfor %}
-                            <!-- <li><a class="dropdown-item" href="#">Second level</a></li> -->
+                                <!-- <li><a class="dropdown-item" href="#">Second level</a></li> -->
                             </ul>
                             {% endif %}
                         </li>
@@ -43,42 +44,41 @@
                         {% if current_user.is_support %}
                         <li>
                             <hr class="dropdown-divider" />
-                          </li>
+                        </li>
                         <li>
-                            <a class="dropdown-item" type="button"
-                                href="{{ url_for('support.index')}}">Suporte</a>
+                            <a class="dropdown-item" type="button" href="{{ url_for('support.index')}}">Suporte</a>
                         </li>
                         {% endif %}
 
                         <li>
-                            <a class="dropdown-item" type="button"
-                                href="{{ url_for('dashboard')}}" class='nav-link'>Dashboard</a>
+                            <a class="dropdown-item" type="button" href="{{ url_for('dashboard')}}"
+                                class='nav-link'>Dashboard</a>
                         </li>
-                        
-                       
-                          {% if config.get('MODE', False) == 'dev' %}
-                          <li>
+
+
+                        {% if config.get('MODE', False) == 'dev' %}
+                        <li>
                             <hr class="dropdown-divider" />
-                          </li>
-                          <li class="dropdown-submenu dropdown-item">
+                        </li>
+                        <li class="dropdown-submenu dropdown-item">
                             <a class="dropdown-item" href="#">Desenvolvimento</a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li><a class='dropdown-item' type='button' href="{{ url_for('notifier.index')}}"
-                                    class='nav-link'>Notificações</a>
-                            </li>
-                            <li><a class="dropdown-item" type='button' href="{{ url_for('transactions.index')}}"
-                                    class='nav-link'>Transações</a>
-                            </li>
+                                        class='nav-link'>Notificações</a>
+                                </li>
+                                <li><a class="dropdown-item" type='button' href="{{ url_for('transactions.index')}}"
+                                        class='nav-link'>Transações</a>
+                                </li>
                             </ul>
                         </li>
                         {% endif %}
                         {% endif %}
                     </ul>
-                </div>  
+                </div>
 
             </ul>
 
-<!-- 
+            <!-- 
             <div class="dropdown nav-item">
                 <button class="btn btn-outline-success dropdown-toggle" type="button" id="dropdownMenuButton1"
                     data-bs-toggle="dropdown" aria-expanded="false">
@@ -157,7 +157,8 @@
                         <li><a class="dropdown-item" href="{{url_for('admin.tag')}}">Marcação</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.topic')}}">Tópico</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.sub_topic')}}">Sub Tópico</a></li>
-                        <li><a class="dropdown-item" href="{{url_for('admin.file_pdf_type')}}"> Tipo de Arquivo</a> </li>
+                        <li><a class="dropdown-item" href="{{url_for('admin.file_pdf_type')}}"> Tipo de Arquivo</a>
+                        </li>
                         {% endif %}
                         <hr class="dropdown-divider">
                         <li><a class="dropdown-item" href='{{url_for("admin.file")}}'>Upload</a></li>
@@ -165,7 +166,7 @@
                         <!-- #TODO apenas em DEV -->
                         <hr class="dropdown-divider">
                         <li><a class="dropdown-item" href='{{url_for("admin.notifier")}}'>Notificações</a></li>
-                        
+
                         {% endif %}
 
                     </ul>
@@ -204,7 +205,24 @@
                 </li>
 
                 {% endif %}
-
+                
+                <div class="icon" id="bell"> <i class="fas fa-bell"></i></i></div>
+                <div class="notifications" id="box">
+                    <h2>Notifications - <span>2</span></h2>
+                    <div class="notifications-item"> <img src="https://i.imgur.com/uIgDDDd.jpg" alt="img">
+                        <div class="text">
+                            <h4>Samso aliao</h4>
+                            <p>Samso Nagaro Like your home work</p>
+                        </div>
+                    </div>
+                    <div class="notifications-item"> <img
+                            src="https://img.icons8.com/flat_round/64/000000/vote-badge.png" alt="img">
+                        <div class="text">
+                            <h4>John Silvester</h4>
+                            <p>+20 vista badge earned</p>
+                        </div>
+                    </div>
+                </div>
 
             </ul>
 
