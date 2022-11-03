@@ -98,13 +98,17 @@
                 var color = $(this).text();
                 if (down) {
 
-                    $('#box').css('height', '0px');
+                    //$('#box').css('height', '0px');
                     $('#box').css('opacity', '0');
+                    $('#box').css('display', 'none');
+                    $('#box').css('visibility', 'hidden');
                     down = false;
                 } else {
 
-                    $('#box').css('height', 'auto');
+                    //$('#box').css('height', 'auto');
                     $('#box').css('opacity', '1');
+                    $('#box').css('display', 'block');
+                    $('#box').css('visibility', 'visible');
                     down = true;
 
                 }

@@ -5,6 +5,7 @@ from flask.globals import current_app
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
 from app.core.db import db
+from app.models.notifier import Notifier, NotifierPriority, NotifierStatus
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, Tag, Topic
 from app.models.security import User
 from app.models.app import Network
@@ -61,7 +62,16 @@ def question(id):
 def question_access():
     return ''
 
+@bp.route('notifications')
+@counter
+def notifications():
+    if session.get("AccessType", False) is False:
+        abort(500)
+    notifier = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo').order_by(NotifierPriority.order.asc())
 
+    
+
+    return jsonify(to_dict)
 # # api dashboard
 # @bp.route('dashboard/tags_data', methods=['GET', 'POST'])
 # def tags_data():
