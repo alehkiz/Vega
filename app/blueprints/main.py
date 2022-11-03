@@ -33,6 +33,7 @@ from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
 from app.utils.kernel import convert_datetime_to_local, breadcrumb, route_from
 from app.utils.routes import counter
+from app.models.notifier import Notifier, NotifierPriority, NotifierStatus
 # from app.core.extensions import cache
 
 # from app.dashboard import dash
@@ -50,6 +51,9 @@ def before_first_request():
 def before_request():
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
+    notifiers = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo').order_by(NotifierPriority.order.asc())
+    g.sum_active_notifier = notifiers.count()
+    g.notifiers_dict = [x.to_dict for x in notifiers]
     if current_user.is_authenticated:
         current_user.last_seen = convert_datetime_to_local(datetime.utcnow())
         g.upload_urls = {file.name:file.url_route for file in FilePDFType.query.filter(FilePDFType.active==True)}

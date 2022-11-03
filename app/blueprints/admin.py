@@ -683,7 +683,7 @@ def notifier():
     )
     last_page = paginate.pages
     order_type = "asc" if order_type == "desc" else "desc"
-
+    order_type_inverse = "asc" if order_type == "desc" else "desc"
     url_args = dict(request.args)
     url_args.pop('page') if 'page' in url_args.keys() else None
 
@@ -697,6 +697,7 @@ def notifier():
         list=True,
         page_name="Notificações",
         order_type=order_type,
+        order_type_inverse=order_type_inverse,
         url_args=url_args
     )
 

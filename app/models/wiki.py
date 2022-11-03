@@ -54,6 +54,8 @@ transaction_sub_topic = db.Table('transaction_sub_topic',
                                     db.ForeignKey('transaction.id')),
                         db.Column('topic_sub_id', db.Integer, db.ForeignKey('sub_topic.id'))            
                         )
+
+
 class ArticleView(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -264,7 +266,7 @@ class Topic(db.Model):
     nickname = db.Column(db.String(10), nullable=False, unique=True)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
     # questions_old = db.relationship('Question', backref='topic', lazy='dynamic', foreign_keys='[Question.topic_id]')
-    notices = db.relationship('Notifier', backref='topic', lazy='dynamic')
+    # notifications = db.relationship('Notifier', backref='topic', lazy='dynamic')
     visit = db.relationship('Visit', cascade='all, delete-orphan',
                             single_parent=True, backref='topic', lazy='dynamic')
     @hybrid_property
@@ -982,3 +984,8 @@ class Transaction(db.Model):
 # (db.session.query(Article, (func.strict_word_similarity(Article.search_vector.op('@@')(func.to_tsquery('principal'), 'principal')).label('sml'))).order_by(desc('sml'))).all()
 
 # (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal variantes sobre tempo exemplo')).label('sml'))).order_by(desc('sml')).all()
+
+
+
+
+
