@@ -68,9 +68,7 @@ def notifications():
     if session.get("AccessType", False) is False:
         abort(500)
     notifier = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo').order_by(NotifierPriority.order.asc())
-
-    
-
+    to_dict = [_.to_dict for _ in notifier]
     return jsonify(to_dict)
 # # api dashboard
 # @bp.route('dashboard/tags_data', methods=['GET', 'POST'])
