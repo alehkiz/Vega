@@ -226,7 +226,11 @@ $(document).ready(function () {
         });
       });
 
-
+      $('#bell-dropdown').on('hidden.bs.dropdown', function () {
+        console.log('aqui')
+        var notifications = $('#notification_box')
+        notifications.html("");
+      });
 
 
 });
