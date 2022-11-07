@@ -132,8 +132,37 @@
                 <!-- </div> -->
             </div>
 
-
+            
             <ul class="navbar-nav w-100 justify-content-center">
+                <li class="nav-item dropdown bell" id="bell-dropdown">
+                    <!-- <div class="icon" id="bell">  -->
+                    <a class="nav-link notifications-link" href="{{url_for('api.notifications')}}" id="bell" data-bs-toggle="dropdown" aria-expanded="false">
+
+                        <i class="fas fa-bell circle">
+                            <span class="badge badge-danger">{{g.sum_active_notifier}}</span>
+                        </i>
+
+                    </a>
+                    <ul class="dropdown-menu show-bell" aria-labelledby="dropdown01">
+                        <div class="notifications" id="notification_box">
+                            <!-- <h2>Notificações - <span>{{g.sum_active_notifier}}</span></h2>
+                            {% if g.notifiers_dict | length == 0 %}
+                            ZERO
+                            {% else %}
+                            {% for notifier in g.notifiers_dict %}
+                            <div class="notifications-item">
+                                <div class="text">
+                                    <h6>{{notifier['title']}}</h6>
+                                    <p>{{notifier['content']}}</p>
+                                </div>
+                            </div>
+
+                            {% endfor %}
+                            {% endif %} -->
+                        </div>
+                    </ul>
+                    <!-- </div> -->
+                </li>
                 {% if current_user.is_anonymous %}
                 <li class="nav-item">
                     <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
@@ -202,35 +231,7 @@
 
                 {% endif %}
 
-                <li class="nav-item dropdown bell" id="bell-dropdown">
-                    <!-- <div class="icon" id="bell">  -->
-                    <a class="nav-link notifications-link" href="{{url_for('api.notifications')}}" id="bell" data-bs-toggle="dropdown" aria-expanded="false">
-
-                        <i class="fas fa-bell circle">
-                            <span class="badge badge-danger">{{g.sum_active_notifier}}</span>
-                        </i>
-
-                    </a>
-                    <ul class="dropdown-menu show-bell" aria-labelledby="dropdown01">
-                        <div class="notifications" id="notification_box">
-                            <!-- <h2>Notificações - <span>{{g.sum_active_notifier}}</span></h2>
-                            {% if g.notifiers_dict | length == 0 %}
-                            ZERO
-                            {% else %}
-                            {% for notifier in g.notifiers_dict %}
-                            <div class="notifications-item">
-                                <div class="text">
-                                    <h6>{{notifier['title']}}</h6>
-                                    <p>{{notifier['content']}}</p>
-                                </div>
-                            </div>
-
-                            {% endfor %}
-                            {% endif %} -->
-                        </div>
-                    </ul>
-                    <!-- </div> -->
-                </li>
+                
 
 
 
