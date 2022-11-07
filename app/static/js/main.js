@@ -143,6 +143,91 @@ $(document).ready(function () {
 
 
 
+// h2_obj.parent().append('<div id="flush-collapse_' + question_id + '" class="accordion-collapse collapse border border-1 rounded mb-3"' +
+// 'aria-labelledby="flush-heading_' + question_id + '" data-bs-parent="#accordionFlushQuestion">')
+// $('#flush-collapse_' + question_id).append('<div class="accordion-head">' +
+//     '<div class="accordion-head-info">' +
+//     '</div>' +
+//     '</div>'
+// )
+    var down = false;
+    var notifications = $('.bell')
+
+    // $('.bell').click(function (e) {
+    //     console.log('clicado')
+    //     var color = $(this).text();
+    //     console.log("licado")
+    //     if (down) {
+    //         //$('#notification_box').css('height', '0px');
+    //         // $('#notification_box').css('opacity', '0');
+    //         // $('#notification_box').css('display', 'none');
+    //         // $('#notification_box').css('visibility', 'hidden');
+    //         down = false;
+    //     } else {
+    //         console.log('Ativar')
+    //         //$('#notification_box').css('height', 'auto');
+    //         // $('#notification_box').css('opacity', '1');
+    //         // $('#notification_box').css('display', 'block');
+    //         // $('#notification_box').css('visibility', 'visible');
+    //         down = true;
+    //     }
+
+    // });
+
+    $('#bell-dropdown').on('shown.bs.dropdown', function () {
+        notifications = $('#notification_box')
+
+        url = $('#bell').attr('href')
+        console.log(url)
+        $.ajax({
+            url: url,
+            type: 'get',
+            dataType: 'json',
+            // async: false,
+            headers: {
+                'X-CSRFToken': $CSRF_TOKEN
+            },
+            beforeSend: function () {
+                accordion_link = true;
+            },
+            complete: function () {
+                accordion_link = false;
+            },
+            success: function (data) {
+                console.log(data)
+                data.forEach(function (element) {
+                    console.log(element)
+
+                    notifications.append('<div class="notifications-item"><div class="text">' + 
+                        '<h6>'+element.title+'</h6>'+
+                        '<p>'+element.content+'</p>'+
+                    '</div>'+
+                '</div>')
+                }
+                )
+
+                // $(target).collapse();
+
+            },
+            error: function (data) {
+                if (data.status == 404) {
+                    if (!button_accordion.hasClass('bg-danger')) {
+                        button_accordion.addClass('bg-danger')
+                        button_accordion.append('<span class="badge bg-secondary mx-3">Não encontrado</span>\n')
+
+                    }
+                }
+                if (data.status == 500) {
+                    if (!button_accordion.hasClass('bg-danger')) {
+
+                    }
+                }
+            }
+        });
+      });
+
+
+
 
 });
 

@@ -53,7 +53,7 @@ def before_request():
     g.question_search_form = SearchForm()
     notifiers = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo').order_by(NotifierPriority.order.asc())
     g.sum_active_notifier = notifiers.count()
-    g.notifiers_dict = [x.to_dict for x in notifiers]
+    # g.notifiers_dict = [x.to_dict for x in notifiers]
     if current_user.is_authenticated:
         current_user.last_seen = convert_datetime_to_local(datetime.utcnow())
         g.upload_urls = {file.name:file.url_route for file in FilePDFType.query.filter(FilePDFType.active==True)}

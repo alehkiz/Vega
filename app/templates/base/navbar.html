@@ -174,10 +174,6 @@
                 </li>
 
                 {% endif %}
-
-
-
-
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
                         aria-expanded="false">
@@ -205,40 +201,46 @@
                 </li>
 
                 {% endif %}
-                <li class="nav-item icon">
-                <!-- <div class="icon" id="bell">  -->
-                    <a class="nav-link" href="#" id="bell" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        
-                    <i class="fas fa-bell circle">
-                        <span class="badge badge-danger">{{g.sum_active_notifier}}</span>
-                    </i>
-                    
+
+                <li class="nav-item dropdown bell" id="bell-dropdown">
+                    <!-- <div class="icon" id="bell">  -->
+                    <a class="nav-link notifications-link" href="{{url_for('api.notifications')}}" id="bell" data-bs-toggle="dropdown" aria-expanded="false">
+
+                        <i class="fas fa-bell circle">
+                            <span class="badge badge-danger">{{g.sum_active_notifier}}</span>
+                        </i>
+
                     </a>
-                    
-                <!-- </div> -->
-                </li>
-                <div class="notifications" id="box">
-                    <h2>Notificações - <span>{{g.sum_active_notifier}}</span></h2>
-                    {% if g.notifiers_dict | length == 0 %}
-                    ZERO
-                    {% else %}
-                    {% for notifier in g.notifiers_dict %}
-                    <div class="notifications-item">
-                        <div class="text">
-                            <h6>{{notifier['title']}}</h6>
-                            <p>{{notifier['content']}}</p>
+                    <ul class="dropdown-menu show-bell" aria-labelledby="dropdown01">
+                        <div class="notifications" id="notification_box">
+                            <!-- <h2>Notificações - <span>{{g.sum_active_notifier}}</span></h2>
+                            {% if g.notifiers_dict | length == 0 %}
+                            ZERO
+                            {% else %}
+                            {% for notifier in g.notifiers_dict %}
+                            <div class="notifications-item">
+                                <div class="text">
+                                    <h6>{{notifier['title']}}</h6>
+                                    <p>{{notifier['content']}}</p>
+                                </div>
+                            </div>
+
+                            {% endfor %}
+                            {% endif %} -->
                         </div>
-                    </div>
-                    
-                    {% endfor %}
-                    {% endif %}
-                </div>
+                    </ul>
+                    <!-- </div> -->
+                </li>
+
+
 
             </ul>
 
+
         </div>
+
     </div>
+
 </nav>
 
 

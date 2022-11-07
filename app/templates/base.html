@@ -91,29 +91,9 @@
                     window.location.href = ui.item.link
                 }
             });
-            var down = false;
+            
 
-            $('#bell').click(function (e) {
-
-                var color = $(this).text();
-                if (down) {
-
-                    //$('#box').css('height', '0px');
-                    $('#box').css('opacity', '0');
-                    $('#box').css('display', 'none');
-                    $('#box').css('visibility', 'hidden');
-                    down = false;
-                } else {
-
-                    //$('#box').css('height', 'auto');
-                    $('#box').css('opacity', '1');
-                    $('#box').css('display', 'block');
-                    $('#box').css('visibility', 'visible');
-                    down = true;
-
-                }
-
-            });
+            
         })
     </script>
     <script src="{{url_for('static', filename='js/main.js')}}" type="text/javascript"></script>
