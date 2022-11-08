@@ -143,13 +143,13 @@ $(document).ready(function () {
 
 
 
-// h2_obj.parent().append('<div id="flush-collapse_' + question_id + '" class="accordion-collapse collapse border border-1 rounded mb-3"' +
-// 'aria-labelledby="flush-heading_' + question_id + '" data-bs-parent="#accordionFlushQuestion">')
-// $('#flush-collapse_' + question_id).append('<div class="accordion-head">' +
-//     '<div class="accordion-head-info">' +
-//     '</div>' +
-//     '</div>'
-// )
+    // h2_obj.parent().append('<div id="flush-collapse_' + question_id + '" class="accordion-collapse collapse border border-1 rounded mb-3"' +
+    // 'aria-labelledby="flush-heading_' + question_id + '" data-bs-parent="#accordionFlushQuestion">')
+    // $('#flush-collapse_' + question_id).append('<div class="accordion-head">' +
+    //     '<div class="accordion-head-info">' +
+    //     '</div>' +
+    //     '</div>'
+    // )
     var down = false;
     var notifications = $('.bell')
 
@@ -198,11 +198,15 @@ $(document).ready(function () {
                 data.forEach(function (element) {
                     console.log(element)
 
-                    notifications.append('<div class="notifications-item"><div class="text">' + 
-                        '<h6>'+element.title+'</h6>'+
-                        '<p>'+element.content+'</p>'+
-                    '</div>'+
-                '</div>')
+                    notifications.append(
+                        '<a href="' + element.url + '" class="notification-link" id="notification-' + element.id + '">' +
+                        '<div class="notifications-item">' +
+                        '<div class="text">' +
+                        '<h6>' + element.title + '</h6>' +
+                        '<p>' + element.content + '</p>' +
+                        '</div>' +
+                        '</div>' +
+                        '</a>')
                 }
                 )
 
@@ -224,17 +228,56 @@ $(document).ready(function () {
                 }
             }
         });
-      });
+    });
 
-      $('#bell-dropdown').on('hidden.bs.dropdown', function () {
+    $('#bell-dropdown').on('hidden.bs.dropdown', function () {
         console.log('aqui')
         var notifications = $('#notification_box')
         notifications.html("");
-      });
+    });
+
+    
 
 
 });
 
+$(document).on('click', '.notification-link', function () {
+    console.log('aqui')
+    console.log(this)
+    url = $(this).attr('href');
+    id = $(this).attr('id').split('-')[1]
+    $.ajax({
+        url: url,
+        type: 'get',
+        dataType: 'json',
+        beforeSend: function () {
+            like_link = false;
+        },
+        complete: function () {
+            like_link = false;
+        },
+        success: function (data) {
+            console.log(data)
+            toast = $('.toast')
+            toast_title = toast.find('#toast-title')
+            toast_title.text(data.title)
+            toast_elapsed_time = toast.find('#toast-time')
+            toast_elapsed_time.text(data.created_elapsed_time)
+            toast_content = toast.find('#toast-content')
+            toast_content.text(data.content)
+            $(".toast").toast('show');
+        },
+        error: function (data) {
+            // console.log('Erro');
+            like_link = false;
+        }
+    })
+    return false;
+})
+
+$(document).on('click', '#toast-close', function(e){
+    $('.toast').toast('hide')
+})
 $(document).on('click', ".like, .unlike", function (e) {
     if (like_link === true) {
         return false;
@@ -245,8 +288,6 @@ $(document).on('click', ".like, .unlike", function (e) {
     var action = split_id[0];
     var link_href = $(this).attr('href');
     like_link = true;
-
-    // $(this).attr('href', '#');
     var question_id = split_id[1];
 
     if ($(this).hasClass('like')) {

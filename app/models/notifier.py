@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlalchemy.orm import backref
 from sqlalchemy_searchable import make_searchable
+from flask import url_for
 
 from app.core.db import db
 from app.utils.kernel import format_datetime_local, format_elapsed_time, convert_datetime_to_local
@@ -79,13 +80,23 @@ class Notifier(db.Model):
         return {
             'id': self.id,
             'title': self.title,
-            'content': limit_chars(self.content, 128),
+            'content': limit_chars(self.content, 50),
+            'status': self.status_name,
+            'priority_order': self.priority_order,
+            'url' : url_for('api.notification', id=self.id)
+        }
+
+    @property
+    def to_dict_detail(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'content': self.content,
             'status': self.status_name,
             'priority': self.priority_name,
             'priority_order': self.priority_order,
             'created_elapsed_time': self.get_create_time_elapsed
         }
-
     def __repr__(self) -> str:
         return super().__repr__()
 
