@@ -70,6 +70,17 @@ def notifications():
     notifier = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo').order_by(NotifierPriority.order.asc())
     to_dict = [_.to_dict for _ in notifier]
     return jsonify(to_dict)
+
+
+@bp.route('notification/<int:id>')
+@counter
+def notification(id:int):
+    obj_notification = Notifier.query.filter(Notifier.id == id).first()
+    if obj_notification is None:
+        return jsonify([]), 404
+    else:
+        return jsonify(obj_notification.to_dict_detail)
+    
 # # api dashboard
 # @bp.route('dashboard/tags_data', methods=['GET', 'POST'])
 # def tags_data():
