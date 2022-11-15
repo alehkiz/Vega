@@ -7,12 +7,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4 fixed-top border-bottom" id='nav_bar'>
-        <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
-            aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button> -->
+
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <a class="navbar-brand" href="{{url_for('main.index')}}">{{config['SITE_TITLE']}}</a>
             <ul class="navbar-nav me-auto mb-md-0  navbar-nav-scroll">
@@ -20,90 +15,65 @@
                     <a class="btn btn-sm btn-outline-secondary me-2" type="button" href="{{ url_for('question.index')}}"
                         class='nav-link'>Dúvidas</a>
                 </li>
-                
+
                 <div class="dropdown nav-item">
                     <button class="btn btn-outline-success dropdown-toggle" type="button" id="dropdownMenuButton1"
                         data-bs-toggle="dropdown" aria-expanded="false">
                         Menu
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton1">
-                        
+                        {% if g.upload_urls %}
                         <li class="dropdown-submenu dropdown-item">
+
                             <a class="dropdown-item" href="#">Arquivos</a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                            {% if current_user.is_authenticated %}
-                            <li><a class="dropdown-item" href="{{url_for('file_pdf.atas')}}">Atas</a></li>
-                            {% endif %}
-                            <li><a class="dropdown-item" href="{{url_for('file_pdf.manuais')}}">Manuais</a></li>
-                            <!-- <li><a class="dropdown-item" href="#">Second level</a></li> -->
+                                {% for item in g.upload_urls.items() %}
+                                <li><a class="dropdown-item"
+                                        href="{{url_for('file_pdf.files', file_type= item[1])}}">{{item[0]}}</a></li>
+                                {% endfor %}
                             </ul>
+                            {% endif %}
                         </li>
                         {% if current_user.is_authenticated %}
                         {% if current_user.is_support %}
                         <li>
                             <hr class="dropdown-divider" />
-                          </li>
+                        </li>
                         <li>
-                            <a class="dropdown-item" type="button"
-                                href="{{ url_for('support.index')}}">Suporte</a>
+                            <a class="dropdown-item" type="button" href="{{ url_for('support.index')}}">Suporte</a>
                         </li>
                         {% endif %}
 
                         <li>
-                            <a class="dropdown-item" type="button"
-                                href="{{ url_for('dashboard')}}" class='nav-link'>Dashboard</a>
+                            <a class="dropdown-item" type="button" href="{{ url_for('dashboard')}}"
+                                class='nav-link'>Dashboard</a>
                         </li>
-                        
-                       
-                          {% if config.get('MODE', False) == 'dev' %}
-                          <li>
+                        <li><a class='dropdown-item' type='button' href="{{ url_for('notifier.index')}}"
+                                class='nav-link'>Notificações</a>
+                        </li>
+
+
+                        {% if config.get('MODE', False) == 'dev' %}
+                        <li>
                             <hr class="dropdown-divider" />
-                          </li>
-                          <li class="dropdown-submenu dropdown-item">
+                        </li>
+                        <li class="dropdown-submenu dropdown-item">
                             <a class="dropdown-item" href="#">Desenvolvimento</a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class='dropdown-item' type='button' href="{{ url_for('notifier.index')}}"
-                                    class='nav-link'>Notificações</a>
-                            </li>
-                            <li><a class="dropdown-item" type='button' href="{{ url_for('transactions.index')}}"
-                                    class='nav-link'>Transações</a>
-                            </li>
+
+                                <li><a class="dropdown-item" type='button' href="{{ url_for('transactions.index')}}"
+                                        class='nav-link'>Transações</a>
+                                </li>
                             </ul>
                         </li>
                         {% endif %}
                         {% endif %}
                     </ul>
-                </div>  
+                </div>
 
             </ul>
-
-<!-- 
-            <div class="dropdown nav-item">
-                <button class="btn btn-outline-success dropdown-toggle" type="button" id="dropdownMenuButton1"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                    Arquivos
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                    <li><a class="dropdown-item" href="{{url_for('file_pdf.index')}}">Atas</a></li>
-                </ul>
-            </div> -->
             {% if config.get('MODE', False) == 'dev' %}
-            <!-- #TODO apenas em DEV -->
-            {#<div class="dropdown">
-                <button class="btn btn-outline-info dropdown-toggle" type="button" id="dropdownMenuButton1"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                    Em desenvolvimento
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
 
-                    <li><a class='dropdown-item' type='button' href="{{ url_for('notifier.index')}}"
-                            class='nav-link'>Notificações</a>
-                    </li>
-                    <li><a class="dropdown-item" type='button' href="{{ url_for('transactions.index')}}"
-                            class='nav-link'>Transações</a>
-                    </li>
-                </ul>
-            </div>#}
             {% endif %}
             <div class="navbar-nav col-6 w-50 justify-content-center">
 
@@ -133,6 +103,36 @@
 
 
             <ul class="navbar-nav w-100 justify-content-center">
+                <li class="nav-item dropdown bell" id="bell-dropdown">
+                    <!-- <div class="icon" id="bell">  -->
+                    <a class="nav-link notifications-link" href="{{url_for('api.notifications')}}" id="bell"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+
+                        <i class="fas fa-bell circle bg_red">
+                            <span class="badge badge-danger">{{g.sum_active_notifier}}</span>
+                        </i>
+
+                    </a>
+                    <ul class="dropdown-menu show-bell" aria-labelledby="dropdown01">
+                        <div class="notifications" id="notification_box">
+                            <!-- <h2>Notificações - <span>{{g.sum_active_notifier}}</span></h2>
+                            {% if g.notifiers_dict | length == 0 %}
+                            ZERO
+                            {% else %}
+                            {% for notifier in g.notifiers_dict %}
+                            <div class="notifications-item">
+                                <div class="text">
+                                    <h6>{{notifier['title']}}</h6>
+                                    <p>{{notifier['content']}}</p>
+                                </div>
+                            </div>
+
+                            {% endfor %}
+                            {% endif %} -->
+                        </div>
+                    </ul>
+                    <!-- </div> -->
+                </li>
                 {% if current_user.is_anonymous %}
                 <li class="nav-item">
                     <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
@@ -156,15 +156,20 @@
                         <li><a class="dropdown-item" href="{{url_for('admin.tag')}}">Marcação</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.topic')}}">Tópico</a></li>
                         <li><a class="dropdown-item" href="{{url_for('admin.sub_topic')}}">Sub Tópico</a></li>
-                        <li><a class="dropdown-item" href="{{url_for('admin.file_pdf_type')}}"> Tipo de Arquivo</a> </li>
+                        <li><a class="dropdown-item" href="{{url_for('admin.file_pdf_type')}}"> Tipo de Arquivo</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href='{{url_for("admin.notifier")}}'>Notificações</a></li>
+                        {% endif %}
                         <hr class="dropdown-divider">
                         <li><a class="dropdown-item" href='{{url_for("admin.file")}}'>Upload</a></li>
-                        {% endif %}
                         {% if config.get('MODE', False) == 'dev' %}
                         <!-- #TODO apenas em DEV -->
                         <hr class="dropdown-divider">
-                        <li><a class="dropdown-item" href='{{url_for("admin.notifier")}}'>Notificações</a></li>
                         
+
                         {% endif %}
 
                     </ul>
@@ -172,10 +177,6 @@
                 </li>
 
                 {% endif %}
-
-
-
-
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
                         aria-expanded="false">
@@ -205,10 +206,16 @@
                 {% endif %}
 
 
+
+
+
             </ul>
 
+
         </div>
+
     </div>
+
 </nav>
 
 

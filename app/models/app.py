@@ -2,6 +2,7 @@
 from enum import unique
 from os import stat
 from flask import Markup, escape, current_app as app, abort, flash
+from flask_login import login_required
 from sqlalchemy import func, text, Index, cast, desc, extract, Date, asc
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import date, datetime
@@ -111,7 +112,21 @@ class Visit(db.Model):
             extract('year', Visit.datetime) == year,
             extract('month', Visit.datetime) == month
         ).group_by('date')
+    @staticmethod
+    def visits_by_ip(ips : list = None):
+        """Return a query object with a lista of network in ips and the count of access
 
+        Args:
+            ips (list, optional): IPs. Defaults to None.
+
+        Returns:
+            BaseQuery: A BaseQuery with number of access for each IP
+        """        
+        if list is None:
+            query = db.session.query(Network, func.count(Network.id).label('views')).join(Visit.network).group_by(Network)
+        else:
+            query = db.session.query(Network, func.count(Network.id).label('views')).join(Visit.network).filter(Network.ip.in_(ips)).group_by(Network)
+        return query
 class Network(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ip = db.Column(INET, nullable=False)
@@ -126,7 +141,7 @@ class Network(db.Model):
     current_login_user = db.relationship('User', backref='current_login_network', lazy='dynamic', foreign_keys='[User.current_login_network_id]')
     confirmed_user = db.relationship('User', backref='confirmed_network', lazy='dynamic', foreign_keys='[User.confirmed_network_id]')
     notifiers = db.relationship('Notifier', backref='network', lazy='dynamic', single_parent=True)
-    visit = db.relationship('Visit', backref='network', lazy='dynamic')
+    visits = db.relationship('Visit', backref='network', lazy='dynamic', single_parent=True)
     # created_citizen = db.relationship('Citizen', backref='created_network', lazy='dynamic', foreign_keys='[Citizen.created_network_id]')
 
 
@@ -144,6 +159,7 @@ class FilePDF(db.Model):
     size = db.Column(db.Float, nullable=False)
     reference_date = db.Column(db.Date, nullable=True)
     title = db.Column(db.Text, nullable=False)
+    update_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     type_id = db.Column(db.Integer, db.ForeignKey("file_pdf_type.id"), nullable=False)
     sub_topic_id = db.Column(db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
     topics = db.relationship('Topic', secondary=file_topic, 
@@ -201,6 +217,8 @@ class FilePDFType(db.Model):
     create_at = db.Column(db.DateTime(timezone=True), default=convert_datetime_to_local(datetime.utcnow()))
     create_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     active = db.Column(db.Boolean, default=False)
+    url_route = db.Column(db.Text)
+    login_required = db.Column(db.Boolean, default=False)
     files = db.relationship('FilePDF', backref='type', lazy='dynamic')
 
 class FileView(db.Model):

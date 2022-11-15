@@ -21,7 +21,9 @@
             <div class="row">
 
                 <div class="mt-2">
-                    <span class="badge bg-info mt-0 float-start">{{notice.topic.name}}</span>
+                    {% for topic in notice.topics_name%}
+                    <span class="badge bg-info mt-0 float-start">{{topic}}</span>
+                    {% endfor %}
                     <a class="edit text-decoration-none float-end" id="edit_34170"
                         href="{{ url_for('notifier.edit', id=notice.id)}}"><i class="fas fa-edit"></i></a>
                 </div>
@@ -55,7 +57,9 @@
             aria-labelledby="history-tab">
             {% if notices_history is defined %}
             {% for notice in notices_history %}
-            <span class="badge bg-secondary mt-3 float-end">{{notice.topic.name}}</span>
+            {% for topic in notice.topics_name %}
+            <span class="badge bg-secondary mt-3 float-end">{{topic}}</span>
+            {% endfor %}
             <div class="row m-3">
                 <div class="row">
                     <h5 class="fw-normal text-secondary">{{notice.title}}</h5>

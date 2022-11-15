@@ -8,7 +8,9 @@ from unicodedata import normalize, category
 from werkzeug.urls import url_parse
 from flask import request
 from dateutil import tz
-from flask import url_for
+from flask import url_for, g, session, request
+from collections import namedtuple
+from flask.globals import _app_ctx_stack, _request_ctx_stack
 
 
 ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_123456789'
@@ -37,7 +39,7 @@ def format_elapsed_time(timestamp):
     '''
     if isinstance(timestamp, datetime):
         timestamp = convert_datetime_to_local(timestamp).replace(microsecond=0)
-        return format_timedelta(convert_datetime_to_local(datetime.utcnow()).replace(microsecond=0) - timestamp , add_direction=True, locale='pt_BR')
+        return format_timedelta(timestamp-convert_datetime_to_local(datetime.utcnow()).replace(microsecond=0), add_direction=True, locale='pt_BR')
 
 def format_datetime_local(timestamp, format='short'):
     if not format in ['full', 'long', 'medium', 'short']:
@@ -164,3 +166,64 @@ def process_value(value : str, cls_query, route : str = ''):
             raise Exception(f'O valor {number} não foi encontrado')
         value = value.replace(old_value, '[aqui]('+link+')')
     return value
+
+
+BreadCrumb = namedtuple('BreadCrumb', ['path', 'title'])
+
+def breadcrumb(app):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            sub_topic = kwargs.get('sub_topic', None)
+            tag = kwargs.get('tag', None)
+            view_title = tag if not tag is None else sub_topic
+            g.title = view_title
+            session_crumbs = session.setdefault('crumbs', [])
+            print(session_crumbs)
+            g.breadcrumbs = set()
+
+            for path, title in session_crumbs:
+                g.breadcrumbs.add(BreadCrumb(path, title))
+            # print(args)
+            # print(kwargs)
+
+            paths = [_ for _ in request.path.split('/') if _ != '']
+            if not paths:
+                paths.append('index')
+            dict_paths = {v: '/'.join(paths[0:i+1]) for i, v in enumerate(paths)}
+
+            
+
+            print('path', request.path)
+
+            print(f'route_from: {route_from(request.path)}')
+            rv = f(*args, **kwargs)
+
+            session.modified = True
+
+            session_crumbs.append((request.path, view_title))
+
+            if len(session_crumbs) > 3:
+                session_crumbs.pop(0)
+            return rv
+        return decorated_function
+    return decorator
+
+
+def route_from(url, method=None):
+    app_ctx = _app_ctx_stack.top
+    req_ctx = _request_ctx_stack.top
+
+    if app_ctx is None:
+        raise RuntimeError('Não existe contexto para a aplicação, somente é possível identificar a URL quando estiver com um contexto')
+    if req_ctx is not None:
+        url_adapter = req_ctx.url_adapter
+    else:
+        url_adapter = app_ctx.url_adapter
+        if url_adapter is None:
+            raise RuntimeError('A aplicação não está disponível para criar uma url')
+    parsed_url = url_parse(url)
+
+    if parsed_url.netloc != '' and parsed_url.netloc != url_adapter.server_name:
+        raise RuntimeError('Not Found')
+    return url_adapter.match(parsed_url.path, method)

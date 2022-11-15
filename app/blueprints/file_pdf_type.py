@@ -46,8 +46,10 @@ def edit(id):
     if form.validate_on_submit():
         try:
             file_type.name = form.name.data
+            file_type.active = form.active.data
+            file_type.url_route = form.url_route.data
             db.session.commit()
-            return redirect(url_for('admin.sub_topic'))
+            return redirect(url_for('admin.file_pdf_type'))
         except Exception as e:
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)
@@ -55,13 +57,15 @@ def edit(id):
             return render_template('edit.html', form=form, title='Editar', edit=True)
     
     form.name.data = file_type.name
-    # form.sub_topic.data = question.sub_topics
-    # form.sub_topic.data = question.sub_topic
-    # form.answer.data = question.answer
-
+    form.active.data = file_type.active
+    form.url_route.data = file_type.url_route
 
     return render_template('edit.html',form=form, title='Editar', edit=True)
 
 @bp.route('/deactive/<int:id>')
 def deactive(id):
+    return ''
+
+@bp.route('/view/<int:id>')
+def view(id):
     return ''

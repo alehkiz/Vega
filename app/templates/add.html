@@ -54,8 +54,11 @@
         {{ macros.render_field(form.topic, class='selectpicker', nolabel=true, multiple=true,
         **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
         <br>
-        {{ macros.render_field(form.sub_topic, class='form-select', nosize=true)}}
+        <BR>
+        {{ macros.render_field(form.sub_topic, class='form-select', class='selectpicker', nolabel=true, multiple=true,
+        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
         <br>
+        <BR>
         {% if current_user.is_admin %}
         {{ macros.render_field(form.approved, nosize=true, checked=true)}}
         {% endif %}
@@ -112,7 +115,12 @@
         {{ macros.render_field(form.content, size=32, class='form-control', placeholder='Titulo', maxlength=498) }}
         {{ macros.render_field(form.status, nosize=true, class='form-select') }}
         {{ macros.render_field(form.priority, nosize=true, class='form-select') }}
-        {{ macros.render_field(form.topic, nosize=true, class='form-select') }}
+        <br>
+        <br>
+
+        {{ macros.render_field(form.topics, class='selectpicker', nolabel=true, multiple=true,
+        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
+        <br>
         <br>
         {{ form.submit }}
 
