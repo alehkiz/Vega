@@ -49,7 +49,10 @@
         {{ macros.render_field(form.answer, size=256, class='form-control', placeholder='Reposta')}}
         {{ macros.render_field(form.tag, class='form-select', class='selectpicker', nolabel=true, multiple=true, **{'data-style':"btn-primary", 'data-selected-text-format':"count", "data-live-search":"true", "data-size":"5", 'data-width':"auto"})}}
         <br>
-        {{ macros.render_field(form.sub_topic, class='form-select', nosize=true)}}
+        <br>
+        {{ macros.render_field(form.sub_topic, class='form-select', class='selectpicker', nolabel=true, multiple=true,
+        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
+        <br>
         <br>
         {{ macros.render_field(form.topic, class='form-select', class='selectpicker', nolabel=true, multiple=true, **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
         <br>
@@ -69,17 +72,22 @@
         {% elif edit is defined %}
         {{ form.csrf_token}}
         {{ macros.render_field(form.name, size=256, class='form-control', placeholder='Tag')}}
+        {{ macros.render_field(form.url_route, size=256, class='form-control', placeholder='Rota URL')}}
+        {{ macros.render_field(form.active)}}
         <br>
         {{ form.submit }}
 
         {% elif notifier is defined %}
 
         {{ form.csrf_token }}
-        {{ macros.render_field(form.title, size=32, class='form-control', placeholder='Titulo') }}
-        {{ macros.render_field(form.content, size=60, class='form-control', placeholder='Titulo', maxlength=490) }}
+        {{ macros.render_field(form.title, size=32, class='form-control', placeholder='Titulo', maxlength=40) }}
+        {{ macros.render_field(form.content, size=60, class='form-control', placeholder='Titulo', maxlength=400) }}
         {{ macros.render_field(form.status, nosize=true, class='form-select') }}
         {{ macros.render_field(form.priority, nosize=true, class='form-select') }}
-        {{ macros.render_field(form.topic, nosize=true, class='form-select') }}
+        <br>
+        {{ macros.render_field(form.topics, class='form-select', class='selectpicker', nolabel=true, multiple=true,
+        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
+        <br>
         <br>
         {{ form.submit }}
 

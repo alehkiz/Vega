@@ -102,7 +102,7 @@ class BaseConfig(object):
                 'name' : 'Tópicos',
                 'attr' : 'topic_name'
             },
-            'sub_topic' :{
+            'sub_topics' :{
                 'name' : 'Sub Tópico',
                 'attr' : 'sub_topic_name'
             },
@@ -226,9 +226,9 @@ class BaseConfig(object):
                 'name': 'title',
                 'attr': None
             },
-            'create_at':{
+            'reference_date':{
                 'name': 'Criado em',
-                'attr': 'get_create_datetime'
+                'attr': 'get_reference_date'
             },
             'approved': {
                 'name': "Aprovado",
@@ -268,8 +268,9 @@ class BaseConfig(object):
     }
     USER_ANON_ID = 4
     UPLOAD_FOLDER = join(APP_DIR, 'upload')
-    MAX_CONTENT_LENGTH = 10485760 #20MB
-    UPLOAD_EXTENSIONS = ['pdf']
+    OLD_UPLOAD_FOLDER = join(UPLOAD_FOLDER, '_old')
+    MAX_CONTENT_LENGTH = 31457280 #20MB
+    UPLOAD_EXTENSIONS = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'xlsx', 'xls']
 
 class DevelopmentConfig(BaseConfig):
     # SQLALCHEMY_DATABASE_URI = f'sqlite:///{BaseConfig.DEV_DB}'

@@ -6,27 +6,60 @@
     {% if form is defined %}
     <form action="" method="GET" role="form">
         <div class='form-group'>
+            {% if form.search is defined %}
             <div class="col-md-2">
             {{ forms.render_field(form.search, size=5, class='form-select',
             placeholder='Buscar...', nolabel=true, type='search', **{'aria-label':"Buscar",
             'aria-describedby':"submit"})}}
             </div>
+            {% endif %}
             <br>
+            {% if form.topic is defined %}
             {{ forms.render_field(form.topic, class='form-select', class='selectpicker', nolabel=true,
             multiple=true,
             title='Selecionar Tópico', **{'data-actions-box':"true", 'data-style':"btn-primary",
             'data-selected-text-format':"count"})}}
+            {% endif %}
+            {% if form.sub_topic is defined %}
             {{ forms.render_field(form.sub_topic, class='form-select', class='selectpicker', nolabel=true,
             multiple=true,
             title='Selecionar Sub-Tópico', **{'data-actions-box':"true", 'data-style':"btn-primary",
             'data-selected-text-format':"count"})}}
+            {% endif %}
+
+            {% if form.tag is defined %}
             {{ forms.render_field(form.tag, class='form-select', class='selectpicker', nolabel=true, multiple=true,
             title='Selecionar Marcação', **{'data-actions-box':"true", 'data-style':"btn-primary",
             'data-selected-text-format':"count"})}}
-
-
+            {% endif %}
+            {% if form.who_answer is defined %}
+            {{ forms.render_field(form.who_answer, class='form-select', class='selectpicker', nolabel=true, multiple=true,
+            title='Selecionar Marcação', **{'data-actions-box':"true", 'data-style':"btn-primary",
+            'data-selected-text-format':"count"})}}
+            {% endif %}
+            
+            {% if form.active is defined %}
             <br>
-            <!-- {{ forms.render_field(form.active)}} -->
+            {{ forms.render_field(form.active, class='form-select', class='selectpicker',
+            title='Selecionar Marcação', **{'data-actions-box':"true", 'data-style':"btn-primary",
+            'data-selected-text-format':"count"})}}
+            {% endif %}
+            <br>
+
+            {% if form.type is defined %}
+            <br>
+            {{ forms.render_field(form.type, class='form-select', class='selectpicker',
+            title='Selecionar Marcação', **{'data-actions-box':"true", 'data-style':"btn-primary",
+            'data-selected-text-format':"count"})}}
+            {% endif %}
+
+            {% if form.approved is defined %}
+            <br>
+            {{ forms.render_field(form.approved, class='form-select', class='selectpicker',
+            title='Selecionar Marcação', **{'data-actions-box':"true", 'data-style':"btn-primary",
+            'data-selected-text-format':"count"})}}
+            {% endif %}
+
             <br>
             {{ form.submit(class='btn btn-success') }}
         </div>
@@ -35,7 +68,7 @@
     {% endif %}
     <!-- {{current_user}} -->
     {{ macros.render_table(cls_table, pagination, page_name, url_arguments = url_args if url_args is defined else {}, order_type=order_type, order=order, mode=mode, type=type,
-    user = current_user, no_view=true, order_type_inverse=order_type_inverse) }}
+    user = current_user, no_view=false, order_type_inverse=order_type_inverse) }}
     {{ macros.render_pagination(pagination, first_page, last_page, endpoint, url_arguments = url_args if url_args is defined else {}, order=order, order_type=order_type, order_type_inverse=order_type_inverse)}}
     
 </div>

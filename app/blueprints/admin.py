@@ -1,3 +1,5 @@
+from argparse import FileType
+from app.forms.file_pdf_type import FilePDFTypeFilter
 from app.models.app import FilePDF, FilePDFType
 from app.models.notifier import Notifier
 from flask import (
@@ -19,7 +21,7 @@ from sqlalchemy.orm import relationship
 
 from sqlalchemy import inspect, desc, asc, func
 
-from app.models.wiki import Article, Topic, User, Question, Tag, SubTopic
+from app.models.wiki import Article, Topic, Transaction, User, Question, Tag, SubTopic
 from app.forms.wiki import ArticleForm
 from app.forms.question import QuestionFilter
 from app.core.db import db
@@ -150,8 +152,8 @@ def answers():
             q = q.join(Question.topics).filter(Topic.id.in_(
                 [_.id for _ in form.topic.data]))
         if len(form.sub_topic.data) > 0:
-            q = q.filter(Question.sub_topic_id.in_(
-                [_.id for _ in form.sub_topic.data]))
+            q = q.filter(Question.sub_topics.any(
+                SubTopic.id.in_([_.id for _ in form.sub_topic.data])))
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
@@ -261,38 +263,24 @@ def questions():
                     .order_by(relationship_type_order())
                 )
     else:
-        # if topic != False:
-        #     q = Question.query.filter(
-        #         Question.answer == None, Question.topic_id == topic.id
-        #     ).order_by(Question.create_at.asc())
-        # else:
-        #     q = Question.query.filter(Question.answer == None).order_by(
-        #         Question.create_at.asc()
-        #     )
         if topic != False:
             q = db.session.query(Question).filter(
                 Question.answer == None).join(Question.topics).filter(Topic.id == topic.id).order_by(column_type())
-            # q = Question.query.filter(
-            #     Question.answer == None, Question.topic_id == topic.id
-            # ).order_by(column_type())
         else:
             q = db.session.query(Question).filter(
-                Question.answer == None).order_by(column_type())
-            # Question.query.filter(Question.answer == None).order_by(
-            #     column_type()
-            # )
-    
+                Question.answer == None).order_by(column_type())    
     if form.validate():
         if len(form.topic.data) > 0:
             q = q.join(Question.topics).filter(Topic.id.in_(
                 [_.id for _ in form.topic.data]))
         if len(form.sub_topic.data) > 0:
-            q = q.filter(Question.sub_topic_id.in_(
-                [_.id for _ in form.sub_topic.data]))
+            q = q.filter(Question.sub_topics.any(
+                SubTopic.id.in_([_.id for _ in form.sub_topic.data])))
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
-    
+        if form.active.data is True:
+            q = q.filter(Question.active == True)
     if search != False and search != '' and search != None:
         q = q.filter((
             func.ts_rank_cd(
@@ -350,7 +338,6 @@ def to_approve():
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
     elif topic != False and topic.isnumeric():
         topic = Topic.query.filter(Topic.id == int(topic)).first()
-
     if not order is False or not order_type is False:
         try:
             column = getattr(Question, order)
@@ -402,11 +389,6 @@ def to_approve():
         if topic != False:
             q = db.session.query(Question).filter(Question.answer != None, Question.answer_approved == False).join(
                 Question.topics).filter(Topic.id == topic.id).order_by(Question.create_at.asc())
-            # Question.query.filter(
-            #     Question.answer != None,
-            #     Question.answer_approved == False,
-            #     Question.topic_id == topic.id,
-            # ).order_by(Question.create_at.asc())
         else:
             q = Question.query.filter(
                 Question.answer != None, Question.answer_approved == False
@@ -418,11 +400,16 @@ def to_approve():
             q = q.filter(Topic.id.in_(
                 [_.id for _ in form.topic.data]))
         if len(form.sub_topic.data) > 0:
-            q = q.filter(Question.sub_topic_id.in_(
-                [_.id for _ in form.sub_topic.data]))
+            q = q.filter(Question.sub_topics.any(
+                SubTopic.id.in_([_.id for _ in form.sub_topic.data])))
         if len(form.tag.data) > 0:
             q = q.filter(Question.tags.any(
                 Tag.id.in_([_.id for _ in form.tag.data])))
+        if len(form.who_answer.data) > 0:
+            q = q.filter(Question.answer_user_id.in_([_.id for _ in form.who_answer.data]))
+        if form.active.data is True:
+            print('teste')
+            q = q.filter(Question.active == True)
     if search != False and search != '' and search != None:
         q = q.filter((
             func.ts_rank_cd(
@@ -438,6 +425,7 @@ def to_approve():
     last_page = paginate.pages
     order_type_inverse = "asc" if order_type == "desc" else "desc"
     order = request.args.get('order', None)
+    order_type = "asc" if order_type == "desc" else "desc"
     url_args = dict(request.args)
     url_args.pop('order_type', None)
     url_args.pop('order', None)
@@ -547,6 +535,8 @@ def file_pdf_type():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
+    
+    request_args = request.args
     if not order is False or not order_type is False:
         try:
             column = getattr(FilePDFType, order)
@@ -557,8 +547,14 @@ def file_pdf_type():
     else:
         column = FilePDFType.id
         column_type = column.desc
-    t = FilePDFType.query.order_by(column_type())
-    paginate = t.paginate(page, app.config.get(
+
+    # if order:
+
+
+
+
+    file_type = FilePDFType.query.order_by(column_type())
+    paginate = file_type.paginate(page, app.config.get(
         "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
         list(paginate.iter_pages())[0]
@@ -566,7 +562,16 @@ def file_pdf_type():
         else None
     )
     last_page = paginate.pages
+    print(order_type)
     order_type = "asc" if order_type == "desc" else "desc"
+
+    order_type_inverse = "asc" if order_type == "desc" else "desc"
+    order = request.args.get('order', None)
+    url_args = dict(request.args)
+    url_args.pop('order_type', None)
+    url_args.pop('order', None)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+
     return render_template(
         "admin.html",
         pagination=paginate,
@@ -577,7 +582,8 @@ def file_pdf_type():
         list=True,
         page_name="FilePDFType",
         order_type=order_type,
-        no_view=False
+        no_view=False,
+        order_type_inverse=order_type_inverse
     )
 
 @bp.route("/tag")
@@ -677,7 +683,7 @@ def notifier():
     )
     last_page = paginate.pages
     order_type = "asc" if order_type == "desc" else "desc"
-
+    order_type_inverse = "asc" if order_type == "desc" else "desc"
     url_args = dict(request.args)
     url_args.pop('page') if 'page' in url_args.keys() else None
 
@@ -691,6 +697,7 @@ def notifier():
         list=True,
         page_name="Notificações",
         order_type=order_type,
+        order_type_inverse=order_type_inverse,
         url_args=url_args
     )
 
@@ -698,13 +705,14 @@ def notifier():
 
 @bp.route('/file')
 @login_required
-@roles_accepted('admin', 'suporte')
+@roles_accepted('admin', 'support')
 def file():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
     topic = request.args.get("topic", False)
-    # form = QuestionFilter(request.args, meta={'csrf': False})
+    
+    form = FilePDFTypeFilter(request.args, meta={'csrf': False})
     request_args = request.args
     if topic != False and not topic.isnumeric():
         topic = Topic.query.filter(Topic.name.ilike(topic)).first()
@@ -753,34 +761,22 @@ def file():
                     .order_by(relationship_type_order())
                 )
     else:
-        # if topic != False:
-        #     q = Question.query.filter(
-        #         Question.answer == None, Question.topic_id == topic.id
-        #     ).order_by(Question.create_at.asc())
-        # else:
-        #     q = Question.query.filter(Question.answer == None).order_by(
-        #         Question.create_at.asc()
-        #     )
+
         if topic != False:
-            q = db.session.query(FilePDF).join(FilePDF.topics).filter(Topic.id == topic.id).order_by(column_type())
-            # q = Question.query.filter(
-            #     Question.answer == None, Question.topic_id == topic.id
-            # ).order_by(column_type())
+            q = db.session.query(FilePDF).join(FilePDF.topics).join(FilePDF.type).filter(Topic.id == topic.id).order_by(column_type())
+
         else:
-            q = db.session.query(FilePDF).order_by(column_type())
-            # Question.query.filter(Question.answer == None).order_by(
-            #     column_type()
-            # )
-    # if form.validate():
-    #     if len(form.topic.data) > 0:
-    #         q = q.join(Question.topics).filter(Topic.id.in_(
-    #             [_.id for _ in form.topic.data]))
-    #     if len(form.sub_topic.data) > 0:
-    #         q = q.filter(Question.sub_topic_id.in_(
-    #             [_.id for _ in form.sub_topic.data]))
-    #     if len(form.tag.data) > 0:
-    #         q = q.filter(Question.tags.any(
-    #             Tag.id.in_([_.id for _ in form.tag.data])))
+            q = db.session.query(FilePDF).join(FilePDF.topics).join(FilePDF.type).order_by(column_type())
+    # q = q.join(FilePDFType)
+    if form.validate():
+        if len(form.type.data) > 0:
+            q = q.filter(FilePDFType.id.in_([_.id for _ in form.type.data]))
+        if len(form.topic.data) > 0:
+            q = q.filter(Topic.id.in_([_.id for _ in form.topic.data]))
+        if form.approved.data is True:
+            q  = q.filter(FilePDF.approved == True)
+            
+
     paginate = q.paginate(page, app.config.get(
         "TABLE_ITEMS_PER_PAGE", 10), False)
     first_page = (
@@ -789,9 +785,14 @@ def file():
         else None
     )
     last_page = paginate.pages
+    order_type_inverse = "asc" if order_type == "desc" else "desc"
     order_type = "asc" if order_type == "desc" else "desc"
-
+    print(order_type)
+    
+    order = request.args.get('order', None)
     url_args = dict(request.args)
+    url_args.pop('order_type', None)
+    url_args.pop('order', None)
     url_args.pop('page') if 'page' in url_args.keys() else None
 
     return render_template(
@@ -805,8 +806,55 @@ def file():
         page_name="Arquivos",
         order_type=order_type,
         type='aprovar',
+        form=form,
         _topic=Topic.query.filter(Topic.selectable == True),
         _sub_topic=SubTopic.query,
         request_args=request_args,
-        url_args=url_args
+        url_args=url_args,
+        order_type_inverse = order_type_inverse,
+        # order=order
     )
+
+@bp.route('/transaction')
+@login_required
+@roles_accepted('admin', 'support')
+def transaction():
+    page = request.args.get('page', 1, type=int)
+    order = request.args.get('order', False)
+    order_type = request.args.get('order_type', 'desc')
+    
+    if not order is False or not order_type is False:
+        try:
+            column = getattr(FilePDF, order)
+            column_type = getattr(column, order_type)
+        except Exception as e:
+            column = FilePDF.uploaded_at
+            column_type = FilePDF.uploaded_at.asc
+    else:
+        column = FilePDF.uploaded_a
+    if order:
+        if order in Transaction.__table__.columns:
+            if topic != False:
+                q= db.session.query(Transaction).join(Transaction.topics).filter(Topic.id == topic.id).order_by(column_type())
+            else:
+                q=db.session.query(Transaction).join(Transaction.topics).order_by(column_type())
+        else:
+            relationship_class = getattr(
+                Transaction, order).property.mapper.class_
+            relationship_type = getattr(Transaction, order)
+            relationship_type_order = getattr(
+                relationship_class.name, order_type)
+            if topic != False:
+                q = (
+                    db.session.query(Transaction)
+                    .join(Transaction.topics)
+                    .filter(Topic.id == topic.id)
+                    .join(relationship_class, relationship_type)
+                    .order_by(relationship_type_order())
+                )
+            else:
+                q = (
+                    db.session.query(Transaction)
+                    .join(relationship_class, relationship_type)
+                    .order_by(relationship_type_order())
+                )

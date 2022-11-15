@@ -143,9 +143,136 @@ $(document).ready(function () {
 
 
 
+    // h2_obj.parent().append('<div id="flush-collapse_' + question_id + '" class="accordion-collapse collapse border border-1 rounded mb-3"' +
+    // 'aria-labelledby="flush-heading_' + question_id + '" data-bs-parent="#accordionFlushQuestion">')
+    // $('#flush-collapse_' + question_id).append('<div class="accordion-head">' +
+    //     '<div class="accordion-head-info">' +
+    //     '</div>' +
+    //     '</div>'
+    // )
+    var down = false;
+    var notifications = $('.bell')
+
+    // $('.bell').click(function (e) {
+    //     console.log('clicado')
+    //     var color = $(this).text();
+    //     console.log("licado")
+    //     if (down) {
+    //         //$('#notification_box').css('height', '0px');
+    //         // $('#notification_box').css('opacity', '0');
+    //         // $('#notification_box').css('display', 'none');
+    //         // $('#notification_box').css('visibility', 'hidden');
+    //         down = false;
+    //     } else {
+    //         console.log('Ativar')
+    //         //$('#notification_box').css('height', 'auto');
+    //         // $('#notification_box').css('opacity', '1');
+    //         // $('#notification_box').css('display', 'block');
+    //         // $('#notification_box').css('visibility', 'visible');
+    //         down = true;
+    //     }
+
+    // });
+
+    $('#bell-dropdown').on('shown.bs.dropdown', function () {
+        notifications = $('#notification_box')
+
+        url = $('#bell').attr('href')
+        // console.log(url)
+        $.ajax({
+            url: url,
+            type: 'get',
+            dataType: 'json',
+            // async: false,
+            headers: {
+                'X-CSRFToken': $CSRF_TOKEN
+            },
+            beforeSend: function () {
+                accordion_link = true;
+            },
+            complete: function () {
+                accordion_link = false;
+            },
+            success: function (data) {
+                // console.log(data)
+                data.forEach(function (element) {
+                    // console.log(element)
+
+                    notifications.append(
+                        '<a href="' + element.url + '" class="notification-link" id="notification-' + element.id + '">' +
+                        '<div class="notifications-item">' +
+                        '<div class="text">' +
+                        '<h6>' + element.title + '</h6>' +
+                        '<p>' + element.content + '</p>' +
+                        '</div>' +
+                        '</div>' +
+                        '</a>')
+                }
+                )
+
+                // $(target).collapse();
+
+            },
+            error: function (data) {
+                if (data.status == 404) {
+                    if (!button_accordion.hasClass('bg-danger')) {
+                        button_accordion.addClass('bg-danger')
+                        button_accordion.append('<span class="badge bg-secondary mx-3">Não encontrado</span>\n')
+
+                    }
+                }
+                if (data.status == 500) {
+                    if (!button_accordion.hasClass('bg-danger')) {
+
+                    }
+                }
+            }
+        });
+    });
+
+    $('#bell-dropdown').on('hidden.bs.dropdown', function () {
+        var notifications = $('#notification_box')
+        notifications.html("");
+    });
+
+    
+
 
 });
 
+$(document).on('click', '.notification-link', function () {
+    url = $(this).attr('href');
+    id = $(this).attr('id').split('-')[1]
+    $.ajax({
+        url: url,
+        type: 'get',
+        dataType: 'json',
+        beforeSend: function () {
+            like_link = false;
+        },
+        complete: function () {
+            like_link = false;
+        },
+        success: function (data) {
+            toast = $('.toast')
+            toast_title = toast.find('#toast-title')
+            toast_title.text(data.title)
+            toast_elapsed_time = toast.find('#toast-time')
+            toast_elapsed_time.text(data.created_elapsed_time)
+            toast_content = toast.find('#toast-content')
+            toast_content.text(data.content)
+            $(".toast").toast('show');
+        },
+        error: function (data) {
+            like_link = false;
+        }
+    })
+    return false;
+})
+
+$(document).on('click', '#toast-close', function(e){
+    $('.toast').toast('hide')
+})
 $(document).on('click', ".like, .unlike", function (e) {
     if (like_link === true) {
         return false;
@@ -156,8 +283,6 @@ $(document).on('click', ".like, .unlike", function (e) {
     var action = split_id[0];
     var link_href = $(this).attr('href');
     like_link = true;
-
-    // $(this).attr('href', '#');
     var question_id = split_id[1];
 
     if ($(this).hasClass('like')) {
@@ -201,7 +326,6 @@ $(document).on('click', ".like, .unlike", function (e) {
             });
         },
         error: function (data) {
-            // console.log('Erro');
             like_link = false;
         }
     });
@@ -261,7 +385,6 @@ $(document).on('click', ".save, .unsave", function (e) {
             });
         },
         error: function (data) {
-            // console.log('Erro');
             save_link = false;
         }
     });
@@ -308,9 +431,9 @@ $("#delete-modal").on("show.bs.modal", function (e) {
 
 function iframeLoaded(frame_id) {
     var iFrameID = document.getElementById(frame_id.id);
-    console.log('aqui')
-    console.log(frame_id.id)
-    console.log(iFrameID)
+    // console.log('aqui')
+    // console.log(frame_id.id)
+    // console.log(iFrameID)
     if (iFrameID) {
         // here you can make the height, I delete it first, then I make it again
         iFrameID.height = "";

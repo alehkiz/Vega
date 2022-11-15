@@ -1,4 +1,6 @@
+from argparse import FileType
 from app.models.search import Search
+from app.models.app import FilePDFType
 from flask import (
     current_app as app,
     Blueprint,
@@ -19,16 +21,19 @@ from flask import (
 )
 from flask_security import login_required, current_user
 from datetime import datetime
+from datetime import timedelta
 from sqlalchemy import func
+from werkzeug.urls import url_parse
 
 from app.core.db import db
-from app.models.wiki import Article, Question, QuestionView, Tag, Topic
+from app.models.wiki import Article, Question, QuestionView, SubTopic, Tag, Topic
 from app.models.app import Network, Page, Visit
 from app.models.security import User
 from app.forms.question import QuestionSearchForm
 from app.forms.search import SearchForm
-from app.utils.kernel import convert_datetime_to_local
+from app.utils.kernel import convert_datetime_to_local, breadcrumb, route_from
 from app.utils.routes import counter
+from app.models.notifier import Notifier, NotifierPriority, NotifierStatus
 # from app.core.extensions import cache
 
 # from app.dashboard import dash
@@ -46,8 +51,12 @@ def before_first_request():
 def before_request():
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
+    notifiers = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo').order_by(NotifierPriority.order.asc())
+    g.sum_active_notifier = notifiers.count()
+    # g.notifiers_dict = [x.to_dict for x in notifiers]
     if current_user.is_authenticated:
         current_user.last_seen = convert_datetime_to_local(datetime.utcnow())
+        g.upload_urls = {file.name:file.url_route for file in FilePDFType.query.filter(FilePDFType.active==True)}
         try:
             db.session.commit()
         except Exception as e:
@@ -55,7 +64,8 @@ def before_request():
                 "Não foi possível salvar ultima visualização do usuário")
             app.logger.error(e)
             return abort(500)
-
+    else:
+        g.upload_urls = {file.name:file.url_route for file in FilePDFType.query.filter(FilePDFType.active==True, FilePDFType.login_required == False)}
     if not session.get("AccessType", False):
         current_rule = request.url_rule
         if Topic.query.filter(Topic.selectable == True).count() > 1:
@@ -63,7 +73,8 @@ def before_request():
                 "main.select_access",
                 "static",
             ]:
-                return redirect(url_for("main.select_access"))
+                
+                return redirect(url_for("main.select_access", next=request.path))
         else:
             topic = Topic.query.filter(Topic.selectable == True).first()
             response = make_response(redirect(url_for(current_rule.endpoint)))
@@ -101,12 +112,7 @@ def before_request():
                 app.config.get("ITEMS_PER_PAGE", 5), g.topic)
             g.questions_most_recent = db.session.query(Question).filter(Question.answer_approved == True).join(
                 Topic, Question.topics).filter(Topic.id == g.topic.id).order_by(Question.create_at.desc()).limit(app.config.get("ITEMS_PER_PAGE", 5)).all()
-            # (
-            #     Question.query.order_by(Question.create_at.desc())
-            #     .filter(Question.answer_approved == True, Question.topic_id == g.topic.id)
-            #     .limit(app.config.get("ITEMS_PER_PAGE", 5))
-            #     .all()
-            # )
+
             g.questions_most_liked = Question.most_liked(
                 app.config.get("ITEMS_PER_PAGE", 5), topic=g.topic, classification=False
             )
@@ -155,8 +161,11 @@ def teardown_request(exception):
 
 @bp.route("/")
 @bp.route("/index")
+@bp.route('/index/<string:sub_topic>')
+@bp.route('/index/<string:sub_topic>/<string:tag>')
+# @breadcrumb(app)
 @counter
-def index():
+def index(sub_topic=None, tag=None):
     if current_user.is_authenticated and current_user.has_support:
         topics = [
             {
@@ -200,39 +209,102 @@ def index():
             Topic.name.ilike(session.get("AccessType", False))
         ).first_or_404()
 
-        topic_question = [
+        if sub_topic != None:
+            _sub_topic = SubTopic.query.filter(SubTopic.name == sub_topic).first_or_404()
+        if tag != None:
+            _tag = Tag.query.filter(Tag.name == tag).first_or_404()
+
+
+        # sub_topics = db.session.query(Question).join(Topic.questions, SubTopic).filter(Topic.id == topic.id)
+        sub_topics_questions = [
             {
                 "id": topic.id,
                 "name": topic.name,
                 "values": [
                     {
-                        "title": "Aprovadas",
-                        "count": topic.questions.filter(
-                            Question.answer_approved == True
-                        ).count(),
+                        "title": _.name,
+                        "count": db.session.query(Question).filter(
+                            Question.answer_approved == True,
+                            Question.active == True,
+                            Question.sub_topics.contains(_),
+                            Question.topics.contains(topic)
+                        ).group_by(Question).count(),
                         "bt_name": "Visualizar",
                         "bt_route": url_for(
-                            "question.topic", name=topic.name, type="aprovada"
+                            "main.index", sub_topic=_.name
                         ),
                         "card_style": "bg-primary bg-gradient text-dark",
-                    }
+                    } for _ in SubTopic.query.all()
                 ],
             }
         ]
+        paths = [_ for _ in request.path.split('/') if _ != '']
+        if not paths:
+            paths.append('index')
+        breadcrumbs = {v if v != 'index' else 'Home' : '/'+'/'.join(paths[0:i+1]) if i < len(paths)-1 else None for i, v in enumerate(paths)}
 
-        tags = db.session.query(Tag).join(Question.tags)
+        if sub_topic != None and tag is None:
+            print(sub_topic)
+            # tags = _sub_topic.questions.join(Topic.questions).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
+            tags = db.session.query(Tag).join(Question.tags).filter(
+                        Question.answer_approved == True, 
+                        Question.active == True, 
+                        Question.topics.contains(topic), 
+                        Question.sub_topics.contains(_sub_topic)).group_by(
+                            Tag).order_by(
+                                func.count(
+                                    Question.id).desc()).having(
+                                        func.count(Question.id) > 0)
 
-        tags.group_by(Tag).order_by(func.count(Question.id).desc())
+            # tags = tags.group_by(Tag).order_by(func.count(Question.id).desc()).having(func.count(Question.id) > 0)
 
-        tags_question = [{"name": 'Marcações', "values": [{
-            'title': _.name,
-            'count': _.questions_approved(g.topic).count(),
-            'bt_name': 'Visualizar',
-            'bt_route': url_for('question.tag', name=_.name, type='aprovada'),
-            'card_style': 'bg-success br.gradient text-dark'
-        } for _ in tags]}]
+            tags_question = [{"name": 'Marcações', "values": [{
+                'title': _.name,
+                'count': _.questions.join(Topic.questions).filter(
+                    Question.answer_approved == True, 
+                    Question.active == True,
+                    Question.topics.contains(topic), 
+                    Question.sub_topics.contains(_sub_topic)).group_by(Question).count(),
+                'bt_name': 'Visualizar',
+                'bt_route': url_for('main.index', sub_topic=_sub_topic.name, tag=_.name),
+                'card_style': 'bg-success br.gradient text-dark'
+            } for _ in tags]}]
 
-        return render_template("index.html", topics=topic_question, tags=tags_question)
+            return render_template("index.html", mode='index',tags=tags_question, breadcrumbs=breadcrumbs)#
+        if tag != None:
+            page = request.args.get('page', 1, type=int)
+            
+            query = _tag.questions.join(Question.view).filter(
+                Question.answer_approved == True, 
+                Question.active == True,
+                Question.topics.contains(topic), 
+                Question.sub_topics.contains(_sub_topic)).group_by(
+                    Question).order_by(
+                        func.count(QuestionView.id).desc())
+
+            # db.session.query(Tag).join(Topic.questions).join(SubTopic).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
+            paginate = query.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+            iter_pages = list(paginate.iter_pages())
+            first_page = iter_pages[0] if len(iter_pages) >= 1 else None
+            last_page = paginate.pages if paginate.pages > 0 else None
+
+            url_args = dict(request.args)
+            url_args.pop('page') if 'page' in url_args.keys() else None
+            route, args = route_from(request.path)
+            url_args = dict(url_args, **args)
+            return render_template(
+                'index.html', 
+                pagination=paginate, 
+                cls_question=Question, 
+                first_page=first_page, 
+                last_page=last_page, 
+                sub_topics=SubTopic.query,
+                url_args=url_args,
+                breadcrumbs=breadcrumbs,
+                route=route
+                )
+
+        return render_template("index.html", sub_topics=sub_topics_questions, topic=topic, mode='index',breadcrumbs=breadcrumbs)#
     page = request.args.get("page", 1, type=int)
     if not session.get("AccessType", False):
         return redirect(url_for("main.index"))
@@ -246,15 +318,54 @@ def index():
     last_page = paginate.pages if paginate.pages > 0 else None
 
 
+@bp.route('/recents')
+def recents(days:int=30):
+    page = request.args.get('page', 1, type=int)
+    today = datetime.today()
+    last_days = today - timedelta(days=days)
+    topic = Topic.query.filter(
+            Topic.name.ilike(session.get("AccessType", False))
+        ).first_or_404()
+    query = Question.query.filter(
+                Question.answer_approved == True, 
+                Question.active == True,
+                Question.topics.contains(topic)).filter(Question.answer_approved_at >= last_days).order_by(Question.answer_approved_at.desc())
+
+    paginate = query.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+    iter_pages = list(paginate.iter_pages())
+    first_page = iter_pages[0] if len(iter_pages) >= 1 else None
+    last_page = paginate.pages if paginate.pages > 0 else None
+
+    url_args = dict(request.args)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+    route, args = route_from(request.path)
+    url_args = dict(url_args, **args)
+    return render_template(
+        'index.html', 
+        pagination=paginate, 
+        cls_question=Question, 
+        first_page=first_page, 
+        last_page=last_page, 
+        sub_topics=SubTopic.query,
+        url_args=url_args,
+        # breadcrumbs=breadcrumbs,
+        route=route
+        )
+
 @bp.route("/select_access/")
 @bp.route("/select_access/<string:topic>")
 def select_access(topic=None):
+    next_page = request.args.get('next')
+    
+    if not next_page or url_parse(next_page).netloc != '':
+        next_page = url_for('main.index')  
     if topic is None:
         topics = Topic.query.filter(Topic.selectable == True).all()
-        return render_template("select_access.html", topics=topics)
+        return render_template("select_access.html", topics=topics, next_page=next_page)
     obj_topic = Topic.query.filter(
         Topic.name.ilike(topic.lower())).first_or_404()
-    response = make_response(redirect(url_for("main.index")))
+    response = make_response(redirect(next_page))
+    # response = make_response(redirect(url_for("main.index")))
     response.set_cookie(key="AccessType", value=obj_topic.name)
     session["AccessType"] = obj_topic.name
     return response
@@ -262,6 +373,7 @@ def select_access(topic=None):
 
 @bp.route("/access/<string:topic>")
 def selected_access(topic=None):
+    #TODO permitir que uma url ou rota seja enviada para o redirecionamento.
     if topic is None:
         return redirect(url_for("main.select_access"))
 

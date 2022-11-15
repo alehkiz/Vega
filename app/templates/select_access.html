@@ -2,16 +2,17 @@
 {% block app_content %}
 {% if topics is defined %}
 <div class="row justify-content-md-center">
-    <h1 class="display-4"><strong>Selecione um módulo: </strong></h1>
+    <div class="h2 p-3 bg-white text-danger">Selecione um módulo para acessar: </div>
     <br><br>
+    
 <div class="btn-group pt-5" role="group" aria-label="Basic example">
   {% for topic in topics %}
     {% if loop.index == 1 %}
-    <a type="button" class="btn btn-primary btn-lg" href="{{url_for('main.select_access', topic=topic.name)}}">{{topic.name}}</a>
+    <a type="button" class="btn btn-primary btn-lg" href="{{url_for('main.select_access', topic=topic.name, next=next_page)}}">{{topic.name}}</a>
     {% elif loop.index == 2 %}
-    <a type="button" class="btn btn-success btn-lg" href="{{url_for('main.select_access', topic=topic.name)}}">{{topic.name}}</a>
+    <a type="button" class="btn btn-success btn-lg" href="{{url_for('main.select_access', topic=topic.name, next=next_page)}}">{{topic.name}}</a>
     {% elif loop.index == 3 %}
-    <a type="button" class="btn btn-lg" href="{{url_for('main.select_access', topic=topic.name)}}" style="background-color: black;color: white;">{{topic.name}}</a>
+    <a type="button" class="btn btn-lg" href="{{url_for('main.select_access', topic=topic.name, next=next_page)}}" style="background-color: black;color: white;">{{topic.name}}</a>
     {% endif %}
     
   {% endfor  %}

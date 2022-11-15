@@ -1,6 +1,4 @@
 # from sqlalchemy import func
-from enum import unique
-from os import stat
 from flask import Markup, escape, current_app as app, abort, flash
 from sqlalchemy import func, text, Index, cast, desc, extract, Date
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -39,6 +37,23 @@ question_topic = db.Table('question_topic',
                           db.Column('question_id', db.Integer,
                                     db.ForeignKey('question.id')),
                           db.Column('topic_id', db.Integer, db.ForeignKey('topic.id')))
+
+question_sub_topic = db.Table('question_sub_topic',
+                        db.Column('question_id', db.Integer, 
+                                    db.ForeignKey('question.id')),
+                        db.Column('sub_topic_id', db.Integer, db.ForeignKey('sub_topic.id'))
+                        )
+
+transaction_topic = db.Table('transaction_topic',
+                        db.Column('transaction_id', db.Integer,
+                                    db.ForeignKey('transaction.id')),
+                        db.Column('topic_id', db.Integer, db.ForeignKey('topic.id'))            
+                        )
+transaction_sub_topic = db.Table('transaction_sub_topic',
+                        db.Column('transaction_id', db.Integer,
+                                    db.ForeignKey('transaction.id')),
+                        db.Column('topic_sub_id', db.Integer, db.ForeignKey('sub_topic.id'))            
+                        )
 
 
 class ArticleView(db.Model):
@@ -251,7 +266,7 @@ class Topic(db.Model):
     nickname = db.Column(db.String(10), nullable=False, unique=True)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
     # questions_old = db.relationship('Question', backref='topic', lazy='dynamic', foreign_keys='[Question.topic_id]')
-    notices = db.relationship('Notifier', backref='topic', lazy='dynamic')
+    # notifications = db.relationship('Notifier', backref='topic', lazy='dynamic')
     visit = db.relationship('Visit', cascade='all, delete-orphan',
                             single_parent=True, backref='topic', lazy='dynamic')
     @hybrid_property
@@ -274,8 +289,8 @@ class SubTopic(db.Model):
                             nullable=True, unique=True)
     create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
     # articles = db.relationship('Article', backref='topic', lazy='dynamic')
-    questions = db.relationship('Question', backref='sub_topic',
-                                lazy='dynamic', foreign_keys='[Question.sub_topic_id]')
+    # questions = db.relationship('Question', backref='sub_topic',
+    #                             lazy='dynamic', foreign_keys='[Question.sub_topic_id]')
 
     @hybrid_property
     def name(self):
@@ -351,13 +366,17 @@ class Question(db.Model):
     answer_at = db.Column(db.DateTime(timezone=True))
     # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
     # topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
-    sub_topic_id = db.Column(
-        db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
+    # sub_topic_id = db.Column(
+    #     db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
     question_network_id = db.Column(
         db.Integer, db.ForeignKey('network.id'), nullable=False)
     answer_network_id = db.Column(
         db.Integer, db.ForeignKey('network.id'), nullable=True)
     active = db.Column(db.Boolean, nullable=False)
+    sub_topics = db.relationship('SubTopic', 
+                                secondary=question_sub_topic, 
+                                backref=db.backref('questions', 
+                                                    lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
     topics = db.relationship('Topic',
                              secondary=question_topic,
                              backref=db.backref('questions',
@@ -366,7 +385,7 @@ class Question(db.Model):
     tags = db.relationship('Tag',
                            secondary=question_tag,
                            backref=db.backref('questions',
-                                              lazy='dynamic', cascade='all, delete-orphan', single_parent=True,),
+                                              lazy='dynamic', cascade='save-update', single_parent=True,),
                            lazy='dynamic')
     search_vector = db.Column(TSVectorType(
         'question', 'answer', regconfig='public.pt', cache_ok=False))  # regconfig='public.pt'))
@@ -399,8 +418,8 @@ class Question(db.Model):
         return format_datetime_local(self.update_at)
 
     @property
-    def get_answer_time_elapsed(self):
-        return format_elapsed_time(self.answer_at)
+    def get_answer_approved_time_elapsed(self):
+        return format_elapsed_time(self.answer_approved_at)
 
     @property
     def get_answer_datetime(self):
@@ -430,9 +449,10 @@ class Question(db.Model):
     def topic_name(self):
         return ', '.join([_.name for _ in self.topics])
 
+
     @property
     def sub_topic_name(self):
-        return self.sub_topic.name
+        return ', '.join([_.name for _ in self.sub_topics])
 
     @property
     def is_support(self):
@@ -464,6 +484,13 @@ class Question(db.Model):
     def answer(self):
         return self._answer
         # return self._answer
+
+    def has_topic(self, topic : Topic = None):
+        # TODO
+        if topic is None:
+            raise Exception('Topico não pode ser vazio')
+        return topic in self.topics.all()
+
 
     @answer.setter
     def answer(self, answer):
@@ -509,12 +536,13 @@ class Question(db.Model):
                       # desc('similarity'))
                       )
         if not topics:
-            result = result.filter(Question.sub_topic_id.in_(
+            result = result.join(SubTopic.questions).filter(SubTopic.id.in_(
                 [_.id for _ in sub_topics]))
         else:
-            result = result.filter(Question.sub_topic_id.in_(
+            result = result.join(SubTopic.questions).filter(SubTopic.id.in_(
                 [_.id for _ in sub_topics])).join(Question.topics).filter(
                     Topic.id.in_([_.id for _ in topics]))
+        result = result.join(QuestionView).group_by(Question).order_by(func.count(QuestionView.id).desc())
         if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
@@ -687,7 +715,7 @@ class Question(db.Model):
 
     @property
     def was_approved(self):
-        return self.answer_approved == True
+        return self.answer_approved == True and self.active == True
 
     @property
     def was_answered(self):
@@ -774,7 +802,7 @@ class Question(db.Model):
                 # 'updater': self.updater.name if self.was_updated() else None,
                 'answer': self.get_body_html() if self.was_answered else None,
                 # 'answered_by': self.answered_by.name if self.was_answered else None,
-                'answered_at': self.get_answer_time_elapsed if self.was_answered else None,
+                'answered_at': self.get_answer_approved_time_elapsed if self.was_answered else None,
                 'topics': [x.name for x in self.topics], #self.topic.name if not self.topic is None else None,
                 'tags': [x.name for x in self.tags],
                 'views': self.views
@@ -890,12 +918,21 @@ class QuestionChanges(db.Model):
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    transaction = db.Column(db.String(10), unique=False, nullable=False)
-    parameter = db.Column(db.String, nullable=True)
-    option = db.Column(db.String)
+    transaction = db.Column(db.String(6), unique=True, nullable=False)
+    parameter = db.Column(db.String(64), nullable=True)
+    option = db.Column(db.String(10))
     description = db.Column(db.String)
-    datetime = db.Column(db.DateTime(timezone=True), nullable=False, default=convert_datetime_to_local(datetime.utcnow()))
+    create_at = db.Column(db.DateTime(timezone=True), index=False, default=convert_datetime_to_local(datetime.utcnow()))
     created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    edit_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    sub_topics = db.relationship('SubTopic', 
+                                secondary=transaction_sub_topic, 
+                                backref=db.backref('transactions', 
+                                                    lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
+    topics = db.relationship('Topic',
+                             secondary=transaction_topic,
+                             backref=db.backref('transactions',
+                                                lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
 
     def __repr__(self):
         return f'<{self.transaction}>'
@@ -947,3 +984,8 @@ class Transaction(db.Model):
 # (db.session.query(Article, (func.strict_word_similarity(Article.search_vector.op('@@')(func.to_tsquery('principal'), 'principal')).label('sml'))).order_by(desc('sml'))).all()
 
 # (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal variantes sobre tempo exemplo')).label('sml'))).order_by(desc('sml')).all()
+
+
+
+
+

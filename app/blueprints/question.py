@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify, session
 from flask.globals import current_app
 from flask_security import login_required, current_user, roles_accepted
+from app.blueprints.admin import sub_topic
 from app.core.db import db
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, SubTopic, Tag, Topic
 from app.models.security import User
@@ -12,7 +13,7 @@ from app.utils.kernel import convert_datetime_to_local, strip_accents
 from app.utils.html import process_html
 from app.forms.question import QuestionAnswerForm, CreateQuestion, QuestionApproveForm, QuestionEditAndApproveForm
 from app.utils.routes import counter
-from sqlalchemy import desc, nullslast
+from sqlalchemy import desc, func, nullslast
 
 
 
@@ -34,14 +35,16 @@ def index():
     topics = Topic.query.filter(Topic.name.ilike(session.get('AccessType'))).all()
     search_form = QuestionSearchForm()
     if current_user.is_authenticated and current_user.is_support:
-        query = db.session.query(Question).filter(Question.answer_approved == True, Question.active == True).order_by(Question.create_at.desc())
+        query = db.session.query(Question).join(Question.view).filter(Question.answer_approved == True, Question.active == True)#.order_by(Question.create_at.desc())
     else:
-        query = db.session.query(Question).filter(Question.answer_approved == True, Question.active == True).join(Question.topics).filter(Topic.id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
+        query = db.session.query(Question).join(Question.view).filter(Question.answer_approved == True, Question.active == True).join(Question.topics).join(Question.view).filter(Topic.id.in_([_.id for _ in topics]))#.order_by(Question.create_at.desc())
     # query = Question.query.filter(Question.answer_approved==True, Question.topic_id.in_([_.id for _ in topics])).order_by(Question.create_at.desc())
     if not sub_topic is False:
-        paginate = query.filter(Question.sub_topic_id == sub_topic.id).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+        paginate = query.group_by(Question).order_by(func.count(QuestionView.id).desc()).filter(
+            Question.sub_topics.contains(sub_topic)).paginate(
+                per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     else:
-        paginate = query.paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
+        paginate = query.group_by(Question).order_by(func.count(QuestionView.id).desc()).paginate(per_page=app.config.get('QUESTIONS_PER_PAGE'), page=page)
     iter_pages = list(paginate.iter_pages())
     first_page = iter_pages[0] if len(iter_pages) >= 1 else None
     last_page = paginate.pages if paginate.pages > 0 else None
@@ -123,7 +126,7 @@ def search():
                     question = Question()
                     question.question = form.question.data
                     question.topics.append(topic)
-                    question.sub_topic = form.sub_topic.data
+                    question.sub_topics.append(form.sub_topic.data)
                     question.create_user_id = user.id
                     question.question_network_id = g.ip_id
                     question.active = False
@@ -152,19 +155,29 @@ def search():
 @bp.route('/view/<int:id>')
 @counter
 def view(id=None):
+    # TODO
     if current_user.is_anonymous:
+        # question = db.session.query(Question
+        # ).filter(Question.id == id
+        # ).join(Question.topics
+        # ).filter(Topic.id == g.topic.id, Question.active == True
+        # ).first_or_404()
         question = db.session.query(Question
-        ).filter(Question.id == id
-        ).join(Question.topics
-        ).filter(Topic.id == g.topic.id, Question.active == True
+        ).filter(Question.id == id, Question.active == True
         ).first_or_404()
+        if not question.has_topic(g.topic):
+            # _topic_name = f'<p class="font-weight-bold">{question.topic_name}</p>'
+            flash(Markup(f'A pergunta que você tentou acessar está disponível para <b>{question.topic_name}</b>, selecione o módulo correto para acessar a perrgunta.'), category='danger')
+            return redirect(url_for('main.select_access', next=request.path))
+
     else:
         question = Question.query.filter(Question.id == id).first_or_404()
-    if not question.was_answered:
-        return redirect(url_for('question.index'))
+    
     if current_user.is_authenticated:
         user_id = current_user.id
     else:
+        if not question.was_answered or not question.was_approved:
+            return redirect(url_for('question.index'))
         user = User.query.filter(User.name == 'ANON').first()
         if user is None:
             raise Exception('Usuário anônimo não criado')
@@ -186,7 +199,7 @@ def edit(id):
         question.question = process_html(form.question.data).text
         question.tags = form.tag.data
         question.topics = form.topic.data
-        question.sub_topic = form.sub_topic.data
+        question.sub_topics = form.sub_topic.data
         question.update_user_id = current_user.id
         question.update_at = convert_datetime_to_local(datetime.now())
         # question.answer_user_id = current_user.id
@@ -205,7 +218,7 @@ def edit(id):
     form.tag.data = question.tags
     form.topic.data = question.topics
     form.answer.data = question.answer
-    form.sub_topic.data = question.sub_topic
+    form.sub_topic.data = question.sub_topics
     if current_user.is_admin:
         form.approved.data = question.answer_approved
     return render_template('edit.html',form=form, title='Editar', question=True)
@@ -253,6 +266,7 @@ def deactive(id):
     id = q.id 
     try:
         q.active = False
+        q.update_user_id = current_user.id
         db.session.commit()
         return jsonify({'id':id,
                     'status': 'success'})
@@ -287,6 +301,7 @@ def active(id):
     q.active = True
     try:
         q.active = True
+        q.update_user_id = current_user.id
         db.session.commit()
         return jsonify({'id':q.id,
                     'status': 'success'})
@@ -331,7 +346,7 @@ def add():
             question.question_network_id = g.ip_id
             question.create_user_id = current_user.id
             question.topics.extend(form.topic.data)
-            question.sub_topic_id = form.sub_topic.data.id
+            question.sub_topics.extend(form.sub_topic.data)
             question.tags = form.tag.data
             question.active = True
             question.create_at = convert_datetime_to_local(datetime.utcnow())
@@ -372,11 +387,11 @@ def answer(id: int):
                 return render_template('answer.html', form=form, answer=True)
         q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
-        q.answer = form.answer.data
+        q.answer = process_html(form.answer.data).text
         q.answer_at = convert_datetime_to_local(datetime.utcnow())
         q.tags = form.tag.data
         q.topics = form.topic.data
-        q.sub_topic = form.sub_topic.data
+        q.sub_topics = form.sub_topic.data
         q.question = form.question.data
         try:
             db.session.commit()
@@ -390,7 +405,7 @@ def answer(id: int):
     
     form.question.data = q.question
     form.topic.data = q.topics
-    form.sub_topic.data = q.sub_topic
+    form.sub_topic.data = q.sub_topics
 
 
     return render_template('answer.html', form=form, answer=True)
@@ -423,7 +438,7 @@ def approve(id: int):
         # q.answer_at = datetime.now()
         q.tags = form.tag.data
         q.topics = form.topic.data
-        q.sub_topic = form.sub_topic.data
+        q.sub_topics = form.sub_topic.data
         q.answer_approved = form.approve.data
         q.answer_approve_user_id = current_user.id
         q.active = True
@@ -438,15 +453,12 @@ def approve(id: int):
             app.logger.error(e)
             db.session.rollback()
             return render_template('answer.html', form=form, approve=True)
-        
-        
-        return 'ok'
-    
+                
     form.question.data = q.question
     form.answer.data = q.answer
     form.tag.data = q.tags
     form.topic.data = q.topics
-    form.sub_topic.data = q.sub_topic
+    form.sub_topic.data = q.sub_topics
     form.approve.data = q.answer_approved
     form.answered_by.data = q.answered_by.name
 
@@ -481,7 +493,7 @@ def tag(name):
                                 last_page=last_page, 
                                 url_args=url_args)
 
-
+#TODO: REMOVER
 @bp.route('/topic/<string:name>/<string:type>/')
 @counter
 def topic(name, type):
@@ -657,8 +669,11 @@ def make_question():
     form = CreateQuestion()
     if form.validate_on_submit():
         question = Question.query.filter(Question.question.ilike(form.question.data)).first()
-        if not question is None:
-            form.question.errors.append('Dúvida já cadastrada')
+        sub_topic = SubTopic.query.all()
+        question = Question.search(form.question.data, sub_topics=sub_topic)
+        if question.count() > 0:
+            flash('Já temos perguntas cadastras sobre o assunto pesquisado!!', category='warning')
+            return redirect(url_for('question.search', q=form.question.data))
         if not form.errors:
             if current_user.is_authenticated:
                 user = current_user
@@ -671,7 +686,6 @@ def make_question():
                 db.session.add(ip)
                 try:
                     db.session.commit()
-                    
                     return redirect(url_for('question.index'))
                 except Exception as e:
                     db.session.rollback()

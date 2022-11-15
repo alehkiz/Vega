@@ -26,10 +26,24 @@ url_arguments=url_arguments)}} {% endif %} {% endif %} {% endif %} {% if mode ==
 {{ render_pagination(pagination, first_page, last_page, request.endpoint, url_args if url_args is defined else
 {})}} {% endif %} {% if mode == 'view' %}
 <article class="article-post">
+    {% if not question.was_approved %}
+    <div class="alert alert-warning" role="alert">
+        Pergunta não aprovada
+      </div>
+    {% endif %}
     <div class="article-header">
         <div class="float-end">
+            {% if current_user.is_authenticated %}
+            {% if current_user.is_support %}
             <a class="edit text-decoration-none" id="edit_{{question.id}}" href="{{url_for('question.edit', id=question.id)}}" data-bs-toggle="tooltip" title="Editar">
                 <i class="fas fa-edit"></i></a>
+            {% if not question.was_approved %}
+            <a class="edit text-decoration-none text-success"
+            href="{{ url_for('question.approve', id=question.id)}}" data-bs-toggle="tooltip" title="Aprovar">
+            <i class="fas fa-clipboard-check"></i></a>
+            {% endif %}
+            {% endif %}
+            {% endif %}
         </div>
         <h6 class="article-title">
             {{question.question}}

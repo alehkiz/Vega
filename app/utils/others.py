@@ -77,3 +77,9 @@ def remove_question(id:int):
 
     elif answer == 'n':
         print(f'Nenhuma atualização para a pergunta {q.id}')
+
+def limit_chars(chars: str, limit : int = 20) -> str:
+    if len(chars) > limit:
+        return chars[0: limit-3] + '...'
+    return chars
+    

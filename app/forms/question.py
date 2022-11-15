@@ -4,6 +4,7 @@ from wtforms import TextAreaField, StringField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length
 from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
 from app.models.wiki import SubTopic, Topic, Tag
+from app.models.security import User
 from flask import request
 
 class QuestionEditForm(FlaskForm):
@@ -11,7 +12,7 @@ class QuestionEditForm(FlaskForm):
     answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=8000, message='A resposta deve conter um texto entre 10 e 8000 caracteres')])
     tag = QuerySelectMultipleField('Tag', allow_blank=False, query_factory= lambda : Tag.query.order_by(Tag.name.asc()), get_label='name', validators=[DataRequired('Item Obrigatório')])
     topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.selectable == True), get_label = 'name', validators = [DataRequired('Item Obrigatório')])
-    sub_topic = QuerySelectField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
+    sub_topic = QuerySelectMultipleField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
     submit = SubmitField('Enviar')
 
 class QuestionEditAndApproveForm(FlaskForm):
@@ -19,7 +20,7 @@ class QuestionEditAndApproveForm(FlaskForm):
     answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=8000, message='A resposta deve conter um texto entre 10 e 8000 caracteres')])
     tag = QuerySelectMultipleField('Tag', allow_blank=False, query_factory= lambda : Tag.query.order_by(Tag.name.asc()), get_label='name', validators=[DataRequired('Item Obrigatório')])
     topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.selectable == True), get_label = 'name', validators = [DataRequired('Item Obrigatório')])
-    sub_topic = QuerySelectField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
+    sub_topic = QuerySelectMultipleField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
     # text = TextAreaField('Text', validators=[DataRequired('Item obrigatório'), Length(min=32, message='O campo texto deve conter pelo menos 32 caracteres')])
     # topic = QuerySelectField('Topico', validators=[DataRequired('Item obrigatório')], query_factory=lambda: Topic.query, get_label='name', allow_blank=False)
     approved = BooleanField('Aprovada')
@@ -46,7 +47,7 @@ class QuestionAnswerForm(FlaskForm):
     answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=8000, message='A descrição deve conter um texto entre 10 e 8000 caracteres')])
     tag = QuerySelectMultipleField('Tag', allow_blank=False, query_factory= lambda : Tag.query.order_by(Tag.name.asc()), get_label='name', validators=[DataRequired('Item Obrigatório')])
     topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.selectable == True), get_label = 'name', validators = [DataRequired('Item Obrigatório')])
-    sub_topic = QuerySelectField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
+    sub_topic = QuerySelectMultipleField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
     # text = TextAreaField('Text', validators=[DataRequired('Item obrigatório'), Length(min=32, message='O campo texto deve conter pelo menos 32 caracteres')])
     # topic = QuerySelectField('Topico', validators=[DataRequired('Item obrigatório')], query_factory=lambda: Topic.query, get_label='name', allow_blank=False)
     # approved = BooleanField('Aprovada')
@@ -59,7 +60,7 @@ class QuestionApproveForm(FlaskForm):
     answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=8000, message='A descrição deve conter um texto entre 10 e 8000 caracteres')])
     tag = QuerySelectMultipleField('Tag', allow_blank=False, query_factory= lambda : Tag.query.order_by(Tag.name.asc()), get_label='name', validators=[DataRequired('Item Obrigatório')])
     topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.selectable == True), get_label = 'name', validators = [DataRequired('Item Obrigatório')])
-    sub_topic = QuerySelectField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
+    sub_topic = QuerySelectMultipleField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
     # text = TextAreaField('Text', validators=[DataRequired('Item obrigatório'), Length(min=32, message='O campo texto deve conter pelo menos 32 caracteres')])
     # topic = QuerySelectField('Topico', validators=[DataRequired('Item obrigatório')], query_factory=lambda: Topic.query, get_label='name', allow_blank=False)
     # approve = BooleanField('Aprovada')
@@ -78,6 +79,7 @@ class QuestionFilter(FlaskForm):
     topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.active==True, Topic.selectable==True), get_label='name')
     sub_topic = QuerySelectMultipleField('Sub-tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name')
     tag = QuerySelectMultipleField('Marcações', allow_blank=True, query_factory= lambda : Tag.query.order_by(Tag.name.asc()), get_label= 'name')
+    who_answer = QuerySelectMultipleField('Quem', allow_blank=True, query_factory= lambda : User.query.order_by(User.name.asc()), get_label= 'name')
     active = BooleanField('Ativa')
     search = StringField('Busca')
     submit = SubmitField('Filtrar')

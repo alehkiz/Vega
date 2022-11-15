@@ -144,6 +144,12 @@ def get_graph_access_by_date():
             asc('Data')).statement, con=db.session.bind)
     df.Data = df.Data.dt.date
     df.Topico.replace([None], 'Nenhum', inplace=True)
+    ndf = pd.DataFrame(df.groupby(['Data'], as_index=False).Total.sum())#.rolling(7, min_periods=1).mean()
+
+    ndf['Topico'] = "Media Móvel (7 dias)"
+    ndf['Total'] = ndf.rolling(7, min_periods=1).mean().round(0)
+    # ndf['MM'] = ndf
+    df = pd.concat([df, ndf])
     # print(df.columns)
     graph = px.line(df, x='Data', y='Total', color='Topico', title='Acessos por dia')
     return graph
@@ -153,7 +159,10 @@ def get_user_answers():
     df = pd.read_sql(
         db.session.query(
             User.name.label('Nome'),
-            func.count(Question.id).label('Total')).outerjoin(Question.answered_by).group_by(User).order_by(func.count(Question.id).desc()).statement, con=db.session.bind
+            func.count(
+                Question.id).label('Total')).outerjoin(
+                    Question.answered_by).group_by(User).filter(Question.answer_approved==True).order_by(
+                        func.count(Question.id).desc()).statement, con=db.session.bind
     )
     df['%'] = df.Total.apply(lambda x: float((x / df.Total.sum()) * 100))
     df['%'] = df['%'].round(decimals=2)
@@ -210,6 +219,12 @@ def get_total_access():
         or_(Visit.user_id == 4, Visit.user_id == None),
         extract('isodow', Visit.datetime) < 7).count()
 
+def get_total_access_until_last_month():
+    lastmonth = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+    return Visit.query.filter(
+        or_(Visit.user_id == 4, Visit.user_id == None),
+        extract('isodow', Visit.datetime) < 7,
+        Visit.datetime <= lastmonth).count()
 
 def access_last_month():
     lastmonth = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
@@ -242,9 +257,17 @@ def get_total_questions_views():
 def get_questions_answered():
     return Question.query.filter(Question.active == True, Question._answer != '', Question.answer_approved == True).count()
 
+def get_questions_answered_until_last_month():
+    last_month = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+    return Question.query.filter(
+        Question.active == True, 
+        Question.answer_approved == True).filter(Question.answer_approved_at <= last_month
+            # extract('year', Question.answer_approved_at) <= last_month.year,
+            # extract('month', Question.answer_approved_at) <= last_month.month
+        ).count()
 
 def get_report_last_month():
-    last_month = datetime.date.today().replace(days=1) - datetime.timedelta(days=1)
+    last_month = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
     return Question.query.filter(
         Question.active == True,
         Question._answer != '',
@@ -441,7 +464,9 @@ def dash_app(app=False):
                 html.Div([
                 html.Div('Acessos Totais', className='card-header'),
                 html.Div([
-                    html.B(format_number_as_thousand(get_total_access()))
+                    html.B(format_number_as_thousand(get_total_access())),
+                    html.Hr(),
+                    html.P([html.B('Até o mês anterior: '), format_number_as_thousand(get_total_access_until_last_month())])
                     ], className='card-body')], className='card mx-1 mb-2'),
                 html.Div([
                 html.Div('Acessos Mês Anterior', className='card-header'),
@@ -479,7 +504,9 @@ def dash_app(app=False):
                     html.Div([
                     html.Div('Perguntas Respondidas', className='card-header'),
                     html.Div([
-                        html.B(format_number_as_thousand(get_questions_answered()))
+                        html.B(format_number_as_thousand(get_questions_answered())),
+                        html.Hr(),
+                        html.P([html.B('Até o mês anterior: '), format_number_as_thousand(get_questions_answered_until_last_month())])
                         ], className='card-body')], className='card mx-1 mb-2'),
                 html.Div([
                     html.Div('Perguntas visualizadas', className='card-header'),
@@ -639,10 +666,17 @@ def dash_app(app=False):
 
 
 
+from sqlalchemy import extract, or_, and_
+import datetime
 ## Visistas ultimo mês
 # lastmonth = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
 # Visit.query.filter(or_(Visit.user_id == 4, Visit.user_id == None),extract('isodow', Visit.datetime) < 7, Visit.datetime <= lastmonth).count()
 
-# db.session.query(Question).filter(
-#     Question.answer_approved_at <= lastmonth,
-#     Question.answer_approved== True).count()
+# db.session.query(Question).filter(Question.answer_approved_at <= lastmonth, Question.answer_approved== True).count()
+
+
+# Visit.query.filter(or_(Visit.user_id == 4, Visit.user_id == None),and_(extract('year', Visit.datetime) == 2021).count()
+
+
+
+# db.session.query(Question).filter(extract('year', Question.answer_approved_at) == 2021, Question.answer_approved== True).count()
