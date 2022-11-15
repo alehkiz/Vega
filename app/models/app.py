@@ -59,6 +59,7 @@ class Visit(db.Model):
     network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
 
+
     @staticmethod
     def query_by_month_year(year: int, month: int):
         return Visit.query.filter(extract('year', Visit.datetime) == year, extract('month', Visit.datetime) == month)
