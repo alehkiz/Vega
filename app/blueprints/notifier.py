@@ -91,7 +91,7 @@ def edit(id: int):
         nf.content = form.content.data
         nf.status = form.status.data
         nf.priority = form.priority.data
-        nf.topic = form.topic.data
+        nf.topics.extend(form.topics.data)
         nf.updater_user_id = current_user.id
         try:
             db.session.commit()
@@ -106,7 +106,7 @@ def edit(id: int):
     form.content.data = nf.content
     form.status.data = nf.status
     form.priority.data = nf.priority
-    form.topic.data = nf.topic
+    form.topics.data = nf.topics
     return render_template('edit.html', form=form, title='Editar', notifier=True)
 
 @bp.route('/deactive/<int:id>', methods=['GET', 'POST'])
