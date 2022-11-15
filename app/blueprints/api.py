@@ -75,7 +75,8 @@ def notifications():
 @bp.route('notification/<int:id>')
 @counter
 def notification(id:int):
-    obj_notification = Notifier.query.filter(Notifier.id == id).first()
+    obj_notification = db.session.query(Notifier).join(NotifierStatus).filter(NotifierStatus.status == 'Ativo', Notifier.id == id).first()
+    # Notifier.query.filter(Notifier.id == id, Notifier.).first()
     if obj_notification is None:
         return jsonify([]), 404
     else:

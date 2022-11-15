@@ -178,7 +178,7 @@ $(document).ready(function () {
         notifications = $('#notification_box')
 
         url = $('#bell').attr('href')
-        console.log(url)
+        // console.log(url)
         $.ajax({
             url: url,
             type: 'get',
@@ -194,9 +194,9 @@ $(document).ready(function () {
                 accordion_link = false;
             },
             success: function (data) {
-                console.log(data)
+                // console.log(data)
                 data.forEach(function (element) {
-                    console.log(element)
+                    // console.log(element)
 
                     notifications.append(
                         '<a href="' + element.url + '" class="notification-link" id="notification-' + element.id + '">' +
@@ -231,7 +231,6 @@ $(document).ready(function () {
     });
 
     $('#bell-dropdown').on('hidden.bs.dropdown', function () {
-        console.log('aqui')
         var notifications = $('#notification_box')
         notifications.html("");
     });
@@ -242,8 +241,6 @@ $(document).ready(function () {
 });
 
 $(document).on('click', '.notification-link', function () {
-    console.log('aqui')
-    console.log(this)
     url = $(this).attr('href');
     id = $(this).attr('id').split('-')[1]
     $.ajax({
@@ -257,7 +254,6 @@ $(document).on('click', '.notification-link', function () {
             like_link = false;
         },
         success: function (data) {
-            console.log(data)
             toast = $('.toast')
             toast_title = toast.find('#toast-title')
             toast_title.text(data.title)
@@ -268,7 +264,6 @@ $(document).on('click', '.notification-link', function () {
             $(".toast").toast('show');
         },
         error: function (data) {
-            // console.log('Erro');
             like_link = false;
         }
     })
@@ -331,7 +326,6 @@ $(document).on('click', ".like, .unlike", function (e) {
             });
         },
         error: function (data) {
-            // console.log('Erro');
             like_link = false;
         }
     });
@@ -391,7 +385,6 @@ $(document).on('click', ".save, .unsave", function (e) {
             });
         },
         error: function (data) {
-            // console.log('Erro');
             save_link = false;
         }
     });
@@ -438,9 +431,9 @@ $("#delete-modal").on("show.bs.modal", function (e) {
 
 function iframeLoaded(frame_id) {
     var iFrameID = document.getElementById(frame_id.id);
-    console.log('aqui')
-    console.log(frame_id.id)
-    console.log(iFrameID)
+    // console.log('aqui')
+    // console.log(frame_id.id)
+    // console.log(iFrameID)
     if (iFrameID) {
         // here you can make the height, I delete it first, then I make it again
         iFrameID.height = "";

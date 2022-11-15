@@ -52,10 +52,10 @@ class Notifier(db.Model):
         return format_datetime_local(self.create_at)
 
     @property
-    def topic_name(self):
-        if self.topic is None:
+    def topics_name(self):
+        if not self.topics.all():
             return None
-        return self.topic.name
+        return [x.name for x in self.topics.all()]
 
     @property
     def priority_name(self):
