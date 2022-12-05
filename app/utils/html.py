@@ -8,3 +8,8 @@ def process_html(text):
     [x.attrs.__setitem__('class', 'blockquote') for x in html.findAll('blockquote')]
 
     return html
+
+
+def replace_newline_with_br(text:str):
+    return text.replace('\n', '<br>')
+    

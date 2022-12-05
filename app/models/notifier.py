@@ -2,8 +2,9 @@ from datetime import datetime
 from sqlalchemy.orm import backref
 from sqlalchemy_searchable import make_searchable
 from flask import url_for
-
+from bs4 import BeautifulSoup as bs
 from app.core.db import db
+from app.utils.html import replace_newline_with_br
 from app.utils.kernel import format_datetime_local, format_elapsed_time, convert_datetime_to_local
 from app.utils.others import limit_chars
 
@@ -52,6 +53,10 @@ class Notifier(db.Model):
         return format_datetime_local(self.create_at)
 
     @property
+    def get_content_text(self):
+        html = bs(self.content)
+        return html.get_text()
+    @property
     def topics_name(self):
         if not self.topics.all():
             return None
@@ -80,7 +85,7 @@ class Notifier(db.Model):
         return {
             'id': self.id,
             'title': self.title,
-            'content': limit_chars(self.content, 50),
+            'content': limit_chars(replace_newline_with_br(self.get_content_text), 50),
             'status': self.status_name,
             'priority_order': self.priority_order,
             'url' : url_for('api.notification', id=self.id)
@@ -91,7 +96,7 @@ class Notifier(db.Model):
         return {
             'id': self.id,
             'title': self.title,
-            'content': self.content,
+            'content': replace_newline_with_br(self.content),
             'status': self.status_name,
             'priority': self.priority_name,
             'priority_order': self.priority_order,
