@@ -215,15 +215,18 @@ def get_user_approve():
 
 
 def get_total_access():
-    return Visit.query.filter(
-        or_(Visit.user_id == 4, Visit.user_id == None),
-        extract('isodow', Visit.datetime) < 7).count()
+    return Visit.query.count()
+        # .filter(
+        # or_(Visit.user_id == 4, Visit.user_id == None),
+        # extract('isodow', Visit.datetime) < 7
+        # )\
+        
 
 def get_total_access_until_last_month():
     lastmonth = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
     return Visit.query.filter(
-        or_(Visit.user_id == 4, Visit.user_id == None),
-        extract('isodow', Visit.datetime) < 7,
+        # or_(Visit.user_id == 4, Visit.user_id == None),
+        # extract('isodow', Visit.datetime) < 7,
         Visit.datetime <= lastmonth).count()
 
 def access_last_month():
@@ -231,7 +234,8 @@ def access_last_month():
     query = db.session.query(func.count(Visit.id).label('Total')).filter(
         extract('month', Visit.datetime) == lastmonth.month,
         extract('year', Visit.datetime) == lastmonth.year,
-        extract('isodow', Visit.datetime) < 7)
+        # extract('isodow', Visit.datetime) < 7
+        )
     return query.all()[0].Total
 
     return QuestionView.query_by_month_year(lastmonth.year, lastmonth.month).count()

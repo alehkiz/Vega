@@ -236,6 +236,21 @@ $(document).ready(function () {
         notifications.html("");
     });
 
+
+
+
+
+
+
+
+
+
+    $.ajax({ url: "/api/notifications/autoload",
+        context: document.body,
+        success: function(){
+        //    alert("done");
+        }
+    });
     
 
 

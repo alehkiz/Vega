@@ -14,4 +14,5 @@ class NotifierForm(FlaskForm):
     priority = QuerySelectField('Prioridade', allow_blank=False, query_factory=lambda: NotifierPriority.query.order_by(NotifierPriority.order.asc()), get_label='priority', validators=[DataRequired('Item obrigatório')])
     # topic = QuerySelectField('Topico', allow_blank=False, query_factory=lambda: Topic.query.filter(Topic.active == True), get_label='name', validators=[DataRequired('Item obrigarório')])
     topics = QuerySelectMultipleField('Topicos', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.selectable == True), get_label = 'name', validators = [DataRequired('Item Obrigatório')])
+    autoload = BooleanField('Carregar automático', validators=[DataRequired('Item Obrigatório')])
     submit = SubmitField('Enviar')
