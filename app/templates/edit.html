@@ -84,16 +84,7 @@
         {{ macros.render_field(form.content, size=60, class='form-control', placeholder='Titulo', maxlength=490) }}
         {{ macros.render_field(form.status, nosize=true, class='form-select') }}
         {{ macros.render_field(form.priority, nosize=true, class='form-select') }}
-<<<<<<< Updated upstream
         {{ macros.render_field(form.topic, nosize=true, class='form-select') }}
-=======
-        <br>
-        {{ macros.render_field(form.autoload) }}
-        <br>
-        {{ macros.render_field(form.topics, class='form-select', class='selectpicker', nolabel=true, multiple=true,
-        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
-        <br>
->>>>>>> Stashed changes
         <br>
         {{ form.submit }}
 
