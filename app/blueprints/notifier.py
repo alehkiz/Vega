@@ -108,12 +108,7 @@ def edit(id: int):
     form.content.data = nf.content
     form.status.data = nf.status
     form.priority.data = nf.priority
-<<<<<<< Updated upstream
     form.topic.data = nf.topic
-=======
-    form.topics.data = nf.topics
-    form.autoload.data = nf.autoload
->>>>>>> Stashed changes
     return render_template('edit.html', form=form, title='Editar', notifier=True)
 
 @bp.route('/deactive/<int:id>', methods=['GET', 'POST'])
