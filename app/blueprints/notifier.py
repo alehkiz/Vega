@@ -46,6 +46,7 @@ def add():
         nf.priority = form.priority.data
         nf.topics.extend(form.topics.data)
         nf.created_user_id = current_user.id
+        nf.autoload = form.autoload.data
         _ip = Network.query.filter(Network.id == g.ip_id).first()
         if _ip is None:
             _ip = Network()
@@ -93,6 +94,7 @@ def edit(id: int):
         nf.priority = form.priority.data
         nf.topic = form.topic.data
         nf.updater_user_id = current_user.id
+        nf.autoload = form.autoload.data
         try:
             db.session.commit()
             flash('Notificação criada com sucesso', category='success')
@@ -106,7 +108,12 @@ def edit(id: int):
     form.content.data = nf.content
     form.status.data = nf.status
     form.priority.data = nf.priority
+<<<<<<< Updated upstream
     form.topic.data = nf.topic
+=======
+    form.topics.data = nf.topics
+    form.autoload.data = nf.autoload
+>>>>>>> Stashed changes
     return render_template('edit.html', form=form, title='Editar', notifier=True)
 
 @bp.route('/deactive/<int:id>', methods=['GET', 'POST'])

@@ -143,3 +143,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 question_202108122320.sql
+
+
+*.xls
+*.xlsx
+*.csv
