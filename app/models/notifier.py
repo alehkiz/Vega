@@ -12,10 +12,16 @@ from app.utils.others import limit_chars
 make_searchable(db.metadata, options={'regconfig': 'public.pt'})
 
 
+notifier_sub_topic = db.Table('notifier_sub_topic',
+                        db.Column('notifier_id', db.Integer, 
+                                    db.ForeignKey('notifier.id')),
+                        db.Column('sub_topic_id', db.Integer, db.ForeignKey('sub_topic.id'))
+                        )
 
-
-notifier_topic = db.Table('notifier_topic', db.Column('notifier_id', db.Integer, db.ForeignKey(
-    'notifier.id')), db.Column('topic_id', db.Integer, db.ForeignKey('topic.id')))
+notifier_topic = db.Table('notifier_topic', 
+                        db.Column('notifier_id', db.Integer, 
+                                    db.ForeignKey('notifier.id')),
+                        db.Column('topic_id', db.Integer, db.ForeignKey('topic.id')))
 
 class Notifier(db.Model):
     __searchable__ = ['title', 'content']
@@ -35,6 +41,11 @@ class Notifier(db.Model):
                              secondary=notifier_topic,
                              backref=db.backref('notifications',
                                                 lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
+    sub_topics = db.relationship('SubTopic', 
+                                secondary=notifier_sub_topic, 
+                                backref=db.backref('notifications', 
+                                                    lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
+
     # topics = db.relationship('Topic',
     #                          secondary=transaction_topic,
     #                          backref=db.backref('transactions',
@@ -89,7 +100,8 @@ class Notifier(db.Model):
             'content': limit_chars(replace_newline_with_br(self.get_content_text), 50),
             'status': self.status_name,
             'priority_order': self.priority_order,
-            'url' : url_for('api.notification', id=self.id)
+            'url' : url_for('api.notification', id=self.id),
+            'subtopic': '' if self.sub_topics.first() is None else self.sub_topics.first().name
         }
 
     @property
@@ -101,7 +113,8 @@ class Notifier(db.Model):
             'status': self.status_name,
             'priority': self.priority_name,
             'priority_order': self.priority_order,
-            'created_elapsed_time': self.get_create_time_elapsed
+            'created_elapsed_time': self.get_create_time_elapsed,
+            'subtopic': '' if self.sub_topics.first() is None else self.sub_topics.first().name
         }
     def __repr__(self) -> str:
         return super().__repr__()

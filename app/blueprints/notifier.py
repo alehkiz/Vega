@@ -45,6 +45,7 @@ def add():
         nf.status = form.status.data
         nf.priority = form.priority.data
         nf.topics.extend(form.topics.data)
+        nf.sub_topics.extend(form.sub_topics.data)
         nf.created_user_id = current_user.id
         nf.autoload = form.autoload.data
         _ip = Network.query.filter(Network.id == g.ip_id).first()
@@ -93,6 +94,7 @@ def edit(id: int):
         nf.status = form.status.data
         nf.priority = form.priority.data
         nf.topics.extend(form.topics.data)
+        nf.sub_topics.extend(form.sub_topics.data)
         nf.updater_user_id = current_user.id
         nf.autoload = form.autoload.data
         try:
@@ -109,6 +111,8 @@ def edit(id: int):
     form.status.data = nf.status
     form.priority.data = nf.priority
     form.topics.data = nf.topics
+    form.autoload.data = nf.autoload
+    form.sub_topics.data = nf.sub_topics
     return render_template('edit.html', form=form, title='Editar', notifier=True)
 
 @bp.route('/deactive/<int:id>', methods=['GET', 'POST'])
