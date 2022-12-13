@@ -212,6 +212,10 @@ class BaseConfig(object):
                 'name': 'Topico',
                 'attr': 'topic_name'
             },
+            'level_id': {
+                'name': 'Level',
+                'attr': 'level_translate_name'
+            },
             'created_at':{
                 'name': 'Criado em',
                 'attr': 'get_formated_date'
