@@ -51,7 +51,7 @@ def before_first_request():
 def before_request():
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
-    notifiers = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo').order_by(NotifierPriority.order.asc())
+    notifiers = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo', Notifier.autoload == False).order_by(NotifierPriority.order.asc())
     g.sum_active_notifier = notifiers.count()
     # g.notifiers_dict = [x.to_dict for x in notifiers]
     if current_user.is_authenticated:

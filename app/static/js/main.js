@@ -255,6 +255,7 @@ $(document).ready(function () {
             data.forEach(function (element) {
             console.log(data)
             toast = $('#toast-'+element.subtopic)
+            toast.addClass('bg-'+element.level)
             toast_title = toast.find('#toast-title')
             toast_title.text(element.title)
             toast_elapsed_time = toast.find('#toast-time')
@@ -262,6 +263,7 @@ $(document).ready(function () {
             toast_content = toast.find('#toast-content')
             toast_content.empty()
             toast_content.append(element.content)
+            toast_content.append('<span class="badge bg-secondary mx-1">'+ element.subtopic +'</span><span class="badge bg-primary mx-1">Automática</span>')
             toast.toast('show');
             });        
         }
@@ -285,7 +287,7 @@ $(document).on('click', '.notification-link', function () {
             like_link = false;
         },
         success: function (data) {
-            toast = $('.toast')
+            toast = $('#toast-general')
             toast_title = toast.find('#toast-title')
             toast_title.text(data.title)
             toast_elapsed_time = toast.find('#toast-time')
@@ -293,7 +295,8 @@ $(document).on('click', '.notification-link', function () {
             toast_content = toast.find('#toast-content')
             toast_content.empty()
             toast_content.append(data.content)
-            $(".toast").toast('show');
+            toast_content.append('<br><br><span class="badge bg-secondary">'+ data.subtopic +'</span>')
+            toast.toast('show');
         },
         error: function (data) {
             like_link = false;
@@ -471,4 +474,21 @@ function iframeLoaded(frame_id) {
         iFrameID.height = "";
         iFrameID.height = iFrameID.contentWindow.document.body.scrollHeight + "px";
     }
+}
+
+
+function create_toast(){
+    html = '<div class="toast text-white bg-danger hide" data-bs-autohide="false" id="toast-general">' +
+            '<div class="toast-header">'+
+            '<svg class="bd-placeholder-img rounded me-2" width="20" height="20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false">'+
+            '<rect width="100%" height="100%" fill="#f17a0a"></rect>'+
+            '</svg>'+
+            '<strong class="me-auto"  id="toast-title"></strong>'+
+            '<small id="toast-time"></small>'+
+            '<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>'+
+            '</div>'+
+            '<div class="toast-body" id="toast-content">'+
+            '</div>'+
+            '</div>'
+    return html
 }
