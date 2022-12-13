@@ -116,7 +116,13 @@
         {{ macros.render_field(form.status, nosize=true, class='form-select') }}
         {{ macros.render_field(form.priority, nosize=true, class='form-select') }}
         <br>
+        
         {{ macros.render_field(form.autoload) }}
+        <br>
+        <br>
+
+        {{ macros.render_field(form.sub_topics, class='selectpicker', nolabel=true, multiple=true,
+        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
         <br>
         <br>
 

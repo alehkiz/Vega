@@ -243,10 +243,27 @@ $(document).ready(function () {
 
 
 
-    $.ajax({ url: "/api/notifications/autoload",
+    $.ajax({ 
+        url: "/api/notifications/autoload",
+        type: 'get',
+        dataType: 'json',
+        headers: {
+            'X-CSRFToken': $CSRF_TOKEN
+        },
         context: document.body,
-        success: function(){
-        //    alert("done");
+        success: function(data){
+            data.forEach(function (element) {
+            console.log(data)
+            toast = $('#toast-'+element.subtopic)
+            toast_title = toast.find('#toast-title')
+            toast_title.text(element.title)
+            toast_elapsed_time = toast.find('#toast-time')
+            toast_elapsed_time.text(element.created_elapsed_time)
+            toast_content = toast.find('#toast-content')
+            toast_content.empty()
+            toast_content.append(element.content)
+            toast.toast('show');
+            });        
         }
     });
     
