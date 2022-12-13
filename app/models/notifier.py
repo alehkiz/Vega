@@ -22,6 +22,7 @@ class Notifier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128), index=True, nullable=False, unique=False)
     content = db.Column(db.String, index=True, nullable=False)
+    autoload = db.Column(db.Boolean, nullable=False, default=False)
     status_id = db.Column(db.Integer, db.ForeignKey(
         'notifier_status.id'), nullable=False)
     priority_id = db.Column(db.Integer, db.ForeignKey(
