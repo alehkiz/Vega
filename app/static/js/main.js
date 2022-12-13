@@ -196,8 +196,6 @@ $(document).ready(function () {
             success: function (data) {
                 // console.log(data)
                 data.forEach(function (element) {
-                    // console.log(element)
-
                     notifications.append(
                         '<a href="' + element.url + '" class="notification-link" id="notification-' + element.id + '">' +
                         '<div class="notifications-item">' +
@@ -207,6 +205,7 @@ $(document).ready(function () {
                         '</div>' +
                         '</div>' +
                         '</a>')
+                    console.log(element.content)
                 }
                 )
 
@@ -275,7 +274,8 @@ $(document).on('click', '.notification-link', function () {
             toast_elapsed_time = toast.find('#toast-time')
             toast_elapsed_time.text(data.created_elapsed_time)
             toast_content = toast.find('#toast-content')
-            toast_content.text(data.content)
+            toast_content.empty()
+            toast_content.append(data.content)
             $(".toast").toast('show');
         },
         error: function (data) {
