@@ -78,7 +78,7 @@ class Notifier(db.Model):
         if not self.topics.all():
             return None
         if as_string == True:
-            return ' '.join([x.name for x in self.topics.all()])
+            return ', '.join([x.name for x in self.topics.all()])
         return [x.name for x in self.topics.all()]
 
     @property
@@ -108,7 +108,10 @@ class Notifier(db.Model):
         if self.status is None:
             return None
         return self.status.status
-    
+
+    @property
+    def get_autoload(self):
+        return "Sim" if self.autoload else "Não"
     def get_body_html(self, resume=False, size=1500):
         html_classes = {'table': 'table table-bordered',
                         'img': 'img img-fluid'}

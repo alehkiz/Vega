@@ -8,8 +8,8 @@ from wtforms import TextAreaField, StringField, SubmitField, BooleanField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
 
 class NotifierForm(FlaskForm):
-    title = StringField('Título', validators=[DataRequired('Item obrigatório'), Length(min=5, max=40, message='O titulo deve conster entre 5 e 40 caracteres')])
-    content = TextAreaField('Conteúdo', validators=[DataRequired('Item obrigatório'), Length(min=5, max=400, message='O titulo deve conster entre 5 e 400 caracteres')])
+    title = StringField('Título', validators=[DataRequired('Item obrigatório'), Length(min=5, max=25, message='O titulo deve conster entre 5 e 40 caracteres')])
+    content = TextAreaField('Conteúdo', validators=[DataRequired('Item obrigatório'), Length(min=5, max=80, message='O titulo deve conster entre 5 e 80 caracteres')])
     status = QuerySelectField('Status', allow_blank=False, query_factory=lambda: NotifierStatus.query, get_label='status',validators=[DataRequired('Item obrigatório')])
     priority = QuerySelectField('Prioridade', allow_blank=False, query_factory=lambda: NotifierPriority.query.order_by(NotifierPriority.order.asc()), get_label='priority', validators=[DataRequired('Item obrigatório')])
     level = QuerySelectField('Nível', allow_blank=False, query_factory=lambda: NotifierLevel.query, get_label='level_translate', validators=[DataRequired('Item obrigatório')])

@@ -648,6 +648,7 @@ def notifier():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
+    # print(order_type)
     order_dict = {'desc': desc, 'asc': asc}
     if not order_type in order_dict.keys():
         order_type = 'desc'
@@ -682,11 +683,12 @@ def notifier():
         else None
     )
     last_page = paginate.pages
-    order_type = "asc" if order_type == "desc" else "desc"
     order_type_inverse = "asc" if order_type == "desc" else "desc"
+    order = request.args.get('order', None)
     url_args = dict(request.args)
+    url_args.pop('order_type', None)
+    url_args.pop('order', None)
     url_args.pop('page') if 'page' in url_args.keys() else None
-
     return render_template(
         "admin.html",
         pagination=paginate,
