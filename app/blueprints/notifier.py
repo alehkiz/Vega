@@ -102,10 +102,10 @@ def edit(id: int):
         nf.content = process_html(form.content.data).text
         if form.status.data.status == 'Histórico' and nf.status.status == 'Ativo':
             nf.closed_at = convert_datetime_to_local(datetime.utcnow())
-            nf.level = NotifierLevel.query.filter(NotifierLevel.level_bootstrap == 'info').first()
+            # nf.level = NotifierLevel.query.filter(NotifierLevel.level_bootstrap == 'info').first()
         if form.status.data.status == 'Ativo' and nf.status.status == 'Histórico':
             nf.closed_at = None
-            nf.level = form.level.data
+        nf.level = form.level.data
         nf.status = form.status.data
         nf.priority = form.priority.data
         

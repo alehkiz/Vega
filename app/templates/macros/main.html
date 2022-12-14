@@ -9,8 +9,7 @@
         {%- if first_page != pagination.page and not first_page is none%}
         <li class='page-item'>
             {% if kwargs.get('order', false) is false%}
-            <a class="page-link"
-                href="{{url_for(endpoint, page=first_page, **url_arguments)}}">&laquo;</a>
+            <a class="page-link" href="{{url_for(endpoint, page=first_page, **url_arguments)}}">&laquo;</a>
             {% else %}
             <a class="page-link"
                 href="{{url_for(endpoint, page=first_page, order=kwargs['order'], order_type=kwargs['order_type'], **url_arguments)}} "
@@ -28,8 +27,7 @@
         {%- endif %} {%- for page in pagination.iter_pages() %} {% if page %} {% if page != pagination.page %}
         <li class="page-item">
             {% if kwargs.get('order', false) is false%}
-            <a class="page-link"
-                href="{{url_for(endpoint, page=page, **url_arguments)}}">{{page}}</a>
+            <a class="page-link" href="{{url_for(endpoint, page=page, **url_arguments)}}">{{page}}</a>
             {% else %}
             <a class="page-link"
                 href="{{url_for(endpoint, page=page, order=kwargs['order'], order_type=kwargs['order_type'], **url_arguments)}}">{{page}}</a>
@@ -41,8 +39,7 @@
         <li class="page-item disabled">
             <!-- {{url_arguments}} -->
             {% if kwargs.get('order', false) is false%}
-            <a class="page-link"
-                href="{{url_for(endpoint, page=page, **url_arguments)}}">{{page}}</a>
+            <a class="page-link" href="{{url_for(endpoint, page=page, **url_arguments)}}">{{page}}</a>
             {% else %}
             <a class="page-link active"
                 href="{{ url_for(endpoint, page=page, order=kwargs['order'], order_type=kwargs['order_type'], **url_arguments) }}"
@@ -63,8 +60,7 @@
         {%- if last_page != pagination.page and not last_page is none %}
         <li class='page-item'>
             {% if kwargs.get('order', false) is false%}
-            <a class="page-link"
-                href="{{url_for(endpoint, page=last_page, **url_arguments)}}">&raquo;</a>
+            <a class="page-link" href="{{url_for(endpoint, page=last_page, **url_arguments)}}">&raquo;</a>
             {% else %}
             <a class="page-link"
                 href="{{ url_for(endpoint, page=last_page, order=kwargs['order'], order_type=kwargs['order_type'], **url_arguments)}}"
@@ -129,16 +125,16 @@
                 </th>
                 {% endif %}
                 {% endif %}
-<th><a
+                <th><a
                         href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type_inverse'], **url_arguments)}}">{{value['name'].capitalize()}}</a>
                 </th>
 
                 {% if order == key %}
                 <th><a
-                    href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type'], **url_arguments)}}">{{value['name'].capitalize()}}</a>
-            </th>
+                        href="{{url_for(request.endpoint, order=key, order_type=kwargs['order_type'], **url_arguments)}}">{{value['name'].capitalize()}}</a>
+                </th>
                 {% else %}
-                
+
                 {% endif %}
                 {% endfor %}
                 <th class="actions">Ações</th>
