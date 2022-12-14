@@ -52,7 +52,8 @@ def add():
         nf.sub_topics.extend(form.sub_topics.data)
         nf.created_user_id = current_user.id
         if form.autoload.data == True:
-            temp_nf = Notifier.query.filter(Notifier.sub_topics.contains(form.sub_topics.data), Notifier.autoload == True).first()
+            print(form.sub_topics.data[0])
+            temp_nf = Notifier.query.filter(Notifier.sub_topics.contains(*form.sub_topics.data), Notifier.autoload == True).first()
             if not temp_nf is None:
                 status = NotifierStatus.query.filter(NotifierStatus.status == 'Histórico').first()
                 temp_nf.status =status
