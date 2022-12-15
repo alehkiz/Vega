@@ -1,9 +1,12 @@
+from datetime import datetime
 from flask.json import jsonify
+from app.utils.html import process_html
+from app.utils.kernel import convert_datetime_to_local
 from app.utils.routes import counter
 from flask.helpers import flash, url_for
 from werkzeug.utils import redirect
 from app.models.app import Network
-from app.models.notifier import Notifier, NotifierPriority, NotifierStatus
+from app.models.notifier import Notifier, NotifierLevel, NotifierPriority, NotifierStatus
 from app.forms.notifier import NotifierForm
 from flask import Blueprint, render_template, g, request, current_app as app, abort
 from app.core.db import db
@@ -43,9 +46,18 @@ def add():
         nf.title = form.title.data
         nf.content = form.content.data
         nf.status = form.status.data
+        nf.level = form.level.data
         nf.priority = form.priority.data
         nf.topics.extend(form.topics.data)
+        nf.sub_topics.extend(form.sub_topics.data)
         nf.created_user_id = current_user.id
+        if form.autoload.data == True:
+            temp_nf = Notifier.query.filter(Notifier.sub_topics.contains(*form.sub_topics.data), Notifier.autoload == True).first()
+            if not temp_nf is None:
+                # status = NotifierStatus.query.filter(NotifierStatus.status == 'Histórico').first()
+                # temp_nf.status =status
+                temp_nf.autoload = False
+        nf.autoload = form.autoload.data
         _ip = Network.query.filter(Network.id == g.ip_id).first()
         if _ip is None:
             _ip = Network()
@@ -88,11 +100,27 @@ def edit(id: int):
     form = NotifierForm()
     if form.validate_on_submit():
         nf.title = form.title.data
-        nf.content = form.content.data
+        nf.content = process_html(form.content.data).text
+        if form.status.data.status == 'Histórico' and nf.status.status == 'Ativo':
+            nf.closed_at = convert_datetime_to_local(datetime.utcnow())
+            # nf.level = NotifierLevel.query.filter(NotifierLevel.level_bootstrap == 'info').first()
+        if form.status.data.status == 'Ativo' and nf.status.status == 'Histórico':
+            nf.closed_at = None
+        nf.level = form.level.data
         nf.status = form.status.data
         nf.priority = form.priority.data
+        
         nf.topics.extend(form.topics.data)
+        nf.sub_topics.extend(form.sub_topics.data)
         nf.updater_user_id = current_user.id
+        if nf.autoload != form.autoload.data:
+            if form.autoload.data is True:
+                temp_nf = Notifier.query.filter(Notifier.sub_topics.contains(*form.sub_topics.data), Notifier.autoload == True).first()
+                if not temp_nf is None:
+                    # status = NotifierStatus.query.filter(NotifierStatus.status == 'Histórico').first()
+                    # temp_nf.status =status
+                    temp_nf.autoload = False
+        nf.autoload = form.autoload.data
         try:
             db.session.commit()
             flash('Notificação criada com sucesso', category='success')
@@ -107,6 +135,9 @@ def edit(id: int):
     form.status.data = nf.status
     form.priority.data = nf.priority
     form.topics.data = nf.topics
+    form.autoload.data = nf.autoload
+    form.sub_topics.data = nf.sub_topics
+    form.level.data = nf.level
     return render_template('edit.html', form=form, title='Editar', notifier=True)
 
 @bp.route('/deactive/<int:id>', methods=['GET', 'POST'])

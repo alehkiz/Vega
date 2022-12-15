@@ -63,11 +63,11 @@ def question_access():
     return ''
 
 @bp.route('notifications')
-@counter
+# @counter
 def notifications():
     if session.get("AccessType", False) is False:
         abort(500)
-    notifier = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo').order_by(NotifierPriority.order.asc())
+    notifier = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo', Notifier.autoload != True).order_by(NotifierPriority.order.asc())
     to_dict = [_.to_dict for _ in notifier]
     return jsonify(to_dict)
 
@@ -81,7 +81,14 @@ def notification(id:int):
         return jsonify([]), 404
     else:
         return jsonify(obj_notification.to_dict_detail)
-    
+
+
+@bp.route('notifications/autoload')
+# @counter
+def notifications_autoload():
+    obj_notification = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo', Notifier.autoload == True).order_by(NotifierPriority.order.asc())
+    to_dict = [_.to_dict_detail for _ in obj_notification]
+    return jsonify(to_dict)
 # # api dashboard
 # @bp.route('dashboard/tags_data', methods=['GET', 'POST'])
 # def tags_data():

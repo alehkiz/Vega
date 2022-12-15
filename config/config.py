@@ -210,11 +210,19 @@ class BaseConfig(object):
             },
             'topic_id': {
                 'name': 'Topico',
-                'attr': 'topic_name'
+                'attr': 'topics_name'
+            },
+            'level_id': {
+                'name': 'Level',
+                'attr': 'level_translate_name'
             },
             'created_at':{
                 'name': 'Criado em',
                 'attr': 'get_formated_date'
+            },
+            'autoload':{
+                'name': 'Carregamento Automático',
+                'attr': 'get_autoload'
             }
         },
         'file_pdf':{

@@ -114,7 +114,16 @@
         {{ macros.render_field(form.title, size=32, class='form-control', placeholder='Titulo') }}
         {{ macros.render_field(form.content, size=32, class='form-control', placeholder='Titulo', maxlength=498) }}
         {{ macros.render_field(form.status, nosize=true, class='form-select') }}
+        {{ macros.render_field(form.level, nosize=true, class='form-select') }}
         {{ macros.render_field(form.priority, nosize=true, class='form-select') }}
+        <br>
+        
+        {{ macros.render_field(form.autoload) }}
+        <br>
+        <br>
+
+        {{ macros.render_field(form.sub_topics, class='selectpicker', nolabel=true, multiple=true,
+        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
         <br>
         <br>
 
@@ -142,16 +151,23 @@
 <script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}"></script>
 
 <script type="text/javascript">
+    
     element = document.getElementById("text");
     if (element == null){
         element = document.getElementById("answer");
     }
+    {% if notifier is defined %}
+    element = document.getElementById("content");
+    {% endif %}
     var simplemde = new SimpleMDE({ 
         element: element,
         renderingConfig: {
             singleLineBreaks: true,
             codeSyntaxHighlighting: true,
         },
+        {% if notifier is defined %}
+        hideIcons: ['image', 'table'],
+        {% endif %}
         forceSync: true,
         shortcuts: {
             drawTable: "Cmd-Alt-T"
