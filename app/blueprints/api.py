@@ -63,7 +63,7 @@ def question_access():
     return ''
 
 @bp.route('notifications')
-@counter
+# @counter
 def notifications():
     if session.get("AccessType", False) is False:
         abort(500)
@@ -84,7 +84,7 @@ def notification(id:int):
 
 
 @bp.route('notifications/autoload')
-@counter
+# @counter
 def notifications_autoload():
     obj_notification = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo', Notifier.autoload == True).order_by(NotifierPriority.order.asc())
     to_dict = [_.to_dict_detail for _ in obj_notification]

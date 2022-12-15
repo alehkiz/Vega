@@ -50,16 +50,9 @@ class Notifier(db.Model):
                                 secondary=notifier_sub_topic, 
                                 backref=db.backref('notifications', 
                                                     lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
-
-    # topics = db.relationship('Topic',
-    #                          secondary=transaction_topic,
-    #                          backref=db.backref('transactions',
-    #                                             lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
-    # topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     created_network_id = db.Column(
         db.Integer, db.ForeignKey('network.id'), nullable=False)
     update_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # status = db.relationship('NotifierStatus', single_parent=True, backref='notices', lazy='dynamic')
 
     @property
     def get_create_time_elapsed(self):

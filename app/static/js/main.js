@@ -255,6 +255,14 @@ $(document).ready(function () {
             data.forEach(function (element) {
             console.log(data)
             toast = $('#toast-'+element.subtopic)
+            // if (element.level == 'warning') {
+            //     toast.removeClass('text-white')
+            //     toast.addClass('bg-'+element.level+ ' text-dark')
+                
+            // }
+            // else {
+            //     toast.addClass('bg-'+element.level)
+            // }
             toast.addClass('bg-'+element.level)
             toast_title = toast.find('#toast-title')
             toast_title.text(element.title)
