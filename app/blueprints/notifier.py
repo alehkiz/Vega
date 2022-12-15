@@ -52,11 +52,11 @@ def add():
         nf.sub_topics.extend(form.sub_topics.data)
         nf.created_user_id = current_user.id
         if form.autoload.data == True:
-            print(form.sub_topics.data[0])
             temp_nf = Notifier.query.filter(Notifier.sub_topics.contains(*form.sub_topics.data), Notifier.autoload == True).first()
             if not temp_nf is None:
-                status = NotifierStatus.query.filter(NotifierStatus.status == 'Histórico').first()
-                temp_nf.status =status
+                # status = NotifierStatus.query.filter(NotifierStatus.status == 'Histórico').first()
+                # temp_nf.status =status
+                temp_nf.autoload = False
         nf.autoload = form.autoload.data
         _ip = Network.query.filter(Network.id == g.ip_id).first()
         if _ip is None:
@@ -113,6 +113,13 @@ def edit(id: int):
         nf.topics.extend(form.topics.data)
         nf.sub_topics.extend(form.sub_topics.data)
         nf.updater_user_id = current_user.id
+        if nf.autoload != form.autoload.data:
+            if form.autoload.data is True:
+                temp_nf = Notifier.query.filter(Notifier.sub_topics.contains(*form.sub_topics.data), Notifier.autoload == True).first()
+                if not temp_nf is None:
+                    # status = NotifierStatus.query.filter(NotifierStatus.status == 'Histórico').first()
+                    # temp_nf.status =status
+                    temp_nf.autoload = False
         nf.autoload = form.autoload.data
         try:
             db.session.commit()
