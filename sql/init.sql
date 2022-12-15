@@ -1,6 +1,5 @@
+-- Arquivo para inicialização do PostgreSQL
 CREATE EXTENSION unaccent;
-
-
 -- Cria uma nova configuração para o FTS
 CREATE TEXT SEARCH CONFIGURATION pt (COPY = pg_catalog.portuguese);
 ALTER TEXT SEARCH CONFIGURATION pt
