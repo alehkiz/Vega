@@ -1,4 +1,4 @@
-# Sistemade perguntas e respostas
+# Sistema de perguntas e respostas
 
 
 
