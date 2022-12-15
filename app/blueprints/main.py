@@ -244,8 +244,6 @@ def index(sub_topic=None, tag=None):
         breadcrumbs = {v if v != 'index' else 'Home' : '/'+'/'.join(paths[0:i+1]) if i < len(paths)-1 else None for i, v in enumerate(paths)}
 
         if sub_topic != None and tag is None:
-            print(sub_topic)
-            # tags = _sub_topic.questions.join(Topic.questions).filter(Question.answer_approved == True, Question.active == True, Topic.id == topic.id)
             tags = db.session.query(Tag).join(Question.tags).filter(
                         Question.answer_approved == True, 
                         Question.active == True, 
@@ -255,9 +253,6 @@ def index(sub_topic=None, tag=None):
                                 func.count(
                                     Question.id).desc()).having(
                                         func.count(Question.id) > 0)
-
-            # tags = tags.group_by(Tag).order_by(func.count(Question.id).desc()).having(func.count(Question.id) > 0)
-
             tags_question = [{"name": 'Marcações', "values": [{
                 'title': _.name,
                 'count': _.questions.join(Topic.questions).filter(

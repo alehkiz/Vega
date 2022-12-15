@@ -73,7 +73,9 @@ class Notifier(db.Model):
         if as_string == True:
             return ', '.join([x.name for x in self.topics.all()])
         return [x.name for x in self.topics.all()]
-
+    @property
+    def sub_topics_name(self):
+        return [x.name for x in self.sub_topics.all()]
     @property
     def priority_name(self):
         if self.priority is None:

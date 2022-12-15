@@ -20,9 +20,6 @@ def handler_error_500(err):
 def handler_error_413(err):
     g.search_form = SearchForm()
     g.question_search_form = SearchForm()
-
-    print("Erro aqui")
-    print(dir(g))
     if request.path.startswith('/api/'):
         return jsonify(error=str(err)), err.code
     return render_template('errors/413.html'), 413

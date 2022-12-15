@@ -11,8 +11,6 @@ def get_url(url, cookie = ''):
     try:
         return requests.get(url, cookies=cookie)
     except Exception as e:
-        print('Erro')
-        print(e)
         return ''
 
 def thread_(url : str = '', number_exec : int = 100, cookie = ''):

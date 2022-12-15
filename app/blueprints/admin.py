@@ -408,7 +408,6 @@ def to_approve():
         if len(form.who_answer.data) > 0:
             q = q.filter(Question.answer_user_id.in_([_.id for _ in form.who_answer.data]))
         if form.active.data is True:
-            print('teste')
             q = q.filter(Question.active == True)
     if search != False and search != '' and search != None:
         q = q.filter((
@@ -562,7 +561,6 @@ def file_pdf_type():
         else None
     )
     last_page = paginate.pages
-    print(order_type)
     order_type = "asc" if order_type == "desc" else "desc"
 
     order_type_inverse = "asc" if order_type == "desc" else "desc"
@@ -648,7 +646,6 @@ def notifier():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)
     order_type = request.args.get("order_type", "desc")
-    # print(order_type)
     order_dict = {'desc': desc, 'asc': asc}
     if not order_type in order_dict.keys():
         order_type = 'desc'
@@ -789,7 +786,6 @@ def file():
     last_page = paginate.pages
     order_type_inverse = "asc" if order_type == "desc" else "desc"
     order_type = "asc" if order_type == "desc" else "desc"
-    print(order_type)
     
     order = request.args.get('order', None)
     url_args = dict(request.args)

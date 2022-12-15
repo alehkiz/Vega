@@ -509,10 +509,6 @@ def topic(name, type):
         pagination_args = pagination_args | url_args
     except TypeError:
         pagination_args = dict(pagination_args.items() | url_args.items())
-
-    print(pagination_args)
-    print(url_for('question.topic', page=1, **pagination_args))
-    print(request.endpoint)
     topic = Topic.query.filter(Topic.name==name).first_or_404()
     if type in ['pendente', 'aprovada']:
         if type == 'pendente':
@@ -531,7 +527,6 @@ def topic(name, type):
 
     url_args['name'] = name
     url_args['type'] = type
-    print(url_args)
     return render_template('question.html', 
                                 pagination=paginate, 
                                 cls_question=Question, 
@@ -699,8 +694,7 @@ def make_question():
             topic = Topic.query.filter(Topic.name == g.selected_access).first()
             if topic is None:
                 app.logger.error(f"Tópico {g.selected_access} não existe")
-                return abort(500)  
-            # print(topic)
+                return abort(500)
             question.create_at = convert_datetime_to_local(datetime.utcnow())
             question.question = form.question.data
             question.topics.append(topic)

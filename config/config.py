@@ -212,6 +212,10 @@ class BaseConfig(object):
                 'name': 'Topico',
                 'attr': 'topics_name'
             },
+            'sub_topic_id': {
+                'name': 'Sub Topico',
+                'attr': 'sub_topics_name'
+            },
             'level_id': {
                 'name': 'Level',
                 'attr': 'level_translate_name'

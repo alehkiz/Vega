@@ -150,7 +150,6 @@ def get_graph_access_by_date():
     ndf['Total'] = ndf.rolling(7, min_periods=1).mean().round(0)
     # ndf['MM'] = ndf
     df = pd.concat([df, ndf])
-    # print(df.columns)
     graph = px.line(df, x='Data', y='Total', color='Topico', title='Acessos por dia')
     return graph
 
@@ -427,7 +426,6 @@ def dash_app(app=False):
             elif active_subtab == 'user-approve':
                 return get_user_approve()
             elif active_subtab == 'diary-searches':
-                print('aqui')
                 return dcc.Graph(figure=get_graph_search_by_date(), config={'displayModeBar': False})
         else:
             return 'Nenhuma seleção'
@@ -436,8 +434,6 @@ def dash_app(app=False):
         Output('updater_values', 'children'),
         Input('interval-component', 'n_intervals'))
     def updater(n):
-        # print(n)
-
         perc_comp_last_month = round((get_total_visit_by_bussiness_day_in_current_month() / get_mean_visit_by_bussiness_day_month()) *100 , 2)
         perc_comp_today = round((get_visits_today() / get_mean_visit_by_bussiness_day()) * 100, 2)
         perc_comp_question_today = round((get_question_views_today() / get_mean_question_view_by_bussiness_day()) * 100, 2)

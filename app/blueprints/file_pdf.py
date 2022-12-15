@@ -51,7 +51,6 @@ def atas():
         else None
     )
     last_page = paginate.pages
-    print(paginate.items)
     return render_template('files.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint)
 
 @bp.route('/doc_req')
@@ -67,7 +66,6 @@ def doc_req():
         else None
     )
     last_page = paginate.pages
-    print(paginate.items)
     return render_template('files.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint)
 
 @bp.route('/')
@@ -84,7 +82,6 @@ def manuais():
         else None
     )
     last_page = paginate.pages
-    # print(paginate.items)
     return render_template('files.html', pagination=paginate, first_page=first_page, last_page=last_page, endpoint=request.url_rule.endpoint, title_name='Manuais')
 
 @bp.route('/add', methods=['POST', 'GET'])
@@ -95,8 +92,6 @@ def add():
     if form.validate_on_submit():
         file_uploaded = form.file.data
         if file_uploaded != '':
-            # file_ext = splitext(file_uploaded.filename)[1].lower()
-            # print(file_ext)
             if file_uploaded.filename.rsplit('.', 1)[1].lower() not in app.config['UPLOAD_EXTENSIONS']:
                 form.file.errors.append(f"Arquivo não aceito, envie apenas arquivos no formato {', '.join(app.config['UPLOAD_EXTENSIONS'])}")
                 return render_template('upload.html', form=form)
@@ -121,7 +116,6 @@ def add():
                 return render_template('upload.html', form=form)
             # file_path = join(app.config['UPLOAD_FOLDER'], file_uploaded.filename)
             file_uploaded.save(file.path)
-            # print(f'Arquivo {file_path} não existe')
             if not isfile(file.path):
                 flash('Não foi possível salvar o arquivo', category='warning')
                 return render_template('upload.html', form=form)
@@ -162,10 +156,8 @@ def edit(id):
     form = EditFileForm()
     if form.validate_on_submit():
         file_uploaded = form.file.data
-        print(form.file_update.data)
         if form.file_update.data is True:
             if file_uploaded != '' and file_uploaded != None:
-                print(file_uploaded)
                 if file_uploaded.filename.rsplit('.', 1)[1].lower() not in app.config['UPLOAD_EXTENSIONS']:
                     form.file.errors.append(f"Arquivo não aceito, envie apenas arquivos no formato {', '.join(app.config['UPLOAD_EXTENSIONS'])}")
                     return render_template('upload.html', form=form)
@@ -260,7 +252,6 @@ def view(id=None):
             response.headers['Content-Type'] = 'application/octet-stream'
         response.headers['Content-Disposition'] = \
             f'inline; filename="{file.file_name}";name="{file.file_name}"'
-        # print(file.file_name)
         return response
 
 @bp.route('/deactive/<int:id>')

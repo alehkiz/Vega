@@ -11,9 +11,6 @@ from functools import wraps
 def counter(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # print(args)
-        # print(kwargs)
-        # print(request.url_rule.rule)
         if current_user.is_authenticated:
             user = current_user
         else:
@@ -21,7 +18,6 @@ def counter(f):
             if user is None:
                 app.logger.error('Usuário anonimo não encontrado')
                 return abort(500)
-        # print(g.get('topic_id'))
         if g.get('topic_id') is None:
             return redirect(url_for("main.select_access"))
         page = Page.query.filter(Page.endpoint == request.endpoint).first()

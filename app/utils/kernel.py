@@ -179,24 +179,15 @@ def breadcrumb(app):
             view_title = tag if not tag is None else sub_topic
             g.title = view_title
             session_crumbs = session.setdefault('crumbs', [])
-            print(session_crumbs)
             g.breadcrumbs = set()
 
             for path, title in session_crumbs:
                 g.breadcrumbs.add(BreadCrumb(path, title))
-            # print(args)
-            # print(kwargs)
 
             paths = [_ for _ in request.path.split('/') if _ != '']
             if not paths:
                 paths.append('index')
             dict_paths = {v: '/'.join(paths[0:i+1]) for i, v in enumerate(paths)}
-
-            
-
-            print('path', request.path)
-
-            print(f'route_from: {route_from(request.path)}')
             rv = f(*args, **kwargs)
 
             session.modified = True

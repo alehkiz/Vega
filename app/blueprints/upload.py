@@ -27,10 +27,6 @@ def atas():
         else None
     )
 
-    # file = files.first()
-    # print(file.title)
-    # return f'{file.title}'
-
 @bp.route('/disable', methods=['POST', 'GET'])
 @login_required
 @roles_accepted('admin')
@@ -39,8 +35,6 @@ def disabled():
     if form.validate_on_submit():
         file_uploaded = form.file.data
         if file_uploaded != '':
-            # file_ext = splitext(file_uploaded.filename)[1].lower()
-            # print(file_ext)
             if file_uploaded.filename.rsplit('.', 1)[1].lower() not in app.config['UPLOAD_EXTENSIONS']:
                 form.file.errors.append('Arquivo não aceito, envie apenas arquivos no formato PDF')
                 return render_template('upload.html', form=form)
@@ -62,9 +56,7 @@ def disabled():
             if not FilePDF.query.filter(FilePDF.title == file.title).first() is None:
                 form.title.errors.append('Arquivo com o mesmo título, já adicionado')
                 return render_template('upload.html', form=form)
-            # file_path = join(app.config['UPLOAD_FOLDER'], file_uploaded.filename)
             file_uploaded.save(file.path)
-            # print(f'Arquivo {file_path} não existe')
             if not isfile(file.path):
                 flash('Não foi possível salvar o arquivo', category='warning')
                 return render_template('upload.html', form=form)
