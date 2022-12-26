@@ -33,12 +33,13 @@ def validate_password(password):
     valid_pass['ok'] = all(valid_pass.values())
     return valid_pass
 
-def format_elapsed_time(timestamp):
+def format_elapsed_time(timestamp:datetime):
     '''
     Retorna o tempo decorrido entre o ´timezone´ e tempo atual, retona no formato do tizone atual.
     '''
     if isinstance(timestamp, datetime):
-        timestamp = convert_datetime_to_local(timestamp).replace(microsecond=0)
+        if timestamp.tzinfo is None:
+            timestamp = convert_datetime_to_local(timestamp).replace(microsecond=0)
         return format_timedelta(timestamp-convert_datetime_to_local(datetime.utcnow()).replace(microsecond=0), add_direction=True, locale='pt_BR')
 
 def format_datetime_local(timestamp, format='short'):
