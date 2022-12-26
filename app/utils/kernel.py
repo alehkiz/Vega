@@ -40,7 +40,7 @@ def format_elapsed_time(timestamp:datetime):
     if isinstance(timestamp, datetime):
         if timestamp.tzinfo is None:
             timestamp = convert_datetime_to_local(timestamp).replace(microsecond=0)
-        return format_timedelta(timestamp-convert_datetime_to_local(datetime.utcnow()).replace(microsecond=0), add_direction=True, locale='pt_BR')
+        return format_timedelta(convert_datetime_to_local(datetime.utcnow()).replace(microsecond=0)-timestamp, add_direction=True, locale='pt_BR')
 
 def format_datetime_local(timestamp, format='short'):
     if not format in ['full', 'long', 'medium', 'short']:
