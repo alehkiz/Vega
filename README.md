@@ -35,7 +35,7 @@ Para utilizar, siga estas etapas:
 
 Na raiz do repositórico, inicie o ambiente virual e instale os pacotes necessários, e rode flask run.
 
-Lembre-se que utilizamos o postgres, logo, você deverá ter criado, além de criar o banco de dados com o nome `house_price` após criar o banco de dados, rode o comando `flask shell` e no terminal utilize o comando `db.create_all()`, saia e então rode `flask run`
+Lembre-se que utilizamos o postgres, logo, você deverá ter criado, além de criar o banco de dados com o nome `vega` após criar o banco de dados, rode o comando `flask shell` e no terminal utilize o comando `db.create_all()`, saia e então rode `flask run`
 
 O servidor também roda em Docker, para isso rode o arquivo `docker.sh`
 
