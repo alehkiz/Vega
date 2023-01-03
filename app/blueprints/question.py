@@ -4,6 +4,7 @@ from flask.globals import current_app
 from flask_security import login_required, current_user, roles_accepted
 from app.blueprints.admin import sub_topic
 from app.core.db import db
+from app.models.history import QuestionHistory
 from app.models.wiki import Question, QuestionLike, QuestionSave, QuestionView, SubTopic, Tag, Topic
 from app.models.security import User
 from app.models.app import Network
@@ -195,13 +196,23 @@ def edit(id):
     else:
         form = QuestionEditForm()
     if form.validate_on_submit():
+        qh = QuestionHistory()
+        qh.get_from_question(question)
+        db.session.add(qh)
+        try:
+            db.session.commit()
+        except Exception as e:
+            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(e)
+            db.session.rollback()
+            return abort(404)
         # try:
         question.question = process_html(form.question.data).text
         question.tags = form.tag.data
         question.topics = form.topic.data
         question.sub_topics = form.sub_topic.data
         question.update_user_id = current_user.id
-        question.update_at = convert_datetime_to_local(datetime.now())
+        question.update_at = convert_datetime_to_local(datetime.utcnow())
         # question.answer_user_id = current_user.id
         question.answer = process_html(form.answer.data).text
 

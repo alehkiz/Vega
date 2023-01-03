@@ -21,6 +21,7 @@ from app.models.wiki import Article, Topic, Tag, ArticleView, Question, Question
 from app.models.search import Search, SearchDateTime
 from app.models.app import FilePDF, Network, Visit, Page, FilePDFType
 from app.models.notifier import Notifier, NotifierPriority, NotifierStatus
+from app.models.history import QuestionHistory
 from app.utils.kernel import convert_datetime_to_local
 
 # from app.dashboard import dash
@@ -114,7 +115,8 @@ def init(app):
             Network=Network,
             NotifierPriority=NotifierPriority,
             FilePDF = FilePDF,
-            FilePDFType = FilePDFType
+            FilePDFType = FilePDFType,
+            QuestionHistory = QuestionHistory
             )
     
     with app.app_context():

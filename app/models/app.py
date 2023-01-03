@@ -142,6 +142,7 @@ class Network(db.Model):
     confirmed_user = db.relationship('User', backref='confirmed_network', lazy='dynamic', foreign_keys='[User.confirmed_network_id]')
     notifiers = db.relationship('Notifier', backref='network', lazy='dynamic', single_parent=True)
     visits = db.relationship('Visit', backref='network', lazy='dynamic', single_parent=True)
+    history_answer_created_ip = db.relationship('QuestionHistory', backref='answer_created_network', lazy='dynamic', foreign_keys='[QuestionHistory.answer_network_id]')
     # created_citizen = db.relationship('Citizen', backref='created_network', lazy='dynamic', foreign_keys='[Citizen.created_network_id]')
 
 

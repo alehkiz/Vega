@@ -396,7 +396,7 @@ class Question(db.Model):
                            single_parent=True, backref='question', lazy='dynamic')
     like = db.relationship('QuestionLike', cascade='all, delete-orphan',
                            single_parent=True, backref='question', lazy='dynamic')
-
+    history = db.relationship('QuestionHistory', single_parent=True, lazy='dynamic')
     def __repr__(self):
 
         return f'<Question {self.question[:15] if not self.question  is None else None}>'
