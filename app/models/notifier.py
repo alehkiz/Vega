@@ -39,7 +39,7 @@ class Notifier(db.Model):
     level_id = db.Column(db.Integer, db.ForeignKey(
         'notifier_level.id'), nullable=False)
     create_at = db.Column(db.DateTime(timezone=True), index=False,
-                          default=convert_datetime_to_local(datetime.utcnow()))
+                          default=convert_datetime_to_local)
     closed_at = db.Column(db.DateTime, index=False,
                           nullable=True)
     created_user_id = db.Column(

@@ -61,7 +61,7 @@ class ArticleView(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     article_id = db.Column(db.Integer, db.ForeignKey(
         'article.id'), nullable=False)
-    first_view = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
+    first_view = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local)
     last_view = db.Column(db.DateTime(timezone=True), index=True)
     count_view = db.Column(db.Integer, default=1)
 
@@ -74,7 +74,7 @@ class Article(db.Model):
     title = db.Column(db.String(32), index=True, nullable=False, unique=True)
     description = db.Column(db.String(128), index=False, nullable=False)
     _text = db.Column(db.Text, index=False, nullable=False)
-    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
+    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local)
     update_at = db.Column(db.DateTime(timezone=True), index=True)
     update_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -261,7 +261,7 @@ class Topic(db.Model):
     format_name = db.Column(db.String(32), index=True,
                             nullable=True, unique=True)
     active = db.Column(db.Boolean, default=True)
-    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
+    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local)
     selectable = db.Column(db.Boolean, default=False, nullable=False)
     nickname = db.Column(db.String(10), nullable=False, unique=True)
     articles = db.relationship('Article', backref='topic', lazy='dynamic')
@@ -287,7 +287,7 @@ class SubTopic(db.Model):
     _name = db.Column(db.String(32), index=True, nullable=False, unique=True)
     format_name = db.Column(db.String(32), index=True,
                             nullable=True, unique=True)
-    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
+    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local)
     # articles = db.relationship('Article', backref='topic', lazy='dynamic')
     # questions = db.relationship('Question', backref='sub_topic',
     #                             lazy='dynamic', foreign_keys='[Question.sub_topic_id]')
@@ -308,7 +308,7 @@ class SubTopic(db.Model):
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(48), index=True, nullable=False, unique=True)
-    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
+    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref='tag')
     # questions = db.relationship('Question', backref=backref('tag', lazy='dynamic'), lazy='dynamic', foreign_keys='[Question.tag_id]')
@@ -356,7 +356,7 @@ class Question(db.Model):
                         nullable=True, unique=False)
     answer_approved = db.Column(db.Boolean, nullable=True, default=False)
     answer_approved_at = db.Column(db.DateTime(timezone=True))
-    create_at = db.Column(db.DateTime(timezone=True), index=False, default=convert_datetime_to_local(datetime.utcnow()))
+    create_at = db.Column(db.DateTime(timezone=True), index=False, default=convert_datetime_to_local)
     create_user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
     update_at = db.Column(db.DateTime(timezone=True))
@@ -566,7 +566,7 @@ class Question(db.Model):
         qv.question_id = self.id
         qv.user_id = user_id
         qv.network_id = network_id
-        qv.datetime =  convert_datetime_to_local(datetime.utcnow())
+        # qv.datetime =  convert_datetime_to_local(datetime.utcnow())
         db.session.add(qv)
 
         # if qv == None:
@@ -601,7 +601,7 @@ class Question(db.Model):
             ql = QuestionLike()
             ql.user_id = user.id
             ql.question_id = self.id
-            ql.create_at = convert_datetime_to_local(datetime.utcnow())
+            # ql.create_at = convert_datetime_to_local(datetime.utcnow())
             db.session.add(ql)
             try:
                 db.session.commit()
@@ -657,7 +657,7 @@ class Question(db.Model):
             qs = QuestionSave()
             qs.user_id = user.id
             qs.question_id = self.id
-            qs.create_at = convert_datetime_to_local(datetime.utcnow())
+            # qs.create_at = convert_datetime_to_local(datetime.utcnow())
             db.session.add(qs)
             try:
                 db.session.commit()
@@ -838,7 +838,7 @@ class QuestionView(db.Model):
         'user.id', onupdate="CASCADE", ondelete="CASCADE"))
     question_id = db.Column(db.Integer, db.ForeignKey(
         'question.id'), nullable=False)
-    datetime = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local(datetime.utcnow()))
+    datetime = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local)
     network_id = db.Column(db.Integer, db.ForeignKey(
         'network.id'), nullable=False)
 
@@ -877,7 +877,7 @@ class QuestionLike(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     question_id = db.Column(db.Integer, db.ForeignKey(
         'question.id'), nullable=False)
-    create_at = db.Column(db.DateTime, nullable=False, default=convert_datetime_to_local(datetime.utcnow()))
+    create_at = db.Column(db.DateTime, nullable=False, default=convert_datetime_to_local)
     # user_like = db.relationship()
 
     def __repr__(self):
@@ -896,7 +896,7 @@ class QuestionSave(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     question_id = db.Column(db.Integer, db.ForeignKey(
         'question.id'), nullable=False)
-    create_at = db.Column(db.DateTime, nullable=False, default=convert_datetime_to_local(datetime.utcnow()))
+    create_at = db.Column(db.DateTime, nullable=False, default=convert_datetime_to_local)
 
     def __repr__(self):
         return f'<Question Like id: {self.question_id} by {self.user_id}>'
@@ -922,7 +922,7 @@ class Transaction(db.Model):
     parameter = db.Column(db.String(64), nullable=True)
     option = db.Column(db.String(10))
     description = db.Column(db.String)
-    create_at = db.Column(db.DateTime(timezone=True), index=False, default=convert_datetime_to_local(datetime.utcnow()))
+    create_at = db.Column(db.DateTime(timezone=True), index=False, default=convert_datetime_to_local)
     created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     edit_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     sub_topics = db.relationship('SubTopic', 

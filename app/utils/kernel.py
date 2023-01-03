@@ -132,7 +132,9 @@ def format_number_as_thousand(number: int):
     return f'{number:,d}'.replace(',','.')
 
 
-def convert_datetime_to_local(timestamp):
+def convert_datetime_to_local(timestamp = None):
+    if timestamp is None:
+        timestamp = datetime.utcnow()
     to_zone = tz.gettz('America/Sao_Paulo')
     from_zone = tz.gettz('UTC')
     # if timestamp.tzinfo is None:
