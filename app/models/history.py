@@ -48,3 +48,4 @@ class QuestionHistory(db.Model):
         self.active = question.active
 
 
+    
