@@ -18,7 +18,7 @@ class QuestionHistory(db.Model):
                        nullable=True, unique=False)
     answer_approved = db.Column(db.Boolean, nullable=True, default=False)
     answer_approved_at = db.Column(db.DateTime(timezone=True))
-    # create_at = db.Column(db.DateTime(timezone=True), index=False)
+    history_at = db.Column(db.DateTime(timezone=True), index=False, default=convert_datetime_to_local)
     # create_user_id = db.Column(
     #     db.Integer, db.ForeignKey('user.id'), nullable=False)
     update_at = db.Column(db.DateTime(timezone=True), default=convert_datetime_to_local)
