@@ -1,7 +1,10 @@
 from datetime import datetime
 from app.core.db import db
 from app.models.wiki import Question
-from app.utils.kernel import convert_datetime_to_local
+from app.utils.kernel import convert_datetime_to_local, process_value
+from markdown2 import markdown
+from flask import Markup
+from app.utils.html import process_html
 
 
 class QuestionHistory(db.Model):
@@ -48,4 +51,21 @@ class QuestionHistory(db.Model):
         self.active = question.active
 
 
-    
+    def get_body_html(self, resume=False, size=1500):
+        html_classes = {'table': 'table table-bordered',
+                        'img': 'img img-fluid'}
+        if resume:
+            l_text = list(filter(lambda x: x not in [
+                          '', ' ', '\t'], self.process_answer.split('\n')))
+            # text = get_list_max_len(l_text, 256)
+            return Markup(process_html(markdown('\n'.join(l_text), extras={"tables": None, "html-classes": html_classes, 'target-blank-links':True}))).striptags()[0:size] + '...'
+            # return Markup(process_html(markdown(text))).striptags()
+
+        return Markup(markdown(self.process_answer, extras={"tables": None, "html-classes": html_classes, 'target-blank-links':True}))
+
+
+    @property
+    def process_answer(self):
+        if self.answer != '' or self.answer != None:
+            return process_value(self.answer, Question)
+        return self._answer

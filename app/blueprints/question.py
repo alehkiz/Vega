@@ -168,12 +168,15 @@ def view(id=None):
         ).first_or_404()
         if not question.has_topic(g.topic):
             # _topic_name = f'<p class="font-weight-bold">{question.topic_name}</p>'
-            flash(Markup(f'A pergunta que você tentou acessar está disponível para <b>{question.topic_name}</b>, selecione o módulo correto para acessar a perrgunta.'), category='danger')
+            flash(Markup(f'A pergunta que você tentou acessar está disponível para <b>{question.topic_name}</b>, selecione o módulo correto para acessar a pergunta.'), category='danger')
             return redirect(url_for('main.select_access', next=request.path))
 
     else:
         question = Question.query.filter(Question.id == id).first_or_404()
-    
+        question_history = QuestionHistory.query.filter(QuestionHistory.question_id == question.id).all()
+        if len(question_history) == 0:
+            question_history = None
+            
     if current_user.is_authenticated:
         user_id = current_user.id
     else:
@@ -184,7 +187,7 @@ def view(id=None):
             raise Exception('Usuário anônimo não criado')
         user_id = user.id
     question.add_view(user_id, g.ip_id)
-    return render_template('question.html', mode='view', question=question, cls_question=Question)
+    return render_template('question.html', mode='view', question=question, cls_question=Question, question_history=question_history)
 
 @bp.route('edit/<int:id>', methods=['GET', 'POST'])
 @login_required

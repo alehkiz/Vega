@@ -65,6 +65,18 @@ url_arguments=url_arguments)}} {% endif %} {% endif %} {% endif %} {% if mode ==
     <span class="badge bg-secondary"><a href="{{url_for('question.tag', name=tag.name)}}"
             class="text-white">{{tag.name}}</a> </span> {% endfor %} {% endif %}
 </article>
+{% if question_history != none %}
+<hr>
+{% for qh in question_history %}
+<h6 class="article-title">
+    {{qh.question}}
+</h6>
+
+<div class="article-text">
+    {{qh.get_body_html()}}
+</div>
+{% endfor %}
+{% endif %}
 {% endif %} {% if mode == 'make_question' %} {% include 'create_question.html' %} {% endif %} {% endblock %} {% block
 scripts %} {{ super() }} {% if article == true %}
 <!-- <script src="{{url_for('static', filename='js/editormd/editormd.min.js')}}"></script> -->
