@@ -227,7 +227,7 @@ class Role(RoleMixin, db.Model):
         return False
     @property
     def has_support(self):
-        if self.level in [0,2,3,4,5]:
+        if self.level in [0,2,3,4]:
             return True
         return False
 
@@ -239,7 +239,7 @@ class Role(RoleMixin, db.Model):
 
     @property
     def can_edit(self):
-        if self.level in [0, 2, 3]:
+        if self.level in [0, 2, 3, 4]:
             return True
         return False
 
