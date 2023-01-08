@@ -14,59 +14,71 @@ from sqlalchemy.dialects.postgresql import INET
 from sqlalchemy_searchable import make_searchable
 
 from app.core.db import db
-from app.utils.kernel import convert_datetime_to_local, format_elapsed_time, get_list_max_len, only_letters, format_datetime_local, days_elapsed, process_value
+from app.utils.kernel import (
+    convert_datetime_to_local,
+    format_elapsed_time,
+    get_list_max_len,
+    only_letters,
+    format_datetime_local,
+    days_elapsed,
+    process_value,
+)
 from app.utils.html import process_html
 from app.models.security import User
 
 
-make_searchable(db.metadata, options={'regconfig': 'public.pt'})
+make_searchable(db.metadata, options={"regconfig": "public.pt"})
 
 
-article_tag = db.Table('article_tag',
-                       db.Column('post_id', db.Integer,
-                                 db.ForeignKey('article.id')),
-                       db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')))
+article_tag = db.Table(
+    "article_tag",
+    db.Column("post_id", db.Integer, db.ForeignKey("article.id")),
+    db.Column("tag_id", db.Integer, db.ForeignKey("tag.id")),
+)
 
-question_tag = db.Table('question_tag',
-                        db.Column('question_id', db.Integer,
-                                  db.ForeignKey('question.id')),
-                        db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')))
+question_tag = db.Table(
+    "question_tag",
+    db.Column("question_id", db.Integer, db.ForeignKey("question.id")),
+    db.Column("tag_id", db.Integer, db.ForeignKey("tag.id")),
+)
 
 
-question_topic = db.Table('question_topic',
-                          db.Column('question_id', db.Integer,
-                                    db.ForeignKey('question.id')),
-                          db.Column('topic_id', db.Integer, db.ForeignKey('topic.id')))
+question_topic = db.Table(
+    "question_topic",
+    db.Column("question_id", db.Integer, db.ForeignKey("question.id")),
+    db.Column("topic_id", db.Integer, db.ForeignKey("topic.id")),
+)
 
-question_sub_topic = db.Table('question_sub_topic',
-                        db.Column('question_id', db.Integer, 
-                                    db.ForeignKey('question.id')),
-                        db.Column('sub_topic_id', db.Integer, db.ForeignKey('sub_topic.id'))
-                        )
+question_sub_topic = db.Table(
+    "question_sub_topic",
+    db.Column("question_id", db.Integer, db.ForeignKey("question.id")),
+    db.Column("sub_topic_id", db.Integer, db.ForeignKey("sub_topic.id")),
+)
 
-transaction_topic = db.Table('transaction_topic',
-                        db.Column('transaction_id', db.Integer,
-                                    db.ForeignKey('transaction.id')),
-                        db.Column('topic_id', db.Integer, db.ForeignKey('topic.id'))            
-                        )
-transaction_sub_topic = db.Table('transaction_sub_topic',
-                        db.Column('transaction_id', db.Integer,
-                                    db.ForeignKey('transaction.id')),
-                        db.Column('topic_sub_id', db.Integer, db.ForeignKey('sub_topic.id'))            
-                        )
+transaction_topic = db.Table(
+    "transaction_topic",
+    db.Column("transaction_id", db.Integer, db.ForeignKey("transaction.id")),
+    db.Column("topic_id", db.Integer, db.ForeignKey("topic.id")),
+)
+transaction_sub_topic = db.Table(
+    "transaction_sub_topic",
+    db.Column("transaction_id", db.Integer, db.ForeignKey("transaction.id")),
+    db.Column("topic_sub_id", db.Integer, db.ForeignKey("sub_topic.id")),
+)
 
 
 class ArticleView(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    article_id = db.Column(db.Integer, db.ForeignKey(
-        'article.id'), nullable=False)
-    first_view = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    article_id = db.Column(db.Integer, db.ForeignKey("article.id"), nullable=False)
+    first_view = db.Column(
+        db.DateTime(timezone=True), index=True, default=convert_datetime_to_local
+    )
     last_view = db.Column(db.DateTime(timezone=True), index=True)
     count_view = db.Column(db.Integer, default=1)
 
     def __repr__(self):
-        return f'<Article View id {self.article_id} by {self.user_id}>'
+        return f"<Article View id {self.article_id} by {self.user_id}>"
 
 
 class Article(db.Model):
@@ -74,15 +86,18 @@ class Article(db.Model):
     title = db.Column(db.String(32), index=True, nullable=False, unique=True)
     description = db.Column(db.String(128), index=False, nullable=False)
     _text = db.Column(db.Text, index=False, nullable=False)
-    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local)
+    create_at = db.Column(
+        db.DateTime(timezone=True), index=True, default=convert_datetime_to_local
+    )
     update_at = db.Column(db.DateTime(timezone=True), index=True)
-    update_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
+    update_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    topic_id = db.Column(db.Integer, db.ForeignKey("topic.id"), nullable=False)
     # updater = db.relationship('User', foreign_keys = [update_user_id], backref='articles_updated')
     # author = db.relationship('User', foreign_keys = [user_id], backref='articles', lazy='dynamic')
-    search_vector = db.Column(TSVectorType(
-        '_text', 'title', regconfig='public.pt', cache_ok=False))
+    search_vector = db.Column(
+        TSVectorType("_text", "title", regconfig="public.pt", cache_ok=False)
+    )
     # __ts_vector__ = create_tsvector(
     #     cast(func.coalesce(_text, ''), postgresql.TEXT))
 
@@ -91,14 +106,20 @@ class Article(db.Model):
     #     __ts_vector__,
     #     postgresql_using='gin'),)
 
-    tags = db.relationship('Tag',
-                           secondary=article_tag,
-                           backref=db.backref('articles',
-                                              lazy='dynamic'),
-                           lazy='dynamic')
+    tags = db.relationship(
+        "Tag",
+        secondary=article_tag,
+        backref=db.backref("articles", lazy="dynamic"),
+        lazy="dynamic",
+    )
 
-    views = db.relationship('ArticleView', cascade='all, delete-orphan',
-                            backref='article', single_parent=True, lazy='dynamic')
+    views = db.relationship(
+        "ArticleView",
+        cascade="all, delete-orphan",
+        backref="article",
+        single_parent=True,
+        lazy="dynamic",
+    )
 
     @hybrid_property
     def text(self):
@@ -106,46 +127,58 @@ class Article(db.Model):
 
     @text.setter
     def text(self, text):
-        '''
+        """
         Remove tags html in text
-        '''
+        """
         self._text = BeautifulSoup(text, features="lxml").get_text()
 
     def __repr__(self):
-        return f'<Article {self.title}>'
+        return f"<Article {self.title}>"
 
     def search(text, pagination=False, per_page=1, page=1, resume=False):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         if resume:
-            result = (db.session.query(Article.title, (
-                func.ts_rank_cd(
-                    Article.search_vector,
-                    func.plainto_tsquery(
-                        'public.pt',
-                        text))).label(
-                            'similarity')).filter((
-                                func.ts_rank_cd(
-                                    Article.search_vector,
-                                    func.plainto_tsquery(
-                                        'public.pt',
-                                        text))) > 0)  # .order_by(
-                      # desc('similarity'))
-                      )
+            result = (
+                db.session.query(
+                    Article.title,
+                    (
+                        func.ts_rank_cd(
+                            Article.search_vector,
+                            func.plainto_tsquery("public.pt", text),
+                        )
+                    ).label("similarity"),
+                ).filter(
+                    (
+                        func.ts_rank_cd(
+                            Article.search_vector,
+                            func.plainto_tsquery("public.pt", text),
+                        )
+                    )
+                    > 0
+                )  # .order_by(
+                # desc('similarity'))
+            )
         else:
-            result = (db.session.query(Article, (
-                func.ts_rank_cd(
-                    Article.search_vector,
-                    func.plainto_tsquery(
-                        'public.pt',
-                        text))).label(
-                            'similarity')).filter((
-                                func.ts_rank_cd(
-                                    Article.search_vector,
-                                    func.plainto_tsquery(
-                                        'public.pt',
-                                        text))) > 0)  # .order_by(
-                      # desc('similarity'))
-                      )
+            result = (
+                db.session.query(
+                    Article,
+                    (
+                        func.ts_rank_cd(
+                            Article.search_vector,
+                            func.plainto_tsquery("public.pt", text),
+                        )
+                    ).label("similarity"),
+                ).filter(
+                    (
+                        func.ts_rank_cd(
+                            Article.search_vector,
+                            func.plainto_tsquery("public.pt", text),
+                        )
+                    )
+                    > 0
+                )  # .order_by(
+                # desc('similarity'))
+            )
         if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
@@ -153,20 +186,37 @@ class Article(db.Model):
     @property
     def resume(self):
         return self.title
+
     # def get_resume(self):
     #     return self.title
 
     def get_body_html(self, resume=False, size=256):
-        html_classes = {'table': 'table table-bordered',
-                        'img': 'img img-fluid'}
+        html_classes = {"table": "table table-bordered", "img": "img img-fluid"}
         if resume:
-            l_text = list(filter(lambda x: x not in [
-                          '', ' ', '\t'], self.text.split('\n')))
+            l_text = list(
+                filter(lambda x: x not in ["", " ", "\t"], self.text.split("\n"))
+            )
             # text = get_list_max_len(l_text, 256)
-            return Markup(process_html(markdown('\n'.join(l_text), extras={"tables": None, "html-classes": html_classes}))).striptags()[0:size] + '...'
+            return (
+                Markup(
+                    process_html(
+                        markdown(
+                            "\n".join(l_text),
+                            extras={"tables": None, "html-classes": html_classes},
+                        )
+                    )
+                ).striptags()[0:size]
+                + "..."
+            )
             # return Markup(process_html(markdown(text))).striptags()
 
-        return Markup(process_html(markdown(self.text, extras={"tables": None, "html-classes": html_classes})))
+        return Markup(
+            process_html(
+                markdown(
+                    self.text, extras={"tables": None, "html-classes": html_classes}
+                )
+            )
+        )
 
     @property
     def get_text_resume(self):
@@ -189,7 +239,8 @@ class Article(db.Model):
             user = User.query.filter_by(id=user_id).first_or_404()
             user_id = user.id
         article_view = ArticleView.query.filter_by(
-            user_id=user_id, article_id=self.id).first()
+            user_id=user_id, article_id=self.id
+        ).first()
         if article_view is None:
             article_view = ArticleView()
             article_view.article_id = self.id
@@ -202,17 +253,18 @@ class Article(db.Model):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
             app.logger.error(e)
             return abort(500)
 
     def sum_views(self, user_id: int = None):
         try:
             sum_query = db.session.query(
-                func.sum(ArticleView.count_view).label('views')).join(Article.views)
+                func.sum(ArticleView.count_view).label("views")
+            ).join(Article.views)
         except Exception as e:
             db.session.rollback()
-            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
             app.logger.error(e)
             return abort(500)
         if user_id is None:
@@ -220,19 +272,20 @@ class Article(db.Model):
                 rs = sum_query.filter(ArticleView.article_id == self.id).all()
             except Exception as e:
                 db.session.rollback()
-                app.logger.error(app.config.get(
-                    '_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
                 app.logger.error(e)
                 return abort(500)
             return sum([x.views for x in rs if x.views != None])
         else:
             try:
-                rs = sum_query.filter(ArticleView.article_id == self.id).filter(
-                    ArticleView.user_id == user_id).all()
+                rs = (
+                    sum_query.filter(ArticleView.article_id == self.id)
+                    .filter(ArticleView.user_id == user_id)
+                    .all()
+                )
             except Exception as e:
                 db.session.rollback()
-                app.logger.error(app.config.get(
-                    '_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
                 app.logger.error(e)
                 return abort(500)
             return sum([x.views for x in rs if x.views != None])
@@ -245,11 +298,19 @@ class Article(db.Model):
     @staticmethod
     def most_viewed(limit=5):
         try:
-            rs = db.session.query(Article, func.sum(ArticleView.count_view).label('views')).join(
-                Article.views).group_by(Article).order_by(text('views DESC')).limit(limit).all()
+            rs = (
+                db.session.query(
+                    Article, func.sum(ArticleView.count_view).label("views")
+                )
+                .join(Article.views)
+                .group_by(Article)
+                .order_by(text("views DESC"))
+                .limit(limit)
+                .all()
+            )
         except Exception as e:
             db.session.rollback()
-            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
             app.logger.error(e)
             return abort(500)
         return [x[0] for x in rs if x != None]
@@ -258,17 +319,24 @@ class Article(db.Model):
 class Topic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     _name = db.Column(db.String(32), index=True, nullable=False, unique=True)
-    format_name = db.Column(db.String(32), index=True,
-                            nullable=True, unique=True)
+    format_name = db.Column(db.String(32), index=True, nullable=True, unique=True)
     active = db.Column(db.Boolean, default=True)
-    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local)
+    create_at = db.Column(
+        db.DateTime(timezone=True), index=True, default=convert_datetime_to_local
+    )
     selectable = db.Column(db.Boolean, default=False, nullable=False)
     nickname = db.Column(db.String(10), nullable=False, unique=True)
-    articles = db.relationship('Article', backref='topic', lazy='dynamic')
+    articles = db.relationship("Article", backref="topic", lazy="dynamic")
     # questions_old = db.relationship('Question', backref='topic', lazy='dynamic', foreign_keys='[Question.topic_id]')
     # notifications = db.relationship('Notifier', backref='topic', lazy='dynamic')
-    visit = db.relationship('Visit', cascade='all, delete-orphan',
-                            single_parent=True, backref='topic', lazy='dynamic')
+    visit = db.relationship(
+        "Visit",
+        cascade="all, delete-orphan",
+        single_parent=True,
+        backref="topic",
+        lazy="dynamic",
+    )
+
     @hybrid_property
     def name(self):
         return self._name
@@ -279,15 +347,16 @@ class Topic(db.Model):
         self.format_name = only_letters(text)
 
     def __repr__(self):
-        return f'<Topic {self.name}>'
+        return f"<Topic {self.name}>"
 
 
 class SubTopic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     _name = db.Column(db.String(32), index=True, nullable=False, unique=True)
-    format_name = db.Column(db.String(32), index=True,
-                            nullable=True, unique=True)
-    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local)
+    format_name = db.Column(db.String(32), index=True, nullable=True, unique=True)
+    create_at = db.Column(
+        db.DateTime(timezone=True), index=True, default=convert_datetime_to_local
+    )
     # articles = db.relationship('Article', backref='topic', lazy='dynamic')
     # questions = db.relationship('Question', backref='sub_topic',
     #                             lazy='dynamic', foreign_keys='[Question.sub_topic_id]')
@@ -302,21 +371,23 @@ class SubTopic(db.Model):
         self.format_name = only_letters(text)
 
     def __repr__(self):
-        return f'<Topic {self.name}>'
+        return f"<Topic {self.name}>"
 
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(48), index=True, nullable=False, unique=True)
-    create_at = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship('User', backref='tag')
+    create_at = db.Column(
+        db.DateTime(timezone=True), index=True, default=convert_datetime_to_local
+    )
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user = db.relationship("User", backref="tag")
     # questions = db.relationship('Question', backref=backref('tag', lazy='dynamic'), lazy='dynamic', foreign_keys='[Question.tag_id]')
 
     @hybrid_property
     def username(self):
         if self.user is None:
-            return ''
+            return ""
         return self.user.name
 
     @staticmethod
@@ -325,13 +396,24 @@ class Tag(db.Model):
 
     def questions_approved(self, topic=None):
         if topic != None:
-            return db.session.query(Tag).join(Tag.questions).join(Question.topics).filter(Question.answer_approved == True, Topic.id== topic.id, Tag.id == self.id)
+            return (
+                db.session.query(Tag)
+                .join(Tag.questions)
+                .join(Question.topics)
+                .filter(
+                    Question.answer_approved == True,
+                    Topic.id == topic.id,
+                    Tag.id == self.id,
+                )
+            )
             # return self.questions.filter(Question.answer != None, Question.answer_approved == True, Question.topic_id == topic.id)
-        return self.questions.filter(Question.answer != None, Question.answer_approved == True)
+        return self.questions.filter(
+            Question.answer != None, Question.answer_approved == True
+        )
 
 
 class Question(db.Model):
-    '''
+    """
     Classe responsável pelas perguntas da wiki, com indexação para ``full text search``
 
 
@@ -343,63 +425,103 @@ class Question(db.Model):
 
     #Trigger para remover os acentos no FTS
     CREATE TRIGGER question_search_vector_trigger
-    BEFORE INSERT OR UPDATE 
+    BEFORE INSERT OR UPDATE
     ON public.question
     FOR EACH ROW
     EXECUTE PROCEDURE tsvector_update_trigger('search_vector', 'public.pt', 'question', 'answer');
-    '''
-    __searchable__ = ['question', 'answer']
+    """
+
+    __searchable__ = ["question", "answer"]
     id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(800), index=False,
-                         nullable=False, unique=True)
-    _answer = db.Column('answer', db.Text, index=False,
-                        nullable=True, unique=False)
+    question = db.Column(db.String(800), index=False, nullable=False, unique=True)
+    _answer = db.Column("answer", db.Text, index=False, nullable=True, unique=False)
     answer_approved = db.Column(db.Boolean, nullable=True, default=False)
     answer_approved_at = db.Column(db.DateTime(timezone=True))
-    create_at = db.Column(db.DateTime(timezone=True), index=False, default=convert_datetime_to_local)
-    create_user_id = db.Column(
-        db.Integer, db.ForeignKey('user.id'), nullable=False)
+    create_at = db.Column(
+        db.DateTime(timezone=True), index=False, default=convert_datetime_to_local
+    )
+    create_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     update_at = db.Column(db.DateTime(timezone=True))
-    update_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    answer_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    answer_approve_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    update_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    answer_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    answer_approve_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     answer_at = db.Column(db.DateTime(timezone=True))
     # tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True)
     # topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
     # sub_topic_id = db.Column(
     #     db.Integer, db.ForeignKey('sub_topic.id'), nullable=True)
     question_network_id = db.Column(
-        db.Integer, db.ForeignKey('network.id'), nullable=False)
+        db.Integer, db.ForeignKey("network.id"), nullable=False
+    )
     answer_network_id = db.Column(
-        db.Integer, db.ForeignKey('network.id'), nullable=True)
+        db.Integer, db.ForeignKey("network.id"), nullable=True
+    )
     active = db.Column(db.Boolean, nullable=False)
-    sub_topics = db.relationship('SubTopic', 
-                                secondary=question_sub_topic, 
-                                backref=db.backref('questions', 
-                                                    lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
-    topics = db.relationship('Topic',
-                             secondary=question_topic,
-                             backref=db.backref('questions',
-                                                lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
+    sub_topics = db.relationship(
+        "SubTopic",
+        secondary=question_sub_topic,
+        backref=db.backref(
+            "questions", lazy="dynamic", cascade="save-update", single_parent=True
+        ),
+        lazy="dynamic",
+    )
+    topics = db.relationship(
+        "Topic",
+        secondary=question_topic,
+        backref=db.backref(
+            "questions", lazy="dynamic", cascade="save-update", single_parent=True
+        ),
+        lazy="dynamic",
+    )
 
-    tags = db.relationship('Tag',
-                           secondary=question_tag,
-                           backref=db.backref('questions',
-                                              lazy='dynamic', cascade='save-update', single_parent=True,),
-                           lazy='dynamic')
-    search_vector = db.Column(TSVectorType(
-        'question', 'answer', regconfig='public.pt', cache_ok=False))  # regconfig='public.pt'))
+    tags = db.relationship(
+        "Tag",
+        secondary=question_tag,
+        backref=db.backref(
+            "questions",
+            lazy="dynamic",
+            cascade="save-update",
+            single_parent=True,
+        ),
+        lazy="dynamic",
+    )
+    search_vector = db.Column(
+        TSVectorType("question", "answer", regconfig="public.pt", cache_ok=False)
+    )  # regconfig='public.pt'))
 
-    view = db.relationship('QuestionView', cascade='all, delete-orphan',
-                           single_parent=True, backref='question', lazy='dynamic')
-    save = db.relationship('QuestionSave', cascade='all, delete-orphan',
-                           single_parent=True, backref='question', lazy='dynamic')
-    like = db.relationship('QuestionLike', cascade='all, delete-orphan',
-                           single_parent=True, backref='question', lazy='dynamic')
-    history = db.relationship('QuestionHistory', single_parent=True, lazy='dynamic')
+    view = db.relationship(
+        "QuestionView",
+        cascade="all, delete-orphan",
+        single_parent=True,
+        backref="question",
+        lazy="dynamic",
+    )
+    save = db.relationship(
+        "QuestionSave",
+        cascade="all, delete-orphan",
+        single_parent=True,
+        backref="question",
+        lazy="dynamic",
+    )
+    like = db.relationship(
+        "QuestionLike",
+        cascade="all, delete-orphan",
+        single_parent=True,
+        backref="question",
+        lazy="dynamic",
+    )
+    history = db.relationship(
+        "QuestionHistory",
+        order_by="desc(QuestionHistory.history_at)",
+        single_parent=True,
+        lazy="dynamic",
+    )
+
     def __repr__(self):
 
-        return f'<Question {self.question[:15] if not self.question  is None else None}>'
+        return (
+            f"<Question {self.question[:15] if not self.question  is None else None}>"
+        )
 
     @property
     def get_create_time_elapsed(self):
@@ -432,7 +554,7 @@ class Question(db.Model):
     @property
     def get_user_answer(self):
         if self.answered_by is None:
-            return ''
+            return ""
         return self.answered_by.name
 
     # @property
@@ -447,16 +569,15 @@ class Question(db.Model):
 
     @property
     def topic_name(self):
-        return ', '.join([_.name for _ in self.topics])
-
+        return ", ".join([_.name for _ in self.topics])
 
     @property
     def sub_topic_name(self):
-        return ', '.join([_.name for _ in self.sub_topics])
+        return ", ".join([_.name for _ in self.sub_topics])
 
     @property
     def is_support(self):
-        return 'Suporte' in [_.name for _ in self.topics]
+        return "Suporte" in [_.name for _ in self.topics]
 
     @hybrid_property
     def answer(self):
@@ -466,17 +587,17 @@ class Question(db.Model):
     def is_approved_to(self):
         if self.answer_approved == True:
             return "Sim"
-        return 'Não'
+        return "Não"
 
     @property
     def is_active(self):
         if self.active == True:
-            return 'Sim'
-        return 'Não'
+            return "Sim"
+        return "Não"
 
     @property
     def process_answer(self):
-        if self._answer != '' or self._answer != None:
+        if self._answer != "" or self._answer != None:
             return process_value(self._answer, Question)
         return self._answer
 
@@ -485,12 +606,11 @@ class Question(db.Model):
         return self._answer
         # return self._answer
 
-    def has_topic(self, topic : Topic = None):
+    def has_topic(self, topic: Topic = None):
         # TODO
         if topic is None:
-            raise Exception('Topico não pode ser vazio')
+            raise Exception("Topico não pode ser vazio")
         return topic in self.topics.all()
-
 
     @answer.setter
     def answer(self, answer):
@@ -498,51 +618,82 @@ class Question(db.Model):
         self.answer_approved = False
         if self.answer_user_id is None:
             raise Exception(
-                '´answer_user_id´ deve ser informado para responder uma questão')
-
+                "´answer_user_id´ deve ser informado para responder uma questão"
+            )
 
     @staticmethod
-    def search(expression, pagination=False, per_page=1, page=1, resume=False, sub_topics: list = [], topics: list = []):
+    def search(
+        expression,
+        pagination=False,
+        per_page=1,
+        page=1,
+        resume=False,
+        sub_topics: list = [],
+        topics: list = [],
+    ):
         # result = (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal')).label('similarity')).order_by(desc('similarity')))
         if not sub_topics:
-            raise Exception('sub_topics não pode ser vazio')
+            raise Exception("sub_topics não pode ser vazio")
         # if not topics:
         #     raise Exception('topics não pode ser vazio')
         if resume:
-            result = (db.session.query(Question.question, (
-                func.ts_rank_cd(
-                    Question.search_vector(cache_ok=True),
-                    func.plainto_tsquery(
-                        'public.pt',
-                        expression))).label(
-                            'similarity')).filter((
-                                func.ts_rank_cd(
-                                    Question.search_vector,
-                                    func.plainto_tsquery(
-                                        'public.pt',
-                                        expression))) > 0)  # .order_by(
-                      # desc('similarity'))
-                      )
+            result = (
+                db.session.query(
+                    Question.question,
+                    (
+                        func.ts_rank_cd(
+                            Question.search_vector(cache_ok=True),
+                            func.plainto_tsquery("public.pt", expression),
+                        )
+                    ).label("similarity"),
+                ).filter(
+                    (
+                        func.ts_rank_cd(
+                            Question.search_vector,
+                            func.plainto_tsquery("public.pt", expression),
+                        )
+                    )
+                    > 0
+                )  # .order_by(
+                # desc('similarity'))
+            )
         else:
-            result = (db.session.query(Question, (
-                func.ts_rank_cd(
-                    Question.search_vector,
-                    func.plainto_tsquery(
-                        'public.pt',
-                        expression))).label(
-                            'similarity')).filter((
-                                func.ts_rank_cd(
-                                    Question.search_vector, func.plainto_tsquery('public.pt', expression))) > 0)  # .order_by(
-                      # desc('similarity'))
-                      )
+            result = (
+                db.session.query(
+                    Question,
+                    (
+                        func.ts_rank_cd(
+                            Question.search_vector,
+                            func.plainto_tsquery("public.pt", expression),
+                        )
+                    ).label("similarity"),
+                ).filter(
+                    (
+                        func.ts_rank_cd(
+                            Question.search_vector,
+                            func.plainto_tsquery("public.pt", expression),
+                        )
+                    )
+                    > 0
+                )  # .order_by(
+                # desc('similarity'))
+            )
         if not topics:
-            result = result.join(SubTopic.questions).filter(SubTopic.id.in_(
-                [_.id for _ in sub_topics]))
+            result = result.join(SubTopic.questions).filter(
+                SubTopic.id.in_([_.id for _ in sub_topics])
+            )
         else:
-            result = result.join(SubTopic.questions).filter(SubTopic.id.in_(
-                [_.id for _ in sub_topics])).join(Question.topics).filter(
-                    Topic.id.in_([_.id for _ in topics]))
-        result = result.join(QuestionView).group_by(Question).order_by(func.count(QuestionView.id).desc())
+            result = (
+                result.join(SubTopic.questions)
+                .filter(SubTopic.id.in_([_.id for _ in sub_topics]))
+                .join(Question.topics)
+                .filter(Topic.id.in_([_.id for _ in topics]))
+            )
+        result = (
+            result.join(QuestionView)
+            .group_by(Question)
+            .order_by(func.count(QuestionView.id).desc())
+        )
         if pagination:
             result = result.paginate(page=page, per_page=per_page)
         return result
@@ -559,7 +710,7 @@ class Question(db.Model):
     def add_view(self, user_id, network_id):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
-            raise Exception('Usuário informado não existe')
+            raise Exception("Usuário informado não existe")
         # qv = QuestionView.query.filter(QuestionView.question_id==self.id, QuestionView.user_id==user.id).first()
         qv = QuestionView()
 
@@ -582,20 +733,20 @@ class Question(db.Model):
         try:
             db.session.commit()
         except Exception as e:
-            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização', category='warning')
+            flash("Não foi possível atualizar a visualização", category="warning")
         return qv
 
     def add_like(self, user_id):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
-            raise Exception('Usuário informado não existe')
+            raise Exception("Usuário informado não existe")
         ql = QuestionLike.query.filter(QuestionLike.question_id == self.id)
         like_user = ql.filter(QuestionLike.user_id == user_id).first()
         if not like_user is None:
-            flash('Questão já curtida', category='info')
+            flash("Questão já curtida", category="info")
         ql = ql.first()
         if ql is None or like_user is None:
             ql = QuestionLike()
@@ -606,40 +757,40 @@ class Question(db.Model):
             try:
                 db.session.commit()
             except Exception as e:
-                app.logger.error(app.config.get(
-                    '_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
                 app.logger.error(e)
                 db.session.rollback()
-                flash('Não foi possível atualizar a visualização',
-                      category='warning')
+                flash("Não foi possível atualizar a visualização", category="warning")
                 return False
         return ql
 
     def remove_like(self, user_id):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
-            raise Exception('Usuário informado não existe')
+            raise Exception("Usuário informado não existe")
         ql = QuestionLike.query.filter(
-            QuestionLike.question_id == self.id, QuestionLike.user_id == user_id).first()
+            QuestionLike.question_id == self.id, QuestionLike.user_id == user_id
+        ).first()
         if ql is None:
-            raise Exception('Questão não foi curtida')
+            raise Exception("Questão não foi curtida")
         db.session.delete(ql)
         try:
             db.session.commit()
         except Exception as e:
-            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização', category='warning')
+            flash("Não foi possível atualizar a visualização", category="warning")
             return false
         return True
 
     def is_liked(self, user_id):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
-            raise Exception('Usuários informado não existe')
+            raise Exception("Usuários informado não existe")
         ql = QuestionLike.query.filter(
-            QuestionLike.question_id == self.id, QuestionLike.user_id == user.id).first()
+            QuestionLike.question_id == self.id, QuestionLike.user_id == user.id
+        ).first()
         if ql is None:
             return False
         return True
@@ -647,11 +798,11 @@ class Question(db.Model):
     def add_save(self, user_id):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
-            raise Exception('Usuário informado não existe')
+            raise Exception("Usuário informado não existe")
         qs = QuestionSave.query.filter(QuestionSave.question_id == self.id)
         save_user = qs.filter(QuestionSave.user_id == user_id).first()
         if not save_user is None:
-            flash('Questão já salva', category='info')
+            flash("Questão já salva", category="info")
         qs = qs.first()
         if qs is None or save_user is None:
             qs = QuestionSave()
@@ -663,54 +814,60 @@ class Question(db.Model):
                 db.session.commit()
 
             except Exception as e:
-                app.logger.error(app.config.get(
-                    '_ERRORS').get('DB_COMMIT_ERROR'))
+                app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
                 app.logger.error(e)
                 db.session.rollback()
-                flash('Não foi possível atualizar a visualização',
-                      category='warning')
+                flash("Não foi possível atualizar a visualização", category="warning")
                 return False
         return qs
 
     def remove_save(self, user_id):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
-            raise Exception('Usuário informado não existe')
+            raise Exception("Usuário informado não existe")
         qs = QuestionSave.query.filter(
-            QuestionSave.question_id == self.id, QuestionSave.user_id == user_id).first()
+            QuestionSave.question_id == self.id, QuestionSave.user_id == user_id
+        ).first()
         if qs is None:
-            raise Exception('Questão não foi curtida')
+            raise Exception("Questão não foi curtida")
         db.session.delete(qs)
         try:
             db.session.commit()
         except Exception as e:
-            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
             app.logger.error(e)
             db.session.rollback()
-            flash('Não foi possível atualizar a visualização', category='warning')
+            flash("Não foi possível atualizar a visualização", category="warning")
             return false
         return True
 
     def is_saved(self, user_id):
         user = User.query.filter(User.id == user_id).first()
         if user is None:
-            raise Exception('Usuários informado não existe')
+            raise Exception("Usuários informado não existe")
         qs = QuestionSave.query.filter(
-            QuestionSave.question_id == self.id, QuestionSave.user_id == user.id).first()
+            QuestionSave.question_id == self.id, QuestionSave.user_id == user.id
+        ).first()
         if qs is None:
             return False
         return True
 
     @property
     def views(self):
-        count_views = db.session.query(func.count(QuestionView.id)).filter(
-            QuestionView.question_id == self.id).scalar()
+        count_views = (
+            db.session.query(func.count(QuestionView.id))
+            .filter(QuestionView.question_id == self.id)
+            .scalar()
+        )
         return 0 if count_views is None else count_views
 
     @property
     def likes(self):
-        count_likes = db.session.query(func.sum(QuestionLike.question_id)).filter(
-            QuestionLike.question_id == self.id).scalar()
+        count_likes = (
+            db.session.query(func.sum(QuestionLike.question_id))
+            .filter(QuestionLike.question_id == self.id)
+            .scalar()
+        )
         return 0 if count_likes is None else count_likes
 
     @property
@@ -724,19 +881,31 @@ class Question(db.Model):
     @property
     def was_answered_to(self):
         if self.answer != None:
-            return 'Sim'
-        return 'Não'
+            return "Sim"
+        return "Não"
 
     @staticmethod
     def most_viewed(limit=5, topic: Topic = None):
         try:
             if topic is None:
                 return []
-            rs = db.session.query(Question, func.count(QuestionView.id).label('views')).join(
-                Question.view).join(Question.topics).group_by(Question).order_by(text('views DESC')).filter(Question.answer != None, Question.answer_approved == True, Topic.id == topic.id).limit(limit).all()
+            rs = (
+                db.session.query(Question, func.count(QuestionView.id).label("views"))
+                .join(Question.view)
+                .join(Question.topics)
+                .group_by(Question)
+                .order_by(text("views DESC"))
+                .filter(
+                    Question.answer != None,
+                    Question.answer_approved == True,
+                    Topic.id == topic.id,
+                )
+                .limit(limit)
+                .all()
+            )
         except Exception as e:
             db.session.rollback()
-            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
             app.logger.error(e)
             return []
         return [x[0] for x in rs if x != None]
@@ -746,11 +915,23 @@ class Question(db.Model):
         try:
             if topic is None:
                 return []
-            rs = db.session.query(Question, func.count(QuestionLike.id).label('likes')).join(
-                Question.like).join(Question.topics).group_by(Question).order_by(text('likes DESC')).filter(Question.answer != None, Question.answer_approved == True, Topic.id == topic.id).limit(limit).all()
+            rs = (
+                db.session.query(Question, func.count(QuestionLike.id).label("likes"))
+                .join(Question.like)
+                .join(Question.topics)
+                .group_by(Question)
+                .order_by(text("likes DESC"))
+                .filter(
+                    Question.answer != None,
+                    Question.answer_approved == True,
+                    Topic.id == topic.id,
+                )
+                .limit(limit)
+                .all()
+            )
         except Exception as e:
             db.session.rollback()
-            app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
+            app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
             app.logger.error(e)
             return []
         if classification:
@@ -762,12 +943,14 @@ class Question(db.Model):
         if topic is None:
             return None
         user = User.query.filter(User.id == user_id).first_or_404()
-        rs = db.session.query(Question).join(
-            QuestionLike.question).filter(
-                QuestionLike.user_id == user.id
-                ).join(Question.topics
-                ).filter(Topic.id == topic.id
-                ).order_by(Question.create_at.desc())
+        rs = (
+            db.session.query(Question)
+            .join(QuestionLike.question)
+            .filter(QuestionLike.user_id == user.id)
+            .join(Question.topics)
+            .filter(Topic.id == topic.id)
+            .order_by(Question.create_at.desc())
+        )
         return rs
 
     @staticmethod
@@ -775,46 +958,83 @@ class Question(db.Model):
         if topic is None:
             return None
         user = User.query.filter(User.id == user_id).first_or_404()
-        rs = db.session.query(Question).filter(Question.topic_id == topic.id).join(
-            QuestionSave.question).filter(
-                QuestionSave.user_id == user.id).order_by(Question.create_at.desc())
+        rs = (
+            db.session.query(Question)
+            .filter(Question.topic_id == topic.id)
+            .join(QuestionSave.question)
+            .filter(QuestionSave.user_id == user.id)
+            .order_by(Question.create_at.desc())
+        )
         return rs
 
     def get_body_html(self, resume=False, size=1500):
-        html_classes = {'table': 'table table-bordered',
-                        'img': 'img img-fluid'}
+        html_classes = {"table": "table table-bordered", "img": "img img-fluid"}
         if resume:
-            l_text = list(filter(lambda x: x not in [
-                          '', ' ', '\t'], self.process_answer.split('\n')))
+            l_text = list(
+                filter(
+                    lambda x: x not in ["", " ", "\t"], self.process_answer.split("\n")
+                )
+            )
             # text = get_list_max_len(l_text, 256)
-            return Markup(process_html(markdown('\n'.join(l_text), extras={"tables": None, "html-classes": html_classes, 'target-blank-links':True}))).striptags()[0:size] + '...'
+            return (
+                Markup(
+                    process_html(
+                        markdown(
+                            "\n".join(l_text),
+                            extras={
+                                "tables": None,
+                                "html-classes": html_classes,
+                                "target-blank-links": True,
+                            },
+                        )
+                    )
+                ).striptags()[0:size]
+                + "..."
+            )
             # return Markup(process_html(markdown(text))).striptags()
 
-        return Markup(markdown(self.process_answer, extras={"tables": None, "html-classes": html_classes, 'target-blank-links':True}))
+        return Markup(
+            markdown(
+                self.process_answer,
+                extras={
+                    "tables": None,
+                    "html-classes": html_classes,
+                    "target-blank-links": True,
+                },
+            )
+        )
 
     def to_dict(self):
-        return {'id': self.id,
-                'question': self.get_body_html(),
-                'create_time_elapsed': self.get_create_time_elapsed,
-                'create_at': self.get_create_datetime,
-                # 'author': self.author.name,
-                'update_at': self.get_update_time_elapsed if self.was_updated() else None,
-                # 'updater': self.updater.name if self.was_updated() else None,
-                'answer': self.get_body_html() if self.was_answered else None,
-                # 'answered_by': self.answered_by.name if self.was_answered else None,
-                'answered_at': self.get_answer_approved_time_elapsed if self.was_answered else None,
-                'topics': [x.name for x in self.topics], #self.topic.name if not self.topic is None else None,
-                'tags': [x.name for x in self.tags],
-                'views': self.views
-                }
+        return {
+            "id": self.id,
+            "question": self.get_body_html(),
+            "create_time_elapsed": self.get_create_time_elapsed,
+            "create_at": self.get_create_datetime,
+            # 'author': self.author.name,
+            "update_at": self.get_update_time_elapsed if self.was_updated() else None,
+            # 'updater': self.updater.name if self.was_updated() else None,
+            "answer": self.get_body_html() if self.was_answered else None,
+            # 'answered_by': self.answered_by.name if self.was_answered else None,
+            "answered_at": self.get_answer_approved_time_elapsed
+            if self.was_answered
+            else None,
+            "topics": [
+                x.name for x in self.topics
+            ],  # self.topic.name if not self.topic is None else None,
+            "tags": [x.name for x in self.tags],
+            "views": self.views,
+        }
 
     @staticmethod
     def query_by_month_year(year: int, month: int):
-        return Question.query.filter(extract('year', Question.create_at) == year, extract('month', Question.create_at) == month)
+        return Question.query.filter(
+            extract("year", Question.create_at) == year,
+            extract("month", Question.create_at) == month,
+        )
 
     @staticmethod
     def query_by_year(year: int):
-        return Question.query.filter(extract('year', Question.create_at) == year)
+        return Question.query.filter(extract("year", Question.create_at) == year)
 
     @staticmethod
     def query_by_date(date: date):
@@ -822,45 +1042,60 @@ class Question(db.Model):
 
     @staticmethod
     def query_by_interval(start: date, end: date):
-        return Question.query.filter(cast(Question.create_at, Date) == start, cast(Question.create_at, Date) == end)
+        return Question.query.filter(
+            cast(Question.create_at, Date) == start,
+            cast(Question.create_at, Date) == end,
+        )
 
     @staticmethod
-    def count_by_topic(topic: str = ''):
-        if topic == '':
-            raise ValueError('topic não pode ser vazio')
+    def count_by_topic(topic: str = ""):
+        if topic == "":
+            raise ValueError("topic não pode ser vazio")
         return Question.query.filter(Topic.name == topic).count()
 
 
 class QuestionView(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer,  db.ForeignKey(
-        'user.id', onupdate="CASCADE", ondelete="CASCADE"))
-    question_id = db.Column(db.Integer, db.ForeignKey(
-        'question.id'), nullable=False)
-    datetime = db.Column(db.DateTime(timezone=True), index=True, default=convert_datetime_to_local)
-    network_id = db.Column(db.Integer, db.ForeignKey(
-        'network.id'), nullable=False)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id", onupdate="CASCADE", ondelete="CASCADE")
+    )
+    question_id = db.Column(db.Integer, db.ForeignKey("question.id"), nullable=False)
+    datetime = db.Column(
+        db.DateTime(timezone=True), index=True, default=convert_datetime_to_local
+    )
+    network_id = db.Column(db.Integer, db.ForeignKey("network.id"), nullable=False)
 
     # last_view = db.Column(db.DateTime, index=True, nullable=False)
     # count_view = db.Column(db.Integer, default=1)
 
     def __repr__(self):
-        return f'<Question View id: {self.question_id} by {self.user_id}>'
+        return f"<Question View id: {self.question_id} by {self.user_id}>"
 
     def views_by_question(self, question_id: int):
-        return db.session.query(func.count(self.id)).filter(self.question_id == question_id).scalar()
+        return (
+            db.session.query(func.count(self.id))
+            .filter(self.question_id == question_id)
+            .scalar()
+        )
 
     def views_by_user(self, user_id: int):
-        return db.session.query(func.count(self.id)).filter(self.user_id == user_id).scalar()
+        return (
+            db.session.query(func.count(self.id))
+            .filter(self.user_id == user_id)
+            .scalar()
+        )
 
     @staticmethod
     def query_by_month_year(year: int, month: int):
-        return QuestionView.query.filter(extract('year', QuestionView.datetime) == year, extract('month', QuestionView.datetime) == month)
+        return QuestionView.query.filter(
+            extract("year", QuestionView.datetime) == year,
+            extract("month", QuestionView.datetime) == month,
+        )
 
     @staticmethod
     def query_by_year(year: int):
-        return QuestionView.query.filter(extract('year', QuestionView.datetime) == year)
+        return QuestionView.query.filter(extract("year", QuestionView.datetime) == year)
 
     @staticmethod
     def query_by_date(date: date):
@@ -868,20 +1103,24 @@ class QuestionView(db.Model):
 
     @staticmethod
     def query_by_interval(start: date, end: date):
-        return QuestionView.query.filter(cast(QuestionView.datetime, Date) == start, cast(QuestionView.datetime, Date) == end)
+        return QuestionView.query.filter(
+            cast(QuestionView.datetime, Date) == start,
+            cast(QuestionView.datetime, Date) == end,
+        )
 
 
 class QuestionLike(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    question_id = db.Column(db.Integer, db.ForeignKey(
-        'question.id'), nullable=False)
-    create_at = db.Column(db.DateTime, nullable=False, default=convert_datetime_to_local)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    question_id = db.Column(db.Integer, db.ForeignKey("question.id"), nullable=False)
+    create_at = db.Column(
+        db.DateTime, nullable=False, default=convert_datetime_to_local
+    )
     # user_like = db.relationship()
 
     def __repr__(self):
-        return f'<Question Like id: {self.question_id} by {self.user_id}>'
+        return f"<Question Like id: {self.question_id} by {self.user_id}>"
 
     def likes_by_user(self, question_id: int):
         return self.query.filter(self.question_id == question_id).count()
@@ -893,13 +1132,14 @@ class QuestionLike(db.Model):
 class QuestionSave(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    question_id = db.Column(db.Integer, db.ForeignKey(
-        'question.id'), nullable=False)
-    create_at = db.Column(db.DateTime, nullable=False, default=convert_datetime_to_local)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    question_id = db.Column(db.Integer, db.ForeignKey("question.id"), nullable=False)
+    create_at = db.Column(
+        db.DateTime, nullable=False, default=convert_datetime_to_local
+    )
 
     def __repr__(self):
-        return f'<Question Like id: {self.question_id} by {self.user_id}>'
+        return f"<Question Like id: {self.question_id} by {self.user_id}>"
 
     def saves_by_user(self, question_id: int):
         return self.query.filter(self.question_id == question_id).count()
@@ -907,14 +1147,15 @@ class QuestionSave(db.Model):
     def saves_by_user(self, user_id: int):
         return self.query.filter(self.question_id == user_id).count()
 
+
 class QuestionChanges(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     create_at = db.Column(db.DateTime, index=False, default=datetime.utcnow)
-    change_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    change_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     old_answer = db.Column(db.Text, index=False, nullable=False, unique=False)
     new_answer = db.Column(db.Text, index=False, nullable=False, unique=False)
-    
+
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -922,20 +1163,30 @@ class Transaction(db.Model):
     parameter = db.Column(db.String(64), nullable=True)
     option = db.Column(db.String(10))
     description = db.Column(db.String)
-    create_at = db.Column(db.DateTime(timezone=True), index=False, default=convert_datetime_to_local)
-    created_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    edit_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    sub_topics = db.relationship('SubTopic', 
-                                secondary=transaction_sub_topic, 
-                                backref=db.backref('transactions', 
-                                                    lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
-    topics = db.relationship('Topic',
-                             secondary=transaction_topic,
-                             backref=db.backref('transactions',
-                                                lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
+    create_at = db.Column(
+        db.DateTime(timezone=True), index=False, default=convert_datetime_to_local
+    )
+    created_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    edit_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    sub_topics = db.relationship(
+        "SubTopic",
+        secondary=transaction_sub_topic,
+        backref=db.backref(
+            "transactions", lazy="dynamic", cascade="save-update", single_parent=True
+        ),
+        lazy="dynamic",
+    )
+    topics = db.relationship(
+        "Topic",
+        secondary=transaction_topic,
+        backref=db.backref(
+            "transactions", lazy="dynamic", cascade="save-update", single_parent=True
+        ),
+        lazy="dynamic",
+    )
 
     def __repr__(self):
-        return f'<{self.transaction}>'
+        return f"<{self.transaction}>"
 
 
 # TESTE
@@ -984,8 +1235,3 @@ class Transaction(db.Model):
 # (db.session.query(Article, (func.strict_word_similarity(Article.search_vector.op('@@')(func.to_tsquery('principal'), 'principal')).label('sml'))).order_by(desc('sml'))).all()
 
 # (db.session.query(Article, (func.strict_word_similarity(Article.text, 'principal variantes sobre tempo exemplo')).label('sml'))).order_by(desc('sml')).all()
-
-
-
-
-
