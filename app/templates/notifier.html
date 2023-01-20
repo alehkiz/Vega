@@ -21,7 +21,7 @@
             <div class="row">
 
                 <div class="mt-2">
-                    {% for topic in notice.topics_name%}
+                    {% for topic in notice.topics_name.split(',') %}
                     <span class="badge bg-info mt-0 float-start">{{topic}}</span>
                     {% endfor %}
                     <a class="edit text-decoration-none float-end" id="edit_34170"

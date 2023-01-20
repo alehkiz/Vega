@@ -73,6 +73,44 @@ h6 {
     margin-bottom: 10px !important;
 }
 
+
+
+.history-article-title {
+    margin-top: 30px;
+    margin-bottom: 0;
+    font-size: 1.5em;
+    font-weight: 200;
+}
+
+.history-article-description {
+    font-size: 10px;
+    color: #999
+}
+
+.history-article-meta {
+    margin-bottom: 0;
+    color: #999;
+    font-size: 60% !important;
+}
+
+.history-article-text {
+    /* font-size: 18px; */
+    padding-top: 0.5rem;
+    line-height: 1.0em;
+    font-size: 0.8em;
+}
+
+.history-article.tag {
+    margin-bottom: 0;
+    color: #999;
+    font-size: xx-small;
+}
+
+.history-article-post {
+    margin-bottom: 2rem;
+}
+
+
 .nounderline {
     text-decoration: none !important
 }
@@ -498,4 +536,32 @@ i.fas.circle:hover {
 
 .overlay {
     z-index: 9999;
+}
+
+
+
+
+/* DARK MODE */
+
+.darkbackground {
+    background-color: rgb(46, 45, 49);
+    transition: .30s;
+    color: rgb(94, 94, 94);
+}
+
+.darkmodebtn {
+    font-size: 1.50rem;
+    padding: 0.5rem 0.85rem;
+    background-color: rgba(47, 128, 237, 1);
+    outline: none;
+    border: 0;
+    border-radius: 20px;
+    color: white;
+    position: fixed;
+    bottom: 60px;
+    left: 20px;
+}
+
+.darkmodebtn:focus {
+    outline: none;
 }

@@ -16,7 +16,7 @@ render_pagination %}
 {% else %} {% include '_question.html' %} {{ render_pagination(pagination, first_page, last_page, request.endpoint,
 url_arguments=url_arguments)}} {% endif %} {% endif %} {% endif %} {% if mode == 'views' %}
 
-<div class="btn-group btn-group-lg" role="group" aria-label="...">
+<div class="btn-group btn-group-lg bg-light" role="group" aria-label="...">
     {% for sub_topic in sub_topics %}
     <a href='{{ url_for(".index",  sub_topic=sub_topic.name, **url_arguments)}}'
         class="btn btn-primary rouded border">{{sub_topic.name}}</a> {% endfor %}
@@ -37,7 +37,7 @@ url_arguments=url_arguments)}} {% endif %} {% endif %} {% endif %} {% if mode ==
             {% if current_user.is_support %}
             <a class="edit text-decoration-none" id="edit_{{question.id}}" href="{{url_for('question.edit', id=question.id)}}" data-bs-toggle="tooltip" title="Editar">
                 <i class="fas fa-edit"></i></a>
-            {% if not question.was_approved %}
+            {% if not question.was_approved and current_user.is_admin %}
             <a class="edit text-decoration-none text-success"
             href="{{ url_for('question.approve', id=question.id)}}" data-bs-toggle="tooltip" title="Aprovar">
             <i class="fas fa-clipboard-check"></i></a>
@@ -60,16 +60,39 @@ url_arguments=url_arguments)}} {% endif %} {% endif %} {% endif %} {% if mode ==
     <div class="article-text">
         {{question.get_body_html()}}
     </div>
+    {% if current_user.is_authenticated %}
+        <div class='article-description'>Atualizado por {{question.updater.name}}</div>
+    {% endif %}
+
     {% if question.tag != none %}
     <br> {% for tag in question.tags %}
     <span class="badge bg-secondary"><a href="{{url_for('question.tag', name=tag.name)}}"
-            class="text-white">{{tag.name}}</a> </span> {% endfor %} {% endif %}
+            class="text-white">{{tag.name}}</a> </span> {% endfor %} 
+    {% endif %}
+    {% if question.topics != None %}
+    {% for topic in question.topics %}
+    <span class="badge bg-primary ms-2 float-end">{{topic.name}}</span>
+    {% endfor %}
+    {% endif %}
 </article>
+{% if question_history != none and current_user.is_authenticated%}
+<hr>
+{% for qh in question_history %}
+<div class="history-article-title">
+    {{qh.question}}
+</div>
+<div class="history-article-text">
+    {{qh.get_body_html()}}
+</div>
+<div class="history-article-description">Adicionado por {{qh.add_history.name}} em {{qh.get_history_at}}</div>
+<hr>
+{% endfor %}
+{% endif %}
 {% endif %} {% if mode == 'make_question' %} {% include 'create_question.html' %} {% endif %} {% endblock %} {% block
 scripts %} {{ super() }} {% if article == true %}
 <!-- <script src="{{url_for('static', filename='js/editormd/editormd.min.js')}}"></script> -->
 <script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}"></script>
-
+<script src="{{url_for('static', filename='js/marked/marked.min.js')}}"></script>
 <script type="text/javascript">
     var simplemde = new SimpleMDE({
         element: document.getElementById("text"),
@@ -81,7 +104,23 @@ scripts %} {{ super() }} {% if article == true %}
         shortcuts: {
             drawTable: "Cmd-Alt-T"
         },
-        showIcons: ["code", "table"]
+        showIcons: ["code", "table"],
+        previewRender: (plainText, previewArg) => {
+            const preview = previewArg;
+            setTimeout(() => {
+              preview.classList.add("bg-dark");
+              preview.classList.add("text-light");
+            }, 1);
+    
+            return marked.marked(plainText);
+          }
+        //previewRender: (plainText, previewArg) => {
+        //    const preview = previewArg;
+        //    setTimeout(() => {
+        //      preview.innerHTML = '<div class="content bg-dark">${marked(plainText)}</div>';
+        //    }, 1);
+        //    return `Loading...`;
+        //  }
     });
 </script>
 {% endif %} {% endblock %}

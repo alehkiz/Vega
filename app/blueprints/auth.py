@@ -9,7 +9,7 @@ from datetime import datetime
 from app.models.security import User
 from app.forms.login import LoginForm
 from app.forms.reset_password import ResetPassword
-from app.utils.kernel import convert_datetime_to_local
+from app.utils.kernel import convert_datetime_to_local, validate_password
 from app.utils.routes import counter
 from app.core.db import db
 
@@ -85,13 +85,23 @@ def temp_password():
             if not user.check_password(form.old_password.data):
                 # senha antiga não é igual a senha do usuário
                 message = 'Senha atual incorreta'
-                flash(message=message, category='danger')
-                return redirect(url_for('auth.login'))
+                # flash(message=message, category='danger')
+                form.old_password.errors.append(message)
+                return render_template('reset_password.html', form=form)
             if form.new_password.data == form.old_password.data:
                 # senha nova é igual a senha antiga.
                 message = "A nova senha deve ser diferente da senha anterior"
+                # flash(message=message, category='danger')
+                # return render_template('reset_password.html', form=form)
+                form.old_password.errors.append(message)
+                return render_template('reset_password.html', form=form)
+            _validate_password = validate_password(form.new_password.data)
+            if not _validate_password.get('ok', False) is True:
+                message = app.config['MSG_PASSWORD_VALIDATE']
                 flash(message=message, category='danger')
-                return redirect(url_for('auth.login'))
+                form.new_password.errors.append(message)
+                return render_template('reset_password.html', form=form)
+            print(validate_password(form.new_password.data))
             user.password = form.new_password.data
             user.temp_password = False
             try:

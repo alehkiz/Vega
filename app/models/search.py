@@ -13,16 +13,16 @@ class QuestionSearch(db.Model):
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'))
     search_id = db.Column(db.Integer, db.ForeignKey('search.id'))
     count_access = db.Column(db.Integer, default=1)
-    last_search = db.Column(db.DateTime, default=convert_datetime_to_local(datetime.utcnow()))
-    first_search = db.Column(db.DateTime, default=convert_datetime_to_local(datetime.utcnow()))
+    last_search = db.Column(db.DateTime, default=convert_datetime_to_local)
+    first_search = db.Column(db.DateTime, default=convert_datetime_to_local)
 
 class Search(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     text = db.Column(db.String(256), nullable=False, unique=True)
     # count_search = db.Column(db.Integer, default=1)
-    # search_date = db.Column(db.DateTime, default=convert_datetime_to_local(datetime.utcnow()))
-    # last_search = db.Column(db.DateTime, default=convert_datetime_to_local(datetime.utcnow()))
+    # search_date = db.Column(db.DateTime, default=convert_datetime_to_local)
+    # last_search = db.Column(db.DateTime, default=convert_datetime_to_local)
     # question_id = db.Column(db.Integer, db.ForeignKey('question.id'))
     dates = db.relationship('SearchDateTime', backref='search', lazy='dynamic', cascade='all, delete-orphan')
     def __repr__(self):
@@ -37,7 +37,7 @@ class Search(db.Model):
                 sdt.search_user_id = user.id
 
         sdt.search_id = self.id
-        sdt.search_datetime = convert_datetime_to_local(datetime.utcnow())
+        sdt.search_datetime = convert_datetime_to_local
         db.session.add(sdt)
         try:
             db.session.commit()
@@ -54,5 +54,5 @@ class SearchDateTime(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     search_id = db.Column(db.Integer, db.ForeignKey('search.id'), nullable=False)
     search_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-    search_datetime = db.Column(db.DateTime, default=convert_datetime_to_local(datetime.utcnow()))
+    search_datetime = db.Column(db.DateTime, default=convert_datetime_to_local)
     

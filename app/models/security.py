@@ -30,12 +30,12 @@ class User(UserMixin, db.Model):
     _password = db.Column(db.String(512), nullable=False)
     temp_password = db.Column(db.Boolean, nullable=False, default=True)
     about_me = db.Column(db.String(512))
-    last_seen = db.Column(db.DateTime, default=convert_datetime_to_local(datetime.utcnow()))
+    last_seen = db.Column(db.DateTime, default=convert_datetime_to_local)
     location = db.Column(db.String(128), nullable=True)
     active = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=convert_datetime_to_local(datetime.utcnow()))
+    created_at = db.Column(db.DateTime, default=convert_datetime_to_local)
     created_network_id = db.Column(db.Integer, db.ForeignKey('network.id'), nullable=False)
-    last_login_at = db.Column(db.DateTime, default=convert_datetime_to_local(datetime.utcnow()))
+    last_login_at = db.Column(db.DateTime, default=convert_datetime_to_local)
     last_login_network_id = db.Column(db.Integer, db.ForeignKey('network.id'))
     current_login_at = db.Column(db.DateTime, nullable=True)
     current_login_network_id = db.Column(db.Integer, db.ForeignKey('network.id'))
@@ -50,6 +50,7 @@ class User(UserMixin, db.Model):
     answers = db.relationship('Question', backref='answered_by', lazy='dynamic', foreign_keys='[Question.answer_user_id]')
     answers_approved = db.relationship('Question', backref='approved_by', lazy='dynamic', foreign_keys='[Question.answer_approve_user_id]')
     question_update = db.relationship('Question', backref='updater', lazy='dynamic', foreign_keys='[Question.update_user_id]')
+    question_add_history = db.relationship('QuestionHistory', backref='add_history', lazy='dynamic', foreign_keys='[QuestionHistory.add_history_user_id]')
     question_like = db.relationship('QuestionLike', backref='users_liked', lazy='dynamic', foreign_keys='[QuestionLike.user_id]')
     question_save = db.relationship('QuestionSave', backref='users_saved', lazy='dynamic', foreign_keys='[QuestionSave.user_id]')
     visits = db.relationship('Visit', backref='visitor', lazy='dynamic', foreign_keys='[Visit.user_id]')
@@ -227,7 +228,7 @@ class Role(RoleMixin, db.Model):
         return False
     @property
     def has_support(self):
-        if self.level in [0,2,3,4,5]:
+        if self.level in [0,2,3,4]:
             return True
         return False
 
@@ -239,7 +240,7 @@ class Role(RoleMixin, db.Model):
 
     @property
     def can_edit(self):
-        if self.level in [0, 2, 3]:
+        if self.level in [0, 2, 3, 4]:
             return True
         return False
 

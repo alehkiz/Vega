@@ -14,15 +14,17 @@ make_searchable(db.metadata, options={'regconfig': 'public.pt'})
 
 
 notifier_sub_topic = db.Table('notifier_sub_topic',
-                        db.Column('notifier_id', db.Integer, 
-                                    db.ForeignKey('notifier.id')),
-                        db.Column('sub_topic_id', db.Integer, db.ForeignKey('sub_topic.id'))
-                        )
+                              db.Column('notifier_id', db.Integer,
+                                        db.ForeignKey('notifier.id')),
+                              db.Column('sub_topic_id', db.Integer,
+                                        db.ForeignKey('sub_topic.id'))
+                              )
 
-notifier_topic = db.Table('notifier_topic', 
-                        db.Column('notifier_id', db.Integer, 
+notifier_topic = db.Table('notifier_topic',
+                          db.Column('notifier_id', db.Integer,
                                     db.ForeignKey('notifier.id')),
-                        db.Column('topic_id', db.Integer, db.ForeignKey('topic.id')))
+                          db.Column('topic_id', db.Integer, db.ForeignKey('topic.id')))
+
 
 class Notifier(db.Model):
     __searchable__ = ['title', 'content']
@@ -37,7 +39,7 @@ class Notifier(db.Model):
     level_id = db.Column(db.Integer, db.ForeignKey(
         'notifier_level.id'), nullable=False)
     create_at = db.Column(db.DateTime(timezone=True), index=False,
-                          default=convert_datetime_to_local(datetime.utcnow()))
+                          default=convert_datetime_to_local)
     closed_at = db.Column(db.DateTime, index=False,
                           nullable=True)
     created_user_id = db.Column(
@@ -46,9 +48,9 @@ class Notifier(db.Model):
                              secondary=notifier_topic,
                              backref=db.backref('notifications',
                                                 lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
-    sub_topics = db.relationship('SubTopic', 
-                                secondary=notifier_sub_topic, 
-                                backref=db.backref('notifications', 
+    sub_topics = db.relationship('SubTopic',
+                                 secondary=notifier_sub_topic,
+                                 backref=db.backref('notifications',
                                                     lazy='dynamic', cascade='save-update', single_parent=True), lazy='dynamic')
     created_network_id = db.Column(
         db.Integer, db.ForeignKey('network.id'), nullable=False)
@@ -66,6 +68,7 @@ class Notifier(db.Model):
     def get_content_text(self):
         html = bs(self.content)
         return html.get_text()
+
     @property
     def topics_name(self, as_string=True):
         if not self.topics.all():
@@ -73,6 +76,7 @@ class Notifier(db.Model):
         if as_string == True:
             return ', '.join([x.name for x in self.topics.all()])
         return [x.name for x in self.topics.all()]
+
     @property
     def sub_topics_name(self, as_string=True):
         if not self.topics.all():
@@ -80,16 +84,19 @@ class Notifier(db.Model):
         if as_string == True:
             return ', '.join([x.name for x in self.sub_topics.all()])
         return [x.name for x in self.sub_topics.all()]
+
     @property
     def priority_name(self):
         if self.priority is None:
             return None
         return self.priority.priority
+
     @property
     def level_translate_name(self):
         if self.level is None:
             return None
         return self.level.level_translate
+
     @property
     def level_bootstrap_name(self):
         if self.level is None:
@@ -111,6 +118,7 @@ class Notifier(db.Model):
     @property
     def get_autoload(self):
         return "Sim" if self.autoload else "Não"
+
     def get_body_html(self, resume=False, size=1500):
         html_classes = {'table': 'table table-bordered',
                         'img': 'img img-fluid'}
@@ -118,11 +126,12 @@ class Notifier(db.Model):
             l_text = list(filter(lambda x: x not in [
                           '', ' ', '\t'], self.content.split('\n')))
             # text = get_list_max_len(l_text, 256)
-            return Markup(process_html(markdown('\n'.join(l_text), 
-                                            extras={"tables": None, "html-classes": html_classes, 'target-blank-links':True}))).striptags()[0:size] + '...'
+            return Markup(process_html(markdown('\n'.join(l_text),
+                                                extras={"tables": None, "html-classes": html_classes, 'target-blank-links': True}))).striptags()[0:size] + '...'
             # return Markup(process_html(markdown(text))).striptags()
 
-        return Markup(markdown(self.content, extras={"tables": None, "html-classes": html_classes, 'target-blank-links':True}))
+        return Markup(markdown(self.content, extras={"tables": None, "html-classes": html_classes, 'target-blank-links': True}))
+
     @property
     def to_dict(self):
         return {
@@ -132,7 +141,7 @@ class Notifier(db.Model):
             'status': self.status_name,
             'level': self.level_bootstrap_name,
             'priority_order': self.priority_order,
-            'url' : url_for('api.notification', id=self.id),
+            'url': url_for('api.notification', id=self.id),
             'subtopic': '' if self.sub_topics.first() is None else self.sub_topics.first().name
         }
 
@@ -149,6 +158,7 @@ class Notifier(db.Model):
             'created_elapsed_time': self.get_create_time_elapsed,
             'subtopic': '' if self.sub_topics.first() is None else self.sub_topics.first().name
         }
+
     def __repr__(self) -> str:
         return super().__repr__()
 
@@ -164,6 +174,7 @@ class NotifierPriority(db.Model):
     priority = db.Column(db.String(32), nullable=False)
     order = db.Column(db.Integer, nullable=False)
     notices = db.relationship('Notifier', backref='priority', lazy='dynamic')
+
 
 class NotifierLevel(db.Model):
     id = db.Column(db.Integer, primary_key=True)

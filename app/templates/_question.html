@@ -13,7 +13,7 @@
     {% elif question.topics.filter_by(_name = 'Atendimento - Linha de Frente').count() >= 1 %}
         {% set bg_color = 'text-dark fw-bold' %}
     {% endif %}#}
-    <div class="accordion-item">
+    <div class="accordion-item bg-light text-dark">
         <h2 class="accordion-header" id="flush-heading_{{question.id}}">
             <button id='button-accordion-{{question.id}}' class="accordion-button collapsed {{ 'text-secondary fw-bold' if question.is_support else 'text-success fw-bold' }} rounded-2" type="button" data-bs-toggle="collapse"
                 data-bs-target="#flush-collapse_{{question.id}}" aria-expanded="false" aria-labelledby="flush-heading_{{question.id}}"

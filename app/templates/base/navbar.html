@@ -70,7 +70,7 @@
                         {% endif %}
                     </ul>
                 </div>
-
+                
             </ul>
             {% if config.get('MODE', False) == 'dev' %}
 
@@ -161,15 +161,16 @@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item" href='{{url_for("admin.notifier")}}'>Notificações</a></li>
                         {% endif %}
+                        <li><a class="dropdown-item" href='{{url_for("admin.notifier")}}'>Notificações</a></li>
+                        
                         <hr class="dropdown-divider">
                         <li><a class="dropdown-item" href='{{url_for("admin.file")}}'>Upload</a></li>
                         {% if config.get('MODE', False) == 'dev' %}
                         <!-- #TODO apenas em DEV -->
                         <hr class="dropdown-divider">
                         
-
+                        
                         {% endif %}
 
                     </ul>
@@ -205,7 +206,7 @@
 
                 {% endif %}
 
-
+                teste
 
 
 
@@ -215,7 +216,7 @@
         </div>
 
     </div>
-
+    
 </nav>
 
 

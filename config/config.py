@@ -284,6 +284,8 @@ class BaseConfig(object):
     MAX_CONTENT_LENGTH = 31457280 #20MB
     UPLOAD_EXTENSIONS = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'xlsx', 'xls']
 
+    MSG_PASSWORD_VALIDATE = '''Senha deve conter mais que 6 caracteres, pelo menos um número, pelo menos uma letra maiúscula e pelo menos uma letra minúscula'''
+
 class DevelopmentConfig(BaseConfig):
     # SQLALCHEMY_DATABASE_URI = f'sqlite:///{BaseConfig.DEV_DB}'
     SQLALCHEMY_DATABASE_URI = f'postgresql://{BaseConfig._SQLALCHEMY_DATABASE_USERNAME}:{BaseConfig._SQLALCHEMY_DATABASE_PASSWORD}@{BaseConfig._SQLALCHEMY_DATABASE_HOST}:{BaseConfig._SQLALCHEMY_DATABASE_PORT}/{BaseConfig._SQLALCHEMY_DATABASE_NAME}'

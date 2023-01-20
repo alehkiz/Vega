@@ -45,8 +45,8 @@
 
         {% elif question  is defined%}
         {{ form.csrf_token}}
-        {{ macros.render_field(form.question, style="height: 120px;", class='form-control', placeholder='Pergunta')}}
-        {{ macros.render_field(form.answer, size=256, class='form-control', placeholder='Reposta')}}
+        {{ macros.render_field(form.question, style="height: 120px;", class='form-control bg-light text-dark', placeholder='Pergunta')}}
+        {{ macros.render_field(form.answer, size=256, class='form-control bg-light text-dark', placeholder='Reposta')}}
         {{ macros.render_field(form.tag, class='form-select', class='selectpicker', nolabel=true, multiple=true, **{'data-style':"btn-primary", 'data-selected-text-format':"count", "data-live-search":"true", "data-size":"5", 'data-width':"auto"})}}
         <br>
         <br>
@@ -163,7 +163,7 @@
 {{ super() }}
 
 <script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}" {#nonce="{{ csp_nonce() }}"#}></script>
-
+<script src="{{url_for('static', filename='js/marked/marked.min.js')}}"></script>
 <script type="text/javascript" {#nonce="{{ csp_nonce() }}#}">
 
     
@@ -188,7 +188,16 @@
         shortcuts: {
             drawTable: "Cmd-Alt-T"
         },
-        showIcons: ["code", "table"]
+        showIcons: ["code", "table"],
+        previewRender: (plainText, previewArg) => {
+            const preview = previewArg;
+            setTimeout(() => {
+              preview.classList.add("bg-dark");
+              preview.classList.add("text-light");
+            }, 1);
+    
+            return marked.marked(plainText);
+          }
     });
 </script>
 

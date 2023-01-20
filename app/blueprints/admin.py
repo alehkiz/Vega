@@ -61,7 +61,7 @@ def users():
     else:
         column = User.id
         column_type = column.desc
-    u = User.query.filter(User.active == True).order_by(column_type())
+    u = User.query.order_by(column_type())#filter(User.active == True) Todos os usuários
     paginate = u.paginate(page, app.config.get(
         "TABLE_ITEMS_PER_PAGE", 10), False)
     # paginate = User.query.paginate(page, app.config.get('TABLE_ITEMS_PER_PAGE', 10), False)
@@ -641,7 +641,7 @@ def tag():
 
 @bp.route('/notifier')
 @login_required
-@roles_accepted('admin')
+@roles_accepted('admin', 'support')
 def notifier():
     page = request.args.get("page", 1, type=int)
     order = request.args.get("order", False)

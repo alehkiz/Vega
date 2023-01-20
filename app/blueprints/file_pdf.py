@@ -128,7 +128,7 @@ def add():
                 flash('Arquivo enviado com sucesso', category='success')
                 if current_user.is_admin:
                     return redirect(url_for('file_pdf.edit', id=file.id))
-                return redirect(url_for('file_pdf.viewer'))
+                return redirect(url_for('file_pdf.viewer', id=file.id))
             except Exception as e:
                 db.session.rollback()
                 app.logger.error(f"Erro ao salvar no banco de dados: {e}")

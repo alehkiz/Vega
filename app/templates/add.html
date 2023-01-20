@@ -149,7 +149,7 @@
 
 <!-- <script src="{{url_for('static', filename='js/editormd/editormd.min.js')}}"></script> -->
 <script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}"></script>
-
+<script src="{{url_for('static', filename='js/marked/marked.min.js')}}"></script>
 <script type="text/javascript">
     
     element = document.getElementById("text");
@@ -159,7 +159,7 @@
     {% if notifier is defined %}
     element = document.getElementById("content");
     {% endif %}
-    var simplemde = new SimpleMDE({ 
+    var simplemde = new SimpleMDE({
         element: element,
         renderingConfig: {
             singleLineBreaks: true,
@@ -172,7 +172,16 @@
         shortcuts: {
             drawTable: "Cmd-Alt-T"
         },
-        showIcons: ["code", "table"]
+        showIcons: ["code", "table"],
+        previewRender: (plainText, previewArg) => {
+            const preview = previewArg;
+            setTimeout(() => {
+              preview.classList.add("bg-dark");
+              preview.classList.add("text-light");
+            }, 1);
+    
+            return marked.marked(plainText);
+          }
     });
 </script>
 {% if article == true %}

@@ -27,7 +27,7 @@ def index():
 
 @bp.route('/add', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('admin')
+@roles_accepted('admin', 'support')
 def add():
     form = NotifierForm()
     error = False
@@ -94,7 +94,7 @@ def view(id: int):
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('admin')
+@roles_accepted('admin', 'support')
 def edit(id: int):
     nf = Notifier.query.filter(Notifier.id == id).first_or_404()
     form = NotifierForm()
@@ -141,6 +141,8 @@ def edit(id: int):
     return render_template('edit.html', form=form, title='Editar', notifier=True)
 
 @bp.route('/deactive/<int:id>', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('admin', 'support')
 def deactive(id: int):
     confirm = request.form.get('confirm', False)
     if confirm != 'true':
@@ -169,3 +171,4 @@ def deactive(id: int):
             'status': 'error',
             'message': 'database error'
         }), 404
+        

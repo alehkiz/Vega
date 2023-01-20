@@ -276,6 +276,21 @@ $(document).ready(function () {
             });        
         }
     });
+
+    if (getCookie('bg') == 'dark') {
+        change_background();
+    }
+
+    let darkBackground = document.querySelector('body');
+    let darkModeBtn = document.getElementById('darkModeBtn');
+    let btnIcon = document.getElementById('btnIcon');
+    let codeButton = document.getElementsByClassName('code-btn');
+
+    darkModeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        change_background()
+
+    });
     
 
 
@@ -499,4 +514,85 @@ function create_toast(){
             '</div>'+
             '</div>'
     return html
+}
+
+
+
+
+function change_background(){
+    let darkBackground = document.querySelector('body');
+    let darkModeBtn = document.getElementById('darkModeBtn');
+    let btnIcon = document.getElementById('btnIcon');
+    darkBackground.classList.toggle('darkbackground');
+
+    if (darkBackground.classList.contains('darkbackground')){
+        document.querySelectorAll(".bg-light").forEach(function(elem) {
+            elem.classList.replace("bg-light", "bg-dark");
+            elem.classList.replace("text-dark", "text-white");
+            codemirror = document.getElementsByClassName('CodeMirror');
+            if (codemirror.length === 1){
+                codemirror[0].classList.add("bg-dark", 'text-white')
+            }
+        })
+        btnIcon.classList.replace("fa-moon", "fa-sun");
+    } else {
+        document.querySelectorAll(".bg-dark").forEach(function(elem) {
+            elem.classList.replace("bg-dark", "bg-light");
+            elem.classList.replace("text-white", "text-dark");
+        });
+        btnIcon.classList.replace("fa-sun", "fa-moon");//classList.toggle('fa-moon');
+    };
+    bg = 'white' ? darkBackground.classList.contains('darkbackground') : 'black';
+
+    setCookie('bg', bg);
+    // if (darkBackground.classList.contains('darkbackground')){
+    //     btnIcon.classList.toggle('fa-moon');
+    // }else{
+    //     btnIcon.classList.toggle('fa-sun');
+    // }
+    // $.ajax({
+    //     url: url_bg,
+    //     type: 'post',
+    //     data: { confirm: true },
+    //     dataType: 'json',
+    //     headers: {
+    //         "X-CSRFToken": $CSRF_TOKEN,
+    //     },
+    //     success: function (data) {
+    //         console.log(data)
+    //         if (data.value === true) {
+    //             console.log("Fim")
+    //             if (darkBackground.classList.contains('darkbackground')){
+    //                 url_bg.replace('dark', 'white')
+    //                 btnIcon.classList.toggle('fa-moon');
+    //             }else{
+    //                 btnIcon.classList.toggle('fa-sun');
+    //                 url_bg.replace('white', 'dark');
+    //             }
+    //         }
+    //         darkModeBtn.setAttribute('href', url_bg);
+
+    //     }
+    // });
+}
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
 }
