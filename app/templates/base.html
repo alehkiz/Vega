@@ -42,11 +42,20 @@
     {% endblock %} {% block scripts %}
     <!-- Optional JavaScript -->
 
+    {% if 'bg' in request.cookies %}
+    {% if request.cookies.get('bg') == 'dark' %}
+    <button class="darkmodebtn" id="darkModeBtn" href="{{url_for('api.set_bg', value='white')}}"><i id="btnIcon" class="fas fa-sun"></i></button>
+    {% else %}
+    <button class="darkmodebtn" id="darkModeBtn" href="{{url_for('api.set_bg', value='dark')}}"><i id="btnIcon" class="fas fa-moon"></i></button>
+    {% endif %}
+    {% else %}
+    <button class="darkmodebtn" id="darkModeBtn" href="{{url_for('api.set_bg', value='dark')}}"><i id="btnIcon" class="fas fa-moon"></i></button>
+    {% endif %}
 
-
+    
     <!-- Navbar -->
 
-    <footer class="footer fixed-bottom mt-auto py-2 bg-dark">
+    <footer class="footer fixed-bottom mt-auto py-2 bg-dark text-white">
         <div class="container d-flex justify-content-around">
             <span class="text-muted">Suporte Atendimento</span> {% if current_user.is_authenticated %}
 

@@ -262,9 +262,9 @@ def view(id=None):
 
     else:
         question = Question.query.filter(Question.id == id).first_or_404()
-        question_history = question.history.all()
-        if len(question_history) == 0:
-            question_history = None
+    question_history = question.history.all()
+    if len(question_history) == 0:
+        question_history = None
 
     if current_user.is_authenticated:
         user_id = current_user.id

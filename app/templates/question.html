@@ -16,7 +16,7 @@ render_pagination %}
 {% else %} {% include '_question.html' %} {{ render_pagination(pagination, first_page, last_page, request.endpoint,
 url_arguments=url_arguments)}} {% endif %} {% endif %} {% endif %} {% if mode == 'views' %}
 
-<div class="btn-group btn-group-lg" role="group" aria-label="...">
+<div class="btn-group btn-group-lg bg-light" role="group" aria-label="...">
     {% for sub_topic in sub_topics %}
     <a href='{{ url_for(".index",  sub_topic=sub_topic.name, **url_arguments)}}'
         class="btn btn-primary rouded border">{{sub_topic.name}}</a> {% endfor %}
@@ -92,7 +92,7 @@ url_arguments=url_arguments)}} {% endif %} {% endif %} {% endif %} {% if mode ==
 scripts %} {{ super() }} {% if article == true %}
 <!-- <script src="{{url_for('static', filename='js/editormd/editormd.min.js')}}"></script> -->
 <script src="{{url_for('static', filename='js/simplemde/simplemde.min.js')}}"></script>
-
+<script src="{{url_for('static', filename='js/marked/marked.min.js')}}"></script>
 <script type="text/javascript">
     var simplemde = new SimpleMDE({
         element: document.getElementById("text"),
@@ -104,7 +104,23 @@ scripts %} {{ super() }} {% if article == true %}
         shortcuts: {
             drawTable: "Cmd-Alt-T"
         },
-        showIcons: ["code", "table"]
+        showIcons: ["code", "table"],
+        previewRender: (plainText, previewArg) => {
+            const preview = previewArg;
+            setTimeout(() => {
+              preview.classList.add("bg-dark");
+              preview.classList.add("text-light");
+            }, 1);
+    
+            return marked.marked(plainText);
+          }
+        //previewRender: (plainText, previewArg) => {
+        //    const preview = previewArg;
+        //    setTimeout(() => {
+        //      preview.innerHTML = '<div class="content bg-dark">${marked(plainText)}</div>';
+        //    }, 1);
+        //    return `Loading...`;
+        //  }
     });
 </script>
 {% endif %} {% endblock %}

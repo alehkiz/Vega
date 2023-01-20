@@ -1,6 +1,6 @@
 from app.models.app import Visit
 import re
-from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify, session
+from flask import current_app as app, Blueprint, render_template, url_for, redirect, flash, json, Markup, abort, request, escape, g, jsonify, session, make_response
 from flask.globals import current_app
 from flask_security import login_required, current_user
 from flask_security import roles_accepted
@@ -89,6 +89,24 @@ def notifications_autoload():
     obj_notification = db.session.query(Notifier).join(NotifierStatus).join(NotifierPriority).filter(NotifierStatus.status == 'Ativo', Notifier.autoload == True).order_by(NotifierPriority.order.asc())
     to_dict = [_.to_dict_detail for _ in obj_notification]
     return jsonify(to_dict)
+
+@bp.route('set_bg/<string:value>', methods=["GET", "POST"])
+def set_bg(value):
+    confirm = request.form.get("confirm", False)
+    if confirm != "true":
+        return jsonify({"status": "error", "message": "Não é possível acessar"}), 404
+    if value in ['white', 'dark']:
+        resp = {'value':True}
+        resp = make_response({'value': True})
+        resp.set_cookie('bg', value)
+        return resp
+    return {'value': False}
+
+
+
+
+
+
 # # api dashboard
 # @bp.route('dashboard/tags_data', methods=['GET', 'POST'])
 # def tags_data():
