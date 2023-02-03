@@ -40,7 +40,7 @@ Lembre-se que utilizamos o postgres, logo, você deverá ter criado, além de cr
 O servidor também roda em Docker, para isso rode o arquivo `docker.sh`
 
 ## Disponível em:
-https://dashboard.render.com
+https://facilitar.onrender.com
 
 ## 📝 Licença
 
