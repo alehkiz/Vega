@@ -277,7 +277,7 @@ $(document).ready(function () {
         }
     });
 
-    if (getCookie('bg') == 'dark') {
+    if (getCookie('bg') == 'black') {
         change_background();
     }
 
@@ -542,8 +542,8 @@ function change_background(){
         });
         btnIcon.classList.replace("fa-sun", "fa-moon");//classList.toggle('fa-moon');
     };
-    bg = 'white' ? darkBackground.classList.contains('darkbackground') : 'black';
-
+    bg = darkBackground.classList.contains('darkbackground') ? 'black' : 'white';
+    console.log(bg)
     setCookie('bg', bg);
     // if (darkBackground.classList.contains('darkbackground')){
     //     btnIcon.classList.toggle('fa-moon');
@@ -584,7 +584,7 @@ function getCookie(name) {
         while (c.charAt(0)==' ') c = c.substring(1,c.length);
         if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
     }
-    return null;
+    return false;
 }
 
 function setCookie(name,value,days) {

@@ -381,11 +381,11 @@ def dash_app(app=False):
                     ], id='diary-tab', active_tab='diary-access')]),
                 dbc.Tab(label='Comparativos percentuais', tab_id='percent', children=[
                     dbc.Tabs([
-                        dbc.Tab(label='Marcações', tab_id='percent-tags'),
+                        # dbc.Tab(label='Marcações', tab_id='percent-tags'),
                         dbc.Tab(label='Tópicos', tab_id='percent-topics'),
-                        dbc.Tab(label='Sub-Tópicos',
-                                tab_id='percent-sub-topics'),
-                    ], id='percent-tab', active_tab='percent-tags')]),
+                        # dbc.Tab(label='Sub-Tópicos',
+                        #         tab_id='percent-sub-topics'),
+                    ], id='percent-tab', active_tab='percent-topics')]),
                 dbc.Tab(label='Top respostas', tab_id='user', children=[
                     dbc.Tabs([
                         dbc.Tab(label='Respostas', tab_id='user-answers'),
@@ -415,8 +415,8 @@ def dash_app(app=False):
                 return dcc.Graph(figure=get_questions_views_by_date(), config={'displayModeBar': False})
             elif active_subtab == 'diary-questions-answers':
                 return dcc.Graph(figure=get_graph_questions_answers_by_date(), config={'displayModeBar': False})
-            elif active_subtab == 'percent-tags':
-                return dcc.Graph(figure=get_graph_tags(), config={'displayModeBar': False})
+            # elif active_subtab == 'percent-tags':
+            #     return dcc.Graph(figure=get_graph_tags(), config={'displayModeBar': False})
             elif active_subtab == 'percent-topics':
                 return dcc.Graph(figure=get_graph_topics(), config={'displayModeBar': False})
             elif active_subtab == 'percent-sub-topics':

@@ -105,21 +105,21 @@ scripts %} {{ super() }} {% if article == true %}
             drawTable: "Cmd-Alt-T"
         },
         showIcons: ["code", "table"],
-        previewRender: (plainText, previewArg) => {
-            const preview = previewArg;
-            setTimeout(() => {
-              preview.classList.add("bg-dark");
-              preview.classList.add("text-light");
-            }, 1);
-    
-            return marked.marked(plainText);
-          }
         //previewRender: (plainText, previewArg) => {
         //    const preview = previewArg;
         //    setTimeout(() => {
-        //      preview.innerHTML = '<div class="content bg-dark">${marked(plainText)}</div>';
+        //        if (getCookie('bg') == 'black'){
+        //            console.log('dark')
+        //            preview.classList.add("bg-dark");
+        //            preview.classList.add("text-light");
+        //        }else{
+        //            console.log('white')
+        //            preview.classList.replace("bg-dark", "bg-light");
+        //            preview.classList.replace("text-light", "text-dark");
+        //        }
         //    }, 1);
-        //    return `Loading...`;
+    //
+        //    return marked.marked(plainText);
         //  }
     });
 </script>

@@ -204,7 +204,7 @@ def process_value(value: str, cls_query, route: str = ""):
             if obj_query is None:
                 raise Exception(f"O objeto {_question_id} não foi identificado.")
             if title is None:
-                title = obj_query.question[0:30] + "..."
+                title = obj_query.question
             try:
                 if route and route != "":
                     link = url_for(route, id=_question_id)

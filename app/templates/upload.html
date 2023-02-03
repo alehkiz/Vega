@@ -25,7 +25,7 @@
             <br>
         {% if form.approved is defined %}
         <div class="mb-3">
-        {% if current_user.is_admin %}
+        {% if current_user.is_support %}
         {{ macros.render_field(form.approved)}}
         <br>
         {{ macros.render_field(form.active)}}

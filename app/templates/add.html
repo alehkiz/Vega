@@ -3,7 +3,7 @@
 
 {% block styles %}
 {{- super() -}}
-    <link href="{{url_for('static', filename='css/simplemde/simplemde.min.css')}}" rel="stylesheet">
+    <link href="{{url_for('static', filename='css/simplemde/simplemde-theme-dark.min.css')}}" rel="stylesheet">
 {% if article %}
 
 {% endif %}
@@ -173,15 +173,22 @@
             drawTable: "Cmd-Alt-T"
         },
         showIcons: ["code", "table"],
-        previewRender: (plainText, previewArg) => {
-            const preview = previewArg;
-            setTimeout(() => {
-              preview.classList.add("bg-dark");
-              preview.classList.add("text-light");
-            }, 1);
-    
-            return marked.marked(plainText);
-          }
+        //previewRender: (plainText, previewArg) => {
+        //    const preview = previewArg;
+        //    setTimeout(() => {
+        //        if (getCookie('bg') == 'black'){
+        //            console.log('dark')
+        //            preview.classList.add("bg-dark");
+        //            preview.classList.add("text-light");
+        //        }else{
+        //            console.log('white')
+        //            preview.classList.replace("bg-dark", "bg-light");
+        //            preview.classList.replace("text-light", "text-dark");
+        //        }
+        //    }, 1);
+    //
+        //    return marked.marked(plainText);
+        //  }
     });
 </script>
 {% if article == true %}
