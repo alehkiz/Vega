@@ -4,7 +4,7 @@
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/alehkiz/Vega?style=for-the-badge)
 ![GitHub language count](https://img.shields.io/github/languages/count/alehkiz/Vega?style=for-the-badge)
-![GitHub forks](https://img.shields.io/github/forks/alehkiz/Vega?style=for-the-badge)
+![GitHub forks](https://img.shields.io/github/forks/count/alehkiz/Vega?style=for-the-badge)
 ![Github open issues](https://img.shields.io/github/issues/alehkiz/Vega?style=for-the-badge)
 
 
