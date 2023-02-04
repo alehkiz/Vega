@@ -124,6 +124,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+venv-linux/
 
 # Spyder project settings
 .spyderproject
@@ -148,3 +149,8 @@ question_202108122320.sql
 *.xls
 *.xlsx
 *.csv
+
+
+# Render
+
+.env.render

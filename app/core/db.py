@@ -44,13 +44,14 @@ def init_db_command():
         network.ip = '0.0.0.0'
         db.session.add(network)
         db.session.commit()
-    atendimento = Topic.query.filter(Topic.name == 'Atendimento').first()
+    atendimento = Topic.query.filter(Topic.name == 'Atendimento - Linha de Frente').first()
     if atendimento is None:
         atendimento = Topic()
-        atendimento.name = 'Atendimento'
-        atendimento.format_name = 'Atendimento'
+        atendimento.name = 'Atendimento - Linha de Frente'
+        atendimento.format_name = 'atendimento__linha_de_frente'
         atendimento.selectable = False
         atendimento.active = False
+        atendimento.nickname = 'ATEND'
         db.session.add(atendimento)
     retaguarda = Topic.query.filter(Topic.name == 'Retaguarda').first()
     if retaguarda is None:
@@ -58,6 +59,7 @@ def init_db_command():
         retaguarda.name = 'Retaguarda'
         retaguarda.format_name = 'Retaguarda'
         retaguarda.selectable = True
+        retaguarda.nickname = 'RET'
         retaguarda.active = True
         db.session.add(retaguarda)
     suporte = Topic.query.filter(Topic.name == 'Suporte').first()
@@ -65,6 +67,7 @@ def init_db_command():
         suporte = Topic()
         suporte.name = 'Suporte'
         suporte.format_name = 'Suporte'
+        suporte.nickname = 'SUP'
         suporte.selectable = False
         suporte.active = True
         db.session.add(suporte)    
