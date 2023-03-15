@@ -54,7 +54,9 @@ url_arguments=url_arguments)}} {% endif %} {% endif %} {% endif %} {% if mode ==
         <div class="article-meta">
             Criado {{question.get_create_time_elapsed}} {% if question.was_updated() %} {{'Atualizado '+
             question.get_update_time_elapsed}} {% endif %}
-            <div class="float-end">Visualizações {{question.views}}</div>
+            <div class="float-end ">Visualizações {{question.views}}</div>
+            <br>
+            <div class="float-end fw-bold fs-6 text-dark">ID {{question.id}}</div>
         </div>
     </div>
     <div class="article-text">

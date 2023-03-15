@@ -340,6 +340,17 @@ def get_visits_today():
         # )
     return query.all()[0].Total
 
+def get_visits_moving_avarage():
+    query = db.session.query(
+        func.date_trunc('day', Visit.datetime).label('Date'),
+             func.count(Visit.id).label('Total'),
+             ).filter(
+                 or_(Visit.user_id == 4, Visit.user_id == None),
+                 func.date_trunc('day', Visit.datetime) > datetime.date.today() - timedelta(days=7),
+    
+                 extract('isodow', Visit.datetime) < 7
+             ).group_by('Date')
+    return query.all()
 def dash_app(app=False):
     dash_app = Dash(__name__, server=app, url_base_pathname='/dashapp/',
                     external_stylesheets=[dbc.themes.BOOTSTRAP], update_title='Atualizando...')

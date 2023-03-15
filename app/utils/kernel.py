@@ -186,7 +186,6 @@ def process_value(value: str, cls_query, route: str = ""):
     pat_title = r"(?<=:titulo:).*"
     pat_id = r"(?<=:q:).[0-9]*"
     groups = re.findall(pat, value)
-    print(groups)
     if len(groups) > 0:
         for group in groups:
             _original_value = f"{{{group}}}"
@@ -196,7 +195,6 @@ def process_value(value: str, cls_query, route: str = ""):
                 title = _title_group.group()
                 group.replace(f":titulo:{title}", "")
             _id_group = re.search(pat_id, group)
-            print(group)
             if _id_group is None:
                 raise Exception(f"Houve um erro no processamento da resposta {value}")
             _question_id = int(_id_group.group())

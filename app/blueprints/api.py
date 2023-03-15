@@ -34,7 +34,7 @@ def question(id):
 
     if question is None:
         return abort(404)
-    if question.answer_approved == False or question.active != True or question.was_answered != True:
+    if (question.answer_approved == False or question.active != True or question.was_answered != True) and not current_user.is_authenticated:
         abort(404)
     if current_user.is_authenticated:
         question.add_view(current_user.id, g.ip_id)

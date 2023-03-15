@@ -33,7 +33,7 @@ from app.models.security import User
 from app.models.app import Network
 from app.models.search import Search
 from app.utils.sql import unaccent
-from app.utils.kernel import convert_datetime_to_local, strip_accents
+from app.utils.kernel import convert_datetime_to_local, strip_accents, process_value
 from app.utils.html import process_html
 from app.forms.question import (
     QuestionAnswerForm,
@@ -41,6 +41,7 @@ from app.forms.question import (
     QuestionApproveForm,
     QuestionEditAndApproveForm,
 )
+
 from app.utils.routes import counter
 from sqlalchemy import desc, func, nullslast
 
@@ -306,7 +307,7 @@ def edit(id):
             app.logger.error(e)
             db.session.rollback()
             return abort(404)
-        # try:
+        
         question.question = process_html(form.question.data).text
         question.tags = form.tag.data
         question.topics = form.topic.data
@@ -314,7 +315,14 @@ def edit(id):
         question.update_user_id = current_user.id
         question.update_at = convert_datetime_to_local(datetime.utcnow())
         # question.answer_user_id = current_user.id
-        question.answer = process_html(form.answer.data).text
+        try:
+            process_value(process_html(form.answer.data).text, Question)
+            question.answer = process_html(form.answer.data).text
+        except Exception as e:
+            form.answer.errors.append(Markup('''Formato da resposta inválida, confirme o formato para recuperar uma resposta, 
+                                            <br>Sendo: {:q:ID:titulo:Titulo para apresentação}
+                                            <br>Exemplo: {:q:1}'''))
+            return render_template("edit.html", form=form, title="Editar", question=True)
 
         if current_user.is_admin:
             question.answer_approved = form.approved.data

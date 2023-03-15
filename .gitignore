@@ -148,3 +148,4 @@ question_202108122320.sql
 *.xls
 *.xlsx
 *.csv
+.env
