@@ -495,12 +495,20 @@ def answer(id: int):
                 return render_template("answer.html", form=form, answer=True)
         q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
-        q.answer = process_html(form.answer.data).text
+        try:
+            process_value(process_html(form.answer.data).text, Question)
+            q.answer = process_html(form.answer.data).text
+        except Exception as e:
+            form.answer.errors.append(Markup('''Formato da resposta inválida, confirme o formato para recuperar uma resposta, 
+                                            <br>Sendo: {:q:ID:titulo:Titulo para apresentação}
+                                            <br>Exemplo: {:q:1}'''))
+            return render_template("edit.html", form=form, title="Editar", question=True)
         q.answer_at = convert_datetime_to_local(datetime.utcnow())
         q.tags = form.tag.data
         q.topics = form.topic.data
         q.sub_topics = form.sub_topic.data
         q.question = form.question.data
+        
         try:
             db.session.commit()
             return redirect(url_for("question.view", id=q.id))
@@ -552,7 +560,14 @@ def approve(id: int):
             return redirect(url_for("question.view", id=q.id))
         # q.answer_user_id = current_user.id
         q.answer_network_id = g.ip_id
-        q.answer = form.answer.data
+        try:
+            process_value(process_html(form.answer.data).text, Question)
+            q.answer = process_html(form.answer.data).text
+        except Exception as e:
+            form.answer.errors.append(Markup('''Formato da resposta inválida, confirme o formato para recuperar uma resposta, 
+                                            <br>Sendo: {:q:ID:titulo:Titulo para apresentação}
+                                            <br>Exemplo: {:q:1}'''))
+            return render_template("edit.html", form=form, title="Editar", question=True)
         # q.answer_at = datetime.now()
         q.tags = form.tag.data
         q.topics = form.topic.data
