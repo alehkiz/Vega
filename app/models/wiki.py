@@ -55,16 +55,7 @@ question_sub_topic = db.Table(
     db.Column("sub_topic_id", db.Integer, db.ForeignKey("sub_topic.id")),
 )
 
-transaction_topic = db.Table(
-    "transaction_topic",
-    db.Column("transaction_id", db.Integer, db.ForeignKey("transaction.id")),
-    db.Column("topic_id", db.Integer, db.ForeignKey("topic.id")),
-)
-transaction_sub_topic = db.Table(
-    "transaction_sub_topic",
-    db.Column("transaction_id", db.Integer, db.ForeignKey("transaction.id")),
-    db.Column("topic_sub_id", db.Integer, db.ForeignKey("sub_topic.id")),
-)
+
 
 
 class ArticleView(db.Model):
@@ -1157,36 +1148,7 @@ class QuestionChanges(db.Model):
     new_answer = db.Column(db.Text, index=False, nullable=False, unique=False)
 
 
-class Transaction(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    transaction = db.Column(db.String(6), unique=True, nullable=False)
-    parameter = db.Column(db.String(64), nullable=True)
-    option = db.Column(db.String(10))
-    description = db.Column(db.String)
-    create_at = db.Column(
-        db.DateTime(timezone=True), index=False, default=convert_datetime_to_local
-    )
-    created_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    edit_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    sub_topics = db.relationship(
-        "SubTopic",
-        secondary=transaction_sub_topic,
-        backref=db.backref(
-            "transactions", lazy="dynamic", cascade="save-update", single_parent=True
-        ),
-        lazy="dynamic",
-    )
-    topics = db.relationship(
-        "Topic",
-        secondary=transaction_topic,
-        backref=db.backref(
-            "transactions", lazy="dynamic", cascade="save-update", single_parent=True
-        ),
-        lazy="dynamic",
-    )
 
-    def __repr__(self):
-        return f"<{self.transaction}>"
 
 
 # TESTE
