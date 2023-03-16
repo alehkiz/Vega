@@ -43,6 +43,7 @@ class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     transaction = db.Column(db.String(4), unique=True, nullable=False)
     parameter_id = db.Column(db.ForeignKey('transaction_parameter.id'), nullable=False)
+    type_id = db.Column(db.ForeignKey('transaction_type.id'), nullable=False)
     description = db.Column(db.String)
     create_at = db.Column(
         db.DateTime(timezone=True), index=False, default=convert_datetime_to_local
@@ -67,6 +68,7 @@ class Transaction(db.Model):
     )
     options = db.relationship('TransactionOption', backref='transaction', lazy='dynamic')
     screens = db.relationship('TransactionScreen', backref='transaction', lazy='dynamic')
+    
 
     def __repr__(self):
         return f"<{self.transaction}>"
@@ -95,3 +97,10 @@ class TransactionScreen(db.Model):
         if isfile(self.file_path):
             return True
         return False
+    
+
+class TransactionType(db.Model):
+    '''Incluir o tipo de transação Pesquisa ou Transação'''
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.Text, nullable=False, unique=True)
+    transactions = db.relationship('Transaction', backref='type', lazy='dynamic')
