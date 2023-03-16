@@ -179,7 +179,7 @@ def convert_datetime_utc(timestamp):
 
 def process_value(value: str, cls_query, route: str = ""):
     """
-    Processa o valoe seguindo formato `{:q:1:titulo:TESTE}` ou `{:q:1}` onde título será subistuído pelo texto da pergunta
+    Processa o valor seguindo formato `{:q:1:titulo:TESTE}` ou `{:q:1}` onde título será subistuído pelo texto da pergunta
     """
 
     pat = "(?<=\\{).+?(?=\\})"
@@ -215,6 +215,16 @@ def process_value(value: str, cls_query, route: str = ""):
         return value
     else:
         return value
+
+def process_transaction(value: str) -> str:
+    """
+    Processa o valor para a transação seguindo formato `{:t:TRANSAÇÃO}`, ficando `{:t:PESQ}`, 
+    no qual será gerado um HTML para apresentação de popup com detalhes da transação que será recuparada da API
+
+    """
+
+
+
 
 
 BreadCrumb = namedtuple("BreadCrumb", ["path", "title"])

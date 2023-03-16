@@ -17,11 +17,12 @@ from app.dashboard.index import dash_app
 from app.blueprints import register_blueprints
 from app.core.db import db, user_datastore
 from app.models.security import User, Role
-from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView, SubTopic, Transaction
+from app.models.wiki import Article, Topic, Tag, ArticleView, Question, QuestionLike, QuestionSave, QuestionView, SubTopic
 from app.models.search import Search, SearchDateTime
 from app.models.app import FilePDF, Network, Visit, Page, FilePDFType
 from app.models.notifier import Notifier, NotifierPriority, NotifierStatus
 from app.models.history import QuestionHistory
+from app.models.transactions import Transaction, TransactionOption, TransactionParameter, TransactionScreen
 from app.utils.kernel import convert_datetime_to_local
 
 # from app.dashboard import dash
@@ -109,14 +110,17 @@ def init(app):
             Visit=Visit,
             Page=Page,
             SubTopic=SubTopic,
-            Transaction=Transaction,
             Notifier=Notifier,
             NotifierStatus=NotifierStatus,
             Network=Network,
             NotifierPriority=NotifierPriority,
             FilePDF = FilePDF,
             FilePDFType = FilePDFType,
-            QuestionHistory = QuestionHistory
+            QuestionHistory = QuestionHistory,
+            Transaction=Transaction, 
+            TransactionOption=TransactionOption,
+            TransactionParameter=TransactionParameter,
+            TransactionScreen=TransactionScreen,
             )
     
     with app.app_context():
