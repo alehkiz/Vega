@@ -121,6 +121,7 @@ celerybeat.pid
 .venv
 env/
 venv/
+venv-linux/
 ENV/
 env.bak/
 venv.bak/
@@ -149,3 +150,4 @@ question_202108122320.sql
 *.xlsx
 *.csv
 .env
+.env.render
