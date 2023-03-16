@@ -1,7 +1,16 @@
 $(document).ready(function () {
 
     // like and unlike click
+    $('a[rel=popover]').popover({
+        html: true,
+        trigger: 'hover',
+        placement: 'bottom',
+        content: function(){return '<img src="'+$(this).data('img') + '" />';}
+      });
 
+
+
+      
     accordion_link = false;
     like_link = false;
     save_link = false;

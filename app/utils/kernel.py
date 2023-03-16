@@ -13,7 +13,7 @@ from flask import url_for, g, session, request
 from collections import namedtuple
 from flask.globals import _app_ctx_stack, _request_ctx_stack
 
-from app.models.transactions import Transaction
+
 
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_123456789"
@@ -224,25 +224,32 @@ def process_transaction(value: str) -> str:
     no qual será gerado um HTML para apresentação de popup com detalhes da transação que será recuparada da API
 
     """
+    from app.models.transactions import Transaction
     pat = "(?<=\\{).+?(?=\\})"
     pat_transaction = r"(?<=:t:).[a-zA-Z]*"
     groups = re.findall(pat, value)
     if len(groups) > 0:
         for group in groups:
             _original_value = f"{{{group}}}"
-            _id_group = re.search(pat_transaction, group)
-            if _id_group is None:
+            transaction = re.search(pat_transaction, group)
+            if transaction is None:
                 raise Exception(f"Houve um erro no processamento da resposta {value}")
-            transaction = re.search(pat_transaction)
+            transaction = transaction.group()
             obj_query = Transaction.query.filter(Transaction.transaction.like(transaction)).first()
             if obj_query is None:
                 raise Exception(f"O objeto {transaction} não foi identificado.")
             try:
                 link = url_for("transaction.view", id=obj_query.id)
-                html = Markup('')
-                value = value.replace(_original_value, f"[{title}]({link})")
+                html = Markup(f'''<button type="button" class="btn btn-secondary"
+                                    data-bs-toggle="popover" data-bs-placement="right"
+                                    data-bs-custom-class="custom-popover"
+                                    data-bs-title="Transação {obj_query.transaction}"
+                                    data-bs-content="{obj_query.description}">
+                            {obj_query.transaction}
+                            </button>''')
+                value = value.replace(_original_value, html)
             except Exception as e:
-                raise Exception(f"O valor {_question_id} não foi encontrado")
+                raise Exception(f"A transação {transaction} não foi encontrada")
                 # value = ''
         return value
     else:

@@ -22,7 +22,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import inspect, desc, asc, func
 
 from app.models.wiki import Article, Topic, User, Question, Tag, SubTopic
-from app.models.transactions import Transaction, TransactionOption, TransactionParameter, TransactionScreen
+from app.models.transactions import Transaction, TransactionOption, Parameter, TransactionScreen
 from app.forms.wiki import ArticleForm
 from app.forms.question import QuestionFilter
 from app.core.db import db

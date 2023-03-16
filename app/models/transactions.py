@@ -16,13 +16,7 @@ from sqlalchemy_searchable import make_searchable
 
 from app.core.db import db
 from app.utils.kernel import (
-    convert_datetime_to_local,
-    format_elapsed_time,
-    get_list_max_len,
-    only_letters,
-    format_datetime_local,
-    days_elapsed,
-    process_value,
+    convert_datetime_to_local
 )
 from app.utils.html import process_html
 from app.models.security import User
@@ -38,11 +32,16 @@ transaction_sub_topic = db.Table(
     db.Column("topic_sub_id", db.Integer, db.ForeignKey("sub_topic.id")),
 )
 
+transaction_parameter = db.Table(
+    "transaction_parameter",
+    db.Column("transaction_id", db.Integer, db.ForeignKey("transaction.id")),
+    db.Column("parameter_id", db.Integer, db.ForeignKey("parameter.id")),
+)
+
 class Transaction(db.Model):
     __searchable__ = ["transaction"]
     id = db.Column(db.Integer, primary_key=True)
     transaction = db.Column(db.String(4), unique=True, nullable=False)
-    parameter_id = db.Column(db.ForeignKey('transaction_parameter.id'), nullable=False)
     type_id = db.Column(db.ForeignKey('transaction_type.id'), nullable=False)
     description = db.Column(db.String)
     create_at = db.Column(
@@ -68,13 +67,20 @@ class Transaction(db.Model):
     )
     options = db.relationship('TransactionOption', backref='transaction', lazy='dynamic')
     screens = db.relationship('TransactionScreen', backref='transaction', lazy='dynamic')
-    
+    parameters = db.relationship(
+        "Parameter",
+        secondary=transaction_parameter,
+        backref=db.backref(
+            "transactions", lazy="dynamic", cascade="save-update", single_parent=True
+        ),
+        lazy="dynamic",
+    )
 
     def __repr__(self):
         return f"<{self.transaction}>"
 
 
-class TransactionParameter(db.Model):
+class Parameter(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(32), index=True, nullable=False, unique=True)
 
