@@ -132,7 +132,8 @@
         <br>
         <br>
         {{ form.submit }}
-
+        
+        
         {% elif transaction is defined %}
         {{ form.csrf_token }}
         {{ macros.render_field(form.transaction, size=32, class='form-control', placeholder='Titulo') }}
@@ -162,7 +163,7 @@
         {% elif options is defined %}
         {{ form.csrf_token }}
         {{ macros.render_field(form.transaction, size=32, class='form-control', placeholder='Titulo') }}
-        {{ macros.render_field(form.options, size=32, class='form-control') }}
+        {{ macros.render_field(form.option, size=32, class='form-control') }}
         
         {{ macros.render_field(form.description,size=32, class='form-control', placeholder='Titulo', maxlength=540) }}
         
@@ -172,7 +173,8 @@
         <br>
 
         
-        {{ macros.render_field(form.submit, nolabel=true, **{'class': 'btn btn-primary'}) }}
+        {{ macros.render_field(form.add, nolabel=true, **{'class': 'btn btn-primary'}) }}
+        {{ macros.render_field(form.save, nolabel=true, **{'class': 'btn btn-success'}) }}
         
         {% endif %}
         <br />

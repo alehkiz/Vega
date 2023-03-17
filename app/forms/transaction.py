@@ -1,6 +1,6 @@
 from flask.globals import request
 from flask_wtf import FlaskForm
-from wtforms import TextAreaField, StringField, SubmitField, BooleanField, MultipleFileField, FieldList
+from wtforms import TextAreaField, StringField, SubmitField, BooleanField, MultipleFileField, FieldList, FormField
 from wtforms.validators import DataRequired, Length
 from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
 from app.models.transactions import Parameter, TransactionType
@@ -19,17 +19,25 @@ class TransactionForm(FlaskForm):
     topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.selectable == True), get_label = 'name', validators = [DataRequired('Item Obrigatório')])
     sub_topics = QuerySelectMultipleField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
     submit = SubmitField('Salvar')
-    prints = SubmitField('Prints')
+    prints = SubmitField('Opções')
 
 
 class TransactionOptionForm(FlaskForm):
     transaction = StringField('Transação', render_kw={'disabled':''})
-    options = FieldList(StringField('Opção'), min_entries=1)
+    option = StringField('Opção')
     description = TextAreaField('Descrição')
-    submit = SubmitField('Salvar')
+    save = SubmitField('Salvar')
+    add = SubmitField('Nova Opção')
+    
+
+# class OptionForm(FlaskForm):
+#     transaction = FieldList(FormField(TransactionOptionForm), min_entries=1)
+#     submit = SubmitField('Salvar')   
+
 
 class TransactionScreenForn(FlaskForm):
     transaction = StringField('Transação', render_kw={'disabled':''})
     files = MultipleFileField("Arquivos")
-    submit = SubmitField('Salvar')
+    save = SubmitField('Salvar')
+    add = SubmitField('Nova Tela')
     
