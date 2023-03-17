@@ -201,10 +201,21 @@ def process_value(value: str, cls_query, route: str = ""):
                 raise Exception(f"Houve um erro no processamento da resposta {value}")
             _question_id = int(_id_group.group())
             obj_query = cls_query.query.filter(cls_query.id == _question_id).first()
-            if obj_query is None:
-                raise Exception(f"O objeto {_question_id} não foi identificado.")
+            if obj_query is None or not obj_query.was_approved:
+                '''
+                Remove as linhas no qual a pergunta não foi encontrada ou se a mesma não está aprovada.
+                '''
+                value_list = value.split('\n')
+                finder = [x for x in value_list if x.find(_original_value) > 0]
+                if len(finder) == 0:
+                    #Nenhum valor encontrado
+                    print('nenhum valor encontrado')
+                else:
+                    for line in finder:
+                        value = value.replace(line, '')
+                continue
             if title is None:
-                title = obj_query.question[0:30] + "..."
+                title = obj_query.question
             try:
                 if route and route != "":
                     link = url_for(route, id=_question_id)
