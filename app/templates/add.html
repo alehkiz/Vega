@@ -160,6 +160,21 @@
         {{ macros.render_field(form.submit, nolabel=true, **{'class': 'btn btn-primary'}) }}
         {{ macros.render_field(form.prints, nolabel=true, **{'class': 'btn btn-success'}) }}
 
+        {% elif screen is defined %}
+        {{ form.csrf_token }}
+        {{ macros.render_field(form.transaction, size=32, class='form-control', placeholder='Titulo') }}
+        {{ macros.render_field(form.transaction_option, nosize=true, class='form-select') }}
+        
+        {{ macros.render_field(form.files,size=32, class='form-control', placeholder='Titulo', maxlength=540) }}
+        
+        <br>
+
+        <br>
+        <br>
+
+        
+        {{ macros.render_field(form.add, nolabel=true, **{'class': 'btn btn-primary'}) }}
+        {{ macros.render_field(form.save, nolabel=true, **{'class': 'btn btn-success'}) }}
         {% elif options is defined %}
         {{ form.csrf_token }}
         {{ macros.render_field(form.transaction, size=32, class='form-control', placeholder='Titulo') }}
@@ -175,7 +190,7 @@
         
         {{ macros.render_field(form.add, nolabel=true, **{'class': 'btn btn-primary'}) }}
         {{ macros.render_field(form.save, nolabel=true, **{'class': 'btn btn-success'}) }}
-        
+
         {% endif %}
         <br />
 

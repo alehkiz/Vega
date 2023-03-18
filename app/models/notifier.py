@@ -165,7 +165,7 @@ class Notifier(db.Model):
 
 class NotifierStatus(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String(32), nullable=False)
+    status = db.Column(db.String(32), nullable=False, unique=True)
     notices = db.relationship('Notifier', backref='status', lazy='dynamic')
 
 

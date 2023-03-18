@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import Blueprint, flash, render_template, redirect, url_for, current_app as app, request
 from flask_login import login_required
 from flask_security import login_required, current_user, roles_accepted
-from app.forms.transaction import TransactionOptionForm, TransactionForm, TransactionOptionForm, TransactionScreenForn
+from app.forms.transaction import TransactionOptionForm, TransactionForm, TransactionOptionForm, TransactionScreenForm
 from app.models.transactions import Transaction, TransactionOption
 from app.utils.html import process_html
 from app.utils.kernel import convert_datetime_to_local
@@ -24,7 +24,6 @@ def index():
 @roles_accepted('admin', 'support')
 def add():
     if request.args.get('id', False) != False and request.args.get('options', False) != False:
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>AQUI<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         form = TransactionOptionForm()
         if not request.args.get('id', False).isnumeric():
             flash('Não foi possível identificar a transação', category='danger')
@@ -62,7 +61,21 @@ def add():
                     return render_template('add.html', form=form, title='Adicionar', options=True)
         form.transaction.data = transaction.transaction
         return render_template('add.html', form=form, title='Adicionar Opções', options=True)
-    
+    if request.args.get('id', False) != False and request.args.get('screen', False) != False:
+        form = TransactionScreenForm(request.form, tid=1)
+        if not request.args.get('id', False).isnumeric():
+            flash('Não foi possível identificar a transação', category='danger')
+            return render_template('add.html', options=True)
+        t_id = int(request.args.get('id', False))
+        transaction = Transaction.query.filter(Transaction.id == t_id).first()
+        if transaction is None:
+            flash('Não foi possível identificar a transação', category='danger')
+            return render_template('add.html', options=True)
+        if form.validate_on_submit():
+            ...
+        form.transaction.data = transaction.transaction
+        return render_template('add.html', form=form, title='Adicionar Opções', screen=True)
+
     else:
     
         form = TransactionForm()

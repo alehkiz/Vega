@@ -96,7 +96,7 @@ class TransactionScreen(db.Model):
     filename = db.Column(db.Text, nullable=False, unique=True)
     file_path = db.Column(db.Text, nullable=False, unique=True)
     transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.id'), nullable=False)
-
+    transaction_option_id = db.Column(db.Integer, db.ForeignKey('transaction_option.id'), nullable=True)
     def check_file(self) -> bool:
         if self.file_path is None or self.file_path == '':
             raise Exception('file_path deve ser um caminho válido')

@@ -1,9 +1,9 @@
 from flask.globals import request
 from flask_wtf import FlaskForm
-from wtforms import TextAreaField, StringField, SubmitField, BooleanField, MultipleFileField, FieldList, FormField
+from wtforms import TextAreaField, StringField, SubmitField, BooleanField, MultipleFileField, FieldList, FormField, SelectField
 from wtforms.validators import DataRequired, Length
 from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
-from app.models.transactions import Parameter, TransactionType
+from app.models.transactions import Parameter, TransactionOption, TransactionType
 from app.models.wiki import SubTopic, Topic, Tag
 from app.models.security import User
 from flask import request
@@ -35,9 +35,25 @@ class TransactionOptionForm(FlaskForm):
 #     submit = SubmitField('Salvar')   
 
 
-class TransactionScreenForn(FlaskForm):
+class TransactionScreenForm(FlaskForm):
     transaction = StringField('Transação', render_kw={'disabled':''})
+    transaction_option = SelectField('Opção', 
+                            validators=[DataRequired()])
     files = MultipleFileField("Arquivos")
+    description = TextAreaField('Descrição', validators=[DataRequired('Item obrigatório'), Length(min=8, max=540, message='A descrição deve ter entre 8 e 540 caracteres')])
     save = SubmitField('Salvar')
     add = SubmitField('Nova Tela')
     
+
+
+    def __init__(self, formdata=..., **kwargs): #tid, formdata = ..., *args,
+        super().__init__(formdata, **kwargs)
+        options = [('', 'Selectione uma opção')]
+        if kwargs.get('tid', False) is False:
+            raise Exception('Nenhuma transação informada')
+        options.extend([(_.id, _.option) for _ in TransactionOption.query.filter(TransactionOption.transaction_id == kwargs.get('tid'))])
+        self.transaction_option.choices = options
+        self.transaction_option.process_data(options[0])
+        
+        
+        
