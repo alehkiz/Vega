@@ -71,8 +71,22 @@ def add():
         if transaction is None:
             flash('Não foi possível identificar a transação', category='danger')
             return render_template('add.html', options=True)
+        
+        print('Arquivos: ', request.files.getlist("file"))
+        print('request.files', [x for x in request.files])
         if form.validate_on_submit():
-            ...
+            files_uploaded = form.files.data
+            files = request.files['files']
+            print(files)
+            print(f'Length files:{len(files)}')
+            # print([type(x) for x in files_uploaded])
+            # print(form.files.raw_data)
+            # print(type(form.files.data[0]))
+            if len(files_uploaded) > 0:
+                ...
+            
+            
+        print('Erros:', form.errors)
         form.transaction.data = transaction.transaction
         return render_template('add.html', form=form, title='Adicionar Opções', screen=True)
 

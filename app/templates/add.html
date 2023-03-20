@@ -12,7 +12,8 @@
 {% block app_content %}
 {% if form %}
 <div class="col-md-8">
-    <form action="" method="POST">
+    <form action="" method="POST" {{ "enctype=multipart/form-data" if screen is defined else '' }}>
+        
         {% if article is defined %}
         {{ form.csrf_token }}
         {{ macros.render_field(form.title, size=32, class='form-control', placeholder='Titulo') }}
@@ -164,7 +165,9 @@
         {{ form.csrf_token }}
         {{ macros.render_field(form.transaction, size=32, class='form-control', placeholder='Titulo') }}
         {{ macros.render_field(form.transaction_option, nosize=true, class='form-select') }}
-        
+        {{ macros.render_field(form.description, size=32, class='form-control', placeholder='Titulo', maxlength=540) }}
+
+
         {{ macros.render_field(form.files,size=32, class='form-control', placeholder='Titulo', maxlength=540) }}
         
         <br>

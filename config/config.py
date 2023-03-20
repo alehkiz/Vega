@@ -280,6 +280,7 @@ class BaseConfig(object):
     }
     USER_ANON_ID = 4
     UPLOAD_FOLDER = join(APP_DIR, 'upload')
+    UPLOAD_SCREEN_TRANSACTION_FOLDER = join(UPLOAD_FOLDER, 'screens')
     OLD_UPLOAD_FOLDER = join(UPLOAD_FOLDER, '_old')
     MAX_CONTENT_LENGTH = 31457280 #20MB
     UPLOAD_EXTENSIONS = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'xlsx', 'xls']
