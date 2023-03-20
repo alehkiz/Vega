@@ -78,7 +78,7 @@ def add():
             files_uploaded = form.files.data
             files = request.files['files']
             print(files)
-            print(f'Length files:{len(files)}')
+            print(f'Length files:{dir(files)}')
             # print([type(x) for x in files_uploaded])
             # print(form.files.raw_data)
             # print(type(form.files.data[0]))
