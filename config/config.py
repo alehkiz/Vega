@@ -284,7 +284,7 @@ class BaseConfig(object):
     OLD_UPLOAD_FOLDER = join(UPLOAD_FOLDER, '_old')
     MAX_CONTENT_LENGTH = 31457280 #20MB
     UPLOAD_EXTENSIONS = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'xlsx', 'xls']
-
+    IMAGES_EXTENSION = ['png', 'jpg', 'jpeg']
     MSG_PASSWORD_VALIDATE = '''Senha deve conter mais que 6 caracteres, pelo menos um número, pelo menos uma letra maiúscula e pelo menos uma letra minúscula'''
 
 class DevelopmentConfig(BaseConfig):

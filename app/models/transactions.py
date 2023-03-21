@@ -97,6 +97,17 @@ class TransactionScreen(db.Model):
     file_path = db.Column(db.Text, nullable=False, unique=True)
     transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.id'), nullable=False)
     transaction_option_id = db.Column(db.Integer, db.ForeignKey('transaction_option.id'), nullable=True)
+    active = db.Column(db.Float, nullable=False)
+    active = db.Column(db.Boolean, nullable=False)
+    uploaded_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    update_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    uploaded_at = db.Column(
+        db.DateTime(timezone=True), default=convert_datetime_to_local
+    )
+    mimetype = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, index=True, nullable=False)
+    size = db.Column(db.Integer)
+
     def check_file(self) -> bool:
         if self.file_path is None or self.file_path == '':
             raise Exception('file_path deve ser um caminho válido')

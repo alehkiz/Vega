@@ -1,12 +1,15 @@
 from datetime import datetime
-from flask import Blueprint, flash, render_template, redirect, url_for, current_app as app, request
+from os import remove
+from flask import Blueprint, flash, render_template, redirect, url_for, current_app as app, request, abort
 from flask_login import login_required
 from flask_security import login_required, current_user, roles_accepted
 from app.forms.transaction import TransactionOptionForm, TransactionForm, TransactionOptionForm, TransactionScreenForm
-from app.models.transactions import Transaction, TransactionOption
+from app.models.transactions import Transaction, TransactionOption, TransactionScreen
 from app.utils.html import process_html
 from app.utils.kernel import convert_datetime_to_local
 from app.core.db import db
+from os.path import join, isdir, isfile
+from os import stat
 
 from app.utils.routes import counter
 bp = Blueprint('transactions', __name__, url_prefix='/transacoes')
@@ -17,6 +20,12 @@ bp = Blueprint('transactions', __name__, url_prefix='/transacoes')
 @roles_accepted('admin', 'support')
 def index():
     return 'none'
+
+@bp.route('/view/<int:id>', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('admin', 'support')
+def view(id : int):
+    return 'ok'
 
 
 @bp.route('/add', methods=['GET', 'POST'])
@@ -72,21 +81,63 @@ def add():
             flash('Não foi possível identificar a transação', category='danger')
             return render_template('add.html', options=True)
         
-        print('Arquivos: ', request.files.getlist("file"))
-        print('request.files', [x for x in request.files])
         if form.validate_on_submit():
-            files_uploaded = form.files.data
-            files = request.files['files']
-            print(files)
-            print(f'Length files:{dir(files)}')
-            # print([type(x) for x in files_uploaded])
-            # print(form.files.raw_data)
-            # print(type(form.files.data[0]))
-            if len(files_uploaded) > 0:
-                ...
+            files = request.files.getlist("files")
+            for file in files:
+                if file.filename != '':
+                    if file.filename.split('.', 1)[1].lower() not in app.config['IMAGES_EXTENSION']:
+                        form.files.errors.append(f"Arquivo não aceito, envie apenas arquivos no formato {', '.join(app.config['IMAGES_EXTENSION'])}")
+                        return render_template('add.html', form=form, title='Adicionar Opções', screen=True)
+                else:
+                    form.files.errors.append(f"Nenhum arquivo enviado.")
+                    return render_template('add.html', form=form, title='Adicionar Opções', screen=True)
+                if isfile(join(app.config['UPLOAD_SCREEN_TRANSACTION_FOLDER'], file.filename)):
+                    form.files.errors.append(f"Tela já existe.")
+                    return render_template('add.html', form=form, title='Adicionar Opções', screen=True)
+                
+                screen = TransactionScreen.query.filter(TransactionScreen.filename.like(file.filename)).first()
+                if screen is not None:
+                    form.files.errors.append('Arquivo já existe')
+                    return render_template('add.html', form=form, title='Adicionar Opções', screen=True)
+                last_sequence = TransactionScreen.query.filter(TransactionScreen.transaction_id == form.transaction_option.data).order_by(TransactionScreen.id.desc()).limit(1).first()
+                last_sequence = last_sequence.screen_sequence if last_sequence != None else 0
+                screen = TransactionScreen()
+                screen.active = True
+                screen.screen_sequence = last_sequence + 1
+                screen.uploaded_user_id = current_user.id
+                screen.mimetype = file.mimetype
+                screen.filename = file.filename
+                screen.file_path = join(app.config['UPLOAD_SCREEN_TRANSACTION_FOLDER'], file.filename)
+                screen.description = form.description.data
+                screen.transaction_id = form.transaction_option.data
+                file.save(screen.file_path)
+                if not isfile(screen.file_path):
+                    flash('Não foi possível salvar o arquivo', category='warning')
+                    return render_template('add.html', form=form, title='Adicionar Opções', screen=True)
+                size = stat(join(app.config['UPLOAD_SCREEN_TRANSACTION_FOLDER'], file.filename)).st_size
+                screen.size = size
+                try:
+                    db.session.add(screen)
+                    db.session.commit()
+                    
+                except Exception as e:
+                        if isfile(screen.file_path):
+                            remove(screen.file_path)
+                            flash(f'Arquivo {file.filename} não existe {e}')
+                            app.logger.error(f"Arquivo {file.path} não existe")
+                            app.logger.error(e)
+                            return abort(500)
+                        app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
+                        app.logger.error(e)
+                        db.session.rollback()
+                        return render_template('add.html', form=form, title='Adicionar', screen=True)
+            if request.form.get('save') == 'Salvar':
+                return redirect(url_for('transactions.view', id=transaction.id))
+            elif request.form.get('add') == 'Nova Tela':
+                return redirect(url_for('transactions.add', id=transaction.id, screen=True))
+            else:
+                return redirect(url_for('transactions.view', id=transaction.id))
             
-            
-        print('Erros:', form.errors)
         form.transaction.data = transaction.transaction
         return render_template('add.html', form=form, title='Adicionar Opções', screen=True)
 
