@@ -25,7 +25,9 @@ def index():
 @login_required
 @roles_accepted('admin', 'support')
 def view(id : int):
-    return 'ok'
+    transaction = Transaction.query.filter(Transaction.id == id).first_or_404()
+    
+    return render_template('transaction.html')
 
 
 @bp.route('/add', methods=['GET', 'POST'])
