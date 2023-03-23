@@ -20,6 +20,11 @@ Sistema de pergunta e resposta utilizado pelo Detran.SP, com o objetivo de padro
 ### Melhorias futuras:
 
 - [X] Sistema de notificação;
+- [] Incluir transações:
+ - [X] Modelagem de dados;
+ - [] Workflow para criação de transação, inclusão de prints; 60%
+ - [] Frontend para processamento de todas as pesquisas cadastradads;
+ 
 - [] Incluir requisições assincronas;
 - [] Incluir a leitura de PDF e adicionar como pesquisa sobre manuais;
 
