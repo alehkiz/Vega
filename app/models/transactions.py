@@ -38,6 +38,12 @@ transaction_parameter = db.Table(
     db.Column("parameter_id", db.Integer, db.ForeignKey("parameter.id")),
 )
 
+transaction_finalities = db.Table(
+    "transaction_finalities",
+    db.Column("transaction_id", db.Integer, db.ForeignKey("transaction.id")),
+    db.Column("finality_id", db.Integer, db.ForeignKey("transaction_finality.id")),
+)
+
 class Transaction(db.Model):
     __searchable__ = ["transaction"]
     id = db.Column(db.Integer, primary_key=True)
@@ -65,6 +71,16 @@ class Transaction(db.Model):
         ),
         lazy="dynamic",
     )
+
+    finalities = db.relationship(
+        "TransactionFinality",
+        secondary=transaction_finalities,
+        backref=db.backref(
+            "transactions", lazy="dynamic", cascade="save-update", single_parent=True
+        ),
+        lazy="dynamic",
+    )
+
     options = db.relationship('TransactionOption', backref='transaction', lazy='dynamic')
     screens = db.relationship('TransactionScreen', backref='transaction', lazy='dynamic')
     parameters = db.relationship(
@@ -121,3 +137,9 @@ class TransactionType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.Text, nullable=False, unique=True)
     transactions = db.relationship('Transaction', backref='type', lazy='dynamic')
+
+class TransactionFinality(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False, unique=True)
+
+    # transactions = db.relationship('Transaction', backref='type', lazy='dynamic')

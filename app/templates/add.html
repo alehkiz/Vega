@@ -123,12 +123,12 @@
         <br>
         <br>
 
-        {{ macros.render_field(form.sub_topics, class='selectpicker', nolabel=true, multiple=true,
+        {{ macros.render_field(form.sub_topics, class='selectpicker', label_block=true, multiple=true,
         **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
         <br>
         <br>
 
-        {{ macros.render_field(form.topics, class='selectpicker', nolabel=true, multiple=true,
+        {{ macros.render_field(form.topics, class='selectpicker', label_block=true,  multiple=true,
         **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
         <br>
         <br>
@@ -139,8 +139,16 @@
         {{ form.csrf_token }}
         {{ macros.render_field(form.transaction, size=32, class='form-control', placeholder='Titulo') }}
         {{ macros.render_field(form.description, size=32, class='form-control', placeholder='Titulo', maxlength=540) }}
+        <br>
+        <br>
+        {{ macros.render_field(form.type, class='selectpicker', multiple=true, label_block=true, 
+        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
+        <br>
+        <br>
+        {{ macros.render_field(form.finalyties, class='selectpicker', label_block=true, multiple=true,
+        **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
+
         
-        {{ macros.render_field(form.type, nosize=true, class='form-select') }}
         
         <br>
         <!-- {{ macros.render_field(form.type, class='selectpicker', nolabel=true, multiple=true,
@@ -149,12 +157,12 @@
         <br>
         <br>
 
-        {{ macros.render_field(form.sub_topics, class='selectpicker', nolabel=true, multiple=true,
+        {{ macros.render_field(form.sub_topics, class='selectpicker', label_block=true,  multiple=true,
         **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
         <br>
         <br>
 
-        {{ macros.render_field(form.topic, class='selectpicker', nolabel=true, multiple=true,
+        {{ macros.render_field(form.topic, class='selectpicker', label_block=true,  multiple=true,
         **{'data-actions-box':"true", 'data-style':"btn-primary", 'data-selected-text-format':"count"})}}
         <br>
         <br>

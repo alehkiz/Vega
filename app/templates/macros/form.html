@@ -1,8 +1,12 @@
-{% macro render_field(field, size, class, placeholder, nosize, nolabel) %}
+{% macro render_field(field, size, class, placeholder, nosize, nolabel, label_block) %}
 {% if nolabel %}
 {{ field.label(class='visually-hidden') }}
 {% else %}
-{{ field.label(class='form-label') }}
+    {% if label_block %}
+    {{ field.label(class='col-sm-2 col-form-label') }}
+    {% else %}
+    {{ field.label(class='form-label') }}
+    {% endif %}
 {% endif %}
 {% if style %}
 {{ field(class=(class if class else '') + (" is-invalid" if field.errors else ""), size=size, placeholder=placeholder,
