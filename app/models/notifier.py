@@ -141,7 +141,7 @@ class Notifier(db.Model):
             'status': self.status_name,
             'level': self.level_bootstrap_name,
             'priority_order': self.priority_order,
-            'url': url_for('api.notification', id=self.id),
+            'url': Markup(f'<a href=url_for("api.notification", id=self.id)>Link</a>'),
             'subtopic': '' if self.sub_topics.first() is None else self.sub_topics.first().name
         }
 
@@ -156,7 +156,9 @@ class Notifier(db.Model):
             'priority': self.priority_name,
             'priority_order': self.priority_order,
             'created_elapsed_time': self.get_create_time_elapsed,
-            'subtopic': '' if self.sub_topics.first() is None else self.sub_topics.first().name
+            'subtopic': '' if self.sub_topics.first() is None else self.sub_topics.first().name,
+            'view_link': Markup(f'<a class="view text-decoration-none" href="{url_for("notifier.view", id=self.id)}" data-bs-toggle="tooltip" title="Visualizar"><i class="fas fa-search-plus"></i></a>'),
+            'edit_link': Markup(f'<a class="edit text-decoration-none" id="edit_notification" href="{url_for("notifier.edit", id=self.id)}" data-bs-toggle="tooltip" title="Editar"><i class="fas fa-edit"></i></a>')
         }
 
     def __repr__(self) -> str:

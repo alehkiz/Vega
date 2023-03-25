@@ -1,6 +1,6 @@
 from datetime import datetime
 from os import remove
-from flask import Blueprint, flash, render_template, redirect, url_for, current_app as app, request, abort
+from flask import Blueprint, flash, render_template, redirect, url_for, current_app as app, request, abort, make_response, send_from_directory
 from flask_login import login_required
 from flask_security import login_required, current_user, roles_accepted
 from app.forms.transaction import TransactionOptionForm, TransactionForm, TransactionOptionForm, TransactionScreenForm
@@ -27,7 +27,7 @@ def index():
 def view(id : int):
     transaction = Transaction.query.filter(Transaction.id == id).first_or_404()
     
-    return render_template('transaction.html')
+    return render_template('transaction.html', transaction_dict=transaction.to_dict)
 
 
 @bp.route('/add', methods=['GET', 'POST'])
@@ -57,7 +57,6 @@ def add():
             try:
                 db.session.add(option)
                 db.session.commit()
-                print(request.form)
                 flash('Opção salva com sucesso', category="success")
                 if request.form.get('save', False) == 'Salvar':
                     return redirect(url_for('transactions.add', id=transaction.id, screen=True))
@@ -184,3 +183,20 @@ def add():
 @roles_accepted('admin', 'support')
 def edit():
     return 'none'
+
+
+
+@bp.route('/screen/<int:id>')
+def screen(id=None):
+    if not id is None:
+        file = TransactionScreen.query.filter(TransactionScreen.id == id).first_or_404()
+        
+        if not isfile(join(app.config['UPLOAD_SCREEN_TRANSACTION_FOLDER'], file.filename)):
+            return abort(404)
+        # binary_pdf = file.path
+        response = make_response(send_from_directory(app.config['UPLOAD_SCREEN_TRANSACTION_FOLDER'], file.filename))
+        
+        response.headers['Content-Type'] = 'image/png'
+        response.headers['Content-Disposition'] = \
+            f'inline; filename="{file.filename}";name="{file.filename}"'
+        return response

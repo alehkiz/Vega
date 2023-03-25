@@ -1,0 +1,19 @@
+{% block app_content %}
+
+{% if transaction_dict %}
+
+<h3 class="page-header">Visualizar item #{{transaction_dict['id']}}</h3>
+
+<div class="row">
+  {% for key, value in transaction_dict.items() %}
+    <div class="col-md-4">
+      <p><strong>{{key}}</strong></p>
+      <p>{{value}}</p>
+    </div>
+  {% endfor %}
+  </div> 
+  
+  {% endif %}
+
+
+{% endblock %}

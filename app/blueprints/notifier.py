@@ -88,9 +88,13 @@ def add():
     return render_template('add.html', form=form, title='Adicionar', notifier=True)
 
 @bp.route('/view/<int:id>')
+@login_required
+@roles_accepted('admin', 'support')
 @counter
 def view(id: int):
-    return ''
+    notification = Notifier.query.filter(Notifier.id == id).first_or_404()
+
+    return render_template('notifier.html', notification_dict=notification.to_dict_detail)
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -124,7 +128,7 @@ def edit(id: int):
         try:
             db.session.commit()
             flash('Notificação criada com sucesso', category='success')
-            return redirect(url_for('admin.notifier'))
+            return redirect(url_for('notifier.view', id=nf.id))
         except Exception as e:
             app.logger.error(app.config.get('_ERRORS').get('DB_COMMIT_ERROR'))
             app.logger.error(e)

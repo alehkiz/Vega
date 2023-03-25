@@ -1,4 +1,11 @@
 {% extends 'base_question.html' %} 
 {% from "macros/form.html" import render_field %}
 {% from "macros/main.html" import render_pagination %}
+{% block question_content %}
 
+<div class="container-sm col-10">
+{% include '_transaction.html'%}
+
+</div>
+
+{% endblock %}

@@ -1,5 +1,6 @@
 # from sqlalchemy import func
-from flask import Markup, escape, current_app as app, abort, flash
+from typing import Optional
+from flask import Markup, escape, current_app as app, abort, flash, url_for
 from sqlalchemy import func, text, Index, cast, desc, extract, Date
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import date, datetime
@@ -20,6 +21,7 @@ from app.utils.kernel import (
 )
 from app.utils.html import process_html
 from app.models.security import User
+from app.utils.others import limit_chars
 
 transaction_topic = db.Table(
     "transaction_topic",
@@ -92,6 +94,53 @@ class Transaction(db.Model):
         lazy="dynamic",
     )
 
+    def get_body_html(self, resume=False, size=1500):
+        html_classes = {'table': 'table table-bordered',
+                        'img': 'img img-fluid'}
+        if resume:
+            l_text = list(filter(lambda x: x not in [
+                          '', ' ', '\t'], self.description.split('\n')))
+            # text = get_list_max_len(l_text, 256)
+            return Markup(process_html(markdown('\n'.join(l_text),
+                                                extras={"tables": None, "html-classes": html_classes, 'target-blank-links': True}))).striptags()[0:size] + '...'
+            # return Markup(process_html(markdown(text))).striptags()
+
+        return Markup(markdown(self.description, extras={"tables": None, "html-classes": html_classes, 'target-blank-links': True}))
+
+
+    @property
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'transaction': self.transaction,
+            'description': limit_chars(self.get_body_html(), 50),
+            'finalities' : ', '.join([x.name for x in self.finalities]),
+            'topics' : ', '.join([x.name for x in self.topics]),
+            'subtopics': ', '.join([x.name for x in self.sub_topics]),
+            'options': ', '.join([x.option for x in self.options]),
+            'screens': Markup('<br>'.join([x.img_tag() for x in self.screens])),
+            'url': Markup(f'<a href=url_for("api.notification", id=self.id)>Link</a>'),
+
+        }
+
+    @property
+    def to_dict_detail(self):
+        return {
+            'id': self.id,
+            'transaction': self.transaction,
+            'content': self.get_body_html(),
+            'status': self.status_name,
+            'level': self.level_bootstrap_name,
+            'priority': self.priority_name,
+            'priority_order': self.priority_order,
+            'created_elapsed_time': self.get_create_time_elapsed,
+            'subtopic': '' if self.sub_topics.first() is None else self.sub_topics.first().name,
+            'view_link': Markup(f'<a class="view text-decoration-none" href="{url_for("notifier.view", id=self.id)}" data-bs-toggle="tooltip" title="Visualizar"><i class="fas fa-search-plus"></i></a>'),
+            'edit_link': Markup(f'<a class="edit text-decoration-none" id="edit_notification" href="{url_for("notifier.edit", id=self.id)}" data-bs-toggle="tooltip" title="Editar"><i class="fas fa-edit"></i></a>')
+        }
+
+
+
     def __repr__(self):
         return f"<{self.transaction}>"
 
@@ -131,6 +180,11 @@ class TransactionScreen(db.Model):
             return True
         return False
     
+    def img_tag(self, width:int=200, height:Optional[int]=None) -> Markup:
+        url = url_for('transactions.screen', id=self.id)
+        print(url)
+        return f'<img src="{url}" width="{width}", heigth="{height}">'
+
 
 class TransactionType(db.Model):
     '''Incluir o tipo de transação Pesquisa ou Transação'''

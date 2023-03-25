@@ -3,6 +3,12 @@
 {% block app_content %}
 
 <div class="container-sm col-10">
+
+    {% if notification_dict is defined %}
+    
+    {% include '_notifier.html' %}
+    {% else %}
+    
     <ul class="nav nav-tabs" id='notifierTab' role='notifierList'>
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id='active-tab' data-bs-toggle='tab' data-bs-target="#active" type="button"
@@ -14,9 +20,10 @@
         </li>
     </ul>
     <div class="row my-3 tab-content">
+        {% if notices_active is defined %}
         <div class="tab-pane fade show active border border-primary pb-3 rounded mb-2" id='active' role='tabpanel'
             aria-labelledby="active-tab">
-            {% if notices_active is defined %}
+            
             {% for notice in notices_active %}
             <div class="row">
 
@@ -49,13 +56,13 @@
             </div>
             <hr>
             {% endfor %}
-            {% endif %}
+            
         </div>
-
-
+        {% endif %}
+        {% if notices_history is defined %}
         <div class="tab-pane fade border border-secondary pb-3 rounded mb-3" id='history' role='tabpanel'
             aria-labelledby="history-tab">
-            {% if notices_history is defined %}
+            
             {% for notice in notices_history %}
             {% for topic in notice.topics_name %}
             <span class="badge bg-secondary mt-3 float-end">{{topic}}</span>
@@ -82,8 +89,11 @@
             </div>
             <hr>
             {% endfor %}
-            {% endif %}
+            
         </div>
+        {% endif %}
+
+        {% endif %}
     </div>
 
     {% endblock %}
