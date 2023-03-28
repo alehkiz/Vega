@@ -44,7 +44,7 @@ a {
     margin-bottom: 0;
     color: #999;
     font-size: 60%;
-    
+
 }
 
 .article-text {
@@ -418,7 +418,7 @@ i.fas.circle:hover {
     background-color: #fff !important;
 }
 
-.notification-link:hover{
+.notification-link:hover {
     display: block;
     background-color: rgb(143, 143, 143) !important;
 }
@@ -566,3 +566,15 @@ i.fas.circle:hover {
 .darkmodebtn:focus {
     outline: none;
 }
+
+.custom-popover {
+    --bs-popover-max-width: 200px;
+    --bs-popover-border-color: var(--bs-primary);
+    --bs-popover-header-bg: var(--bs-primary);
+    --bs-popover-header-color: var(--bs-white);
+    --bs-popover-body-padding-x: 1rem;
+    --bs-popover-body-padding-y: .5rem
+}
+
+
+.btn-link{ cursor: pointer; }

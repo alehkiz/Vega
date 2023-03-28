@@ -186,7 +186,8 @@ def process_value(value: str, cls_query, route: str = ""):
 
     pat = "(?<=\\{).+?(?=\\})"
     pat_title = r"(?<=:titulo:).*"
-    pat_id = r"(?<=:q:).[0-9]*"
+    pat_question_id = r"(?<=:q:).[0-9]*"
+    pat_transaction_id = r"(?<=:t:).[a-zA-Z0-9]*"
     groups = re.findall(pat, value)
     if len(groups) > 0:
         for group in groups:
@@ -196,10 +197,37 @@ def process_value(value: str, cls_query, route: str = ""):
             if not _title_group is None:
                 title = _title_group.group()
                 group.replace(f":titulo:{title}", "")
-            _id_group = re.search(pat_id, group)
-            if _id_group is None:
-                raise Exception(f"Houve um erro no processamento da resposta {value}")
-            _question_id = int(_id_group.group())
+            _id_question_group = re.search(pat_question_id, group)
+            if _id_question_group is None:
+                _id_transaction_group = re.search(pat_transaction_id, group)
+                if _id_transaction_group is None:
+                    raise Exception(f"Houve um erro no processamento da resposta {value}")
+                else:
+                    print('aqui: ', _id_transaction_group)
+                    transaction = _id_transaction_group.group()
+                    print(_id_transaction_group.groups())
+                    from app.models.transactions import Transaction
+                    obj_query = Transaction.query.filter(Transaction.transaction.like(transaction)).first()
+                    if obj_query is None:
+                        raise Exception(f"O objeto {transaction} não foi identificado.")
+                    try:
+                        # <a class="btn" rel="popover" data-img="//placehold.it/400x200">Image 1</a>
+                        link = url_for("transactions.view", id=obj_query.id)
+                        link = f'<a href="{link}">detalhes</a>'
+                        html = Markup(f'''<a tabindex="0" class="link-info btn-link"
+                                            data-toggle="popover"
+                                            data-bs-toggle="popover" 
+                                            data-bs-placement="right"
+                                            data-bs-custom-class="custom-popover"
+                                            data-bs-title="Transação {obj_query.transaction.upper()}"
+                                            data-bs-content='{obj_query.description} {link}'>
+                                    {obj_query.transaction}
+                                    </a>''')
+                        value = value.replace(_original_value, html)
+                    except Exception as e:
+                        raise Exception(f"A transação {transaction} não foi encontrada")
+                continue
+            _question_id = int(_id_question_group.group())
             obj_query = cls_query.query.filter(cls_query.id == _question_id).first()
             if obj_query is None or not obj_query.was_approved:
                 '''
@@ -246,11 +274,14 @@ def process_transaction(value: str) -> str:
             if transaction is None:
                 raise Exception(f"Houve um erro no processamento da resposta {value}")
             transaction = transaction.group()
+            print(transaction)
             obj_query = Transaction.query.filter(Transaction.transaction.like(transaction)).first()
             if obj_query is None:
                 raise Exception(f"O objeto {transaction} não foi identificado.")
             try:
-                link = url_for("transaction.view", id=obj_query.id)
+
+                # <a class="btn" rel="popover" data-img="//placehold.it/400x200">Image 1</a>
+                link = url_for("transactions.view", id=obj_query.id)
                 html = Markup(f'''<button type="button" class="btn btn-secondary"
                                     data-bs-toggle="popover" data-bs-placement="right"
                                     data-bs-custom-class="custom-popover"

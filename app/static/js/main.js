@@ -1,11 +1,15 @@
 $(document).ready(function () {
 
     // like and unlike click
-    $('a[rel=popover]').popover({
+    $('[data-toggle=popover]').popover({
         html: true,
-        trigger: 'hover',
+        trigger: 'click',
         placement: 'bottom',
-        content: function(){return '<img src="'+$(this).data('img') + '" />';}
+        // content: function(){
+        //     return '<img src="'+$(this).data('link') + '" />';},
+        // teste: function() {
+        //     console.log($(this))
+        // }
       });
 
 
