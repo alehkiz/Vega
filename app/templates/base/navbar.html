@@ -61,7 +61,7 @@
                             <a class="dropdown-item" href="#">Desenvolvimento</a>
                             <ul class="dropdown-menu dropdown-menu-dark">
 
-                                <li><a class="dropdown-item" type='button' href="{{ url_for('transactions.index')}}"
+                                <li><a class="dropdown-item" type='button' href="{{ url_for('admin.transaction')}}"
                                         class='nav-link'>Transações</a>
                                 </li>
                             </ul>
@@ -163,7 +163,8 @@
                         </li>
                         {% endif %}
                         <li><a class="dropdown-item" href='{{url_for("admin.notifier")}}'>Notificações</a></li>
-                        
+                        <li><a class="dropdown-item" href="{{ url_for('admin.transaction')}}">Transações</a>
+                    </li>
                         <hr class="dropdown-divider">
                         <li><a class="dropdown-item" href='{{url_for("admin.file")}}'>Upload</a></li>
                         {% if config.get('MODE', False) == 'dev' %}

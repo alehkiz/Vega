@@ -12,7 +12,7 @@ from os.path import join, isdir, isfile
 from os import stat
 
 from app.utils.routes import counter
-bp = Blueprint('transactions', __name__, url_prefix='/transacoes')
+bp = Blueprint('transaction', __name__, url_prefix='/transacoes')
 
 @bp.route('/')
 @bp.route('/index')
@@ -185,6 +185,17 @@ def edit():
     return 'none'
 
 
+@bp.route('/deactive')
+@login_required
+@roles_accepted('admin', 'support')
+def deactive():
+    return 'none'
+
+@bp.route('/active')
+@login_required
+@roles_accepted('admin', 'support')
+def active():
+    return 'none'
 
 @bp.route('/screen/<int:id>')
 def screen(id=None):

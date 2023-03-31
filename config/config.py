@@ -268,6 +268,36 @@ class BaseConfig(object):
                 'name' : 'criado por',
                 'attr': 'username'
 
+            },
+        },
+        'transaction':{
+            'id': {
+                'name': 'id',
+                'attr': None
+            },
+            'transaction': {
+                'name': 'Transação',
+                'attr': None
+            },
+            'type_name': {
+                'name': 'Tipo',
+                'attr': 'type_name'
+            },
+            'active': {
+                'name': 'Ativo?',
+                'attr': None
+            },
+            'topic_id': {
+                'name': 'Topico',
+                'attr': 'topics_name'
+            },
+            'sub_topic_id': {
+                'name': 'Sub Topico',
+                'attr': 'sub_topics_name'
+            },
+            'created_at':{
+                'name': 'Criado em',
+                'attr': 'get_formated_date'
             }
         },
     }

@@ -17,7 +17,8 @@ from sqlalchemy_searchable import make_searchable
 
 from app.core.db import db
 from app.utils.kernel import (
-    convert_datetime_to_local
+    convert_datetime_to_local,
+    format_datetime_local
 )
 from app.utils.html import process_html
 from app.models.security import User
@@ -52,9 +53,7 @@ class Transaction(db.Model):
     transaction = db.Column(db.String(4), unique=True, nullable=False)
     type_id = db.Column(db.ForeignKey('transaction_type.id'), nullable=False)
     description = db.Column(db.String)
-    create_at = db.Column(
-        db.DateTime(timezone=True), index=False, default=convert_datetime_to_local
-    )
+    create_at = db.Column(db.DateTime(timezone=True), index=False, default=convert_datetime_to_local)
     created_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     update_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     sub_topics = db.relationship(
@@ -93,6 +92,21 @@ class Transaction(db.Model):
         ),
         lazy="dynamic",
     )
+    @property
+    def topics_name(self) -> str:
+        return ','.join([x.name for x in self.topics])
+    
+    @property
+    def sub_topics_name(self) -> str:
+        return ','.join([x.name for x in self.sub_topics])
+    
+    @property
+    def type_name(self) -> str:
+        return self.type.name
+    
+    @property
+    def get_formated_date(self):
+        return format_datetime_local(self.create_at)
 
     def get_body_html(self, resume=False, size=1500):
         html_classes = {'table': 'table table-bordered',
@@ -162,7 +176,7 @@ class TransactionScreen(db.Model):
     file_path = db.Column(db.Text, nullable=False, unique=True)
     transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.id'), nullable=False)
     transaction_option_id = db.Column(db.Integer, db.ForeignKey('transaction_option.id'), nullable=True)
-    active = db.Column(db.Float, nullable=False)
+    # active = db.Column(db.Float, nullable=False)
     active = db.Column(db.Boolean, nullable=False)
     uploaded_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     update_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
@@ -173,6 +187,7 @@ class TransactionScreen(db.Model):
     description = db.Column(db.Text, index=True, nullable=False)
     size = db.Column(db.Integer)
 
+    
     def check_file(self) -> bool:
         if self.file_path is None or self.file_path == '':
             raise Exception('file_path deve ser um caminho válido')

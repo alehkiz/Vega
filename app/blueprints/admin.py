@@ -701,6 +701,66 @@ def notifier():
         url_args=url_args
     )
 
+@bp.route('/transaction')
+@login_required
+@roles_accepted('admin', 'support')
+def transaction():
+    page = request.args.get("page", 1, type=int)
+    order = request.args.get("order", False)
+    order_type = request.args.get("order_type", "desc")
+    order_dict = {'desc': desc, 'asc': asc}
+    if not order_type in order_dict.keys():
+        order_type = 'desc'
+    if not order is False or not order_type is False:
+        try:
+            column = getattr(Transaction, order)
+            column_type = getattr(column, order_type)
+        except Exception as e:
+            column = Transaction.id
+            column_type = Transaction.id.desc
+    else:
+        column = Transaction.id
+        column_type = column.desc
+    # TODO Incluir a odernação por relacionamento de acordo com a seleção do usuário
+    relations = inspect(Transaction).relationships
+    if hasattr(column.property, 'target'):
+        if column.property.target.name in relations:
+            relationship = getattr(relations, str(
+                column.property.target.name), False)
+            if relationship is False:
+                raise Exception(
+                    f'{column.property.target.name} não é um relacionamento em Transaction')
+            q = db.session.query(Transaction).join(relationship.mapper.class_, getattr(Transaction, str(
+                column.property.target.name))).order_by(order_dict[order_type](getattr(relationship.mapper.class_, 'name')))
+    else:
+        q = Transaction.query.order_by(column_type())
+    paginate = q.paginate(page, app.config.get(
+        "TABLE_ITEMS_PER_PAGE", 10), False)
+    first_page = (
+        list(paginate.iter_pages())[0]
+        if len(list(paginate.iter_pages())) >= 1
+        else None
+    )
+    last_page = paginate.pages
+    order_type_inverse = "asc" if order_type == "desc" else "desc"
+    order = request.args.get('order', None)
+    url_args = dict(request.args)
+    url_args.pop('order_type', None)
+    url_args.pop('order', None)
+    url_args.pop('page') if 'page' in url_args.keys() else None
+    return render_template(
+        "admin.html",
+        pagination=paginate,
+        first_page=first_page,
+        last_page=last_page,
+        endpoint=request.url_rule.endpoint,
+        cls_table=Transaction,
+        list=True,
+        page_name="Transações",
+        order_type=order_type,
+        order_type_inverse=order_type_inverse,
+        url_args=url_args
+    )
 
 
 @bp.route('/file')
@@ -814,47 +874,47 @@ def file():
         # order=order
     )
 
-@bp.route('/transaction')
-@login_required
-@roles_accepted('admin', 'support')
-def transaction():
-    page = request.args.get('page', 1, type=int)
-    order = request.args.get('order', False)
-    order_type = request.args.get('order_type', 'desc')
+# @bp.route('/transaction')
+# @login_required
+# @roles_accepted('admin', 'support')
+# def transaction():
+#     page = request.args.get('page', 1, type=int)
+#     order = request.args.get('order', False)
+#     order_type = request.args.get('order_type', 'desc')
     
-    if not order is False or not order_type is False:
-        try:
-            column = getattr(FilePDF, order)
-            column_type = getattr(column, order_type)
-        except Exception as e:
-            column = FilePDF.uploaded_at
-            column_type = FilePDF.uploaded_at.asc
-    else:
-        column = FilePDF.uploaded_a
-    if order:
-        if order in Transaction.__table__.columns:
-            if topic != False:
-                q= db.session.query(Transaction).join(Transaction.topics).filter(Topic.id == topic.id).order_by(column_type())
-            else:
-                q=db.session.query(Transaction).join(Transaction.topics).order_by(column_type())
-        else:
-            relationship_class = getattr(
-                Transaction, order).property.mapper.class_
-            relationship_type = getattr(Transaction, order)
-            relationship_type_order = getattr(
-                relationship_class.name, order_type)
-            if topic != False:
-                q = (
-                    db.session.query(Transaction)
-                    .join(Transaction.topics)
-                    .filter(Topic.id == topic.id)
-                    .join(relationship_class, relationship_type)
-                    .order_by(relationship_type_order())
-                )
-            else:
-                q = (
-                    db.session.query(Transaction)
-                    .join(relationship_class, relationship_type)
-                    .order_by(relationship_type_order())
-                )
-    return render_template('index.html')
+#     if not order is False or not order_type is False:
+#         try:
+#             column = getattr(FilePDF, order)
+#             column_type = getattr(column, order_type)
+#         except Exception as e:
+#             column = FilePDF.uploaded_at
+#             column_type = FilePDF.uploaded_at.asc
+#     else:
+#         column = FilePDF.uploaded_a
+#     if order:
+#         if order in Transaction.__table__.columns:
+#             if topic != False:
+#                 q= db.session.query(Transaction).join(Transaction.topics).filter(Topic.id == topic.id).order_by(column_type())
+#             else:
+#                 q=db.session.query(Transaction).join(Transaction.topics).order_by(column_type())
+#         else:
+#             relationship_class = getattr(
+#                 Transaction, order).property.mapper.class_
+#             relationship_type = getattr(Transaction, order)
+#             relationship_type_order = getattr(
+#                 relationship_class.name, order_type)
+#             if topic != False:
+#                 q = (
+#                     db.session.query(Transaction)
+#                     .join(Transaction.topics)
+#                     .filter(Topic.id == topic.id)
+#                     .join(relationship_class, relationship_type)
+#                     .order_by(relationship_type_order())
+#                 )
+#             else:
+#                 q = (
+#                     db.session.query(Transaction)
+#                     .join(relationship_class, relationship_type)
+#                     .order_by(relationship_type_order())
+#                 )
+#     return render_template('index.html')

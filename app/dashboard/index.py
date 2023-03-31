@@ -1,4 +1,3 @@
-from unicodedata import category
 from dash_bootstrap_components._components.Alert import Alert
 from dash_html_components.B import B
 from dash_html_components.Br import Br
@@ -10,8 +9,6 @@ from app.models.app import Visit
 from app.models.search import Search, SearchDateTime
 from app.utils.kernel import format_number_as_thousand
 import datetime
-from re import template
-from dash_core_components.Checklist import Checklist
 # from flask import config, url_for, app as current_app
 from dash import Dash
 import dash_core_components as dcc
