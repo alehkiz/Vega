@@ -141,7 +141,7 @@ class Notifier(db.Model):
             'status': self.status_name,
             'level': self.level_bootstrap_name,
             'priority_order': self.priority_order,
-            'url': Markup(f'<a href=url_for("api.notification", id=self.id)>Link</a>'),
+            'url': Markup(f'<a href={url_for("api.notification", id=self.id)}>Link</a>'),
             'subtopic': '' if self.sub_topics.first() is None else self.sub_topics.first().name
         }
 
