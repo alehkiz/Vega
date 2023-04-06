@@ -38,8 +38,7 @@ class TransactionOptionForm(FlaskForm):
 
 class TransactionScreenForm(FlaskForm):
     transaction = StringField('Transação', render_kw={'disabled':''})
-    transaction_option = SelectField('Opção', 
-                            validators=[DataRequired()])
+    transaction_option = SelectField('Opção')
     files = MultipleFileField("Arquivos")
     description = TextAreaField('Descrição', validators=[DataRequired('Item obrigatório'), Length(min=8, max=540, message='A descrição deve ter entre 8 e 540 caracteres')])
     save = SubmitField('Salvar')
