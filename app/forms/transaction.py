@@ -26,7 +26,7 @@ class TransactionForm(FlaskForm):
 class TransactionOptionForm(FlaskForm):
     transaction = StringField('Transação', render_kw={'disabled':''})
     option = StringField('Opção')
-    description = TextAreaField('Descrição')
+    description = TextAreaField('Descrição', validators=[DataRequired('Item obrigatório'), Length(min=8, max=540, message='A descrição deve ter entre 8 e 540 caracteres')])
     save = SubmitField('Salvar')
     add = SubmitField('Nova Opção')
     

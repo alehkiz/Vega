@@ -100,8 +100,11 @@ def add():
                 if screen is not None:
                     form.files.errors.append('Arquivo já existe')
                     return render_template('add.html', form=form, title='Adicionar Opções', screen=True)
-                last_sequence = TransactionScreen.query.filter(TransactionScreen.transaction_id == form.transaction_option.data).order_by(TransactionScreen.id.desc()).limit(1).first()
-                last_sequence = last_sequence.screen_sequence if last_sequence != None else 0
+                if form.transaction_option.data != '':
+                    last_sequence = TransactionScreen.query.filter(TransactionScreen.transaction_id == form.transaction_option.data).order_by(TransactionScreen.id.desc()).limit(1).first()
+                    last_sequence = last_sequence.screen_sequence if last_sequence != None else 0
+                else:
+                    last_sequence = 0
                 screen = TransactionScreen()
                 screen.active = True
                 screen.screen_sequence = last_sequence + 1
