@@ -129,7 +129,7 @@ def add():
                         if isfile(screen.file_path):
                             remove(screen.file_path)
                             flash(f'Arquivo {file.filename} não existe {e}')
-                            app.logger.error(f"Arquivo {file.path} não existe")
+                            app.logger.error(f"Arquivo {file.filename} não existe")
                             app.logger.error(e)
                             return abort(500)
                         app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
