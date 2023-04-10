@@ -113,7 +113,8 @@ def add():
                 screen.filename = file.filename
                 screen.file_path = join(app.config['UPLOAD_SCREEN_TRANSACTION_FOLDER'], file.filename)
                 screen.description = form.description.data
-                screen.transaction_id = form.transaction_option.data
+                screen.transaction_option_id = form.transaction_option.data
+                screen.transaction_id = transaction.id
                 file.save(screen.file_path)
                 if not isfile(screen.file_path):
                     flash('Não foi possível salvar o arquivo', category='warning')
