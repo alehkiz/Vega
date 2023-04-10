@@ -40,7 +40,8 @@ def add():
             flash('Não foi possível identificar a transação', category='danger')
             return render_template('add.html', options=True)
         t_id = int(request.args.get('id', False))
-        transaction = Transaction.query.filter(Transaction.id == t_id).first()
+        transaction = Transaction.query.filter(Transaction.id == t_id).first_or_404()
+        form.transaction.data = transaction.transaction
         if transaction is None:
             flash('Não foi possível identificar a transação', category='danger')
             return render_template('add.html', options=True)
@@ -69,7 +70,7 @@ def add():
                     app.logger.error(e)
                     db.session.rollback()
                     return render_template('add.html', form=form, title='Adicionar', options=True)
-        form.transaction.data = transaction.transaction
+        
         return render_template('add.html', form=form, title='Adicionar Opções', options=True)
     if request.args.get('id', False) != False and request.args.get('screen', False) != False:
         form = TransactionScreenForm(request.form, tid=1)
@@ -81,7 +82,7 @@ def add():
         if transaction is None:
             flash('Não foi possível identificar a transação', category='danger')
             return render_template('add.html', options=True)
-        
+        form.transaction.data = transaction.transaction
         if form.validate_on_submit():
             files = request.files.getlist("files")
             for file in files:
@@ -100,7 +101,7 @@ def add():
                 if screen is not None:
                     form.files.errors.append('Arquivo já existe')
                     return render_template('add.html', form=form, title='Adicionar Opções', screen=True)
-                if form.transaction_option.data != '':
+                if form.transaction_option.data != '' and form.transaction_option.data != 'None':
                     last_sequence = TransactionScreen.query.filter(TransactionScreen.transaction_id == form.transaction_option.data).order_by(TransactionScreen.id.desc()).limit(1).first()
                     last_sequence = last_sequence.screen_sequence if last_sequence != None else 0
                 else:
@@ -113,7 +114,7 @@ def add():
                 screen.filename = file.filename
                 screen.file_path = join(app.config['UPLOAD_SCREEN_TRANSACTION_FOLDER'], file.filename)
                 screen.description = form.description.data
-                screen.transaction_option_id = form.transaction_option.data
+                screen.transaction_option_id = None if form.transaction_option.data == "None" or form.transaction_option.data == '' else form.transaction_option.data
                 screen.transaction_id = transaction.id
                 file.save(screen.file_path)
                 if not isfile(screen.file_path):
@@ -143,7 +144,7 @@ def add():
             else:
                 return redirect(url_for('transactions.view', id=transaction.id))
             
-        form.transaction.data = transaction.transaction
+        
         return render_template('add.html', form=form, title='Adicionar Opções', screen=True)
 
     else:

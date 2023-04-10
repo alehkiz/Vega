@@ -48,7 +48,7 @@ class TransactionScreenForm(FlaskForm):
 
     def __init__(self, formdata=..., **kwargs): #tid, formdata = ..., *args,
         super().__init__(formdata, **kwargs)
-        options = [('', 'Selecione uma opção')]
+        options = [(None, 'Selecione uma opção')]
         if kwargs.get('tid', False) is False:
             raise Exception('Nenhuma transação informada')
         options.extend([(_.id, _.option) for _ in TransactionOption.query.filter(TransactionOption.transaction_id == kwargs.get('tid'))])
