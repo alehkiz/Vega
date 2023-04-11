@@ -12,7 +12,7 @@ from os.path import join, isdir, isfile
 from os import stat
 
 from app.utils.routes import counter
-bp = Blueprint('transaction', __name__, url_prefix='/transacoes')
+bp = Blueprint('transaction', __name__, url_prefix='/transacao')
 
 @bp.route('/')
 @bp.route('/index')

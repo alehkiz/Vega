@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
-from flask_wtf.html5 import DateField
+from wtforms.fields.html5 import DateField
 from wtforms import SubmitField, TextField, BooleanField, StringField
 from wtforms.validators import DataRequired, Length
 from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
