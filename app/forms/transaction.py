@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import TextAreaField, StringField, SubmitField, BooleanField, MultipleFileField, FieldList, FormField, SelectField
 from wtforms.validators import DataRequired, Length
 from wtforms.ext.sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
-from app.models.transactions import Parameter, TransactionFinality, TransactionOption, TransactionType
+from app.models.transaction import Parameter, TransactionFinality, TransactionOption, TransactionType
 from app.models.wiki import SubTopic, Topic, Tag
 from app.models.security import User
 from flask import request

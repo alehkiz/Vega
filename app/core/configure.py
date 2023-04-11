@@ -22,7 +22,7 @@ from app.models.search import Search, SearchDateTime
 from app.models.app import FilePDF, Network, Visit, Page, FilePDFType
 from app.models.notifier import Notifier, NotifierPriority, NotifierStatus
 from app.models.history import QuestionHistory
-from app.models.transactions import Transaction, TransactionOption, Parameter, TransactionScreen
+from app.models.transaction import Transaction, TransactionOption, Parameter, TransactionScreen
 from app.utils.kernel import convert_datetime_to_local
 
 # from app.dashboard import dash

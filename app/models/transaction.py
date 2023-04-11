@@ -82,7 +82,7 @@ class Transaction(db.Model):
         lazy="dynamic",
     )
 
-    options = db.relationship('TransactionOption', backref='transaction', lazy='dynamic')
+    options_transactions = db.relationship('TransactionOption', backref='transaction', lazy='dynamic')
     screens = db.relationship('TransactionScreen', backref='transaction', lazy='dynamic')
     parameters = db.relationship(
         "Parameter",
@@ -126,14 +126,14 @@ class Transaction(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'transaction': self.transaction,
-            'description': limit_chars(self.get_body_html(), 50),
-            'finalities' : ', '.join([x.name for x in self.finalities]),
-            'topics' : ', '.join([x.name for x in self.topics]),
-            'subtopics': ', '.join([x.name for x in self.sub_topics]),
-            'options': ', '.join([x.option for x in self.options]),
-            'screens': Markup('<br>'.join([x.img_tag() for x in self.screens])),
-            'url': Markup(f'<a href=url_for("api.notification", id=self.id)>Link</a>'),
+            'Transação': self.transaction,
+            'Descriçao': self.get_body_html(),
+            'Finalidades' : ', '.join([x.name for x in self.finalities]),
+            'Tópicos' : ', '.join([x.name for x in self.topics]),
+            'Sub-tópicos': ', '.join([x.name for x in self.sub_topics]),
+            'Opções': ', '.join([x.option for x in self.options_transactions]),
+            'Telas': Markup('<br>'.join([x.img_tag() for x in self.screens])),
+            'URL': Markup(f'<a href={url_for("api.notification", id=self.id)}>Link</a>'),
 
         }
 
@@ -196,7 +196,7 @@ class TransactionScreen(db.Model):
         return False
     
     def img_tag(self, width:int=200, height:Optional[int]=None) -> Markup:
-        url = url_for('transactions.screen', id=self.id)
+        url = url_for('transaction.screen', id=self.id)
         print(url)
         return f'<img src="{url}" width="{width}", heigth="{height}">'
 

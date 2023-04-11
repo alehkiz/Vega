@@ -206,7 +206,7 @@ def process_value(value: str, cls_query, route: str = ""):
                     print('aqui: ', _id_transaction_group)
                     transaction = _id_transaction_group.group()
                     print(_id_transaction_group.groups())
-                    from app.models.transactions import Transaction
+                    from app.models.transaction import Transaction
                     obj_query = Transaction.query.filter(Transaction.transaction.like(transaction)).first()
                     if obj_query is None:
                         raise Exception(f"O objeto {transaction} não foi identificado.")
@@ -263,7 +263,7 @@ def process_transaction(value: str) -> str:
     no qual será gerado um HTML para apresentação de popup com detalhes da transação que será recuparada da API
 
     """
-    from app.models.transactions import Transaction
+    from app.models.transaction import Transaction
     pat = "(?<=\\{).+?(?=\\})"
     pat_transaction = r"(?<=:t:).[a-zA-Z]*"
     groups = re.findall(pat, value)
