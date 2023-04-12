@@ -60,11 +60,11 @@ def add():
                 db.session.commit()
                 flash('Opção salva com sucesso', category="success")
                 if request.form.get('save', False) == 'Salvar':
-                    return redirect(url_for('transactions.add', id=transaction.id, screen=True))
+                    return redirect(url_for('transaction.add', id=transaction.id, screen=True))
                 elif request.form.get('add', False) == 'Nova Opção':
-                    return redirect(url_for('transactions.add', id=transaction.id, options=True))
+                    return redirect(url_for('transaction.add', id=transaction.id, options=True))
                 else:
-                    return redirect(url_for('transactions.add', id=transaction.id, screen=True))
+                    return redirect(url_for('transaction.add', id=transaction.id, screen=True))
             except Exception as e:
                     app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
                     app.logger.error(e)
@@ -139,17 +139,16 @@ def add():
                         db.session.rollback()
                         return render_template('add.html', form=form, title='Adicionar', screen=True)
             if request.form.get('save') == 'Salvar':
-                return redirect(url_for('transactions.view', id=transaction.id))
+                return redirect(url_for('transaction.view', id=transaction.id))
             elif request.form.get('add') == 'Nova Tela':
-                return redirect(url_for('transactions.add', id=transaction.id, screen=True))
+                return redirect(url_for('transaction.add', id=transaction.id, screen=True))
             else:
-                return redirect(url_for('transactions.view', id=transaction.id))
+                return redirect(url_for('transaction.view', id=transaction.id))
             
         
         return render_template('add.html', form=form, title='Adicionar Opções', screen=True)
 
     else:
-    
         form = TransactionForm()
         if form.validate_on_submit():
             transaction = Transaction.query.filter(Transaction.transaction.ilike(form.transaction.data)).first()
@@ -171,12 +170,14 @@ def add():
                 db.session.add(transaction)
                 db.session.commit()
                 if request.form.get('submit') == 'Salvar':
-                    return redirect(url_for('transactions.add', id=transaction.id, screen=True))
+                    return redirect(url_for('transaction.add', id=transaction.id, screen=True))
                 elif request.form.get('prints') == 'Opções':
-                    return redirect(url_for('transactions.add', id=transaction.id, options=True))
+                    return redirect(url_for('transaction.add', id=transaction.id, options=True))
                 else:
-                    return redirect(url_for('transactions.add', id=transaction.id, options=True))
+                    return redirect(url_for('transaction.add', id=transaction.id, options=True))
             except Exception as e:
+                    print('Errro!')
+                    print(e)
                     app.logger.error(app.config.get("_ERRORS").get("DB_COMMIT_ERROR"))
                     app.logger.error(e)
                     db.session.rollback()
