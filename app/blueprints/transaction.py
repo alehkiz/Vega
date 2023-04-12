@@ -46,7 +46,7 @@ def add():
             flash('Não foi possível identificar a transação', category='danger')
             return render_template('add.html', options=True)
         if form.validate_on_submit():
-            options_in_transaction = [x.option for x in transaction.options]
+            options_in_transaction = [x.option for x in transaction.options_transactions]
             if form.option.data in options_in_transaction:
                 form.option.errors.append(f'Erro, {form.option.data} já está contido na transação {transaction.transaction}')
                 return render_template('add.html', form=form, title='Adicionar Opções', options=True)
