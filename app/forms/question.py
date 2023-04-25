@@ -9,7 +9,7 @@ from flask import request
 
 class QuestionEditForm(FlaskForm):
     question = TextAreaField('Dúvida', validators=[DataRequired('Item obrigatório'), Length(min=5, max=300, message='A duvida deve conter um texto entre 5 e 256 caracteres')])
-    answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=12000, message='A resposta deve conter um texto entre 10 e 12000 caracteres')])
+    answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=50000, message='A resposta deve conter um texto entre 10 e 50000 caracteres')])
     tag = QuerySelectMultipleField('Tag', allow_blank=False, query_factory= lambda : Tag.query.order_by(Tag.name.asc()), get_label='name', validators=[DataRequired('Item Obrigatório')])
     topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.selectable == True), get_label = 'name', validators = [DataRequired('Item Obrigatório')])
     sub_topic = QuerySelectMultipleField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
@@ -17,7 +17,7 @@ class QuestionEditForm(FlaskForm):
 
 class QuestionEditAndApproveForm(FlaskForm):
     question = TextAreaField('Dúvida', validators=[DataRequired('Item obrigatório'), Length(min=5, max=300, message='A duvida deve conter um texto entre 5 e 256 caracteres')])
-    answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=12000, message='A resposta deve conter um texto entre 10 e 12000 caracteres')])
+    answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=50000, message='A resposta deve conter um texto entre 10 e 50000 caracteres')])
     tag = QuerySelectMultipleField('Tag', allow_blank=False, query_factory= lambda : Tag.query.order_by(Tag.name.asc()), get_label='name', validators=[DataRequired('Item Obrigatório')])
     topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.selectable == True), get_label = 'name', validators = [DataRequired('Item Obrigatório')])
     sub_topic = QuerySelectMultipleField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
@@ -44,7 +44,7 @@ class QuestionSearchForm(FlaskForm):
 
 class QuestionAnswerForm(FlaskForm):
     question = TextAreaField('Dúvida', validators=[DataRequired('Item obrigatório'), Length(min=5, max=800, message='A duvida deve conter um texto entre 5 e 800 caracteres')])
-    answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=12000, message='A descrição deve conter um texto entre 10 e 12000 caracteres')])
+    answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=50000, message='A descrição deve conter um texto entre 10 e 50000 caracteres')])
     tag = QuerySelectMultipleField('Tag', allow_blank=False, query_factory= lambda : Tag.query.order_by(Tag.name.asc()), get_label='name', validators=[DataRequired('Item Obrigatório')])
     topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.selectable == True), get_label = 'name', validators = [DataRequired('Item Obrigatório')])
     sub_topic = QuerySelectMultipleField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
@@ -57,7 +57,7 @@ class QuestionAnswerForm(FlaskForm):
 
 class QuestionApproveForm(FlaskForm):
     question = TextAreaField('Dúvida', validators=[DataRequired('Item obrigatório'), Length(min=5, max=300, message='A duvida deve conter um texto entre 5 e 256 caracteres')])
-    answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=12000, message='A descrição deve conter um texto entre 10 e 12000 caracteres')])
+    answer = TextAreaField('Resposta', validators=[DataRequired('Item obrigatório'), Length(min=10, max=50000, message='A descrição deve conter um texto entre 10 e 50000 caracteres')])
     tag = QuerySelectMultipleField('Tag', allow_blank=False, query_factory= lambda : Tag.query.order_by(Tag.name.asc()), get_label='name', validators=[DataRequired('Item Obrigatório')])
     topic = QuerySelectMultipleField('Topico', allow_blank=False, query_factory= lambda : Topic.query.filter(Topic.selectable == True), get_label = 'name', validators = [DataRequired('Item Obrigatório')])
     sub_topic = QuerySelectMultipleField('Sub-Tópico', allow_blank=True, query_factory= lambda : SubTopic.query, get_label='name', validators=[DataRequired('Item Obrigatório')])
